@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+mobile/node_modules/
+backend/venv/
+
+# Build outputs and local tool state
+dist/
+mobile/dist/
+.expo/
+mobile/.expo/
+supabase/.temp/
+**/.temp/
+mobile/backups/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+google-service-account.json
+*.p8
+*.p12
+*.mobileprovision
+
+# Runtime/generated files
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/settings.local.json

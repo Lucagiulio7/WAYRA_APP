@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.expo/
+
+# Credenziali sensibili — non committare mai
+google-service-account.json
+*.p8
+*.p12
+*.mobileprovision
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

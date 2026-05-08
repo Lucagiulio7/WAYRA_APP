@@ -1,0 +1,23 @@
+[build]
+  command       = "npm run export:web"
+  publish       = "dist"
+
+[build.environment]
+  NODE_VERSION  = "20"
+
+# Pagine legali — servite come HTML statico (prima del catch-all SPA)
+[[redirects]]
+  from   = "/privacy"
+  to     = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from   = "/terms"
+  to     = "/terms.html"
+  status = 200
+
+# Catch-all per la SPA React
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
