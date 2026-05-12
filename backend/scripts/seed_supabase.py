@@ -135,11 +135,12 @@ for city in ALL_CITIES:
             f.get("description"),
             f.get("description_en"),
             j(f.get("ingredients", [])),
+            j(f.get("ingredients_en", [])),
             city.CITY_ID,
         ))
 
 psycopg2.extras.execute_values(cur, """
-    INSERT INTO public.foods (name, name_en, description, description_en, ingredients, city)
+    INSERT INTO public.foods (name, name_en, description, description_en, ingredients, ingredients_en, city)
     VALUES %s
 """, food_rows)
 conn.commit()
