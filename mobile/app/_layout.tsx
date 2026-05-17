@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { queryClient, asyncStoragePersister } from "@/lib/queryClient";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,6 +30,8 @@ function AppStack() {
           animation: "slide_from_right",
         }}
       />
+      {/* Banner offline — sovrapposto in cima, non blocca touch */}
+      <OfflineBanner />
     </>
   );
 }
