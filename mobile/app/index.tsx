@@ -24,6 +24,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
+import { SkeletonBox } from "@/components/Skeleton";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
@@ -414,7 +415,12 @@ export default function HomeScreen() {
         <Section title={t.numDays} colors={colors}>
           {cityInfoLoading ? (
             <View style={styles.daysLoading}>
-              <ActivityIndicator color={colors.accentBlue} size="small" />
+              <View style={{ flexDirection: "row", gap: 7, marginBottom: 7 }}>
+                {[...Array(4)].map((_, i) => <SkeletonBox key={i} width={56} height={38} borderRadius={10} />)}
+              </View>
+              <View style={{ flexDirection: "row", gap: 7 }}>
+                {[...Array(4)].map((_, i) => <SkeletonBox key={i} width={56} height={38} borderRadius={10} />)}
+              </View>
             </View>
           ) : (
             <View style={styles.daysGrid}>
@@ -1075,7 +1081,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   optionText: { fontWeight: "600", fontSize: 14 },
-  daysLoading: { height: 50, alignItems: "center", justifyContent: "center" },
+  daysLoading: { gap: 7 },
 
   // Level
   levelRow: {

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
   Alert,
   Animated,
   Linking,
@@ -29,6 +28,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { BuilderMap, MapSlot } from "@/components/BuilderMap";
 import { useBuilderStore } from "@/store/builderStore";
+import { SkeletonList } from "@/components/Skeleton";
 
 // ── Costanti visive ───────────────────────────────────────────────────────────
 
@@ -1010,7 +1010,7 @@ export default function CreateItineraryScreen() {
             {/* Lista */}
             {activeTab === "attractions" ? (
               loading ? (
-                <ActivityIndicator color={colors.accentGold} style={{ marginTop: 32 }} />
+                <SkeletonList count={6} />
               ) : error ? (
                 <Text style={styles.errorText}>{error}</Text>
               ) : (
@@ -1044,7 +1044,7 @@ export default function CreateItineraryScreen() {
               )
             ) : (
               foodLoading ? (
-                <ActivityIndicator color={colors.accentGreen} style={{ marginTop: 32 }} />
+                <SkeletonList count={5} />
               ) : (
                 <FlashList
                   data={availableFood}
