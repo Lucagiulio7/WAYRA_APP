@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
+import { fetchAttractions } from "@/lib/cityFetchers";
 
 export interface BuilderAttraction {
   id: number;
@@ -18,32 +18,11 @@ export interface BuilderAttraction {
   zone?: string | null;
 }
 
-const HEADERS = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-};
-
-async function fetchAttractions(city: string): Promise<BuilderAttraction[]> {
-  const url =
-    `${SUPABASE_URL}/rest/v1/attractions` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&is_food_spot=eq.false` +
-    `&select=id,name,name_en,description,description_en,` +
-    `category_level,latitude,longitude,estimated_visit_time,` +
-    `tags,attraction_type,ticket_url,block_id,zone` +
-    `&order=category_level.asc,name.asc`;
-
-  const r = await fetch(url, { headers: HEADERS });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
-
 export function useAttractions(city: string) {
   const { data, isLoading, error } = useQuery<BuilderAttraction[], Error>({
     queryKey: ["attractions", city],
     queryFn: () => fetchAttractions(city),
     enabled: !!city,
-    // staleTime e gcTime ereditati dai defaultOptions del queryClient
   });
 
   return {

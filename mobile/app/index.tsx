@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useItinerary } from "@/hooks/useItinerary";
 import { useCityInfo } from "@/hooks/useCityInfo";
+import { useCityDownload } from "@/hooks/useCityDownload";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -566,6 +567,7 @@ function CityPickerModal({
   const [search, setSearch] = useState("");
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
   const searchRef = useRef<TextInput>(null);
+  const { isDownloaded, getStatus, downloadCity, confirmDelete } = useCityDownload();
 
   useEffect(() => {
     if (visible) {
@@ -634,6 +636,7 @@ function CityPickerModal({
                 {POPULAR_CITIES.map((c) => {
                   const isSelected = c.id === selectedId;
                   const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
+                  const dlDone = getStatus(c.id) === "done";
                   return (
                     <TouchableOpacity
                       key={c.id}
@@ -641,6 +644,7 @@ function CityPickerModal({
                         styles.popularChip,
                         { backgroundColor: colors.card, borderColor: colors.border },
                         isSelected && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "18" },
+                        dlDone && !isSelected && { borderColor: colors.accentGreen + "60" },
                       ]}
                       onPress={() => onSelect(c.id)}
                       activeOpacity={0.8}
@@ -649,6 +653,14 @@ function CityPickerModal({
                       <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                         {label}
                       </Text>
+                      {dlDone && (
+                        <Ionicons
+                          name="cloud-done-outline"
+                          size={12}
+                          color={colors.accentGreen}
+                          style={{ position: "absolute", top: 5, right: 6 }}
+                        />
+                      )}
                     </TouchableOpacity>
                   );
                 })}
@@ -693,6 +705,9 @@ function CityPickerModal({
                   {isOpen && co.cities.map((c) => {
                     const isSelected = c.id === selectedId;
                     const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
+                    const dlStatus = getStatus(c.id);
+                    const dlDone = dlStatus === "done";
+                    const dlBusy = dlStatus === "downloading";
                     return (
                       <TouchableOpacity
                         key={c.id}
@@ -713,9 +728,35 @@ function CityPickerModal({
                             {lang === "it" ? co.label : co.labelEn}
                           </Text>
                         )}
-                        {isSelected && (
+
+                        {/* Checkmark selezione */}
+                        {isSelected && !dlDone && (
                           <Ionicons name="checkmark-circle" size={18} color={colors.accentGold} style={{ marginLeft: "auto" }} />
                         )}
+
+                        {/* Icona download */}
+                        <TouchableOpacity
+                          style={[
+                            styles.cityDownloadBtn,
+                            { marginLeft: isSelected && !dlDone ? 8 : "auto" },
+                            dlDone && { backgroundColor: colors.accentGreen + "18" },
+                          ]}
+                          onPress={() => dlDone
+                            ? confirmDelete(c.id, label, lang)
+                            : downloadCity(c.id)
+                          }
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                          activeOpacity={0.7}
+                          disabled={dlBusy}
+                        >
+                          {dlBusy ? (
+                            <ActivityIndicator size={14} color={colors.accentGold} />
+                          ) : dlDone ? (
+                            <Ionicons name="cloud-done-outline" size={17} color={colors.accentGreen} />
+                          ) : (
+                            <Ionicons name="cloud-download-outline" size={17} color={colors.textMuted} />
+                          )}
+                        </TouchableOpacity>
                       </TouchableOpacity>
                     );
                   })}
@@ -1206,6 +1247,10 @@ const styles = StyleSheet.create({
   cityRowEmoji: { fontSize: 20 },
   cityRowLabel: { fontSize: 15, fontWeight: "600" },
   cityRowCountry: { fontSize: 12, marginLeft: 4 },
+  cityDownloadBtn: {
+    width: 30, height: 30, borderRadius: 15,
+    alignItems: "center", justifyContent: "center",
+  },
 
   // ── Generating overlay ─────────────────────────────────────────────────────
   genOverlay: {
