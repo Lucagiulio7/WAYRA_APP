@@ -308,7 +308,7 @@ export default function HomeScreen() {
 
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
-    await generate({ city, num_days: numDays, level, max_walk_km: maxWalkKm });
+    await generate({ city, num_days: numDays, level });
   }
 
   function handleCreate() {

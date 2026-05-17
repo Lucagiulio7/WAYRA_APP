@@ -1,13 +1,12 @@
 import { useRef, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
+import { API_BASE_URL } from "@/constants/api";
 import { Itinerary, ExperienceLevel } from "@/types";
 
 interface GenerateParams {
   city: string;
   num_days: number;
   level: ExperienceLevel;
-  max_walk_km?: number;
 }
 
 interface UseItineraryReturn {
@@ -25,23 +24,20 @@ async function generateItinerary(
 ): Promise<Itinerary> {
   const apiLevel = params.level === "mix" ? [1, 2, 3] : params.level;
 
-  const resp = await fetch(`${FUNCTIONS_URL}/generate-itinerary`, {
+  const resp = await fetch(`${API_BASE_URL}/api/itinerary/generate`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       city: params.city,
       num_days: params.num_days,
       level: apiLevel,
-      max_walk_km: params.max_walk_km,
     }),
     signal,
   });
 
   const json = await resp.json();
-  if (!resp.ok) throw new Error(json.error ?? "Errore sconosciuto dal server");
+  // FastAPI restituisce errori con { detail: "..." }, successi con { data: ... }
+  if (!resp.ok) throw new Error(json.detail ?? json.error ?? "Errore sconosciuto dal server");
   return json.data as Itinerary;
 }
 
@@ -53,8 +49,8 @@ export function useItinerary(): UseItineraryReturn {
       const controller = new AbortController();
       controllerRef.current = controller;
 
-      // timeout di 20 s
-      const timeout = setTimeout(() => controller.abort(), 20_000);
+      // timeout di 30 s (la generazione può richiedere qualche secondo)
+      const timeout = setTimeout(() => controller.abort(), 30_000);
       return generateItinerary(params, controller.signal).finally(() => {
         clearTimeout(timeout);
         controllerRef.current = null;
