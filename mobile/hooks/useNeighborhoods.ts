@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
 import { Neighborhood } from "@/types";
 
@@ -7,31 +7,29 @@ const HEADERS = {
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 };
 
+async function fetchNeighborhoods(city: string): Promise<Neighborhood[]> {
+  const url =
+    `${SUPABASE_URL}/rest/v1/neighborhoods` +
+    `?city=eq.${encodeURIComponent(city)}` +
+    `&select=id,name,name_en,description,description_en,vibe_tags,booking_url` +
+    `&order=sort_order.asc`;
+
+  const r = await fetch(url, { headers: HEADERS });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  return Array.isArray(data) ? data : [];
+}
+
 export function useNeighborhoods(city: string) {
-  const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { data, isLoading } = useQuery<Neighborhood[], Error>({
+    queryKey: ["neighborhoods", city],
+    queryFn: () => fetchNeighborhoods(city),
+    enabled: !!city,
+    staleTime: 1000 * 60 * 60, // 1 ora
+  });
 
-  useEffect(() => {
-    if (!city) return;
-    let cancelled = false;
-    setLoading(true);
-
-    const url =
-      `${SUPABASE_URL}/rest/v1/neighborhoods` +
-      `?city=eq.${encodeURIComponent(city)}` +
-      `&select=id,name,name_en,description,description_en,vibe_tags,booking_url` +
-      `&order=sort_order.asc`;
-
-    fetch(url, { headers: HEADERS })
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled) setNeighborhoods(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, [city]);
-
-  return { neighborhoods, loading };
+  return {
+    neighborhoods: data ?? [],
+    loading: isLoading,
+  };
 }

@@ -217,7 +217,7 @@ const GENERATING_MESSAGES_EN = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { generate, loading, error, itinerary } = useItinerary();
+  const { generate, cancel, loading, error, itinerary } = useItinerary();
   const { lang, t, toggle } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
@@ -343,7 +343,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() => setShowOnboarding(true)}
             activeOpacity={0.7}
-            style={[styles.iconBtn, styles.guideIconBtn, { backgroundColor: colors.card }]}
+            style={[styles.iconBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }]}
             accessibilityLabel={lang === "en" ? "Open guide" : "Apri guida"}
           >
             <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
@@ -361,7 +361,7 @@ export default function HomeScreen() {
             ma TouchableOpacity interno (cambio tema) rimane tappabile */}
         <View style={styles.headerCenter} pointerEvents="box-none">
           <TouchableOpacity onPress={toggleTheme} activeOpacity={0.7}>
-            <Text style={styles.appName}>WAYRA</Text>
+            <Text style={[styles.appName, { color: colors.accentGold }]}>WAYRA</Text>
           </TouchableOpacity>
           <Text style={[styles.appSlogan, { color: colors.textMuted }]}>LET THE CITY FIND YOU</Text>
         </View>
@@ -458,7 +458,7 @@ export default function HomeScreen() {
 
         {/* ── Errore ── */}
         {!!error && (
-          <View style={styles.errorBox}>
+          <View style={[styles.errorBox, { backgroundColor: colors.danger + "22", borderColor: colors.danger + "44" }]}>
             <Ionicons name="warning-outline" size={16} color={colors.danger} />
             <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
           </View>
@@ -467,7 +467,7 @@ export default function HomeScreen() {
         {/* ── CTA ── */}
         <View ref={(ref) => setGuideTarget("actions", ref)}>
           <TouchableOpacity
-            style={[styles.cta, (loading || cityInfoLoading) && styles.ctaDisabled]}
+            style={[styles.cta, { backgroundColor: colors.accentGold }, (loading || cityInfoLoading) && styles.ctaDisabled]}
             onPress={handleGenerate}
             disabled={loading || cityInfoLoading}
             activeOpacity={0.85}
@@ -483,14 +483,14 @@ export default function HomeScreen() {
           </Text>
 
           <TouchableOpacity
-            style={[styles.ctaCreate, (loading || cityInfoLoading) && styles.ctaDisabled]}
+            style={[styles.ctaCreate, { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" }, (loading || cityInfoLoading) && styles.ctaDisabled]}
             onPress={handleCreate}
             disabled={loading || cityInfoLoading}
             activeOpacity={0.85}
           >
             <View style={styles.ctaInner}>
-              <Ionicons name="construct-outline" size={20} color="#6ee7b7" />
-              <Text style={styles.ctaCreateText}>
+              <Ionicons name="construct-outline" size={20} color={colors.accentGreen} />
+              <Text style={[styles.ctaCreateText, { color: colors.accentGreen }]}>
                 {lang === "it" ? "Crea itinerario" : "Build itinerary"}
               </Text>
             </View>
@@ -519,21 +519,26 @@ export default function HomeScreen() {
       {/* ── Overlay generazione AI ── */}
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.genOverlay}>
-          <View style={styles.genCard}>
+          <View style={[styles.genCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={styles.genEmoji}>✨</Text>
-            <ActivityIndicator color="#e8c06a" size="large" style={{ marginVertical: 16 }} />
-            <Text style={styles.genCity}>
+            <ActivityIndicator color={colors.accentGold} size="large" style={{ marginVertical: 16 }} />
+            <Text style={[styles.genCity, { color: colors.accentGold }]}>
               {selectedCity ? (lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label) : ""}
             </Text>
-            <Text style={styles.genMessage}>{genMessages[genMsgIndex]}</Text>
+            <Text style={[styles.genMessage, { color: colors.textMuted }]}>{genMessages[genMsgIndex]}</Text>
             <View style={styles.genDots}>
               {genMessages.map((_, i) => (
                 <View
                   key={i}
-                  style={[styles.genDot, i === genMsgIndex && styles.genDotActive]}
+                  style={[styles.genDot, { backgroundColor: colors.border }, i === genMsgIndex && { backgroundColor: colors.accentGold, width: 18 }]}
                 />
               ))}
             </View>
+            <TouchableOpacity onPress={cancel} style={[styles.genCancel, { borderColor: colors.border }]} activeOpacity={0.7}>
+              <Text style={[styles.genCancelText, { color: colors.textMuted }]}>
+                {lang === "it" ? "Annulla" : "Cancel"}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -612,7 +617,7 @@ function CityPickerModal({
             onChangeText={setSearch}
             placeholder={lang === "it" ? "Cerca una città…" : "Search a city…"}
             placeholderTextColor={colors.textSub}
-            selectionColor="#e8c06a"
+            selectionColor={colors.accentGold}
             returnKeyType="search"
             clearButtonMode="while-editing"
           />
@@ -635,13 +640,13 @@ function CityPickerModal({
                       style={[
                         styles.popularChip,
                         { backgroundColor: colors.card, borderColor: colors.border },
-                        isSelected && { borderColor: "#e8c06a", backgroundColor: "#e8c06a18" },
+                        isSelected && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "18" },
                       ]}
                       onPress={() => onSelect(c.id)}
                       activeOpacity={0.8}
                     >
                       <Text style={styles.popularChipEmoji}>{c.emoji}</Text>
-                      <Text style={[styles.popularChipLabel, { color: isSelected ? "#e8c06a" : colors.textSub }]}>
+                      <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                         {label}
                       </Text>
                     </TouchableOpacity>
@@ -693,14 +698,14 @@ function CityPickerModal({
                         key={c.id}
                         style={[
                           styles.cityRow,
-                          { borderTopColor: colors.border2, backgroundColor: isSelected ? "#e8c06a12" : colors.card2 },
+                          { borderTopColor: colors.border2, backgroundColor: isSelected ? colors.accentGold + "12" : colors.card2 },
                           !isSearching && { paddingLeft: 42 },
                         ]}
                         onPress={() => onSelect(c.id)}
                         activeOpacity={0.8}
                       >
                         <Text style={styles.cityRowEmoji}>{c.emoji}</Text>
-                        <Text style={[styles.cityRowLabel, { color: isSelected ? "#e8c06a" : colors.textSub }]}>
+                        <Text style={[styles.cityRowLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                           {label}
                         </Text>
                         {isSearching && (
@@ -709,7 +714,7 @@ function CityPickerModal({
                           </Text>
                         )}
                         {isSelected && (
-                          <Ionicons name="checkmark-circle" size={18} color="#e8c06a" style={{ marginLeft: "auto" }} />
+                          <Ionicons name="checkmark-circle" size={18} color={colors.accentGold} style={{ marginLeft: "auto" }} />
                         )}
                       </TouchableOpacity>
                     );
@@ -731,6 +736,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   const [slide, setSlide] = useState(0);
   const [rect, setRect] = useState<GuideRect | null>(null);
   const [cardHeight, setCardHeight] = useState(270); // stima iniziale, aggiornata da onLayout
+  const { colors } = useTheme();
 
   const slides: GuideStep[] = lang === "en" ? ONBOARDING_SLIDES_EN : ONBOARDING_SLIDES_IT;
   const isLast = slide === slides.length - 1;
@@ -785,7 +791,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
             <View pointerEvents="none" style={[styles.cutoutPanel, { top: cutoutTop, left: cutoutRight, right: 0, height: cutoutBottom - cutoutTop, backgroundColor: OV }]} />
             <View pointerEvents="none" style={[styles.cutoutPanel, { top: cutoutBottom, left: 0, right: 0, bottom: 0, backgroundColor: OV }]} />
             {/* Bordo dorato attorno all'elemento */}
-            <View pointerEvents="none" style={[styles.tourHighlight, { top: cutoutTop, left: cutoutLeft, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop }]} />
+            <View pointerEvents="none" style={[styles.tourHighlight, { top: cutoutTop, left: cutoutLeft, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop, borderColor: colors.accentGold, backgroundColor: colors.accentGold + "14", shadowColor: colors.accentGold }]} />
           </>
         ) : (
           // Nessun target trovato → overlay pieno
@@ -803,6 +809,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
                 // freccia tra highlight e card: sopra la card se card è sotto, sotto la card se è sopra
                 top: fitsBelow ? tooltipTop - 13 : tooltipTop + cardHeight - 8,
                 transform: [{ rotate: fitsBelow ? "180deg" : "0deg" }],
+                borderBottomColor: colors.accentGold,
               },
             ]}
           />
@@ -810,24 +817,24 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
 
         {/* ── Card tooltip ── */}
         <View
-          style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth }]}
+          style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}
           onLayout={(e) => setCardHeight(e.nativeEvent.layout.height)}
         >
-          <Text style={styles.tourEyebrow}>{slide + 1} / {slides.length}</Text>
+          <Text style={[styles.tourEyebrow, { color: colors.accentGold }]}>{slide + 1} / {slides.length}</Text>
           <Text style={styles.onboardingIcon}>{current.icon}</Text>
-          <Text style={styles.onboardingTitle}>{current.title}</Text>
-          <Text style={styles.onboardingBody}>{current.body}</Text>
+          <Text style={[styles.onboardingTitle, { color: colors.text }]}>{current.title}</Text>
+          <Text style={[styles.onboardingBody, { color: colors.textSub }]}>{current.body}</Text>
           <View style={styles.onboardingDots}>
             {slides.map((_, i) => (
-              <View key={i} style={[styles.onboardingDot, i === slide && styles.onboardingDotActive]} />
+              <View key={i} style={[styles.onboardingDot, { backgroundColor: colors.border }, i === slide && { backgroundColor: colors.accentGold, width: 22 }]} />
             ))}
           </View>
           <TouchableOpacity
-            style={styles.onboardingCta}
+            style={[styles.onboardingCta, { backgroundColor: colors.accentGold }]}
             onPress={() => isLast ? onDone() : setSlide((s) => s + 1)}
             activeOpacity={0.85}
           >
-            <Text style={styles.onboardingCtaText}>
+            <Text style={[styles.onboardingCtaText, { color: colors.bg }]}>
               {isLast
                 ? (lang === "it" ? "Inizia il viaggio" : "Start exploring")
                 : (lang === "it" ? "Avanti" : "Next")}
@@ -835,7 +842,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
           </TouchableOpacity>
           {!isLast && (
             <TouchableOpacity onPress={onDone} style={styles.onboardingSkip} activeOpacity={0.7}>
-              <Text style={styles.onboardingSkipText}>{lang === "it" ? "Salta" : "Skip"}</Text>
+              <Text style={[styles.onboardingSkipText, { color: colors.textMuted }]}>{lang === "it" ? "Salta" : "Skip"}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -962,12 +969,7 @@ const styles = StyleSheet.create({
     width: 34, height: 34, borderRadius: 17,
     borderWidth: 1, alignItems: "center", justifyContent: "center",
   },
-  guideIconBtn: {
-    borderColor: "#e8c06a70",
-    backgroundColor: "#e8c06a14",
-  },
   appName: {
-    color: "#e8c06a",
     fontSize: 40,
     fontFamily: "BebasNeue_400Regular",
     letterSpacing: 5,
@@ -1092,48 +1094,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "relative",
   },
-  walkTrackBase: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#2a2a42",
-  },
-  walkTrackFill: {
-    position: "absolute",
-    left: 0,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#e8c06a",
-  },
-  walkThumb: {
-    position: "absolute",
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    marginLeft: -11,
-    backgroundColor: "#f5d47c",
-    borderWidth: 2,
-    borderColor: "#0f0f1e",
-  },
-  walkScale: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: -4,
-  },
-  walkScaleText: { color: "#555", fontSize: 11, fontWeight: "700" },
   walkHint: { fontSize: 11, lineHeight: 15 },
 
   // Error
   errorBox: {
     flexDirection: "row",
     gap: 8,
-    backgroundColor: "#f8717122",
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#f8717144",
     marginBottom: 20,
     alignItems: "flex-start",
   },
@@ -1141,7 +1110,6 @@ const styles = StyleSheet.create({
 
   // CTA
   cta: {
-    backgroundColor: "#e8c06a",
     borderRadius: 14,
     paddingVertical: 13,
     alignItems: "center",
@@ -1153,13 +1121,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 6,
     borderWidth: 1.5,
-    borderColor: "#6ee7b740",
-    backgroundColor: "#6ee7b710",
   },
   ctaDisabled: { opacity: 0.6 },
   ctaInner: { flexDirection: "row", alignItems: "center", gap: 8 },
   ctaText: { fontSize: 16, fontWeight: "800" },
-  ctaCreateText: { color: "#6ee7b7", fontSize: 16, fontWeight: "800" },
+  ctaCreateText: { fontSize: 16, fontWeight: "800" },
   orDivider: {
     textAlign: "center",
     fontSize: 12,
@@ -1250,10 +1216,8 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   genCard: {
-    backgroundColor: "#161625",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     padding: 36,
     alignItems: "center",
     width: "100%",
@@ -1261,14 +1225,12 @@ const styles = StyleSheet.create({
   },
   genEmoji: { fontSize: 44 },
   genCity: {
-    color: "#e8c06a",
     fontSize: 22,
     fontFamily: "BebasNeue_400Regular",
     letterSpacing: 3,
     marginTop: 4,
   },
   genMessage: {
-    color: "#888",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
@@ -1276,11 +1238,18 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   genDots: { flexDirection: "row", gap: 6, marginTop: 16 },
-  genDot: {
-    width: 6, height: 6, borderRadius: 3,
-    backgroundColor: "#2a2a42",
+  genDot: { width: 6, height: 6, borderRadius: 3 },
+  genCancel: {
+    marginTop: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    borderWidth: 1,
   },
-  genDotActive: { backgroundColor: "#e8c06a", width: 18 },
+  genCancelText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
 
   // ── Onboarding ─────────────────────────────────────────────────────────────
   tourOverlay: {
@@ -1293,10 +1262,7 @@ const styles = StyleSheet.create({
   tourHighlight: {
     position: "absolute",
     borderWidth: 2,
-    borderColor: "#e8c06a",
     borderRadius: 16,
-    backgroundColor: "#e8c06a14",
-    shadowColor: "#e8c06a",
     shadowOpacity: 0.55,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
@@ -1310,51 +1276,41 @@ const styles = StyleSheet.create({
     borderBottomWidth: 12,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: "#e8c06a",
   },
   tourCard: {
     position: "absolute",
     width: 300,
-    backgroundColor: "#161625",
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     padding: 18,
     alignItems: "center",
     gap: 8,
   },
-  tourEyebrow: { color: "#e8c06a", fontSize: 11, fontWeight: "800" },
+  tourEyebrow: { fontSize: 11, fontWeight: "800" },
   onboardingIcon: { fontSize: 38, marginBottom: 2 },
   onboardingTitle: {
-    color: "#f0f0f0",
     fontSize: 18,
     fontWeight: "800",
     textAlign: "center",
     lineHeight: 23,
   },
   onboardingBody: {
-    color: "#888",
     fontSize: 13,
     textAlign: "center",
     lineHeight: 19,
     marginTop: 2,
   },
   onboardingDots: { flexDirection: "row", gap: 5, marginVertical: 5 },
-  onboardingDot: {
-    width: 7, height: 7, borderRadius: 4,
-    backgroundColor: "#2a2a42",
-  },
-  onboardingDotActive: { backgroundColor: "#e8c06a", width: 22 },
+  onboardingDot: { width: 7, height: 7, borderRadius: 4 },
   onboardingCta: {
     marginTop: 5,
-    backgroundColor: "#e8c06a",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 28,
     minWidth: 170,
     alignItems: "center",
   },
-  onboardingCtaText: { color: "#0f0f1e", fontSize: 16, fontWeight: "800" },
+  onboardingCtaText: { fontSize: 16, fontWeight: "800" },
   onboardingSkip: { paddingVertical: 8 },
-  onboardingSkipText: { color: "#888", fontSize: 13 },
+  onboardingSkipText: { fontSize: 13 },
 });

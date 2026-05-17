@@ -17,6 +17,7 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,6 +26,9 @@ import { useAttractions, BuilderAttraction } from "@/hooks/useAttractions";
 import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useCityExtras } from "@/hooks/useCityExtras";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { BuilderMap, MapSlot } from "@/components/BuilderMap";
+import { useBuilderStore } from "@/store/builderStore";
 
 // ── Costanti visive ───────────────────────────────────────────────────────────
 
@@ -162,13 +166,13 @@ function priceLabel(level: number): string {
 
 // ── Geo ───────────────────────────────────────────────────────────────────────
 
-function mapsWaypoint(stop: BuilderAttraction, city: string): string {
-  return encodeURIComponent(`${stop.name}, ${city}`);
+function mapsWaypoint(stop: BuilderAttraction, _city: string): string {
+  // Use coordinates — unambiguous and language-independent
+  return encodeURIComponent(`${stop.latitude},${stop.longitude}`);
 }
 
-function mapsSearchUrl(stop: BuilderAttraction, city: string): string {
-  const query = `${stop.name}, ${city}`;
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+function mapsSearchUrl(stop: BuilderAttraction, _city: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
 }
 
 function isMuseum(stop: BuilderAttraction): boolean {
@@ -308,17 +312,37 @@ export default function CreateItineraryScreen() {
     useLocalSearchParams<{ city: string; numDays: string; cityLabel: string }>();
   const numDays = Math.max(1, parseInt(ndStr, 10) || 3);
   const { lang, toggle } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const { attractions, loading, error } = useAttractions(city);
   const { foodSpots, loading: foodLoading } = useFoodSpots(city);
   const { foods, cultureFacts } = useCityExtras(city);
 
-  // ── State ─────────────────────────────────────────────────────────────────
+  // ── Zustand builder store ─────────────────────────────────────────────────
+  const {
+    days,
+    expandedDay,
+    setExpandedDay,
+    dropAttraction,
+    removeAttraction,
+    deleteSlot: storeDeleteSlot,
+    addSlot: storeAddSlot,
+    setNote: storeSetNote,
+    optimizeDay: storeOptimizeDay,
+    addFilledSlot,
+    mapAddFood: storeMapAddFood,
+    mapReorderSlots,
+    init: initBuilder,
+  } = useBuilderStore();
 
-  const [days, setDays] = useState<DayPlan[]>(() =>
-    Array.from({ length: numDays }, (_, i) => ({ day: i + 1, slots: [makeSlot(), makeSlot()] }))
-  );
-  const [expandedDay, setExpandedDay] = useState<number>(1);
+  // Inizializza il builder (o lo resetta) ogni volta che cambia numDays
+  useEffect(() => {
+    initBuilder(numDays);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numDays]);
+
+  // ── State UI (locale) ─────────────────────────────────────────────────────
   const [selected, setSelected] = useState<BuilderAttraction | null>(null);
   const [selectedKind, setSelectedKind] = useState<SlotKind>("attraction");
   const [activeTab, setActiveTab] = useState<ActiveTab>("attractions");
@@ -330,6 +354,7 @@ export default function CreateItineraryScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [dragging, setDragging] = useState<DragState>(null);
+  const [mapVisible, setMapVisible] = useState(false);
 
   const pianoScrollRef = useRef<ScrollView>(null);
   const dayOffsets = useRef<Map<number, number>>(new Map());
@@ -403,10 +428,29 @@ export default function CreateItineraryScreen() {
   const activeDay = days[activeDayIndex] ?? days[0];
   const activeDayStats = useMemo(() => getDayStats(activeDay), [activeDay]);
 
+  // ── Dati per BuilderMap ────────────────────────────────────────────────────
+
+  const currentMapSlots = useMemo((): MapSlot[] =>
+    (activeDay?.slots ?? [])
+      .filter((s) => s.attraction !== null)
+      .map((s) => ({ slotId: s.id, kind: s.kind, attraction: s.attraction! })),
+  [activeDay]);
+
+  // Mostra sulla mappa solo attrazioni non piazzate in altri giorni + quelle già nel giorno corrente
+  const mapAttractions = useMemo(() => {
+    const currentIds = new Set(activeDay?.slots.filter((s) => s.kind === "attraction" && s.attraction).map((s) => s.attraction!.id) ?? []);
+    return attractions.filter((a) => !placedAttractionIds.has(a.id) || currentIds.has(a.id));
+  }, [attractions, placedAttractionIds, activeDay]);
+
+  const mapFoodSpots = useMemo(() => {
+    const currentIds = new Set(activeDay?.slots.filter((s) => s.kind === "meal" && s.attraction).map((s) => s.attraction!.id) ?? []);
+    return foodSpots.filter((f) => !placedFoodIds.has(f.id) || currentIds.has(f.id));
+  }, [foodSpots, placedFoodIds, activeDay]);
+
   useEffect(() => {
-    AsyncStorage.getItem(MANUAL_GUIDE_KEY).then((val) => {
-      if (!val) setShowGuide(true);
-    });
+    AsyncStorage.getItem(MANUAL_GUIDE_KEY)
+      .then((val) => { if (!val) setShowGuide(true); })
+      .catch((e) => { if (__DEV__) console.warn("[create-itinerary] AsyncStorage read failed:", e); });
   }, []);
 
   // ── Azioni ────────────────────────────────────────────────────────────────
@@ -480,14 +524,10 @@ export default function CreateItineraryScreen() {
 
   const commitPlacement = useCallback((dayIdx: number, slotId: string, item: BuilderAttraction) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) =>
-        i !== dayIdx ? d : { ...d, slots: d.slots.map((s) => s.id === slotId ? { ...s, attraction: item } : s) }
-      )
-    );
+    dropAttraction(dayIdx, slotId, item);
     setSelected(null);
     setActiveSlotId(null);
-  }, []);
+  }, [dropAttraction]);
 
   const placeItemInSlot = useCallback((dayIdx: number, slotId: string, item: BuilderAttraction, kind: SlotKind): boolean => {
     const day = days[dayIdx];
@@ -542,9 +582,7 @@ export default function CreateItineraryScreen() {
 
     const commitNewSlot = () => {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setDays((prev) =>
-        prev.map((d, i) => i !== dayIdx ? d : { ...d, slots: [...d.slots, { ...newSlot, attraction: item }] })
-      );
+      addFilledSlot(dayIdx, kind, item);
       setSelected(null);
       setActiveSlotId(null);
     };
@@ -656,33 +694,23 @@ export default function CreateItineraryScreen() {
 
   const handleRemove = useCallback((dayIdx: number, slotId: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) =>
-        i !== dayIdx ? d : { ...d, slots: d.slots.map((s) => s.id === slotId ? { ...s, attraction: null } : s) }
-      )
-    );
-  }, []);
+    removeAttraction(dayIdx, slotId);
+  }, [removeAttraction]);
 
   const handleDeleteSlot = useCallback((dayIdx: number, slotId: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) => i !== dayIdx ? d : { ...d, slots: d.slots.filter((s) => s.id !== slotId) })
-    );
-  }, []);
+    storeDeleteSlot(dayIdx, slotId);
+  }, [storeDeleteSlot]);
 
   const handleAddSlot = useCallback((dayIdx: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) => i !== dayIdx ? d : { ...d, slots: [...d.slots, makeSlot("attraction")] })
-    );
-  }, []);
+    storeAddSlot(dayIdx, "attraction");
+  }, [storeAddSlot]);
 
   const handleAddMealSlot = useCallback((dayIdx: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) => i !== dayIdx ? d : { ...d, slots: [...d.slots, makeSlot("meal")] })
-    );
-  }, []);
+    storeAddSlot(dayIdx, "meal");
+  }, [storeAddSlot]);
 
   const handleDockSlotPress = useCallback((slot: SlotData) => {
     if (slot.attraction) {
@@ -711,33 +739,45 @@ export default function CreateItineraryScreen() {
   }, [dockDetail, handleRemove]);
 
   const handleSetNote = useCallback((dayIdx: number, slotId: string, note: string) => {
-    setDays((prev) =>
-      prev.map((d, i) =>
-        i !== dayIdx ? d : { ...d, slots: d.slots.map((s) => s.id === slotId ? { ...s, note } : s) }
-      )
-    );
-  }, []);
+    storeSetNote(dayIdx, slotId, note);
+  }, [storeSetNote]);
 
   const handleToggleDay = useCallback((day: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedDay((prev) => {
-      const next = prev === day ? 0 : day;
-      if (next !== 0) {
-        setTimeout(() => {
-          const offset = dayOffsets.current.get(next);
-          if (offset !== undefined) pianoScrollRef.current?.scrollTo({ y: offset, animated: true });
-        }, 120);
-      }
-      return next;
-    });
-  }, []);
+    const next = expandedDay === day ? 0 : day;
+    setExpandedDay(next);
+    if (next !== 0) {
+      setTimeout(() => {
+        const offset = dayOffsets.current.get(next);
+        if (offset !== undefined) pianoScrollRef.current?.scrollTo({ y: offset, animated: true });
+      }, 120);
+    }
+  }, [expandedDay, setExpandedDay]);
 
   const handleOptimizeDay = useCallback((dayIdx: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setDays((prev) =>
-      prev.map((d, i) => i !== dayIdx ? d : { ...d, slots: optimizeSlots(d.slots) })
-    );
-  }, []);
+    storeOptimizeDay(dayIdx);
+  }, [storeOptimizeDay]);
+
+  // ── Handler BuilderMap ────────────────────────────────────────────────────
+
+  const handleMapAddAttraction = useCallback((a: BuilderAttraction) => {
+    placeItemFromList(a, "attraction");
+  }, [placeItemFromList]);
+
+  const handleMapAddFood = useCallback((f: BuilderAttraction, afterSlotId: string | null) => {
+    storeMapAddFood(activeDayIndex, f, afterSlotId);
+  }, [activeDayIndex, storeMapAddFood]);
+
+  const handleMapRemove = useCallback((slotId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    removeAttraction(activeDayIndex, slotId);
+  }, [activeDayIndex, removeAttraction]);
+
+  const handleMapReorder = useCallback((newSlotIds: string[]) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    mapReorderSlots(activeDayIndex, newSlotIds);
+  }, [activeDayIndex, mapReorderSlots]);
 
   const handleView = async () => {
     if (totalPlaced === 0) {
@@ -789,11 +829,11 @@ export default function CreateItineraryScreen() {
         style={styles.header}
       >
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="chevron-back" size={22} color="#e8c06a" />
+          <Ionicons name="chevron-back" size={22} color={colors.accentGold} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            {cityLabel || city.charAt(0).toUpperCase() + city.slice(1)}
+            {cityLabel || city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </Text>
           <Text style={styles.headerSub}>
             {numDays} {numDays === 1 ? (lang === "en" ? "day" : "giorno") : (lang === "en" ? "days" : "giorni")}
@@ -806,7 +846,7 @@ export default function CreateItineraryScreen() {
           style={[styles.flagBtn, styles.guideBtn]}
           accessibilityLabel={lang === "en" ? "Open guide" : "Apri guida"}
         >
-          <Ionicons name="help-circle-outline" size={22} color="#e8c06a" />
+          <Ionicons name="help-circle-outline" size={22} color={colors.accentGold} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggle} activeOpacity={0.7} style={styles.flagBtn}>
           <Text style={styles.flagEmoji}>{lang === "it" ? "🇮🇹" : "🇬🇧"}</Text>
@@ -818,8 +858,8 @@ export default function CreateItineraryScreen() {
           activeOpacity={0.8}
           disabled={totalPlaced === 0}
         >
-          <Ionicons name="eye-outline" size={15} color={totalPlaced > 0 ? "#0f0f1e" : "#555"} />
-          <Text style={[styles.viewBtnText, totalPlaced === 0 && { color: "#555" }]}>
+          <Ionicons name="eye-outline" size={15} color={totalPlaced > 0 ? colors.bg : colors.textMuted} />
+          <Text style={[styles.viewBtnText, totalPlaced === 0 && { color: colors.textMuted }]}>
             {lang === "en" ? "View" : "Vedi"}
           </Text>
         </TouchableOpacity>
@@ -885,19 +925,19 @@ export default function CreateItineraryScreen() {
             {/* Barra ricerca + filtro */}
             <View ref={(ref) => setGuideTarget("search", ref)} style={styles.searchRow}>
               <View style={styles.searchBar}>
-                <Ionicons name="search-outline" size={15} color="#555" />
+                <Ionicons name="search-outline" size={15} color={colors.textMuted} />
                 <TextInput
                   style={styles.searchInput}
                   value={search}
                   onChangeText={(v) => { setSearch(v); setActiveCategories([]); }}
                   placeholder={lang === "en" ? "Search..." : "Cerca..."}
-                  placeholderTextColor="#444"
-                  selectionColor="#e8c06a"
+                  placeholderTextColor={colors.textMuted}
+                  selectionColor={colors.accentGold}
                   returnKeyType="search"
                 />
                 {search.length > 0 && (
                   <TouchableOpacity onPress={() => setSearch("")} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons name="close-circle" size={16} color="#444" />
+                    <Ionicons name="close-circle" size={16} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -906,12 +946,19 @@ export default function CreateItineraryScreen() {
                 onPress={() => setShowFilterModal(true)}
                 activeOpacity={0.8}
               >
-                <Ionicons name="options-outline" size={16} color={activeCategories.length > 0 ? "#e8c06a" : "#666"} />
+                <Ionicons name="options-outline" size={16} color={activeCategories.length > 0 ? colors.accentGold : colors.textMuted} />
                 {activeCategories.length > 0 && (
                   <View style={styles.filterBadge}>
                     <Text style={styles.filterBadgeText}>{activeCategories.length}</Text>
                   </View>
                 )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.mapToggleBtn}
+                onPress={() => setMapVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="map-outline" size={16} color={colors.accentGold} />
               </TouchableOpacity>
             </View>
 
@@ -963,17 +1010,18 @@ export default function CreateItineraryScreen() {
             {/* Lista */}
             {activeTab === "attractions" ? (
               loading ? (
-                <ActivityIndicator color="#e8c06a" style={{ marginTop: 32 }} />
+                <ActivityIndicator color={colors.accentGold} style={{ marginTop: 32 }} />
               ) : error ? (
                 <Text style={styles.errorText}>{error}</Text>
               ) : (
-                <ScrollView
+                <FlashList
+                  data={available}
+                  keyExtractor={(a) => String(a.id)}
+
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.listScroll}
-                >
-                  {available.map((a) => (
+                  renderItem={({ item: a }) => (
                     <AttractionCard
-                      key={a.id}
                       attraction={a}
                       isFood={false}
                       selected={selected?.id === a.id}
@@ -984,27 +1032,28 @@ export default function CreateItineraryScreen() {
                       onDragMove={handleDragMove}
                       onDragEnd={handleDragEnd}
                     />
-                  ))}
-                  {available.length === 0 && (
+                  )}
+                  ListEmptyComponent={
                     <Text style={styles.emptyText}>
                       {search || activeCategories.length > 0
                         ? (lang === "en" ? "No results" : "Nessun risultato")
                         : (lang === "en" ? "All placed! 🎉" : "Tutte inserite! 🎉")}
                     </Text>
-                  )}
-                </ScrollView>
+                  }
+                />
               )
             ) : (
               foodLoading ? (
-                <ActivityIndicator color="#6ee7b7" style={{ marginTop: 32 }} />
+                <ActivityIndicator color={colors.accentGreen} style={{ marginTop: 32 }} />
               ) : (
-                <ScrollView
+                <FlashList
+                  data={availableFood}
+                  keyExtractor={(a) => String(a.id)}
+
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.listScroll}
-                >
-                  {availableFood.map((a) => (
+                  renderItem={({ item: a }) => (
                     <AttractionCard
-                      key={a.id}
                       attraction={a}
                       isFood={true}
                       selected={selected?.id === a.id}
@@ -1015,15 +1064,15 @@ export default function CreateItineraryScreen() {
                       onDragMove={handleDragMove}
                       onDragEnd={handleDragEnd}
                     />
-                  ))}
-                  {availableFood.length === 0 && (
+                  )}
+                  ListEmptyComponent={
                     <Text style={styles.emptyText}>
                       {search || activeCategories.length > 0
                         ? (lang === "en" ? "No results" : "Nessun risultato")
                         : (lang === "en" ? "All placed! 🎉" : "Tutti inseriti! 🎉")}
                     </Text>
-                  )}
-                </ScrollView>
+                  }
+                />
               )
             )}
               </View>
@@ -1085,7 +1134,7 @@ export default function CreateItineraryScreen() {
                     activeOpacity={0.8}
                   >
                     <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-                      {checked && <Ionicons name="checkmark" size={11} color="#0f0f1e" />}
+                      {checked && <Ionicons name="checkmark" size={11} color={colors.bg} />}
                     </View>
                     <Text style={[styles.filterModalItemText, checked && styles.filterModalItemTextChecked]}>
                       {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -1126,7 +1175,7 @@ export default function CreateItineraryScreen() {
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setDockDetail(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons name="close" size={20} color="#777" />
+                    <Ionicons name="close" size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.detailDescription}>
@@ -1140,7 +1189,7 @@ export default function CreateItineraryScreen() {
                     onPress={() => openExternalLink(mapsSearchUrl(dockDetail.slot.attraction!, city))}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="map-outline" size={16} color="#0f0f1e" />
+                    <Ionicons name="map-outline" size={16} color={colors.bg} />
                     <Text style={styles.detailMapText}>Maps</Text>
                   </TouchableOpacity>
                   {isMuseum(dockDetail.slot.attraction) && !!dockDetail.slot.attraction.ticket_url && (
@@ -1149,7 +1198,7 @@ export default function CreateItineraryScreen() {
                       onPress={() => openExternalLink(dockDetail.slot.attraction!.ticket_url!)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="ticket-outline" size={16} color="#e8e8f8" />
+                      <Ionicons name="ticket-outline" size={16} color={colors.text} />
                       <Text style={styles.detailTicketText}>
                         {lang === "en" ? "Tickets" : "Biglietti"}
                       </Text>
@@ -1184,7 +1233,7 @@ export default function CreateItineraryScreen() {
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setAttractionDetail(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                    <Ionicons name="close" size={20} color="#777" />
+                    <Ionicons name="close" size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.detailDescriptionScroll} showsVerticalScrollIndicator={false}>
@@ -1200,7 +1249,7 @@ export default function CreateItineraryScreen() {
                     onPress={() => openExternalLink(mapsSearchUrl(attractionDetail.item, city))}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="map-outline" size={16} color="#0f0f1e" />
+                    <Ionicons name="map-outline" size={16} color={colors.bg} />
                     <Text style={styles.detailMapText}>Maps</Text>
                   </TouchableOpacity>
                   {isMuseum(attractionDetail.item) && !!attractionDetail.item.ticket_url && (
@@ -1209,7 +1258,7 @@ export default function CreateItineraryScreen() {
                       onPress={() => openExternalLink(attractionDetail.item.ticket_url!)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="ticket-outline" size={16} color="#e8e8f8" />
+                      <Ionicons name="ticket-outline" size={16} color={colors.text} />
                       <Text style={styles.detailTicketText}>
                         {lang === "en" ? "Tickets" : "Biglietti"}
                       </Text>
@@ -1270,10 +1319,24 @@ export default function CreateItineraryScreen() {
             </Text>
           </View>
           <TouchableOpacity onPress={handleCancelSelection} style={styles.cancelBtn} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close-circle" size={22} color="#444" />
+            <Ionicons name="close-circle" size={22} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
       )}
+
+      <BuilderMap
+        visible={mapVisible}
+        onClose={() => setMapVisible(false)}
+        lang={lang}
+        dayLabel={lang === "en" ? `Day ${activeDay?.day ?? 1}` : `Giorno ${activeDay?.day ?? 1}`}
+        attractions={mapAttractions}
+        foodSpots={mapFoodSpots}
+        currentSlots={currentMapSlots}
+        onAddAttraction={handleMapAddAttraction}
+        onAddFood={handleMapAddFood}
+        onRemove={handleMapRemove}
+        onReorder={handleMapReorder}
+      />
     </SafeAreaView>
   );
 }
@@ -1286,6 +1349,8 @@ function GuideModal({
   targetRefs: Map<string, View>;
   onDone: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [slide, setSlide] = useState(0);
   const [rect, setRect] = useState<GuideRect | null>(null);
   const isLast = slide === slides.length - 1;
@@ -1393,10 +1458,12 @@ function DaySlotDock({
   onAddSlot: () => void;
   onSummary: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const compatibleSlots = day.slots.filter((s) => s.kind === mode);
-  const timeColor = stats.minutes >= 240 && stats.minutes <= 420 ? "#6ee7b7" : "#e8c06a";
-  const kmColor = stats.distanceKm <= 4 ? "#6ee7b7" : "#f87171";
-  const museumColor = stats.museums <= 1 ? "#6ee7b7" : "#f87171";
+  const timeColor = stats.minutes >= 240 && stats.minutes <= 420 ? colors.accentGreen : colors.accentGold;
+  const kmColor = stats.distanceKm <= 4 ? colors.accentGreen : colors.danger;
+  const museumColor = stats.museums <= 1 ? colors.accentGreen : colors.danger;
 
   return (
     <View style={styles.dayDock}>
@@ -1407,7 +1474,7 @@ function DaySlotDock({
           style={[styles.dayDockArrow, dayIndex <= 0 && styles.dayDockArrowDisabled]}
           activeOpacity={0.7}
         >
-          <Ionicons name="chevron-back" size={16} color={dayIndex <= 0 ? "#333" : "#e8c06a"} />
+          <Ionicons name="chevron-back" size={16} color={dayIndex <= 0 ? colors.textMuted : colors.accentGold} />
         </TouchableOpacity>
         <View style={styles.dayDockTitleWrap}>
           <Text style={styles.dayDockTitle}>
@@ -1425,10 +1492,10 @@ function DaySlotDock({
           style={[styles.dayDockArrow, dayIndex >= dayCount - 1 && styles.dayDockArrowDisabled]}
           activeOpacity={0.7}
         >
-          <Ionicons name="chevron-forward" size={16} color={dayIndex >= dayCount - 1 ? "#333" : "#e8c06a"} />
+          <Ionicons name="chevron-forward" size={16} color={dayIndex >= dayCount - 1 ? colors.textMuted : colors.accentGold} />
         </TouchableOpacity>
         <TouchableOpacity onPress={onSummary} style={styles.dayDockSummaryBtn} activeOpacity={0.75}>
-          <Ionicons name="list-outline" size={15} color="#7eb8f7" />
+          <Ionicons name="list-outline" size={15} color={colors.accentBlue} />
         </TouchableOpacity>
       </View>
 
@@ -1468,7 +1535,7 @@ function DaySlotDock({
           );
         })}
         <TouchableOpacity style={styles.dayDockAddSlot} onPress={onAddSlot} activeOpacity={0.75}>
-          <Ionicons name="add" size={15} color={mode === "meal" ? "#6ee7b7" : "#7eb8f7"} />
+          <Ionicons name="add" size={15} color={mode === "meal" ? colors.accentGreen : colors.accentBlue} />
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -1490,6 +1557,8 @@ function AttractionCard({
   onDragMove: (x: number, y: number) => void;
   onDragEnd: (x: number, y: number) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const dragStarted = useRef(false);
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => false,
@@ -1515,7 +1584,7 @@ function AttractionCard({
     onPanResponderTerminationRequest: () => false,
     onShouldBlockNativeResponder: () => true,
   }), [onDragEnd, onDragMove, onDragStart]);
-  const color = isFood ? "#6ee7b7" : (LEVEL_COLORS[attraction.category_level] ?? "#ccc");
+  const color = isFood ? colors.accentGreen : (LEVEL_COLORS[attraction.category_level] ?? "#ccc");
   const isMuseum = !isFood && (attraction.attraction_type ?? "").toLowerCase() === "museo";
   const name = lang === "en" && attraction.name_en ? attraction.name_en : attraction.name;
   const emoji = getEmoji(attraction.attraction_type, isFood);
@@ -1538,7 +1607,7 @@ function AttractionCard({
           <View style={styles.attrTopRow}>
             <Text style={styles.attrEmoji}>{emoji}</Text>
             <Text style={styles.attrName} numberOfLines={2}>{name}</Text>
-            {selected && <Ionicons name="checkmark-circle" size={18} color={isFood ? "#6ee7b7" : "#e8c06a"} />}
+            {selected && <Ionicons name="checkmark-circle" size={18} color={isFood ? colors.accentGreen : colors.accentGold} />}
           </View>
           <View style={styles.attrMeta}>
             {isFood ? (
@@ -1554,14 +1623,14 @@ function AttractionCard({
             )}
             {attraction.estimated_visit_time ? (
               <View style={styles.metaItem}>
-                <Ionicons name="time-outline" size={11} color="#555" />
+                <Ionicons name="time-outline" size={11} color={colors.textMuted} />
                 <Text style={styles.metaText}>{attraction.estimated_visit_time} min</Text>
               </View>
             ) : null}
             {distance !== undefined && (
               <View style={styles.metaItem}>
-                <Ionicons name="navigate-outline" size={11} color="#6ee7b7" />
-                <Text style={[styles.metaText, { color: "#6ee7b7" }]}>{fmtDist(distance)}</Text>
+                <Ionicons name="navigate-outline" size={11} color={colors.accentGreen} />
+                <Text style={[styles.metaText, { color: colors.accentGreen }]}>{fmtDist(distance)}</Text>
               </View>
             )}
           </View>
@@ -1587,6 +1656,8 @@ function DayRow({
   onSlotRef?: (slot: SlotData, ref: View | null) => void;
   onSetNote: (slotId: string, note: string) => void; onOptimize: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const filledCount = day.slots.filter((s) => s.attraction !== null).length;
   const stats = getDayStats(day);
   const canOptimize = (() => {
@@ -1604,9 +1675,9 @@ function DayRow({
   const mm = totalMins % 60;
   const timeLabel = totalMins > 0 ? (hh > 0 ? `${hh}h${mm > 0 ? ` ${mm}min` : ""}` : `${mm}min`) : null;
   const metricTimeLabel = totalMins > 0 ? (hh > 0 ? `${hh}h${mm > 0 ? `${mm}` : ""}` : `${mm}m`) : "0m";
-  const timeColor = stats.minutes > 420 ? "#f87171" : "#6ee7b7";
-  const kmColor = stats.distanceKm > 4 ? "#f87171" : "#6ee7b7";
-  const museumColor = stats.museums > 1 ? "#f87171" : "#6ee7b7";
+  const timeColor = stats.minutes > 420 ? colors.danger : colors.accentGreen;
+  const kmColor = stats.distanceKm > 4 ? colors.danger : colors.accentGreen;
+  const museumColor = stats.museums > 1 ? colors.danger : colors.accentGreen;
 
   return (
     <View style={styles.dayRow}>
@@ -1630,11 +1701,11 @@ function DayRow({
             activeOpacity={0.7}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="shuffle-outline" size={15} color="#7eb8f7" />
+            <Ionicons name="shuffle-outline" size={15} color={colors.accentBlue} />
             <Text style={styles.optimizeBtnText}>{lang === "en" ? "Opt." : "Ottim."}</Text>
           </TouchableOpacity>
         )}
-        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color="#555" />
+        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
       </TouchableOpacity>
 
       {expanded && (
@@ -1668,11 +1739,11 @@ function DayRow({
           {showAddControls && onAddSlot && onAddMealSlot && (
             <View style={styles.addSlotRow}>
               <TouchableOpacity style={styles.addSlotBtn} onPress={onAddSlot} activeOpacity={0.7}>
-                <Ionicons name="add" size={14} color="#7eb8f7" />
+                <Ionicons name="add" size={14} color={colors.accentBlue} />
                 <Text style={styles.addSlotText}>🏛️</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.addMealBtn} onPress={onAddMealSlot} activeOpacity={0.7}>
-                <Ionicons name="add" size={14} color="#6ee7b7" />
+                <Ionicons name="add" size={14} color={colors.accentGreen} />
                 <Text style={styles.addMealText}>🍝</Text>
               </TouchableOpacity>
             </View>
@@ -1695,6 +1766,8 @@ function SlotCard({
   onSlotRef?: (ref: View | null) => void;
   onSetNote: (note: string) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFilled = slot.attraction !== null;
   const isMeal = slot.kind === "meal";
   const name = isFilled
@@ -1722,7 +1795,7 @@ function SlotCard({
         </View>
         <View style={styles.slotActions}>
           <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} activeOpacity={0.7} style={styles.slotDeleteBtn}>
-            <Ionicons name="trash-outline" size={18} color="#f87171" />
+            <Ionicons name="trash-outline" size={18} color={colors.danger} />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -1748,7 +1821,7 @@ function SlotCard({
       <Ionicons
         name={isMeal ? "restaurant-outline" : "add-circle-outline"}
         size={16}
-        color={canReceive ? (isMeal ? "#6ee7b7" : "#7eb8f7") : (isMeal ? "#2a4a3a" : "#2a2a42")}
+        color={canReceive ? (isMeal ? colors.accentGreen : colors.accentBlue) : colors.border2}
       />
       <View style={{ flex: 1 }} />
       <TouchableOpacity
@@ -1757,7 +1830,7 @@ function SlotCard({
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         activeOpacity={0.7}
       >
-        <Ionicons name="trash-outline" size={14} color="#f87171" />
+        <Ionicons name="trash-outline" size={14} color={colors.danger} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -1765,604 +1838,611 @@ function SlotCard({
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0f0f1e" },
+function makeStyles(colors: any) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.bg },
 
-  // ── Header ────────────────────────────────────────────────────────────────
-  header: {
-    flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 14, paddingVertical: 10,
-    gap: 10, borderBottomWidth: 1, borderBottomColor: "#1e1e30",
-  },
-  backBtn: {
-    width: 36, height: 36, alignItems: "center", justifyContent: "center",
-    borderRadius: 18, backgroundColor: "#161625", borderWidth: 1, borderColor: "#2a2a42", flexShrink: 0,
-  },
-  headerCenter: { flex: 1 },
-  headerTitle: { color: "#f0f0f0", fontWeight: "700", fontSize: 16 },
-  headerSub: { color: "#555", fontSize: 11, marginTop: 1 },
-  viewBtn: {
-    flexDirection: "row", alignItems: "center", gap: 5,
-    backgroundColor: "#e8c06a", borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 8, flexShrink: 0,
-  },
-  viewBtnDisabled: { backgroundColor: "#1e1e30" },
-  viewBtnText: { color: "#0f0f1e", fontWeight: "800", fontSize: 13 },
-  flagBtn: {
-    width: 34, height: 34, borderRadius: 17, backgroundColor: "#161625",
-    borderWidth: 1, borderColor: "#2a2a42", alignItems: "center", justifyContent: "center", flexShrink: 0,
-  },
-  guideBtn: {
-    borderColor: "#e8c06a70",
-    backgroundColor: "#e8c06a14",
-  },
-  flagEmoji: { fontSize: 18 },
+    // ── Header ──────────────────────────────────────────────────────────────
+    header: {
+      flexDirection: "row", alignItems: "center",
+      paddingHorizontal: 14, paddingVertical: 10,
+      gap: 10, borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    backBtn: {
+      width: 36, height: 36, alignItems: "center", justifyContent: "center",
+      borderRadius: 18, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border2, flexShrink: 0,
+    },
+    headerCenter: { flex: 1 },
+    headerTitle: { color: colors.text, fontWeight: "700", fontSize: 16 },
+    headerSub: { color: colors.textMuted, fontSize: 11, marginTop: 1 },
+    viewBtn: {
+      flexDirection: "row", alignItems: "center", gap: 5,
+      backgroundColor: colors.accentGold, borderRadius: 10,
+      paddingHorizontal: 12, paddingVertical: 8, flexShrink: 0,
+    },
+    viewBtnDisabled: { backgroundColor: colors.border },
+    viewBtnText: { color: colors.bg, fontWeight: "800", fontSize: 13 },
+    flagBtn: {
+      width: 34, height: 34, borderRadius: 17, backgroundColor: colors.card,
+      borderWidth: 1, borderColor: colors.border2, alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
+    guideBtn: {
+      borderColor: colors.accentGold + "70",
+      backgroundColor: colors.accentGold + "14",
+    },
+    flagEmoji: { fontSize: 18 },
 
-  // ── Tab bar ───────────────────────────────────────────────────────────────
-  tabBar: {
-    flexDirection: "row",
-    backgroundColor: "#0d0d1a",
-    borderBottomWidth: 1,
-    borderBottomColor: "#1e1e30",
-  },
-  tab: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 6, paddingVertical: 11, paddingHorizontal: 4,
-    borderBottomWidth: 2, borderBottomColor: "transparent",
-    position: "relative",
-  },
-  tabActive: { borderBottomColor: "#e8c06a", backgroundColor: "#e8c06a08" },
-  tabActiveFood: { borderBottomColor: "#6ee7b7", backgroundColor: "#6ee7b708" },
-  tabActivePiano: { borderBottomColor: "#7eb8f7", backgroundColor: "#7eb8f708" },
-  tabEmoji: { fontSize: 15 },
-  tabLabel: { color: "#555", fontSize: 12, fontWeight: "600" },
-  tabLabelActive: { color: "#e8c06a" },
-  tabLabelActiveFood: { color: "#6ee7b7" },
-  tabLabelActivePiano: { color: "#7eb8f7" },
-  tabBadge: {
-    minWidth: 18, height: 18, borderRadius: 9,
-    backgroundColor: "#e8c06a", alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  tabBadgeFood: { backgroundColor: "#6ee7b7" },
-  tabBadgePiano: { backgroundColor: "#7eb8f7" },
-  tabBadgeText: { color: "#0f0f1e", fontSize: 10, fontWeight: "800" },
+    // ── Tab bar ─────────────────────────────────────────────────────────────
+    tabBar: {
+      flexDirection: "row",
+      backgroundColor: colors.card2,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    tab: {
+      flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+      gap: 6, paddingVertical: 11, paddingHorizontal: 4,
+      borderBottomWidth: 2, borderBottomColor: "transparent",
+      position: "relative",
+    },
+    tabActive: { borderBottomColor: colors.accentGold, backgroundColor: colors.accentGold + "08" },
+    tabActiveFood: { borderBottomColor: colors.accentGreen, backgroundColor: colors.accentGreen + "08" },
+    tabActivePiano: { borderBottomColor: colors.accentBlue, backgroundColor: colors.accentBlue + "08" },
+    tabEmoji: { fontSize: 15 },
+    tabLabel: { color: colors.textMuted, fontSize: 12, fontWeight: "600" },
+    tabLabelActive: { color: colors.accentGold },
+    tabLabelActiveFood: { color: colors.accentGreen },
+    tabLabelActivePiano: { color: colors.accentBlue },
+    tabBadge: {
+      minWidth: 18, height: 18, borderRadius: 9,
+      backgroundColor: colors.accentGold, alignItems: "center", justifyContent: "center",
+      paddingHorizontal: 4,
+    },
+    tabBadgeFood: { backgroundColor: colors.accentGreen },
+    tabBadgePiano: { backgroundColor: colors.accentBlue },
+    tabBadgeText: { color: colors.bg, fontSize: 10, fontWeight: "800" },
 
-  // ── Tab content ───────────────────────────────────────────────────────────
-  tabContent: { flex: 1 },
+    // ── Tab content ─────────────────────────────────────────────────────────
+    tabContent: { flex: 1 },
 
-  // Search
-  searchRow: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    paddingHorizontal: 16, paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: "#1a1a2a",
-  },
-  searchBar: {
-    flex: 1, flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: "#161625", borderRadius: 10, borderWidth: 1,
-    borderColor: "#2a2a42", paddingHorizontal: 12, paddingVertical: 8,
-  },
-  searchInput: { flex: 1, color: "#d0d0e8", fontSize: 14 },
-  filterBtn: {
-    width: 36, height: 36, borderRadius: 10,
-    backgroundColor: "#161625", borderWidth: 1, borderColor: "#2a2a42",
-    alignItems: "center", justifyContent: "center",
-  },
-  filterBtnActive: { borderColor: "#e8c06a60", backgroundColor: "#e8c06a12" },
-  filterBadge: {
-    position: "absolute", top: -5, right: -5,
-    width: 16, height: 16, borderRadius: 8,
-    backgroundColor: "#e8c06a", alignItems: "center", justifyContent: "center",
-  },
-  filterBadgeText: { color: "#0f0f1e", fontSize: 9, fontWeight: "800" },
+    // Search
+    searchRow: {
+      flexDirection: "row", alignItems: "center", gap: 8,
+      paddingHorizontal: 16, paddingVertical: 10,
+      borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    searchBar: {
+      flex: 1, flexDirection: "row", alignItems: "center", gap: 8,
+      backgroundColor: colors.card, borderRadius: 10, borderWidth: 1,
+      borderColor: colors.border2, paddingHorizontal: 12, paddingVertical: 8,
+    },
+    searchInput: { flex: 1, color: colors.textSub, fontSize: 14 },
+    filterBtn: {
+      width: 36, height: 36, borderRadius: 10,
+      backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border2,
+      alignItems: "center", justifyContent: "center",
+    },
+    filterBtnActive: { borderColor: colors.accentGold + "60", backgroundColor: colors.accentGold + "12" },
+    mapToggleBtn: {
+      width: 36, height: 36, borderRadius: 10,
+      backgroundColor: colors.accentGold + "14", borderWidth: 1, borderColor: colors.accentGold + "44",
+      alignItems: "center", justifyContent: "center",
+    },
+    filterBadge: {
+      position: "absolute", top: -5, right: -5,
+      width: 16, height: 16, borderRadius: 8,
+      backgroundColor: colors.accentGold, alignItems: "center", justifyContent: "center",
+    },
+    filterBadgeText: { color: colors.bg, fontSize: 9, fontWeight: "800" },
 
-  totalCount: {
-    color: "#444", fontSize: 11, fontWeight: "600",
-    textAlign: "center", paddingVertical: 5, letterSpacing: 0.3,
-  },
+    totalCount: {
+      color: colors.textMuted, fontSize: 11, fontWeight: "600",
+      textAlign: "center", paddingVertical: 5, letterSpacing: 0.3,
+    },
 
-  builderWorkspace: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  builderPlanPane: {
-    flex: 1,
-    minWidth: 0,
-  },
-  builderListPane: {
-    flex: 1,
-    minWidth: 0,
-    borderLeftWidth: 1,
-    borderLeftColor: "#1e1e30",
-    paddingLeft: 8,
-  },
-  builderPaneTitle: {
-    color: "#e8c06a",
-    fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-    marginBottom: 8,
-    paddingHorizontal: 2,
-  },
-  builderPlanScroll: { paddingBottom: 24 },
-  listScroll: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 24 },
-  pianoScroll: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 100 },
+    builderWorkspace: {
+      flex: 1,
+      flexDirection: "row",
+      gap: 10,
+      paddingHorizontal: 10,
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    builderPlanPane: {
+      flex: 1,
+      minWidth: 0,
+    },
+    builderListPane: {
+      flex: 1,
+      minWidth: 0,
+      borderLeftWidth: 1,
+      borderLeftColor: colors.border,
+      paddingLeft: 8,
+    },
+    builderPaneTitle: {
+      color: colors.accentGold,
+      fontSize: 12,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+      marginBottom: 8,
+      paddingHorizontal: 2,
+    },
+    builderPlanScroll: { paddingBottom: 24 },
+    listScroll: { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 24 },
+    pianoScroll: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 100 },
 
-  errorText: { color: "#f87171", fontSize: 13, padding: 16, lineHeight: 19 },
-  emptyText: { color: "#444", fontSize: 13, textAlign: "center", marginTop: 32 },
+    errorText: { color: colors.danger, fontSize: 13, padding: 16, lineHeight: 19 },
+    emptyText: { color: colors.textMuted, fontSize: 13, textAlign: "center", marginTop: 32 },
 
-  // ── Attraction card (full-width) ───────────────────────────────────────────
-  attrCard: {
-    flexDirection: "row", alignItems: "flex-start",
-    backgroundColor: "#161625", borderRadius: 14,
-    borderWidth: 1, borderColor: "#2a2a42",
-    padding: 12, marginBottom: 10,
-  },
-  attrCardSelected: { borderColor: "#e8c06a", backgroundColor: "#e8c06a0c" },
-  attrCardSelectedFood: { borderColor: "#6ee7b7", backgroundColor: "#6ee7b70c" },
-  attrCardMuseum: { borderColor: "#7c3aed66", backgroundColor: "#1a0f2e" },
-  attrEmoji: { fontSize: 22, flexShrink: 0, lineHeight: 25 },
-  attrInfo: { flex: 1 },
-  attrTopRow: { flexDirection: "row", alignItems: "flex-start", gap: 7 },
-  attrName: { flex: 1, color: "#e8e8f8", fontSize: 15, fontWeight: "700", lineHeight: 20, marginBottom: 4, minWidth: 0 },
-  attrDesc: { color: "#7878a0", fontSize: 12, lineHeight: 17, marginBottom: 8 },
-  attrMeta: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
-  typeChip: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 },
-  typeChipText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.2 },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaText: { color: "#555", fontSize: 11, fontWeight: "600" },
+    // ── Attraction card (full-width) ─────────────────────────────────────────
+    attrCard: {
+      flexDirection: "row", alignItems: "flex-start",
+      backgroundColor: colors.card, borderRadius: 14,
+      borderWidth: 1, borderColor: colors.border2,
+      padding: 12, marginBottom: 10,
+    },
+    attrCardSelected: { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "0c" },
+    attrCardSelectedFood: { borderColor: colors.accentGreen, backgroundColor: colors.accentGreen + "0c" },
+    attrCardMuseum: { borderColor: colors.accentPurple + "66", backgroundColor: colors.accentPurple + "15" },
+    attrEmoji: { fontSize: 22, flexShrink: 0, lineHeight: 25 },
+    attrInfo: { flex: 1 },
+    attrTopRow: { flexDirection: "row", alignItems: "flex-start", gap: 7 },
+    attrName: { flex: 1, color: colors.text, fontSize: 15, fontWeight: "700", lineHeight: 20, marginBottom: 4, minWidth: 0 },
+    attrDesc: { color: colors.textSub, fontSize: 12, lineHeight: 17, marginBottom: 8 },
+    attrMeta: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
+    typeChip: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 },
+    typeChipText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.2 },
+    metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
+    metaText: { color: colors.textMuted, fontSize: 11, fontWeight: "600" },
 
-  // Bottom day dock
-  dayDock: {
-    backgroundColor: "#111120",
-    borderTopWidth: 1,
-    borderTopColor: "#2a2a42",
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 14,
-    gap: 10,
-  },
-  dayDockTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  dayDockArrow: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#1a1a2b",
-    borderWidth: 1,
-    borderColor: "#2a2a42",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dayDockArrowDisabled: { opacity: 0.55 },
-  dayDockTitleWrap: { flex: 1 },
-  dayDockTitle: { color: "#f0f0f0", fontSize: 15, fontWeight: "800" },
-  dayDockSubtitle: { color: "#777", fontSize: 12, marginTop: 2 },
-  dayDockSummaryBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: "#7eb8f712",
-    borderWidth: 1,
-    borderColor: "#7eb8f738",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dayDockMetrics: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    flexWrap: "wrap",
-  },
-  dayDockMetric: {
-    fontSize: 11,
-    fontWeight: "800",
-    backgroundColor: "#1a1a2b",
-    borderRadius: 7,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-  },
-  dayDockMetricMuted: {
-    color: "#777",
-    fontSize: 11,
-    fontWeight: "700",
-    backgroundColor: "#1a1a2b",
-    borderRadius: 7,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-  },
-  dayDockSlots: {
-    gap: 8,
-    paddingRight: 8,
-  },
-  dayDockSlot: {
-    width: 132,
-    height: 46,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#2a2a42",
-    backgroundColor: "#18182a",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 8,
-  },
-  dayDockSlotMeal: {
-    borderColor: "#1d3a30",
-    backgroundColor: "#10231d",
-  },
-  dayDockSlotActive: {
-    borderColor: "#e8c06a",
-    backgroundColor: "#e8c06a16",
-  },
-  dayDockSlotFilled: {
-    borderStyle: "solid",
-    opacity: 0.78,
-  },
-  dayDockSlotIndex: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#252540",
-    color: "#aaa",
-    fontSize: 10,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 18,
-    flexShrink: 0,
-  },
-  dayDockSlotText: { color: "#8e8eaa", fontSize: 12, fontWeight: "700", flex: 1 },
-  dayDockSlotTextFilled: { color: "#d8d8f0" },
-  dayDockAddSlot: {
-    width: 46,
-    height: 46,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: "#34445c",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    // Bottom day dock
+    dayDock: {
+      backgroundColor: colors.card2,
+      borderTopWidth: 1,
+      borderTopColor: colors.border2,
+      paddingHorizontal: 14,
+      paddingTop: 12,
+      paddingBottom: 14,
+      gap: 10,
+    },
+    dayDockTop: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    dayDockArrow: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border2,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dayDockArrowDisabled: { opacity: 0.55 },
+    dayDockTitleWrap: { flex: 1 },
+    dayDockTitle: { color: colors.text, fontSize: 15, fontWeight: "800" },
+    dayDockSubtitle: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+    dayDockSummaryBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      backgroundColor: colors.accentBlue + "12",
+      borderWidth: 1,
+      borderColor: colors.accentBlue + "38",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dayDockMetrics: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 7,
+      flexWrap: "wrap",
+    },
+    dayDockMetric: {
+      fontSize: 11,
+      fontWeight: "800",
+      backgroundColor: colors.card,
+      borderRadius: 7,
+      paddingHorizontal: 7,
+      paddingVertical: 3,
+    },
+    dayDockMetricMuted: {
+      color: colors.textMuted,
+      fontSize: 11,
+      fontWeight: "700",
+      backgroundColor: colors.card,
+      borderRadius: 7,
+      paddingHorizontal: 7,
+      paddingVertical: 3,
+    },
+    dayDockSlots: {
+      gap: 8,
+      paddingRight: 8,
+    },
+    dayDockSlot: {
+      width: 132,
+      height: 46,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border2,
+      backgroundColor: colors.card,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 8,
+    },
+    dayDockSlotMeal: {
+      borderColor: colors.accentGreen + "40",
+      backgroundColor: colors.accentGreen + "10",
+    },
+    dayDockSlotActive: {
+      borderColor: colors.accentGold,
+      backgroundColor: colors.accentGold + "16",
+    },
+    dayDockSlotFilled: {
+      borderStyle: "solid",
+      opacity: 0.78,
+    },
+    dayDockSlotIndex: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: colors.border2,
+      color: colors.textMuted,
+      fontSize: 10,
+      fontWeight: "800",
+      textAlign: "center",
+      lineHeight: 18,
+      flexShrink: 0,
+    },
+    dayDockSlotText: { color: colors.textSub, fontSize: 12, fontWeight: "700", flex: 1 },
+    dayDockSlotTextFilled: { color: colors.text },
+    dayDockAddSlot: {
+      width: 46,
+      height: 46,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderStyle: "dashed",
+      borderColor: colors.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  // ── Day row ───────────────────────────────────────────────────────────────
-  dayRow: {
-    backgroundColor: "#161625", borderRadius: 16,
-    borderWidth: 1, borderColor: "#2a2a42", marginBottom: 12, overflow: "hidden",
-  },
-  dayHeader: {
-    flexDirection: "row", alignItems: "center", gap: 8, padding: 12,
-  },
-  dayBadge: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: "#2a2a42", alignItems: "center", justifyContent: "center", flexShrink: 0,
-  },
-  dayBadgeActive: { backgroundColor: "#e8c06a22", borderWidth: 1.5, borderColor: "#e8c06a" },
-  dayBadgeText: { color: "#777", fontSize: 14, fontWeight: "800" },
-  dayBadgeTextActive: { color: "#e8c06a" },
-  dayTitle: { color: "#d0d0e8", fontSize: 15, fontWeight: "700" },
-  dayTimeMeta: { color: "#6ee7b7", fontSize: 11, fontWeight: "700", marginTop: 2 },
-  filledBadge: {
-    minWidth: 24,
-    backgroundColor: "#6ee7b718", borderRadius: 8,
-    paddingHorizontal: 6, paddingVertical: 3, borderWidth: 1, borderColor: "#6ee7b730",
-    alignItems: "center",
-  },
-  filledBadgeText: { color: "#6ee7b7", fontSize: 11, fontWeight: "700" },
-  optimizeBtn: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    padding: 6, borderRadius: 8,
-    backgroundColor: "#7eb8f718", borderWidth: 1, borderColor: "#7eb8f740",
-  },
-  optimizeBtnText: { color: "#7eb8f7", fontSize: 11, fontWeight: "700" },
-  dayBody: { paddingHorizontal: 12, paddingBottom: 12, borderTopWidth: 1, borderTopColor: "#1e1e30" },
-  dayMetricsColumn: {
-    gap: 5,
-    marginTop: 10,
-  },
-  dayMetricChip: {
-    backgroundColor: "#1a1a2b",
-    borderWidth: 1,
-    borderColor: "#2a2a42",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-  },
-  dayMetricText: {
-    fontSize: 11,
-    fontWeight: "800",
-  },
+    // ── Day row ─────────────────────────────────────────────────────────────
+    dayRow: {
+      backgroundColor: colors.card, borderRadius: 16,
+      borderWidth: 1, borderColor: colors.border2, marginBottom: 12, overflow: "hidden",
+    },
+    dayHeader: {
+      flexDirection: "row", alignItems: "center", gap: 8, padding: 12,
+    },
+    dayBadge: {
+      width: 32, height: 32, borderRadius: 16,
+      backgroundColor: colors.border2, alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
+    dayBadgeActive: { backgroundColor: colors.accentGold + "22", borderWidth: 1.5, borderColor: colors.accentGold },
+    dayBadgeText: { color: colors.textMuted, fontSize: 14, fontWeight: "800" },
+    dayBadgeTextActive: { color: colors.accentGold },
+    dayTitle: { color: colors.textSub, fontSize: 15, fontWeight: "700" },
+    dayTimeMeta: { color: colors.accentGreen, fontSize: 11, fontWeight: "700", marginTop: 2 },
+    filledBadge: {
+      minWidth: 24,
+      backgroundColor: colors.accentGreen + "18", borderRadius: 8,
+      paddingHorizontal: 6, paddingVertical: 3, borderWidth: 1, borderColor: colors.accentGreen + "30",
+      alignItems: "center",
+    },
+    filledBadgeText: { color: colors.accentGreen, fontSize: 11, fontWeight: "700" },
+    optimizeBtn: {
+      flexDirection: "row", alignItems: "center", gap: 4,
+      padding: 6, borderRadius: 8,
+      backgroundColor: colors.accentBlue + "18", borderWidth: 1, borderColor: colors.accentBlue + "40",
+    },
+    optimizeBtnText: { color: colors.accentBlue, fontSize: 11, fontWeight: "700" },
+    dayBody: { paddingHorizontal: 12, paddingBottom: 12, borderTopWidth: 1, borderTopColor: colors.border },
+    dayMetricsColumn: {
+      gap: 5,
+      marginTop: 10,
+    },
+    dayMetricChip: {
+      backgroundColor: colors.card2,
+      borderWidth: 1,
+      borderColor: colors.border2,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 5,
+    },
+    dayMetricText: {
+      fontSize: 11,
+      fontWeight: "800",
+    },
 
-  // ── Slot filled ───────────────────────────────────────────────────────────
-  slotFilled: {
-    height: 56,
-    flexDirection: "row", alignItems: "center", gap: 10,
-    backgroundColor: "#1e1e30", borderRadius: 12,
-    paddingHorizontal: 12, marginTop: 10, borderWidth: 1, borderColor: "#2a2a52",
-  },
-  slotFilledMeal: { backgroundColor: "#0f1f1a", borderColor: "#1e3a2e" },
-  slotFilledMuseum: { backgroundColor: "#1a0f2e", borderColor: "#7c3aed66" },
-  slotIndex: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: "#2a2a42", alignItems: "center", justifyContent: "center", flexShrink: 0,
-  },
-  slotIndexMeal: { backgroundColor: "#1a3a2a" },
-  slotIndexText: { color: "#888", fontSize: 11, fontWeight: "800" },
-  slotIndexTextMeal: { color: "#6ee7b7" },
-  slotIndexEmpty: { backgroundColor: "#1e1e2e" },
-  slotIndexEmptyText: { color: "#333", fontSize: 11, fontWeight: "800" },
-  slotEmoji: { fontSize: 20, flexShrink: 0 },
-  slotName: { color: "#d8d8f0", fontSize: 14, fontWeight: "600", lineHeight: 19, flex: 1 },
-  slotNameCompact: { color: "#d8d8f0", fontSize: 13, fontWeight: "700", lineHeight: 15, flex: 1 },
-  slotMetaRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
-  slotTime: { color: "#555", fontSize: 12 },
-  slotPrice: { color: "#6ee7b7", fontSize: 12, fontWeight: "800" },
-  slotNote: {
-    color: "#888", fontSize: 12, marginTop: 8,
-    paddingTop: 6, borderTopWidth: 1, borderTopColor: "#2a2a42", minHeight: 18,
-  },
-  slotActions: { alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  slotDeleteBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f8717118",
-    borderWidth: 1,
-    borderColor: "#f8717140",
-  },
+    // ── Slot filled ─────────────────────────────────────────────────────────
+    slotFilled: {
+      height: 56,
+      flexDirection: "row", alignItems: "center", gap: 10,
+      backgroundColor: colors.border, borderRadius: 12,
+      paddingHorizontal: 12, marginTop: 10, borderWidth: 1, borderColor: colors.border2,
+    },
+    slotFilledMeal: { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "30" },
+    slotFilledMuseum: { backgroundColor: colors.accentPurple + "18", borderColor: colors.accentPurple + "44" },
+    slotIndex: {
+      width: 22, height: 22, borderRadius: 11,
+      backgroundColor: colors.border2, alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
+    slotIndexMeal: { backgroundColor: colors.accentGreen + "28" },
+    slotIndexText: { color: colors.textMuted, fontSize: 11, fontWeight: "800" },
+    slotIndexTextMeal: { color: colors.accentGreen },
+    slotIndexEmpty: { backgroundColor: colors.border },
+    slotIndexEmptyText: { color: colors.textMuted, fontSize: 11, fontWeight: "800" },
+    slotEmoji: { fontSize: 20, flexShrink: 0 },
+    slotName: { color: colors.text, fontSize: 14, fontWeight: "600", lineHeight: 19, flex: 1 },
+    slotNameCompact: { color: colors.text, fontSize: 13, fontWeight: "700", lineHeight: 15, flex: 1 },
+    slotMetaRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
+    slotTime: { color: colors.textMuted, fontSize: 12 },
+    slotPrice: { color: colors.accentGreen, fontSize: 12, fontWeight: "800" },
+    slotNote: {
+      color: colors.textMuted, fontSize: 12, marginTop: 8,
+      paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.border2, minHeight: 18,
+    },
+    slotActions: { alignItems: "center", justifyContent: "center", flexShrink: 0 },
+    slotDeleteBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.danger + "18",
+      borderWidth: 1,
+      borderColor: colors.danger + "40",
+    },
 
-  // ── Slot empty ────────────────────────────────────────────────────────────
-  slotEmpty: {
-    height: 56,
-    flexDirection: "row", alignItems: "center", gap: 10,
-    borderRadius: 12, borderWidth: 1.5, borderColor: "#222235",
-    borderStyle: "dashed", paddingHorizontal: 12, marginTop: 10,
-  },
-  slotEmptyMeal: { borderColor: "#1a3020" },
-  slotEmptyActive: { borderColor: "#7eb8f760", backgroundColor: "#7eb8f710" },
-  slotEmptyMealActive: { borderColor: "#6ee7b760", backgroundColor: "#6ee7b710" },
-  slotEmptyText: { color: "#2a2a42", fontSize: 13, fontWeight: "600", flex: 1 },
-  slotEmptyTextMeal: { color: "#1a3020" },
-  slotEmptyTextActive: { color: "#7eb8f7" },
-  slotEmptyTextMealActive: { color: "#6ee7b7" },
+    // ── Slot empty ──────────────────────────────────────────────────────────
+    slotEmpty: {
+      height: 56,
+      flexDirection: "row", alignItems: "center", gap: 10,
+      borderRadius: 12, borderWidth: 1.5, borderColor: colors.border,
+      borderStyle: "dashed", paddingHorizontal: 12, marginTop: 10,
+    },
+    slotEmptyMeal: { borderColor: colors.accentGreen + "30" },
+    slotEmptyActive: { borderColor: colors.accentBlue + "60", backgroundColor: colors.accentBlue + "10" },
+    slotEmptyMealActive: { borderColor: colors.accentGreen + "60", backgroundColor: colors.accentGreen + "10" },
+    slotEmptyText: { color: colors.border2, fontSize: 13, fontWeight: "600", flex: 1 },
+    slotEmptyTextMeal: { color: colors.accentGreen + "40" },
+    slotEmptyTextActive: { color: colors.accentBlue },
+    slotEmptyTextMealActive: { color: colors.accentGreen },
 
-  // Drag preview
-  dragPreview: {
-    position: "absolute",
-    zIndex: 50,
-    width: 220,
-    minHeight: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 14,
-    backgroundColor: "#1b1b2d",
-    borderWidth: 1.5,
-    borderColor: "#e8c06a",
-    shadowColor: "#000",
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
-  dragPreviewMeal: {
-    borderColor: "#6ee7b7",
-    backgroundColor: "#10231d",
-  },
-  dragPreviewEmoji: { fontSize: 22 },
-  dragPreviewName: { flex: 1, color: "#f0f0f0", fontSize: 13, fontWeight: "800" },
+    // Drag preview
+    dragPreview: {
+      position: "absolute",
+      zIndex: 50,
+      width: 220,
+      minHeight: 56,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
+      borderColor: colors.accentGold,
+      shadowColor: "#000",
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 8,
+    },
+    dragPreviewMeal: {
+      borderColor: colors.accentGreen,
+      backgroundColor: colors.accentGreen + "15",
+    },
+    dragPreviewEmoji: { fontSize: 22 },
+    dragPreviewName: { flex: 1, color: colors.text, fontSize: 13, fontWeight: "800" },
 
-  // ── Add slot ──────────────────────────────────────────────────────────────
-  addSlotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
-  addSlotBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
-    paddingVertical: 10, borderRadius: 10,
-    backgroundColor: "#7eb8f712", borderWidth: 1, borderColor: "#7eb8f730",
-  },
-  addSlotText: { color: "#7eb8f7", fontSize: 13, fontWeight: "700" },
-  addMealBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
-    paddingVertical: 10, borderRadius: 10,
-    backgroundColor: "#6ee7b712", borderWidth: 1, borderColor: "#6ee7b730",
-  },
-  addMealText: { color: "#6ee7b7", fontSize: 13, fontWeight: "700" },
+    // ── Add slot ────────────────────────────────────────────────────────────
+    addSlotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+    addSlotBtn: {
+      flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+      paddingVertical: 10, borderRadius: 10,
+      backgroundColor: colors.accentBlue + "12", borderWidth: 1, borderColor: colors.accentBlue + "30",
+    },
+    addSlotText: { color: colors.accentBlue, fontSize: 13, fontWeight: "700" },
+    addMealBtn: {
+      flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+      paddingVertical: 10, borderRadius: 10,
+      backgroundColor: colors.accentGreen + "12", borderWidth: 1, borderColor: colors.accentGreen + "30",
+    },
+    addMealText: { color: colors.accentGreen, fontSize: 13, fontWeight: "700" },
 
-  // ── Selection bar ─────────────────────────────────────────────────────────
-  selectionBar: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: "#12122a",
-    borderTopWidth: 2, borderTopColor: "#e8c06a50",
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  selectionEmoji: { fontSize: 26, flexShrink: 0 },
-  selectionName: { color: "#e8c06a", fontWeight: "700", fontSize: 15 },
-  selectionHint: { color: "#666", fontSize: 12, marginTop: 2 },
-  goToPianoBtn: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#e8c06a", borderRadius: 10,
-    paddingHorizontal: 10, paddingVertical: 7, flexShrink: 0,
-  },
-  goToPianoBtnText: { fontSize: 14 },
-  cancelBtn: { flexShrink: 0, padding: 4 },
+    // ── Selection bar ────────────────────────────────────────────────────────
+    selectionBar: {
+      flexDirection: "row", alignItems: "center", gap: 12,
+      backgroundColor: colors.card2,
+      borderTopWidth: 2, borderTopColor: colors.accentGold + "50",
+      paddingHorizontal: 16, paddingVertical: 12,
+    },
+    selectionEmoji: { fontSize: 26, flexShrink: 0 },
+    selectionName: { color: colors.accentGold, fontWeight: "700", fontSize: 15 },
+    selectionHint: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+    goToPianoBtn: {
+      flexDirection: "row", alignItems: "center", gap: 4,
+      backgroundColor: colors.accentGold, borderRadius: 10,
+      paddingHorizontal: 10, paddingVertical: 7, flexShrink: 0,
+    },
+    goToPianoBtnText: { fontSize: 14 },
+    cancelBtn: { flexShrink: 0, padding: 4 },
 
-  // ── Modal filtro ──────────────────────────────────────────────────────────
-  modalBackdrop: {
-    flex: 1, backgroundColor: "#00000088",
-    justifyContent: "center", alignItems: "center", paddingHorizontal: 24,
-  },
-  filterModal: {
-    width: "100%", maxHeight: 440,
-    backgroundColor: "#161625", borderRadius: 18,
-    borderWidth: 1, borderColor: "#2a2a42", overflow: "hidden",
-  },
-  detailModal: {
-    width: "100%",
-    maxHeight: "82%",
-    backgroundColor: "#161625",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#2a2a42",
-    padding: 16,
-    gap: 14,
-  },
-  detailHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  detailEmoji: { fontSize: 28, width: 34, textAlign: "center" },
-  detailTitle: { color: "#f0f0f0", fontSize: 17, fontWeight: "800", lineHeight: 22 },
-  detailMeta: { color: "#e8c06a", fontSize: 12, fontWeight: "700", marginTop: 4 },
-  detailMetaMeal: { color: "#6ee7b7" },
-  detailDescriptionScroll: { maxHeight: 260 },
-  detailDescription: { color: "#b8b8d0", fontSize: 14, lineHeight: 20 },
-  detailActionsRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  detailMapBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    backgroundColor: "#e8c06a",
-    borderRadius: 12,
-    paddingVertical: 11,
-  },
-  detailMapText: { color: "#0f0f1e", fontSize: 13, fontWeight: "800" },
-  detailTicketBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    backgroundColor: "#2a2142",
-    borderWidth: 1,
-    borderColor: "#a78bfa70",
-    borderRadius: 12,
-    paddingVertical: 11,
-  },
-  detailTicketText: { color: "#e8e8f8", fontSize: 13, fontWeight: "800" },
-  detailDeleteBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#dc2626",
-    borderRadius: 12,
-    paddingVertical: 12,
-  },
-  detailDeleteText: { color: "#fff", fontSize: 14, fontWeight: "800" },
-  tourOverlay: {
-    flex: 1,
-    backgroundColor: "#000000cc",
-  },
-  tourHighlight: {
-    position: "absolute",
-    borderWidth: 2,
-    borderColor: "#e8c06a",
-    borderRadius: 16,
-    backgroundColor: "#e8c06a14",
-    shadowColor: "#e8c06a",
-    shadowOpacity: 0.55,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  tourArrow: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderBottomWidth: 12,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#e8c06a",
-  },
-  tourCard: {
-    position: "absolute",
-    width: 300,
-    backgroundColor: "#161625",
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: "#2a2a42",
-    padding: 18,
-    alignItems: "center",
-    gap: 8,
-  },
-  tourEyebrow: { color: "#e8c06a", fontSize: 11, fontWeight: "800" },
-  guideIcon: { fontSize: 38, marginBottom: 2 },
-  guideTitle: {
-    color: "#f0f0f0",
-    fontSize: 18,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 23,
-  },
-  guideBody: {
-    color: "#9999b8",
-    fontSize: 13,
-    textAlign: "center",
-    lineHeight: 19,
-    marginTop: 2,
-    marginBottom: 6,
-  },
-  guideDots: { flexDirection: "row", gap: 5, marginVertical: 5 },
-  guideDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#2a2a42",
-  },
-  guideDotActive: { backgroundColor: "#e8c06a", width: 22 },
-  guideCta: {
-    marginTop: 5,
-    backgroundColor: "#e8c06a",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 26,
-    minWidth: 170,
-    alignItems: "center",
-  },
-  guideCtaText: { color: "#0f0f1e", fontSize: 15, fontWeight: "800" },
-  guideSkip: { paddingVertical: 8 },
-  guideSkipText: { color: "#555", fontSize: 13 },
-  filterModalHeader: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 18, paddingVertical: 14,
-    borderBottomWidth: 1, borderBottomColor: "#2a2a42",
-  },
-  filterModalTitle: { color: "#d0d0e8", fontSize: 14, fontWeight: "700" },
-  filterModalReset: { color: "#7eb8f7", fontSize: 13, fontWeight: "600" },
-  filterModalList: { maxHeight: 320 },
-  filterModalItem: {
-    flexDirection: "row", alignItems: "center", gap: 14,
-    paddingHorizontal: 18, paddingVertical: 13,
-    borderBottomWidth: 1, borderBottomColor: "#1e1e30",
-  },
-  checkbox: {
-    width: 20, height: 20, borderRadius: 6, borderWidth: 1.5,
-    borderColor: "#3a3a52", backgroundColor: "#111120",
-    alignItems: "center", justifyContent: "center", flexShrink: 0,
-  },
-  checkboxChecked: { backgroundColor: "#e8c06a", borderColor: "#e8c06a" },
-  filterModalItemText: { color: "#888", fontSize: 14 },
-  filterModalItemTextChecked: { color: "#e8c06a", fontWeight: "600" },
-  filterModalDone: {
-    margin: 14, backgroundColor: "#e8c06a",
-    borderRadius: 12, paddingVertical: 12, alignItems: "center",
-  },
-  filterModalDoneText: { color: "#0f0f1e", fontSize: 14, fontWeight: "800" },
-});
+    // ── Modal filtro ─────────────────────────────────────────────────────────
+    modalBackdrop: {
+      flex: 1, backgroundColor: "#00000088",
+      justifyContent: "center", alignItems: "center", paddingHorizontal: 24,
+    },
+    filterModal: {
+      width: "100%", maxHeight: 440,
+      backgroundColor: colors.card, borderRadius: 18,
+      borderWidth: 1, borderColor: colors.border2, overflow: "hidden",
+    },
+    detailModal: {
+      width: "100%",
+      maxHeight: "82%",
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: colors.border2,
+      padding: 16,
+      gap: 14,
+    },
+    detailHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    detailEmoji: { fontSize: 28, width: 34, textAlign: "center" },
+    detailTitle: { color: colors.text, fontSize: 17, fontWeight: "800", lineHeight: 22 },
+    detailMeta: { color: colors.accentGold, fontSize: 12, fontWeight: "700", marginTop: 4 },
+    detailMetaMeal: { color: colors.accentGreen },
+    detailDescriptionScroll: { maxHeight: 260 },
+    detailDescription: { color: colors.textSub, fontSize: 14, lineHeight: 20 },
+    detailActionsRow: {
+      flexDirection: "row",
+      gap: 10,
+    },
+    detailMapBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7,
+      backgroundColor: colors.accentGold,
+      borderRadius: 12,
+      paddingVertical: 11,
+    },
+    detailMapText: { color: colors.bg, fontSize: 13, fontWeight: "800" },
+    detailTicketBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7,
+      backgroundColor: colors.accentPurple + "25",
+      borderWidth: 1,
+      borderColor: colors.accentPurple + "70",
+      borderRadius: 12,
+      paddingVertical: 11,
+    },
+    detailTicketText: { color: colors.text, fontSize: 13, fontWeight: "800" },
+    detailDeleteBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: colors.danger,
+      borderRadius: 12,
+      paddingVertical: 12,
+    },
+    detailDeleteText: { color: "#fff", fontSize: 14, fontWeight: "800" },
+    tourOverlay: {
+      flex: 1,
+      backgroundColor: "#000000cc",
+    },
+    tourHighlight: {
+      position: "absolute",
+      borderWidth: 2,
+      borderColor: colors.accentGold,
+      borderRadius: 16,
+      backgroundColor: colors.accentGold + "14",
+      shadowColor: colors.accentGold,
+      shadowOpacity: 0.55,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 0 },
+    },
+    tourArrow: {
+      position: "absolute",
+      width: 0,
+      height: 0,
+      borderLeftWidth: 8,
+      borderRightWidth: 8,
+      borderBottomWidth: 12,
+      borderLeftColor: "transparent",
+      borderRightColor: "transparent",
+      borderBottomColor: colors.accentGold,
+    },
+    tourCard: {
+      position: "absolute",
+      width: 300,
+      backgroundColor: colors.card,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: colors.border2,
+      padding: 18,
+      alignItems: "center",
+      gap: 8,
+    },
+    tourEyebrow: { color: colors.accentGold, fontSize: 11, fontWeight: "800" },
+    guideIcon: { fontSize: 38, marginBottom: 2 },
+    guideTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "800",
+      textAlign: "center",
+      lineHeight: 23,
+    },
+    guideBody: {
+      color: colors.textSub,
+      fontSize: 13,
+      textAlign: "center",
+      lineHeight: 19,
+      marginTop: 2,
+      marginBottom: 6,
+    },
+    guideDots: { flexDirection: "row", gap: 5, marginVertical: 5 },
+    guideDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: colors.border2,
+    },
+    guideDotActive: { backgroundColor: colors.accentGold, width: 22 },
+    guideCta: {
+      marginTop: 5,
+      backgroundColor: colors.accentGold,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 26,
+      minWidth: 170,
+      alignItems: "center",
+    },
+    guideCtaText: { color: colors.bg, fontSize: 15, fontWeight: "800" },
+    guideSkip: { paddingVertical: 8 },
+    guideSkipText: { color: colors.textMuted, fontSize: 13 },
+    filterModalHeader: {
+      flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      paddingHorizontal: 18, paddingVertical: 14,
+      borderBottomWidth: 1, borderBottomColor: colors.border2,
+    },
+    filterModalTitle: { color: colors.textSub, fontSize: 14, fontWeight: "700" },
+    filterModalReset: { color: colors.accentBlue, fontSize: 13, fontWeight: "600" },
+    filterModalList: { maxHeight: 320 },
+    filterModalItem: {
+      flexDirection: "row", alignItems: "center", gap: 14,
+      paddingHorizontal: 18, paddingVertical: 13,
+      borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    checkbox: {
+      width: 20, height: 20, borderRadius: 6, borderWidth: 1.5,
+      borderColor: colors.border2, backgroundColor: colors.card2,
+      alignItems: "center", justifyContent: "center", flexShrink: 0,
+    },
+    checkboxChecked: { backgroundColor: colors.accentGold, borderColor: colors.accentGold },
+    filterModalItemText: { color: colors.textMuted, fontSize: 14 },
+    filterModalItemTextChecked: { color: colors.accentGold, fontWeight: "600" },
+    filterModalDone: {
+      margin: 14, backgroundColor: colors.accentGold,
+      borderRadius: 12, paddingVertical: 12, alignItems: "center",
+    },
+    filterModalDoneText: { color: colors.bg, fontSize: 14, fontWeight: "800" },
+  });
+}

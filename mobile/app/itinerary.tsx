@@ -276,8 +276,9 @@ function displayNeighborhoodDescription(neighborhood: Neighborhood, lang: string
   return lang === "en" && neighborhood.description_en ? neighborhood.description_en : neighborhood.description;
 }
 
-function mapsSearchUrl(stop: Stop, city: string): string {
-  return `https://www.google.com/maps/search/${encodeURIComponent(`${displayStopName(stop, "it")}, ${stop.city ?? city}`)}`;
+function mapsSearchUrl(stop: Stop, _city: string): string {
+  // Use coordinates — always unambiguous regardless of city-name language
+  return `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
 }
 
 function levelSet(level: Itinerary["level"]): number[] {
@@ -477,7 +478,7 @@ function buildItineraryPdfHtml({
         <main class="pdf-page">
         <div class="cover">
           <div class="brand">WAYRA</div>
-          <h1>${htmlEscape(itinerary.city.toUpperCase())}</h1>
+          <h1>${htmlEscape(itinerary.city.replace(/_/g, " ").toUpperCase())}</h1>
           <div class="meta">${itinerary.num_days} ${isEn ? "days" : "giorni"} · ${htmlEscape(levelLabel)} · ${itinerary.max_walk_km ?? 5} km/${isEn ? "day" : "giorno"}</div>
         </div>
         ${daysHtml}
@@ -597,9 +598,9 @@ function builderToStop(a: BuilderAttraction, city: string): Stop {
   };
 }
 
-function mapsWaypoint(stop: Stop, city: string): string {
-  const stopCity = stop.city ?? city;
-  return encodeURIComponent(`${stop.name}, ${stopCity}`);
+function mapsWaypoint(stop: Stop, _city: string): string {
+  // Use coordinates — unambiguous and language-independent
+  return encodeURIComponent(`${stop.latitude},${stop.longitude}`);
 }
 
 const ATTRACTION_EMOJI: Record<string, string> = {
@@ -650,20 +651,30 @@ export default function ItineraryScreen() {
 
   // Legge l'itinerario da AsyncStorage (passato da index/create/saved senza URL params)
   useEffect(() => {
-    AsyncStorage.getItem("wayra_pending_itinerary").then((val) => {
-      if (val) {
-        try { setItinerary(JSON.parse(val) as Itinerary); } catch {}
-        AsyncStorage.removeItem("wayra_pending_itinerary");
-      } else {
-        // Fallback: vecchio metodo con URL params (backward compat)
-        const rawData = params.data;
-        const dataStr = Array.isArray(rawData) ? rawData[0] : rawData;
-        if (dataStr) {
-          try { setItinerary(JSON.parse(dataStr as string) as Itinerary); } catch {}
+    AsyncStorage.getItem("wayra_pending_itinerary")
+      .then((val) => {
+        if (val) {
+          try { setItinerary(JSON.parse(val) as Itinerary); } catch (e) {
+            if (__DEV__) console.warn("[itinerary] JSON parse failed:", e);
+          }
+          AsyncStorage.removeItem("wayra_pending_itinerary");
+        } else {
+          // Fallback: vecchio metodo con URL params (backward compat)
+          const rawData = params.data;
+          const dataStr = Array.isArray(rawData) ? rawData[0] : rawData;
+          if (dataStr) {
+            try { setItinerary(JSON.parse(dataStr as string) as Itinerary); } catch (e) {
+              if (__DEV__) console.warn("[itinerary] JSON parse (params) failed:", e);
+            }
+          }
         }
-      }
-      setItineraryLoading(false);
-    });
+      })
+      .catch((e) => {
+        if (__DEV__) console.warn("[itinerary] AsyncStorage read failed:", e);
+      })
+      .finally(() => {
+        setItineraryLoading(false);
+      });
   }, []);
 
   const { attractions } = useAttractions(itinerary?.city ?? "");
@@ -1111,8 +1122,8 @@ export default function ItineraryScreen() {
       <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
         <View style={styles.center}>
           <Text style={[styles.errorText, { color: colors.textSub }]}>{t.itineraryUnavailable}</Text>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backBtnText}>{t.goBack}</Text>
+          <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.card2 }]}>
+            <Text style={[styles.backBtnText, { color: colors.accentGold }]}>{t.goBack}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -1139,9 +1150,9 @@ export default function ItineraryScreen() {
         </TouchableOpacity>
         <View style={styles.topInfo}>
           <View style={styles.topTitleRow}>
-            <Text style={styles.topBrand}>WAYRA</Text>
+            <Text style={[styles.topBrand, { color: colors.accentGold }]}>WAYRA</Text>
             <Text style={[styles.topDivider, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.topCity, { color: colors.text }]}>{itinerary.city.toUpperCase()}</Text>
+            <Text style={[styles.topCity, { color: colors.text }]}>{itinerary.city.replace(/_/g, " ").toUpperCase()}</Text>
           </View>
           <Text style={[styles.topMeta, { color: colors.textMuted }]}>
             {itinerary.num_days} {t.days} · {levelLabel}
@@ -1157,7 +1168,7 @@ export default function ItineraryScreen() {
         <TouchableOpacity
           onPress={() => setShowGuide(true)}
           activeOpacity={0.7}
-          style={[styles.flagBtn, styles.guideBtn, { backgroundColor: colors.card2 }]}
+          style={[styles.flagBtn, styles.guideBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }]}
           accessibilityLabel={lang === "en" ? "Open guide" : "Apri guida"}
         >
           <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
@@ -1182,12 +1193,12 @@ export default function ItineraryScreen() {
           <>
             {attractions.length > 0 && (
               <TouchableOpacity
-                style={styles.globalMapBtn}
+                style={[styles.globalMapBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "44" }]}
                 onPress={() => { setMapDayNumber(itinerary.days[0]?.day ?? 1); setMapVisible(true); }}
                 activeOpacity={0.8}
               >
-                <Ionicons name="map-outline" size={16} color="#e8c06a" />
-                <Text style={styles.globalMapBtnText}>
+                <Ionicons name="map-outline" size={16} color={colors.accentGold} />
+                <Text style={[styles.globalMapBtnText, { color: colors.accentGold }]}>
                   {lang === "en" ? "Open Map" : "Apri Mappa"}
                 </Text>
               </TouchableOpacity>
@@ -1211,11 +1222,11 @@ export default function ItineraryScreen() {
               {t.neighborhoodsIntro(itinerary.city)}
             </Text>
             {neighborhoodsLoading ? (
-              <ActivityIndicator color="#e8c06a" style={{ marginTop: 32 }} />
+              <ActivityIndicator color={colors.accentGold} style={{ marginTop: 32 }} />
             ) : neighborhoods.length === 0 ? (
               <View style={styles.emptyNeighborhoods}>
                 <Text style={styles.emptyNeighborhoodsEmoji}>🏘️</Text>
-                <Text style={styles.emptyNeighborhoodsText}>{t.noNeighborhoodsData}</Text>
+                <Text style={[styles.emptyNeighborhoodsText, { color: colors.textMuted }]}>{t.noNeighborhoodsData}</Text>
               </View>
             ) : (
               neighborhoods.map((n) => (
@@ -1327,7 +1338,7 @@ export default function ItineraryScreen() {
           animationType="slide"
           onRequestClose={() => setPdfPreviewHtml(null)}
         >
-          <SafeAreaView style={styles.pdfPreviewBackdrop}>
+          <SafeAreaView style={[styles.pdfPreviewBackdrop, { backgroundColor: colors.bg }]}>
             <View style={[styles.pdfPreviewSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.pdfPreviewHeader}>
                 <View style={styles.pdfPreviewTitleWrap}>
@@ -1342,8 +1353,8 @@ export default function ItineraryScreen() {
                   <Ionicons name="close" size={20} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
-              <View style={styles.pdfDocumentViewport}>
-                <View style={styles.pdfDocumentPaper}>
+              <View style={[styles.pdfDocumentViewport, { backgroundColor: colors.card2, borderColor: colors.border }]}>
+                <View style={[styles.pdfDocumentPaper, { borderColor: colors.border2, backgroundColor: colors.bg }]}>
                   {Platform.OS === "web"
                     ? React.createElement("iframe", {
                         id: "wayra-pdf-preview",
@@ -1353,7 +1364,7 @@ export default function ItineraryScreen() {
                           width: "100%",
                           height: "100%",
                           border: 0,
-                          backgroundColor: "#0f0f1e",
+                          backgroundColor: colors.bg,
                         },
                       })
                     : (
@@ -1366,8 +1377,8 @@ export default function ItineraryScreen() {
                 </View>
               </View>
               <TouchableOpacity style={[styles.pdfPrintBtn, { backgroundColor: colors.accentGold }]} onPress={handlePrintPdfPreview} activeOpacity={0.85}>
-                <Ionicons name={Platform.OS === "web" ? "print-outline" : "share-outline"} size={18} color="#0f0f1e" />
-                <Text style={styles.pdfPrintText}>
+                <Ionicons name={Platform.OS === "web" ? "print-outline" : "share-outline"} size={18} color={colors.bg} />
+                <Text style={[styles.pdfPrintText, { color: colors.bg }]}>
                   {Platform.OS === "web"
                     ? (lang === "en" ? "Print / Save PDF" : "Stampa / Salva PDF")
                     : (lang === "en" ? "Share / Save PDF" : "Condividi / Salva PDF")}
@@ -1390,37 +1401,37 @@ export default function ItineraryScreen() {
           activeOpacity={1}
           onPress={() => setReloadState(null)}
         >
-          <TouchableOpacity activeOpacity={1} style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
+          <TouchableOpacity activeOpacity={1} style={[styles.modalSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border2 }]} />
 
-            <Text style={styles.modalTitle}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
               {lang === "en"
                 ? `Alternative options — Day ${reloadState?.dayNumber}`
                 : `Opzioni alternative — Giorno ${reloadState?.dayNumber}`}
             </Text>
-            <Text style={styles.modalSub}>
+            <Text style={[styles.modalSub, { color: colors.textMuted }]}>
               {lang === "en" ? "Choose a new day plan" : "Scegli un nuovo programma per la giornata"}
             </Text>
 
             {reloadState?.options.map((option, oi) => (
               <TouchableOpacity
                 key={oi}
-                style={styles.optionCard}
+                style={[styles.optionCard, { backgroundColor: colors.card2, borderColor: colors.border }]}
                 activeOpacity={0.8}
                 onPress={() => applyReloadOption(reloadState.dayIndex, option)}
               >
                 <View style={styles.optionHeader}>
-                  <Text style={styles.optionLabel}>{OPTION_LABELS[oi]}</Text>
-                  <Text style={styles.optionMeta}>
+                  <Text style={[styles.optionLabel, { color: colors.accentGold }]}>{OPTION_LABELS[oi]}</Text>
+                  <Text style={[styles.optionMeta, { color: colors.textMuted }]}>
                     {option.length} {lang === "en" ? "stops" : "tappe"} ·{" "}
                     {option.reduce((s, st) => s + (st.estimated_visit_time ?? 0), 0)} min - {formatDistance(routeWalkingKm(option))}
                   </Text>
                 </View>
                 {option.map((stop, si) => (
                   <View key={stop.id} style={styles.optionStop}>
-                    <Text style={styles.optionStopNum}>{si + 1}</Text>
+                    <Text style={[styles.optionStopNum, { backgroundColor: colors.border, color: colors.textSub }]}>{si + 1}</Text>
                     <Text style={styles.optionStopEmoji}>{stopEmoji(stop)}</Text>
-                    <Text style={styles.optionStopName} numberOfLines={1}>
+                    <Text style={[styles.optionStopName, { color: colors.textSub }]} numberOfLines={1}>
                       {(lang === "en" && stop.name_en) ? stop.name_en : stop.name}
                     </Text>
                   </View>
@@ -1428,8 +1439,8 @@ export default function ItineraryScreen() {
               </TouchableOpacity>
             ))}
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setReloadState(null)} activeOpacity={0.8}>
-              <Text style={styles.cancelBtnText}>{lang === "en" ? "Cancel" : "Annulla"}</Text>
+            <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.border }]} onPress={() => setReloadState(null)} activeOpacity={0.8}>
+              <Text style={[styles.cancelBtnText, { color: colors.textSub }]}>{lang === "en" ? "Cancel" : "Annulla"}</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -1447,13 +1458,13 @@ export default function ItineraryScreen() {
           activeOpacity={1}
           onPress={() => setReplaceState(null)}
         >
-          <TouchableOpacity activeOpacity={1} style={styles.modalSheet}>
-            <View style={styles.modalHandle} />
+          <TouchableOpacity activeOpacity={1} style={[styles.modalSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border2 }]} />
 
-            <Text style={styles.modalTitle}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
               {lang === "en" ? "Nearby alternatives" : "Alternative vicine"}
             </Text>
-            <Text style={styles.modalSub}>
+            <Text style={[styles.modalSub, { color: colors.textMuted }]}>
               {lang === "en"
                 ? `Replace ${replaceState?.stopName ?? "stop"}`
                 : `Sostituisci ${replaceState?.stopName ?? "la tappa"}`}
@@ -1462,7 +1473,7 @@ export default function ItineraryScreen() {
             {replaceState?.options.map((option, oi) => (
               <TouchableOpacity
                 key={option.stop.id}
-                style={styles.replaceOptionCard}
+                style={[styles.replaceOptionCard, { backgroundColor: colors.card2, borderColor: colors.border }]}
                 activeOpacity={0.8}
                 onPress={() => applyReplaceOption(replaceState.dayIndex, replaceState.stopId, option.stop)}
               >
@@ -1472,16 +1483,16 @@ export default function ItineraryScreen() {
                   <Text style={styles.optionStopName} numberOfLines={1}>
                     {(lang === "en" && option.stop.name_en) ? option.stop.name_en : option.stop.name}
                   </Text>
-                  <Text style={styles.replaceOptionMeta}>
+                  <Text style={[styles.replaceOptionMeta, { color: colors.accentGreen }]}>
                     {option.stop.estimated_visit_time ?? 60} min · {formatDistance(option.distanceKm)}
                   </Text>
                 </View>
-                <Ionicons name="swap-horizontal-outline" size={18} color="#7eb8f7" />
+                <Ionicons name="swap-horizontal-outline" size={18} color={colors.accentBlue} />
               </TouchableOpacity>
             ))}
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setReplaceState(null)} activeOpacity={0.8}>
-              <Text style={styles.cancelBtnText}>{lang === "en" ? "Cancel" : "Annulla"}</Text>
+            <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.border }]} onPress={() => setReplaceState(null)} activeOpacity={0.8}>
+              <Text style={[styles.cancelBtnText, { color: colors.textSub }]}>{lang === "en" ? "Cancel" : "Annulla"}</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -1535,6 +1546,7 @@ function ItineraryGuideModal({
 }) {
   const [slide, setSlide] = useState(0);
   const [rect, setRect] = useState<GuideRect | null>(null);
+  const { colors } = useTheme();
   const current = slides[slide];
   const isLast = slide === slides.length - 1;
   const tooltipWidth = Math.min(300, SCREEN_WIDTH - 32);
@@ -1574,6 +1586,9 @@ function ItineraryGuideModal({
                 top: Math.max(6, rect.y - 6),
                 width: Math.min(SCREEN_WIDTH - 12, rect.width + 12),
                 height: Math.min(SCREEN_HEIGHT - rect.y - 12, rect.height + 12),
+                borderColor: colors.accentGold,
+                backgroundColor: colors.accentGold + "14",
+                shadowColor: colors.accentGold,
               },
             ]}
           />
@@ -1587,26 +1602,27 @@ function ItineraryGuideModal({
                 left: Math.max(22, Math.min(SCREEN_WIDTH - 22, rect.x + rect.width / 2 - 7)),
                 top: tooltipTop > rect.y ? tooltipTop - 13 : tooltipTop + tooltipHeight - 8,
                 transform: [{ rotate: tooltipTop > rect.y ? "180deg" : "0deg" }],
+                borderBottomColor: colors.accentGold,
               },
             ]}
           />
         )}
-        <View style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth }]}>
-          <Text style={styles.tourEyebrow}>{slide + 1} / {slides.length}</Text>
+        <View style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.tourEyebrow, { color: colors.accentGold }]}>{slide + 1} / {slides.length}</Text>
           <Text style={styles.tourIcon}>{current.icon}</Text>
-          <Text style={styles.tourTitle}>{current.title}</Text>
-          <Text style={styles.tourBody}>{current.body}</Text>
+          <Text style={[styles.tourTitle, { color: colors.text }]}>{current.title}</Text>
+          <Text style={[styles.tourBody, { color: colors.textSub }]}>{current.body}</Text>
           <View style={styles.tourDots}>
             {slides.map((_, i) => (
-              <View key={i} style={[styles.tourDot, i === slide && styles.tourDotActive]} />
+              <View key={i} style={[styles.tourDot, { backgroundColor: colors.border }, i === slide && { backgroundColor: colors.accentGold, width: 22 }]} />
             ))}
           </View>
           <TouchableOpacity
-            style={styles.tourCta}
+            style={[styles.tourCta, { backgroundColor: colors.accentGold }]}
             onPress={() => isLast ? onDone() : setSlide((s) => s + 1)}
             activeOpacity={0.85}
           >
-            <Text style={styles.tourCtaText}>
+            <Text style={[styles.tourCtaText, { color: colors.bg }]}>
               {isLast
                 ? (lang === "en" ? "Got it" : "Ho capito")
                 : (lang === "en" ? "Next" : "Avanti")}
@@ -1614,7 +1630,7 @@ function ItineraryGuideModal({
           </TouchableOpacity>
           {!isLast && (
             <TouchableOpacity onPress={onDone} style={styles.tourSkip} activeOpacity={0.7}>
-              <Text style={styles.tourSkipText}>{lang === "en" ? "Skip" : "Salta"}</Text>
+              <Text style={[styles.tourSkipText, { color: colors.textMuted }]}>{lang === "en" ? "Skip" : "Salta"}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1626,14 +1642,15 @@ function ItineraryGuideModal({
 function TabButton({ label, icon, active, onPress }: {
   label: string; icon: keyof typeof Ionicons.glyphMap; active: boolean; onPress: () => void;
 }) {
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={[styles.tabBtn, active ? styles.tabBtnActive : styles.tabBtnInactive]}
+      style={[styles.tabBtn, active ? [styles.tabBtnActive, { backgroundColor: colors.accentGold }] : styles.tabBtnInactive]}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Ionicons name={icon} size={active ? 15 : 18} color={active ? "#0f0f1e" : "#888"} />
-      {active && <Text style={styles.tabLabel}>{label}</Text>}
+      <Ionicons name={icon} size={active ? 15 : 18} color={active ? colors.bg : colors.textMuted} />
+      {active && <Text style={[styles.tabLabel, { color: colors.bg }]}>{label}</Text>}
     </TouchableOpacity>
   );
 }
@@ -1653,7 +1670,7 @@ function NeighborhoodCard({ neighborhood: n, lang, city }: { neighborhood: Neigh
   return (
     <View style={[styles.neighborhoodCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       {/* Nome quartiere */}
-      <Text style={styles.neighborhoodName}>{name}</Text>
+      <Text style={[styles.neighborhoodName, { color: colors.accentGold }]}>{name}</Text>
 
       {/* Descrizione */}
       <Text style={[styles.neighborhoodDesc, { color: colors.textMuted }]}>{desc}</Text>
@@ -1689,8 +1706,8 @@ function NeighborhoodCard({ neighborhood: n, lang, city }: { neighborhood: Neigh
         </View>
         <View style={[styles.proConBox, { borderColor: colors.border2, backgroundColor: colors.card2 }]}>
           <View style={styles.proConTitleRow}>
-            <Ionicons name="remove-circle-outline" size={14} color="#f87171" />
-            <Text style={[styles.proConTitle, { color: "#f87171" }]}>{lang === "en" ? "Cons" : "Contro"}</Text>
+            <Ionicons name="remove-circle-outline" size={14} color={colors.danger} />
+            <Text style={[styles.proConTitle, { color: colors.danger }]}>{lang === "en" ? "Cons" : "Contro"}</Text>
           </View>
           {cons.map((item) => (
             <Text key={item} style={[styles.proConText, { color: colors.textSub }]} numberOfLines={2}>{item}</Text>
@@ -1730,53 +1747,50 @@ function CultureCard({ fact }: { fact: CultureFact }) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: "#0f0f1e" },
+  safe:   { flex: 1 },
 
   globalMapBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#e8c06a14",
     borderWidth: 1.5,
-    borderColor: "#e8c06a44",
     borderRadius: 14,
     paddingVertical: 12,
     marginBottom: 12,
   },
   globalMapBtnText: {
-    color: "#e8c06a",
     fontWeight: "700",
     fontSize: 14,
     letterSpacing: 0.3,
   },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16 },
-  errorText: { color: "#f87171", fontSize: 15 },
+  errorText: { fontSize: 15 },
 
   topBar: {
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: "#1e1e30", gap: 12,
+    borderBottomWidth: 1, gap: 12,
   },
   backBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "#1e1e30", alignItems: "center", justifyContent: "center",
+    alignItems: "center", justifyContent: "center",
   },
-  backBtnText: { color: "#e8c06a", fontWeight: "600" },
+  backBtnText: { fontWeight: "600" },
   topInfo: { flex: 1 },
   topTitleRow: { flexDirection: "row", alignItems: "baseline", gap: 6 },
-  topBrand: { color: "#e8c06a", fontSize: 20, fontFamily: "BebasNeue_400Regular", letterSpacing: 2 },
-  topDivider: { color: "#333", fontSize: 14 },
-  topCity:  { color: "#f0f0f0", fontSize: 20, fontFamily: "BebasNeue_400Regular", letterSpacing: 2 },
-  topMeta:  { color: "#666", fontSize: 12, marginTop: 2 },
-  saveBtn:  { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1e1e30", alignItems: "center", justifyContent: "center" },
-  flagBtn:  { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1e1e30", alignItems: "center", justifyContent: "center" },
-  guideBtn: { borderWidth: 1, borderColor: "#e8c06a70", backgroundColor: "#e8c06a14" },
+  topBrand: { fontSize: 20, fontFamily: "BebasNeue_400Regular", letterSpacing: 2 },
+  topDivider: { fontSize: 14 },
+  topCity:  { fontSize: 20, fontFamily: "BebasNeue_400Regular", letterSpacing: 2 },
+  topMeta:  { fontSize: 12, marginTop: 2 },
+  saveBtn:  { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  flagBtn:  { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  guideBtn: { borderWidth: 1 },
   flagEmoji: { fontSize: 20 },
 
   tabs: {
     flexDirection: "row", marginHorizontal: 16, marginVertical: 12,
-    backgroundColor: "#1e1e30", borderRadius: 14, padding: 4, gap: 2,
+    borderRadius: 14, padding: 4, gap: 2,
     alignItems: "center",
   },
   tabBtn: {
@@ -1785,16 +1799,15 @@ const styles = StyleSheet.create({
   },
   tabBtnActive: {
     flex: 2,                    // il tab attivo occupa più spazio per mostrare il testo
-    backgroundColor: "#e8c06a",
     paddingHorizontal: 10,
   },
   tabBtnInactive: {
     flex: 1,                    // i tab inattivi sono compatti (solo icona)
   },
-  tabLabel: { color: "#0f0f1e", fontWeight: "700", fontSize: 11 },
+  tabLabel: { fontWeight: "700", fontSize: 11 },
 
   scroll: { paddingHorizontal: 16, paddingBottom: 40 },
-  sectionIntro: { color: "#888", fontSize: 13, fontStyle: "italic", marginBottom: 16, lineHeight: 20 },
+  sectionIntro: { fontSize: 13, fontStyle: "italic", marginBottom: 16, lineHeight: 20 },
 
   // ── Neighborhoods ────────────────────────────────────────────────────────────
   neighborhoodCard: {
@@ -1805,7 +1818,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   neighborhoodName: {
-    color: "#e8c06a",
     fontSize: 17,
     fontWeight: "800",
     letterSpacing: 0.3,
@@ -1884,21 +1896,20 @@ const styles = StyleSheet.create({
   },
   emptyNeighborhoodsEmoji: { fontSize: 40 },
   emptyNeighborhoodsText: {
-    color: "#444",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
   },
 
   cultureCard: {
-    flexDirection: "row", gap: 14, backgroundColor: "#161625",
-    borderRadius: 14, borderWidth: 1, borderColor: "#2a2a42",
+    flexDirection: "row", gap: 14,
+    borderRadius: 14, borderWidth: 1,
     padding: 16, marginBottom: 12, alignItems: "flex-start",
   },
   cultureIcon: { fontSize: 28, lineHeight: 34 },
   cultureContent: { flex: 1 },
-  cultureTitle: { color: "#c8b8f0", fontSize: 15, fontWeight: "700", marginBottom: 6, lineHeight: 20 },
-  cultureBody:  { color: "#888", fontSize: 13, lineHeight: 20 },
+  cultureTitle: { fontSize: 15, fontWeight: "700", marginBottom: 6, lineHeight: 20 },
+  cultureBody:  { fontSize: 13, lineHeight: 20 },
 
   tourOverlay: {
     flex: 1,
@@ -1907,10 +1918,7 @@ const styles = StyleSheet.create({
   tourHighlight: {
     position: "absolute",
     borderWidth: 2,
-    borderColor: "#e8c06a",
     borderRadius: 16,
-    backgroundColor: "#e8c06a14",
-    shadowColor: "#e8c06a",
     shadowOpacity: 0.55,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
@@ -1924,38 +1932,33 @@ const styles = StyleSheet.create({
     borderBottomWidth: 12,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: "#e8c06a",
   },
   tourCard: {
     position: "absolute",
     width: 300,
-    backgroundColor: "#161625",
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     padding: 18,
     alignItems: "center",
     gap: 8,
   },
-  tourEyebrow: { color: "#e8c06a", fontSize: 11, fontWeight: "800" },
+  tourEyebrow: { fontSize: 11, fontWeight: "800" },
   tourIcon: { fontSize: 38, marginBottom: 2 },
-  tourTitle: { color: "#f0f0f0", fontSize: 18, fontWeight: "800", textAlign: "center", lineHeight: 23 },
-  tourBody: { color: "#9999b8", fontSize: 13, textAlign: "center", lineHeight: 19, marginTop: 2, marginBottom: 6 },
+  tourTitle: { fontSize: 18, fontWeight: "800", textAlign: "center", lineHeight: 23 },
+  tourBody: { fontSize: 13, textAlign: "center", lineHeight: 19, marginTop: 2, marginBottom: 6 },
   tourDots: { flexDirection: "row", gap: 5, marginVertical: 5 },
-  tourDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#2a2a42" },
-  tourDotActive: { backgroundColor: "#e8c06a", width: 22 },
+  tourDot: { width: 7, height: 7, borderRadius: 4 },
   tourCta: {
     marginTop: 5,
-    backgroundColor: "#e8c06a",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 28,
     minWidth: 170,
     alignItems: "center",
   },
-  tourCtaText: { color: "#0f0f1e", fontSize: 15, fontWeight: "800" },
+  tourCtaText: { fontSize: 15, fontWeight: "800" },
   tourSkip: { paddingVertical: 8 },
-  tourSkipText: { color: "#555", fontSize: 13 },
+  tourSkipText: { fontSize: 13 },
 
   // ── Modal ──────────────────────────────────────────────────────────────────
   modalBackdrop: {
@@ -1964,11 +1967,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalSheet: {
-    backgroundColor: "#161625",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     paddingHorizontal: 16,
     paddingBottom: 32,
     paddingTop: 12,
@@ -1985,10 +1986,10 @@ const styles = StyleSheet.create({
   },
   modalHandle: {
     width: 40, height: 4, borderRadius: 2,
-    backgroundColor: "#3a3a52", alignSelf: "center", marginBottom: 8,
+    alignSelf: "center", marginBottom: 8,
   },
-  modalTitle: { color: "#f0f0f0", fontSize: 16, fontWeight: "700" },
-  modalSub:   { color: "#666", fontSize: 13, marginBottom: 4 },
+  modalTitle: { fontSize: 16, fontWeight: "700" },
+  modalSub:   { fontSize: 13, marginBottom: 4 },
   saveOptionBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -2002,7 +2003,6 @@ const styles = StyleSheet.create({
   saveOptionSub: { fontSize: 12, lineHeight: 16 },
   pdfPreviewBackdrop: {
     flex: 1,
-    backgroundColor: "#0f0f1e",
   },
   pdfPreviewSheet: {
     flex: 1,
@@ -2024,10 +2024,8 @@ const styles = StyleSheet.create({
   pdfDocumentViewport: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#070711",
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#24243a",
     padding: 8,
     overflow: "hidden",
   },
@@ -2037,9 +2035,7 @@ const styles = StyleSheet.create({
     maxWidth: 760,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#4a3f56",
     overflow: "hidden",
-    backgroundColor: "#0f0f1e",
     shadowColor: "#000",
     shadowOpacity: 0.35,
     shadowRadius: 18,
@@ -2054,7 +2050,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   pdfPrintText: {
-    color: "#0f0f1e",
     fontWeight: "900",
     fontSize: 15,
   },
@@ -2062,14 +2057,11 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 14,
     overflow: "hidden",
-    backgroundColor: "#0f0f1e",
   },
 
   optionCard: {
-    backgroundColor: "#1e1e30",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     padding: 12,
     gap: 6,
   },
@@ -2077,32 +2069,28 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center",
     justifyContent: "space-between", marginBottom: 4,
   },
-  optionLabel: { color: "#e8c06a", fontWeight: "700", fontSize: 13 },
-  optionMeta:  { color: "#555", fontSize: 11 },
+  optionLabel: { fontWeight: "700", fontSize: 13 },
+  optionMeta:  { fontSize: 11 },
   optionStop: {
     flexDirection: "row", alignItems: "center", gap: 8,
   },
   optionStopNum: {
     width: 18, height: 18, borderRadius: 9,
-    backgroundColor: "#2a2a42",
-    color: "#888", fontSize: 10, fontWeight: "700",
+    fontSize: 10, fontWeight: "700",
     textAlign: "center", lineHeight: 18,
   },
   optionStopEmoji: { fontSize: 13 },
-  optionStopName: { color: "#c0c0d8", fontSize: 13, fontWeight: "500", flex: 1 },
+  optionStopName: { fontSize: 13, fontWeight: "500", flex: 1 },
   replaceOptionCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
-    backgroundColor: "#1e1e30",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     padding: 12,
   },
   replaceOptionInfo: { flex: 1 },
   replaceOptionMeta: {
-    color: "#6ee7b7",
     fontSize: 11,
     fontWeight: "700",
     marginTop: 3,
@@ -2112,8 +2100,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingVertical: 13,
     borderRadius: 12,
-    backgroundColor: "#2a2a42",
     alignItems: "center",
   },
-  cancelBtnText: { color: "#888", fontWeight: "600", fontSize: 14 },
+  cancelBtnText: { fontWeight: "600", fontSize: 14 },
 });

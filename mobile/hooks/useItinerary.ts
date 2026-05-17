@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useCallback } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { FUNCTIONS_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
 import { Itinerary, ExperienceLevel } from "@/types";
 
@@ -14,56 +15,84 @@ interface UseItineraryReturn {
   loading: boolean;
   error: string | null;
   generate: (params: GenerateParams) => Promise<void>;
+  cancel: () => void;
   reset: () => void;
 }
 
+async function generateItinerary(
+  params: GenerateParams,
+  signal: AbortSignal,
+): Promise<Itinerary> {
+  const apiLevel = params.level === "mix" ? [1, 2, 3] : params.level;
+
+  const resp = await fetch(`${FUNCTIONS_URL}/generate-itinerary`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({
+      city: params.city,
+      num_days: params.num_days,
+      level: apiLevel,
+      max_walk_km: params.max_walk_km,
+    }),
+    signal,
+  });
+
+  const json = await resp.json();
+  if (!resp.ok) throw new Error(json.error ?? "Errore sconosciuto dal server");
+  return json.data as Itinerary;
+}
+
 export function useItinerary(): UseItineraryReturn {
-  const [itinerary, setItinerary] = useState<Itinerary | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
-  const generate = async ({ city, num_days, level, max_walk_km }: GenerateParams) => {
-    setLoading(true);
-    setError(null);
-    setItinerary(null);
-
-    const apiLevel = level === "mix" ? [1, 2, 3] : level;
-
-    try {
+  const mutation = useMutation<Itinerary, Error, GenerateParams>({
+    mutationFn: (params) => {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-      const resp = await fetch(`${FUNCTIONS_URL}/generate-itinerary`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ city, num_days, level: apiLevel, max_walk_km }),
-        signal: controller.signal,
+      controllerRef.current = controller;
+
+      // timeout di 20 s
+      const timeout = setTimeout(() => controller.abort(), 20_000);
+      return generateItinerary(params, controller.signal).finally(() => {
+        clearTimeout(timeout);
+        controllerRef.current = null;
       });
-      clearTimeout(timeout);
+    },
+  });
 
-      const json = await resp.json();
-
-      if (!resp.ok) {
-        throw new Error(json.error ?? "Errore sconosciuto dal server");
+  const generate = useCallback(
+    async (params: GenerateParams) => {
+      try {
+        await mutation.mutateAsync(params);
+      } catch {
+        // l'errore è già in mutation.error, non serve rilanciare
       }
+    },
+    [mutation.mutateAsync],
+  );
 
-      setItinerary(json.data);
-    } catch (e: any) {
-      const msg = e?.name === "AbortError"
-        ? "Timeout: la funzione non risponde. Riprova tra qualche secondo."
-        : (e.message ?? "Impossibile raggiungere il server.");
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+  const cancel = useCallback(() => {
+    controllerRef.current?.abort();
+  }, []);
+
+  const reset = useCallback(() => {
+    mutation.reset();
+  }, [mutation.reset]);
+
+  const errorMessage = mutation.error
+    ? mutation.error.name === "AbortError"
+      ? "Timeout: la funzione non risponde. Riprova tra qualche secondo."
+      : (mutation.error.message ?? "Impossibile raggiungere il server.")
+    : null;
+
+  return {
+    itinerary: mutation.data ?? null,
+    loading: mutation.isPending,
+    error: errorMessage,
+    generate,
+    cancel,
+    reset,
   };
-
-  const reset = () => {
-    setItinerary(null);
-    setError(null);
-  };
-
-  return { itinerary, loading, error, generate, reset };
 }

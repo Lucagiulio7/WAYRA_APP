@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
 
 export interface BuilderAttraction {
@@ -18,50 +18,37 @@ export interface BuilderAttraction {
   zone?: string | null;
 }
 
+const HEADERS = {
+  apikey: SUPABASE_ANON_KEY,
+  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+};
+
+async function fetchAttractions(city: string): Promise<BuilderAttraction[]> {
+  const url =
+    `${SUPABASE_URL}/rest/v1/attractions` +
+    `?city=eq.${encodeURIComponent(city)}` +
+    `&is_food_spot=eq.false` +
+    `&select=id,name,name_en,description,description_en,` +
+    `category_level,latitude,longitude,estimated_visit_time,` +
+    `tags,attraction_type,ticket_url,block_id,zone` +
+    `&order=category_level.asc,name.asc`;
+
+  const r = await fetch(url, { headers: HEADERS });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
 export function useAttractions(city: string) {
-  const [attractions, setAttractions] = useState<BuilderAttraction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery<BuilderAttraction[], Error>({
+    queryKey: ["attractions", city],
+    queryFn: () => fetchAttractions(city),
+    enabled: !!city,
+    // staleTime e gcTime ereditati dai defaultOptions del queryClient
+  });
 
-  useEffect(() => {
-    if (!city) return;
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    const url =
-      `${SUPABASE_URL}/rest/v1/attractions` +
-      `?city=eq.${encodeURIComponent(city)}` +
-      `&is_food_spot=eq.false` +
-      `&select=id,name,name_en,description,description_en,` +
-      `category_level,latitude,longitude,estimated_visit_time,` +
-      `tags,attraction_type,ticket_url,block_id,zone` +
-      `&order=category_level.asc,name.asc`;
-
-    fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: BuilderAttraction[]) => {
-        if (!cancelled) setAttractions(data);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e.message ?? "Errore caricamento attrazioni");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [city]);
-
-  return { attractions, loading, error };
+  return {
+    attractions: data ?? [],
+    loading: isLoading,
+    error: error?.message ?? null,
+  };
 }

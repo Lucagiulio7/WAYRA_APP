@@ -28,9 +28,9 @@ const translations = {
     levelIconic: "Iconico",
     levelCurated: "Ricercato",
     levelHidden: "Nascosto",
-    foodIntro: (city: string) => `Piatti tipici da provare assolutamente a ${city.charAt(0).toUpperCase() + city.slice(1)}`,
-    cultureIntro: (city: string) => `Curiosità e pillole di storia su ${city.charAt(0).toUpperCase() + city.slice(1)}`,
-    neighborhoodsIntro: (city: string) => `Le zone migliori dove soggiornare a ${city.charAt(0).toUpperCase() + city.slice(1)}, divise per stile`,
+    foodIntro: (city: string) => `Piatti tipici da provare assolutamente a ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    cultureIntro: (city: string) => `Curiosità e pillole di storia su ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    neighborhoodsIntro: (city: string) => `Le zone migliori dove soggiornare a ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}, divise per stile`,
     viewOnMap: "Vedi su Maps",
     noNeighborhoodsData: "Dati non ancora disponibili per questa città.",
     whereToEat: "Dove mangiarlo",
@@ -48,7 +48,7 @@ const translations = {
     levelHiddenBadge: "Nascosto",
     // Practical info tab
     tabPractical: "Info",
-    practicalIntro: (city: string) => `Tutto quello che devi sapere per visitare ${city.charAt(0).toUpperCase() + city.slice(1)}`,
+    practicalIntro: (city: string) => `Tutto quello che devi sapere per visitare ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
     practicalEssentials: "Essenziali",
     practicalCurrency: "Moneta",
     practicalLanguage: "Lingua",
@@ -85,9 +85,9 @@ const translations = {
     levelIconic: "Iconic",
     levelCurated: "Curated",
     levelHidden: "Hidden",
-    foodIntro: (city: string) => `Must-try dishes in ${city.charAt(0).toUpperCase() + city.slice(1)}`,
-    cultureIntro: (city: string) => `Curiosities and history about ${city.charAt(0).toUpperCase() + city.slice(1)}`,
-    neighborhoodsIntro: (city: string) => `Best neighborhoods to stay in ${city.charAt(0).toUpperCase() + city.slice(1)}, sorted by vibe`,
+    foodIntro: (city: string) => `Must-try dishes in ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    cultureIntro: (city: string) => `Curiosities and history about ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    neighborhoodsIntro: (city: string) => `Best neighborhoods to stay in ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}, sorted by vibe`,
     viewOnMap: "View on Maps",
     noNeighborhoodsData: "No data available for this city yet.",
     whereToEat: "Where to eat it",
@@ -105,7 +105,7 @@ const translations = {
     levelHiddenBadge: "Hidden",
     // Practical info tab
     tabPractical: "Info",
-    practicalIntro: (city: string) => `Everything you need to know to visit ${city.charAt(0).toUpperCase() + city.slice(1)}`,
+    practicalIntro: (city: string) => `Everything you need to know to visit ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
     practicalEssentials: "Essentials",
     practicalCurrency: "Currency",
     practicalLanguage: "Language",
@@ -141,9 +141,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   // Carica lingua salvata al primo avvio
   useEffect(() => {
-    AsyncStorage.getItem(LANG_KEY).then((val) => {
-      if (val === "it" || val === "en") setLang(val);
-    });
+    AsyncStorage.getItem(LANG_KEY)
+      .then((val) => { if (val === "it" || val === "en") setLang(val); })
+      .catch((e) => { if (__DEV__) console.warn("[LanguageContext] AsyncStorage read failed:", e); });
   }, []);
 
   const toggle = () => {

@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ItineraryDay } from "@/types";
 import { BuilderAttraction } from "@/hooks/useAttractions";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -57,8 +58,25 @@ function buildHtml(
   assignedMap: Map<number, number>,
   lang: string,
   accent: string,
+  isDark: boolean,
 ): string {
   const isEn = lang === "en";
+
+  // Colori tema per l'HTML interno
+  const mapBg      = isDark ? "#0a0a1a"              : "#f0eff0";
+  const popupBg    = isDark ? "#161625"              : "#ffffff";
+  const popupBdr   = isDark ? "#2a2a42"              : "#d0d0e0";
+  const popupText  = isDark ? "#f0f0f0"              : "#1a1928";
+  const popupSub   = isDark ? "#aaa"                 : "#555";
+  const popupMeta  = isDark ? "#555"                 : "#888";
+  const filterBg   = isDark ? "rgba(12,12,26,0.92)"  : "rgba(245,245,245,0.95)";
+  const filterBdr  = isDark ? "#2a2a42"              : "#c0c0d0";
+  const inactiveC  = isDark ? "#666"                 : "#555";
+  const rulerBg    = isDark ? "rgba(12,12,26,0.92)"  : "rgba(245,245,245,0.95)";
+  const rulerColor = isDark ? "#aaa"                 : "#555";
+  const tileUrl    = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
 
   // Helper: coordinate valide
   const validCoords = (lat: unknown, lon: unknown): boolean =>
@@ -142,25 +160,25 @@ function buildHtml(
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;background:#0a0a1a;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 #map{width:100%;height:100%}
-.leaflet-container{background:#0a0a1a!important}
+.leaflet-container{background:${mapBg}!important}
 
 /* Popup */
 .leaflet-popup-content-wrapper{
-  background:#161625;border:1px solid #2a2a42;border-radius:14px;
-  box-shadow:0 4px 24px rgba(0,0,0,0.6);color:#f0f0f0;
+  background:${popupBg};border:1px solid ${popupBdr};border-radius:14px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.25);color:${popupText};
 }
-.leaflet-popup-tip{background:#161625}
+.leaflet-popup-tip{background:${popupBg}}
 .leaflet-popup-content{margin:12px 14px;min-width:170px;max-width:230px}
-.leaflet-popup-close-button{color:#555!important;top:8px!important;right:10px!important;font-size:18px!important}
+.leaflet-popup-close-button{color:${popupMeta}!important;top:8px!important;right:10px!important;font-size:18px!important}
 .pop-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px;margin-bottom:7px}
 .pop-badge-day{color:${accent};background:${accent}22;border:1px solid ${accent}55}
 .pop-badge-expl{color:#6ee7b7;background:#6ee7b722;border:1px solid #6ee7b755}
-.pop-name{font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:3px;line-height:1.3}
-.pop-type{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.pop-desc{font-size:11px;color:#aaa;line-height:1.5;margin-bottom:5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.pop-meta{font-size:10px;color:#555;margin-bottom:5px}
+.pop-name{font-size:13px;font-weight:700;color:${popupText};margin-bottom:3px;line-height:1.3}
+.pop-type{font-size:10px;color:${popupSub};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.pop-desc{font-size:11px;color:${popupSub};line-height:1.5;margin-bottom:5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.pop-meta{font-size:10px;color:${popupMeta};margin-bottom:5px}
 .pop-maps{display:block;text-align:center;margin-top:8px;font-size:11px;font-weight:700;
   color:#7eb8f7;background:#7eb8f714;border:1px solid #7eb8f740;
   border-radius:8px;padding:6px;cursor:pointer;text-decoration:none;width:100%;font-family:inherit}
@@ -211,15 +229,15 @@ html,body{width:100%;height:100%;background:#0a0a1a;font-family:-apple-system,Bl
 #ruler-btn{
   position:absolute;top:12px;right:12px;z-index:1000;
   width:38px;height:38px;border-radius:10px;
-  background:rgba(12,12,26,0.92);border:1px solid #2a2a42;
+  background:${rulerBg};border:1px solid ${filterBdr};
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:17px;color:#aaa;
+  cursor:pointer;font-size:17px;color:${rulerColor};
   font-family:inherit;outline:none;padding:0;
 }
 
 /* Etichetta distanza sul tratto misurato */
 .dist-label{
-  background:rgba(12,12,26,0.92);border:1px solid #7eb8f755;
+  background:${rulerBg};border:1px solid #7eb8f755;
   border-radius:8px;padding:4px 10px;
   font-size:12px;font-weight:700;color:#7eb8f7;
   white-space:nowrap;pointer-events:none;
@@ -230,8 +248,8 @@ html,body{width:100%;height:100%;background:#0a0a1a;font-family:-apple-system,Bl
 #filter-bar{
   position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
   z-index:1000;display:flex;gap:4px;
-  background:rgba(12,12,26,0.92);
-  border:1px solid #2a2a42;border-radius:999px;
+  background:${filterBg};
+  border:1px solid ${filterBdr};border-radius:999px;
   padding:5px 8px;backdrop-filter:blur(6px);
 }
 .filter-btn{
@@ -356,7 +374,7 @@ function setFilter(level) {
     var active = lv === level;
     b.classList.toggle('active', active);
     b.style.background = active ? (LEVEL_COLORS[lv] || 'rgba(240,240,240,0.15)') : 'transparent';
-    b.style.color = active ? '#0f0f1e' : '#666';
+    b.style.color = active ? '#0f0f1e' : '${inactiveC}';
   });
 }
 
@@ -390,7 +408,7 @@ function removeButton(id){
 }
 
 var map = L.map('map',{zoomControl:false,attributionControl:false,minZoom:12,maxZoom:19});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}).addTo(map);
+L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
 measureLayer = L.layerGroup().addTo(map);
 
 // ── Layer 3: non in itinerario — gruppi per livello (filtrabili) ─────────────
@@ -442,7 +460,7 @@ UNASSIGNED.forEach(function(a){
     btn.dataset.action = 'filter';
     btn.dataset.level  = f.level;
     btn.style.background = f.level === 0 ? f.color : 'transparent';
-    btn.style.color      = f.level === 0 ? '#f0f0f0' : '#666';
+    btn.style.color      = f.level === 0 ? '${popupText}' : '${inactiveC}';
     bar.appendChild(btn);
   });
   document.getElementById('map').appendChild(bar);
@@ -576,11 +594,12 @@ setTimeout(function() {
 export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lang, accent, onAddAttraction, onMoveAttraction, onRemoveAttraction, allDays, onDayChange }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
 
   const html = useMemo(
-    () => buildHtml(day, allAttractions, assignedMap, lang, accent),
+    () => buildHtml(day, allAttractions, assignedMap, lang, accent, isDark),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day.day, day.stops.length, assignedMap.size, allAttractions.length, lang, accent],
+    [day.day, day.stops.length, assignedMap.size, allAttractions.length, lang, accent, isDark],
   );
 
   useEffect(() => {
@@ -625,6 +644,7 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
     setTimeout(() => setStatus((s) => s === "loading" ? "ready" : s), 6000);
   };
 
+  const mapBg = isDark ? "#0a0a1a" : "#f0eff0";
   const isEn = lang === "en";
   const iframe = Platform.OS === "web"
     ? React.createElement("iframe", {
@@ -633,7 +653,7 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
           width: "100%",
           height: "100%",
           border: "none",
-          backgroundColor: "#0a0a1a",
+          backgroundColor: mapBg,
         },
         sandbox: "allow-scripts allow-same-origin",
       })
@@ -641,12 +661,12 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: colors.bg }]}>
 
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-            <Ionicons name="close" size={22} color="#888" />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.card2 }]} activeOpacity={0.7}>
+            <Ionicons name="close" size={22} color={colors.textMuted} />
           </TouchableOpacity>
           {allDays && allDays.length > 1 && onDayChange ? (
             <ScrollView
@@ -662,10 +682,10 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
                   <TouchableOpacity
                     key={d.day}
                     onPress={() => onDayChange(d.day)}
-                    style={[styles.dayPill, active && { borderColor: da, backgroundColor: da + "22" }]}
+                    style={[styles.dayPill, { borderColor: colors.border, backgroundColor: colors.card2 }, active && { borderColor: da, backgroundColor: da + "22" }]}
                     activeOpacity={0.75}
                   >
-                    <Text style={[styles.dayPillText, { color: active ? da : "#666" }]}>
+                    <Text style={[styles.dayPillText, { color: active ? da : colors.textMuted }]}>
                       {isEn ? `Day ${d.day}` : `Giorno ${d.day}`}
                     </Text>
                   </TouchableOpacity>
@@ -680,18 +700,18 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
         </View>
 
         {/* Legenda */}
-        <View style={styles.legend}>
+        <View style={[styles.legend, { borderBottomColor: colors.border }]}>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: accent }]} />
-            <Text style={styles.legendLabel}>{isEn ? "Today's stops" : "Tappe di oggi"}</Text>
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Today's stops" : "Tappe di oggi"}</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#7eb8f7" }]} />
-            <Text style={styles.legendLabel}>{isEn ? "Other days" : "Altri giorni"}</Text>
+            <View style={[styles.legendDot, { backgroundColor: colors.accentBlue }]} />
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Other days" : "Altri giorni"}</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: "#3a3a5a", borderWidth: 1, borderColor: "#5a5a7a" }]} />
-            <Text style={styles.legendLabel}>{isEn ? "Explore" : "Da esplorare"}</Text>
+            <View style={[styles.legendDot, { backgroundColor: isDark ? "#3a3a5a" : "#b0b0c8", borderWidth: 1, borderColor: isDark ? "#5a5a7a" : "#9090a8" }]} />
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Explore" : "Da esplorare"}</Text>
           </View>
         </View>
 
@@ -708,31 +728,31 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
               onMessage={handleMessage}
               onLoadEnd={handleLoadEnd}
               onError={() => setStatus("error")}
-              style={styles.webview}
+              style={[styles.webview, { backgroundColor: colors.bg }]}
               bounces={false}
               overScrollMode="never"
             />
           )}
 
           {status === "loading" && (
-            <View style={styles.overlay}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
               <ActivityIndicator color={accent} size="large" />
-              <Text style={styles.overlayText}>
+              <Text style={[styles.overlayText, { color: colors.textSub }]}>
                 {isEn ? "Loading map…" : "Caricamento mappa…"}
               </Text>
             </View>
           )}
 
           {status === "error" && (
-            <View style={styles.overlay}>
-              <Ionicons name="wifi-outline" size={44} color="#444" />
-              <Text style={styles.overlayText}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
+              <Ionicons name="wifi-outline" size={44} color={colors.textMuted} />
+              <Text style={[styles.overlayText, { color: colors.textSub }]}>
                 {isEn
                   ? "Internet connection required for the map"
                   : "Connessione internet necessaria per la mappa"}
               </Text>
-              <TouchableOpacity onPress={onClose} style={styles.retryBtn} activeOpacity={0.8}>
-                <Text style={styles.retryText}>{isEn ? "Close" : "Chiudi"}</Text>
+              <TouchableOpacity onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.card2, borderColor: colors.border }]} activeOpacity={0.8}>
+                <Text style={[styles.retryText, { color: colors.textSub }]}>{isEn ? "Close" : "Chiudi"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -745,7 +765,7 @@ export function DayMap({ visible, onClose, day, allAttractions, assignedMap, lan
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0f0f1e" },
+  safe: { flex: 1 },
 
   header: {
     flexDirection: "row",
@@ -754,12 +774,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#1e1e30",
   },
   title: { fontSize: 20, fontWeight: "800", letterSpacing: 1, flex: 1 },
   closeBtn: {
     width: 34, height: 34, borderRadius: 17,
-    backgroundColor: "#161625",
     alignItems: "center", justifyContent: "center",
     flexShrink: 0,
   },
@@ -770,8 +788,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: "#2a2a42",
-    backgroundColor: "#161625",
   },
   dayPillText: { fontSize: 12, fontWeight: "700" },
 
@@ -781,33 +797,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a2a",
     flexWrap: "wrap",
   },
   legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendLabel: { fontSize: 11, color: "#888", fontWeight: "600" },
+  legendLabel: { fontSize: 11, fontWeight: "600" },
 
   mapWrap: { flex: 1, position: "relative" },
-  webview: { flex: 1, backgroundColor: "#0a0a1a" },
+  webview: { flex: 1 },
 
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#0f0f1e",
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
     paddingHorizontal: 40,
   },
-  overlayText: { color: "#555", fontSize: 14, textAlign: "center", lineHeight: 20 },
+  overlayText: { fontSize: 14, textAlign: "center", lineHeight: 20 },
   retryBtn: {
     marginTop: 8,
-    backgroundColor: "#1e1e30",
     borderWidth: 1,
-    borderColor: "#2a2a42",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
-  retryText: { color: "#888", fontSize: 14, fontWeight: "600" },
+  retryText: { fontSize: 14, fontWeight: "600" },
 });

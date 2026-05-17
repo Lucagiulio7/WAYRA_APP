@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Dati città con coordinate geografiche ────────────────────────────────────
 
@@ -228,6 +229,7 @@ interface Props {
 }
 
 export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
+  const { colors } = useTheme();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const htmlRef = useRef(buildMapHtml(lang));
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -256,14 +258,14 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={[styles.safe, { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {/* ── Header ── */}
-        <View style={styles.header}>
-          <Text style={styles.title}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.title, { color: colors.text }]}>
             {lang === "it" ? "Scegli la destinazione" : "Choose destination"}
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-            <Ionicons name="close" size={22} color="#888" />
+          <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
+            <Ionicons name="close" size={22} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -277,16 +279,16 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
               width: "100%",
               height: "100%",
               border: "none",
-              backgroundColor: "#0a0a1a",
+              backgroundColor: colors.bg,
             }}
             sandbox="allow-scripts allow-same-origin"
           />
 
           {/* Loading overlay */}
           {status === "loading" && (
-            <View style={styles.overlay}>
-              <ActivityIndicator color="#e8c06a" size="large" />
-              <Text style={styles.overlayText}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
+              <ActivityIndicator color={colors.accentGold} size="large" />
+              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
                 {lang === "it" ? "Caricamento mappa…" : "Loading map…"}
               </Text>
             </View>
@@ -294,15 +296,15 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 
           {/* Error overlay */}
           {status === "error" && (
-            <View style={styles.overlay}>
-              <Ionicons name="wifi-outline" size={44} color="#444" />
-              <Text style={styles.overlayText}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
+              <Ionicons name="wifi-outline" size={44} color={colors.textMuted} />
+              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
                 {lang === "it"
                   ? "Connessione internet necessaria per la mappa"
                   : "Internet connection required for the map"}
               </Text>
-              <TouchableOpacity onPress={onClose} style={styles.retryBtn} activeOpacity={0.8}>
-                <Text style={styles.retryText}>
+              <TouchableOpacity onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.card, borderColor: colors.border2 }]} activeOpacity={0.8}>
+                <Text style={[styles.retryText, { color: colors.textMuted }]}>
                   {lang === "it" ? "Usa la lista" : "Use list instead"}
                 </Text>
               </TouchableOpacity>
@@ -317,7 +319,7 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0f0f1e" },
+  safe: { flex: 1 },
 
   header: {
     flexDirection: "row",
@@ -326,16 +328,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#1e1e30",
   },
   title: {
-    color: "#f0f0f0",
     fontSize: 17,
     fontWeight: "700",
   },
   closeBtn: {
     width: 34, height: 34, borderRadius: 17,
-    backgroundColor: "#161625",
     alignItems: "center", justifyContent: "center",
   },
 
@@ -343,14 +342,12 @@ const styles = StyleSheet.create({
 
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#0f0f1e",
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
     paddingHorizontal: 40,
   },
   overlayText: {
-    color: "#555",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
@@ -358,12 +355,10 @@ const styles = StyleSheet.create({
 
   retryBtn: {
     marginTop: 8,
-    backgroundColor: "#1e1e30",
     borderWidth: 1,
-    borderColor: "#2a2a42",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
-  retryText: { color: "#888", fontSize: 14, fontWeight: "600" },
+  retryText: { fontSize: 14, fontWeight: "600" },
 });

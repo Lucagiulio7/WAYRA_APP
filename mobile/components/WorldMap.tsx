@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Dati città con coordinate geografiche ────────────────────────────────────
 
@@ -59,9 +60,20 @@ const AVAILABLE_ISO3 = [...new Set(CITY_DATA.map((c) => c.iso3))];
 
 // ── Costruisce l'HTML Leaflet ─────────────────────────────────────────────────
 
-function buildMapHtml(lang: string): string {
+function buildMapHtml(lang: string, isDark: boolean): string {
   const cityJson = JSON.stringify(CITY_DATA);
   const availableJson = JSON.stringify(AVAILABLE_ISO3);
+  const mapBg        = isDark ? "#0a0a1a" : "#e8e8f0";
+  const toastBg      = isDark ? "rgba(12,12,28,0.9)" : "rgba(255,255,255,0.9)";
+  const toastBorder  = isDark ? "#2a2a42" : "#ddd";
+  const toastColor   = isDark ? "#888" : "#555";
+  const tiles        = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
+  const unavailFill   = isDark ? "#111122" : "#ccccdd";
+  const unavailBorder = isDark ? "#252540" : "#bbbbcc";
+  const bubbleBg     = isDark ? "rgba(10,10,26,0.92)" : "rgba(255,255,255,0.92)";
+  const cityNameColor = isDark ? "#f0f0f0" : "#111122";
   const hint = lang === "it"
     ? "Tocca un paese evidenziato per vedere le città"
     : "Tap a highlighted country to see cities";
@@ -78,9 +90,9 @@ function buildMapHtml(lang: string): string {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a1a;font-family:-apple-system,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:${mapBg};font-family:-apple-system,sans-serif}
 #map{width:100%;height:100%}
-.leaflet-container{background:#0a0a1a!important}
+.leaflet-container{background:${mapBg}!important}
 
 /* Marker città — il div è ancorato in basso al centro sulla coordinata */
 .city-wrap{
@@ -90,7 +102,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a1a;font-family:
   cursor:pointer;
 }
 .city-bubble{
-  background:rgba(10,10,26,0.92);
+  background:${bubbleBg};
   border:1.5px solid #e8c06a;
   border-radius:20px;
   padding:4px 9px 4px 6px;
@@ -99,15 +111,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a1a;font-family:
 }
 .city-bubble:active{background:rgba(232,192,106,0.15)}
 .city-emoji{font-size:13px;line-height:1}
-.city-name{color:#f0f0f0;font-size:11px;font-weight:700;letter-spacing:0.1px}
+.city-name{color:${cityNameColor};font-size:11px;font-weight:700;letter-spacing:0.1px}
 .city-pin{width:1.5px;height:5px;background:#e8c06a}
 
 /* Toast */
 #toast{
   position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
-  background:rgba(12,12,28,0.9);border:1px solid #2a2a42;
+  background:${toastBg};border:1px solid ${toastBorder};
   border-radius:20px;padding:9px 18px;
-  color:#888;font-size:12px;font-weight:600;letter-spacing:0.3px;
+  color:${toastColor};font-size:12px;font-weight:600;letter-spacing:0.3px;
   pointer-events:none;transition:opacity 0.4s;white-space:nowrap;
   z-index:9999;
 }
@@ -122,6 +134,8 @@ const CITY_DATA = ${cityJson};
 const AVAILABLE_ISO3 = new Set(${availableJson});
 const HINT = '${hint}';
 const TAP_CITY = '${tapCity}';
+const UNAVAIL_FILL = '${unavailFill}';
+const UNAVAIL_BORDER = '${unavailBorder}';
 
 const map = L.map('map',{
   center:[49,13],zoom:4,
@@ -129,7 +143,7 @@ const map = L.map('map',{
   minZoom:2,maxZoom:10
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{
+L.tileLayer('${tiles}',{
   subdomains:'abcd',maxZoom:20
 }).addTo(map);
 
@@ -182,9 +196,9 @@ fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/wor
       style:function(feature){
         const has=AVAILABLE_ISO3.has(feature.id);
         return {
-          fillColor: has?'#e8c06a':'#111122',
+          fillColor: has?'#e8c06a':UNAVAIL_FILL,
           fillOpacity: has?0.2:0.05,
-          color: has?'#e8c06a':'#252540',
+          color: has?'#e8c06a':UNAVAIL_BORDER,
           weight: has?1.5:0.4,
           opacity: has?0.6:0.2
         };
@@ -231,15 +245,16 @@ interface Props {
 
 export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const htmlRef = useRef(buildMapHtml(lang));
+  const { colors, isDark } = useTheme();
+  const htmlRef = useRef(buildMapHtml(lang, isDark));
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (visible) {
       setStatus("loading");
-      htmlRef.current = buildMapHtml(lang);
+      htmlRef.current = buildMapHtml(lang, isDark);
     }
-  }, [visible, lang]);
+  }, [visible, lang, isDark]);
 
   const handleMessage = (event: any) => {
     try {
@@ -257,14 +272,14 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
         Usiamo useSafeAreaInsets() e applichiamo il padding manualmente
         così notch e Dynamic Island sono sempre rispettati.
       */}
-      <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={[styles.safe, { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {/* ── Header ── */}
-        <View style={styles.header}>
-          <Text style={styles.title}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.title, { color: colors.text }]}>
             {lang === "it" ? "Scegli la destinazione" : "Choose destination"}
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-            <Ionicons name="close" size={22} color="#888" />
+          <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
+            <Ionicons name="close" size={22} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -278,7 +293,7 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
             allowFileAccessFromFileURLs
             allowUniversalAccessFromFileURLs
             onMessage={handleMessage}
-            style={styles.webview}
+            style={[styles.webview, { backgroundColor: colors.bg }]}
             scrollEnabled={false}
             bounces={false}
             overScrollMode="never"
@@ -286,9 +301,9 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 
           {/* Loading overlay */}
           {status === "loading" && (
-            <View style={styles.overlay}>
-              <ActivityIndicator color="#e8c06a" size="large" />
-              <Text style={styles.overlayText}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
+              <ActivityIndicator color={colors.accentGold} size="large" />
+              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
                 {lang === "it" ? "Caricamento mappa…" : "Loading map…"}
               </Text>
             </View>
@@ -296,15 +311,15 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 
           {/* Error overlay */}
           {status === "error" && (
-            <View style={styles.overlay}>
-              <Ionicons name="wifi-outline" size={44} color="#444" />
-              <Text style={styles.overlayText}>
+            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
+              <Ionicons name="wifi-outline" size={44} color={colors.border} />
+              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
                 {lang === "it"
                   ? "Connessione internet necessaria per la mappa"
                   : "Internet connection required for the map"}
               </Text>
-              <TouchableOpacity onPress={onClose} style={styles.retryBtn} activeOpacity={0.8}>
-                <Text style={styles.retryText}>
+              <TouchableOpacity onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.card, borderColor: colors.border }]} activeOpacity={0.8}>
+                <Text style={[styles.retryText, { color: colors.textMuted }]}>
                   {lang === "it" ? "Usa la lista" : "Use list instead"}
                 </Text>
               </TouchableOpacity>
@@ -319,7 +334,7 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0f0f1e", paddingLeft: 0, paddingRight: 0 },
+  safe: { flex: 1, paddingLeft: 0, paddingRight: 0 },
 
   header: {
     flexDirection: "row",
@@ -328,32 +343,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#1e1e30",
   },
   title: {
-    color: "#f0f0f0",
     fontSize: 17,
     fontWeight: "700",
   },
   closeBtn: {
     width: 34, height: 34, borderRadius: 17,
-    backgroundColor: "#161625",
     alignItems: "center", justifyContent: "center",
   },
 
   mapWrap: { flex: 1, position: "relative" },
-  webview: { flex: 1, backgroundColor: "#0a0a1a" },
+  webview: { flex: 1 },
 
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#0f0f1e",
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
     paddingHorizontal: 40,
   },
   overlayText: {
-    color: "#555",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
@@ -361,12 +371,10 @@ const styles = StyleSheet.create({
 
   retryBtn: {
     marginTop: 8,
-    backgroundColor: "#1e1e30",
     borderWidth: 1,
-    borderColor: "#2a2a42",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },
-  retryText: { color: "#888", fontSize: 14, fontWeight: "600" },
+  retryText: { fontSize: 14, fontWeight: "600" },
 });

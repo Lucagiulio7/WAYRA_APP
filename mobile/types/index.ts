@@ -22,7 +22,9 @@ export interface Stop {
 export interface Attraction {
   id: number;
   name: string;
+  name_en?: string | null;
   description?: string | null;
+  description_en?: string | null;
   wiki_snippet?: string | null;
   category_level: number;
   latitude: number;

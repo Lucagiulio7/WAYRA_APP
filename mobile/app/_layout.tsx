@@ -11,6 +11,9 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { supabase } from "@/lib/supabase";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { queryClient, asyncStoragePersister } from "@/lib/queryClient";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,14 +62,21 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <SafeAreaProvider>
-            <AppStack />
-          </SafeAreaProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister: asyncStoragePersister }}
+      >
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <SafeAreaProvider>
+                <AppStack />
+              </SafeAreaProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </PersistQueryClientProvider>
+    </ErrorBoundary>
   );
 }

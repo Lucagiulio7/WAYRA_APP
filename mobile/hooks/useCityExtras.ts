@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
 import { Food, CultureFact } from "@/types";
 
 interface CityExtras {
   foods: Food[];
   cultureFacts: CultureFact[];
-  loading: boolean;
 }
 
 const HEADERS = {
@@ -13,48 +12,46 @@ const HEADERS = {
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 };
 
-export function useCityExtras(city: string): CityExtras {
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [cultureFacts, setCultureFacts] = useState<CultureFact[]>([]);
-  const [loading, setLoading] = useState(false);
+async function fetchCityExtras(city: string): Promise<CityExtras> {
+  const foodsUrl =
+    `${SUPABASE_URL}/rest/v1/foods` +
+    `?city=eq.${encodeURIComponent(city)}` +
+    `&select=id,name,name_en,description,description_en,ingredients,ingredients_en,city,places`;
 
-  useEffect(() => {
-    if (!city) return;
-    let cancelled = false;
-    setLoading(true);
+  const factsUrl =
+    `${SUPABASE_URL}/rest/v1/culture_facts` +
+    `?city=eq.${encodeURIComponent(city)}` +
+    `&select=icon,title,title_en,body,body_en` +
+    `&order=sort_order.asc`;
 
-    const foodsUrl =
-      `${SUPABASE_URL}/rest/v1/foods` +
-      `?city=eq.${encodeURIComponent(city)}` +
-      `&select=id,name,name_en,description,description_en,ingredients,ingredients_en,city,places`;
+  const safeFetch = (url: string) =>
+    fetch(url, { headers: HEADERS }).then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
 
-    const factsUrl =
-      `${SUPABASE_URL}/rest/v1/culture_facts` +
-      `?city=eq.${encodeURIComponent(city)}` +
-      `&select=icon,title,title_en,body,body_en` +
-      `&order=sort_order.asc`;
+  const [foodsData, factsData] = await Promise.all([
+    safeFetch(foodsUrl),
+    safeFetch(factsUrl),
+  ]);
 
-    Promise.all([
-      fetch(foodsUrl, { headers: HEADERS }).then((r) => r.json()),
-      fetch(factsUrl, { headers: HEADERS }).then((r) => r.json()),
-    ])
-      .then(([foodsData, factsData]) => {
-        if (!cancelled) {
-          setFoods(Array.isArray(foodsData) ? foodsData : []);
-          setCultureFacts(Array.isArray(factsData) ? factsData : []);
-        }
-      })
-      .catch(() => {
-        // Fallback silenzioso: le sezioni rimarranno vuote
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+  return {
+    foods: Array.isArray(foodsData) ? foodsData : [],
+    cultureFacts: Array.isArray(factsData) ? factsData : [],
+  };
+}
 
-    return () => {
-      cancelled = true;
-    };
-  }, [city]);
+export function useCityExtras(city: string) {
+  const { data, isLoading } = useQuery<CityExtras, Error>({
+    queryKey: ["cityExtras", city],
+    queryFn: () => fetchCityExtras(city),
+    enabled: !!city,
+    staleTime: 1000 * 60 * 60, // 1 ora – dati statici
+  });
 
-  return { foods, cultureFacts, loading };
+  return {
+    foods: data?.foods ?? [],
+    cultureFacts: data?.cultureFacts ?? [],
+    loading: isLoading,
+  };
 }

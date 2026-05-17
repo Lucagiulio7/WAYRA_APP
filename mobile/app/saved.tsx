@@ -159,7 +159,7 @@ export default function SavedScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="person-circle-outline" size={18} color={colors.accentGold} />
-            <Text style={styles.accountEmail} numberOfLines={1}>
+            <Text style={[styles.accountEmail, { color: colors.accentGold }]} numberOfLines={1}>
               {user.email?.split("@")[0]}
             </Text>
             <Ionicons name="log-out-outline" size={16} color={colors.textMuted} />
@@ -167,11 +167,11 @@ export default function SavedScreen() {
         ) : (
           <TouchableOpacity
             onPress={() => router.push("/auth")}
-            style={styles.loginBtn}
+            style={[styles.loginBtn, { backgroundColor: colors.accentGold }]}
             activeOpacity={0.8}
           >
-            <Ionicons name="log-in-outline" size={16} color="#0f0f1e" />
-            <Text style={styles.loginBtnText}>
+            <Ionicons name="log-in-outline" size={16} color={colors.bg} />
+            <Text style={[styles.loginBtnText, { color: colors.bg }]}>
               {lang === "it" ? "Accedi" : "Sign in"}
             </Text>
           </TouchableOpacity>
@@ -181,17 +181,17 @@ export default function SavedScreen() {
       {/* Banner sync */}
       {!user && saved.length > 0 && (
         <TouchableOpacity
-          style={styles.syncBanner}
+          style={[styles.syncBanner, { backgroundColor: colors.card, borderBottomColor: colors.border }]}
           onPress={() => router.push("/auth")}
           activeOpacity={0.85}
         >
-          <Ionicons name="cloud-upload-outline" size={16} color="#7eb8f7" />
-          <Text style={styles.syncText}>
+          <Ionicons name="cloud-upload-outline" size={16} color={colors.accentBlue} />
+          <Text style={[styles.syncText, { color: colors.accentBlue }]}>
             {lang === "it"
               ? "Accedi per sincronizzare i viaggi su tutti i dispositivi"
               : "Sign in to sync your trips across all devices"}
           </Text>
-          <Ionicons name="chevron-forward" size={14} color="#7eb8f7" />
+          <Ionicons name="chevron-forward" size={14} color={colors.accentBlue} />
         </TouchableOpacity>
       )}
 
@@ -210,12 +210,12 @@ export default function SavedScreen() {
           </Text>
           {!user && (
             <TouchableOpacity
-              style={styles.emptyLoginBtn}
+              style={[styles.emptyLoginBtn, { backgroundColor: colors.accentGold }]}
               onPress={() => router.push("/auth")}
               activeOpacity={0.85}
             >
-              <Ionicons name="person-outline" size={16} color="#0f0f1e" />
-              <Text style={styles.emptyLoginText}>
+              <Ionicons name="person-outline" size={16} color={colors.bg} />
+              <Text style={[styles.emptyLoginText, { color: colors.bg }]}>
                 {lang === "it" ? "Accedi al tuo account" : "Sign in to your account"}
               </Text>
             </TouchableOpacity>
@@ -226,11 +226,11 @@ export default function SavedScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
         >
-          {saved.map((entry) => {
+          {[...saved].sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()).map((entry) => {
             const emoji = CITY_EMOJIS[entry.itinerary.city] ?? "✈️";
-            const cityLabel =
-              entry.itinerary.city.charAt(0).toUpperCase() +
-              entry.itinerary.city.slice(1).replace(/_/g, " ");
+            const cityLabel = entry.itinerary.city
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
             const days = entry.itinerary.num_days;
             const level = Array.isArray(entry.itinerary.level)
               ? "Mix"
@@ -302,19 +302,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 7,
     maxWidth: 140, flexShrink: 0,
   },
-  accountEmail: { color: "#e8c06a", fontSize: 11, fontWeight: "700", flex: 1 },
+  accountEmail: { fontSize: 11, fontWeight: "700", flex: 1 },
   loginBtn: {
     flexDirection: "row", alignItems: "center", gap: 5,
-    backgroundColor: "#e8c06a", borderRadius: 20,
+    borderRadius: 20,
     paddingHorizontal: 12, paddingVertical: 8, flexShrink: 0,
   },
-  loginBtnText: { color: "#0f0f1e", fontSize: 12, fontWeight: "800" },
+  loginBtnText: { fontSize: 12, fontWeight: "800" },
   syncBanner: {
     flexDirection: "row", alignItems: "center", gap: 10,
-    backgroundColor: "#0d1a2e", borderBottomWidth: 1, borderBottomColor: "#1e2e42",
+    borderBottomWidth: 1,
     paddingHorizontal: 16, paddingVertical: 11,
   },
-  syncText: { flex: 1, color: "#7eb8f7", fontSize: 12, lineHeight: 17 },
+  syncText: { flex: 1, fontSize: 12, lineHeight: 17 },
   empty: {
     flex: 1, alignItems: "center", justifyContent: "center",
     paddingHorizontal: 40, gap: 12,
@@ -323,10 +323,10 @@ const styles = StyleSheet.create({
   emptySubtitle: { fontSize: 13, textAlign: "center", lineHeight: 19 },
   emptyLoginBtn: {
     flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: "#e8c06a", borderRadius: 14,
+    borderRadius: 14,
     paddingHorizontal: 18, paddingVertical: 12, marginTop: 8,
   },
-  emptyLoginText: { color: "#0f0f1e", fontSize: 14, fontWeight: "800" },
+  emptyLoginText: { fontSize: 14, fontWeight: "800" },
   list: { padding: 16, gap: 12 },
   card: {
     flexDirection: "row", alignItems: "center", gap: 14,

@@ -101,13 +101,13 @@ function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: "it
   const label = (lang === "en" && item.label_en) ? item.label_en : item.label;
   return (
     <TouchableOpacity
-      style={styles.emergencyRow}
+      style={[styles.emergencyRow, { backgroundColor: colors.danger + "1a", borderColor: colors.danger + "33" }]}
       onPress={() => Linking.openURL(`tel:${item.number}`)}
       activeOpacity={0.75}
     >
-      <Text style={styles.emergencyNumber}>{item.number}</Text>
+      <Text style={[styles.emergencyNumber, { color: colors.danger }]}>{item.number}</Text>
       <Text style={[styles.emergencyLabel, { color: colors.text }]}>{label}</Text>
-      <Ionicons name="call-outline" size={14} color="#f87171" />
+      <Ionicons name="call-outline" size={14} color={colors.danger} />
     </TouchableOpacity>
   );
 }
@@ -286,15 +286,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#f871711a",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderWidth: 1,
-    borderColor: "#f8717133",
   },
   emergencyNumber: {
-    color: "#f87171",
     fontWeight: "800",
     fontSize: 18,
     minWidth: 44,

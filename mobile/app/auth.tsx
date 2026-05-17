@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -109,7 +109,7 @@ export default function AuthScreen() {
     }
   };
 
-  const s = makeStyles(colors);
+  const s = useMemo(() => makeStyles(colors), [colors]);
 
   return (
     <SafeAreaView style={s.safe}>
@@ -174,13 +174,13 @@ export default function AuthScreen() {
 
                 {!!error && (
                   <View style={s.errorBox}>
-                    <Ionicons name="warning-outline" size={14} color="#f87171" />
+                    <Ionicons name="warning-outline" size={14} color={colors.danger} />
                     <Text style={s.errorText}>{error}</Text>
                   </View>
                 )}
                 {!!success && (
                   <View style={s.successBox}>
-                    <Ionicons name="checkmark-circle-outline" size={14} color="#6ee7b7" />
+                    <Ionicons name="checkmark-circle-outline" size={14} color={colors.accentGreen} />
                     <Text style={s.successText}>{success}</Text>
                   </View>
                 )}
@@ -276,13 +276,13 @@ export default function AuthScreen() {
                 {/* Error / Success */}
                 {!!error && (
                   <View style={s.errorBox}>
-                    <Ionicons name="warning-outline" size={14} color="#f87171" />
+                    <Ionicons name="warning-outline" size={14} color={colors.danger} />
                     <Text style={s.errorText}>{error}</Text>
                   </View>
                 )}
                 {!!success && (
                   <View style={s.successBox}>
-                    <Ionicons name="checkmark-circle-outline" size={14} color="#6ee7b7" />
+                    <Ionicons name="checkmark-circle-outline" size={14} color={colors.accentGreen} />
                     <Text style={s.successText}>{success}</Text>
                   </View>
                 )}
@@ -453,17 +453,17 @@ function makeStyles(colors: any) {
 
     errorBox: {
       flexDirection: "row", gap: 8, alignItems: "flex-start",
-      backgroundColor: "#f8717122", borderRadius: 10, padding: 12,
-      borderWidth: 1, borderColor: "#f8717144",
+      backgroundColor: colors.danger + "22", borderRadius: 10, padding: 12,
+      borderWidth: 1, borderColor: colors.danger + "44",
     },
-    errorText: { flex: 1, color: "#f87171", fontSize: 13, lineHeight: 18 },
+    errorText: { flex: 1, color: colors.danger, fontSize: 13, lineHeight: 18 },
 
     successBox: {
       flexDirection: "row", gap: 8, alignItems: "flex-start",
-      backgroundColor: "#6ee7b718", borderRadius: 10, padding: 12,
-      borderWidth: 1, borderColor: "#6ee7b740",
+      backgroundColor: colors.accentGreen + "18", borderRadius: 10, padding: 12,
+      borderWidth: 1, borderColor: colors.accentGreen + "40",
     },
-    successText: { flex: 1, color: "#6ee7b7", fontSize: 13, lineHeight: 18 },
+    successText: { flex: 1, color: colors.accentGreen, fontSize: 13, lineHeight: 18 },
 
     cta: {
       backgroundColor: colors.accentGold, borderRadius: 16,

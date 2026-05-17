@@ -57,9 +57,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((val) => {
-      if (val === "light") setIsDark(false);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((val) => { if (val === "light") setIsDark(false); })
+      .catch((e) => { if (__DEV__) console.warn("[ThemeContext] AsyncStorage read failed:", e); });
   }, []);
 
   const toggleTheme = () => {

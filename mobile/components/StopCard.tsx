@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Stop } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // ── Colori per livello ────────────────────────────────────────────────────────
 
@@ -54,6 +55,7 @@ interface Props {
 export function StopCard({ stop, index, onReplace }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { lang, t } = useLanguage();
+  const { colors, isDark } = useTheme();
 
   const LEVEL_LABELS: Record<number, string> = {
     1: t.levelIconicBadge,
@@ -62,11 +64,11 @@ export function StopCard({ stop, index, onReplace }: Props) {
   };
 
   if (stop.type === "free_time") {
-    return <FreeTimeStop stop={stop} lang={lang} freeTimeLabel={t.freeTimeLabel} />;
+    return <FreeTimeStop stop={stop} lang={lang} freeTimeLabel={t.freeTimeLabel} colors={colors} />;
   }
 
   if (stop.type === "food") {
-    return <FoodStop stop={stop} lang={lang} index={index ?? 1} />;
+    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} />;
   }
 
   return (
@@ -78,58 +80,62 @@ export function StopCard({ stop, index, onReplace }: Props) {
       lang={lang}
       levelLabels={LEVEL_LABELS}
       onReplace={onReplace}
+      colors={colors}
+      isDark={isDark}
     />
   );
 }
 
-// ── Attraction ────────────────────────────────────────────────────────────────
+// ── Food stop ─────────────────────────────────────────────────────────────────
 
-function FoodStop({ stop, lang, index }: { stop: Stop; lang: string; index: number }) {
+function FoodStop({
+  stop, lang, index, colors, isDark,
+}: {
+  stop: Stop; lang: string; index: number; colors: any; isDark: boolean;
+}) {
   const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
   const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
   const emoji = stop.attraction_type ? getAttractionEmoji(stop.attraction_type) : "🍴";
 
   const openMaps = async () => {
-    const query = stop.city ? `${stop.name}, ${stop.city}` : stop.name;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
     catch { Alert.alert("Errore", "Impossibile aprire Maps."); }
   };
 
+  const foodBg     = isDark ? "#0f1f1a" : "#eaf7f3";
+  const foodBorder = isDark ? "#1e3a2e" : "#b8dfd4";
+
   return (
-    <View style={styles.foodStopCard}>
+    <View style={[styles.foodStopCard, { backgroundColor: foodBg, borderColor: foodBorder }]}>
       <View style={styles.row}>
-        <View style={styles.foodIndexBadge}>
-          <Text style={styles.foodIndexText}>{index}</Text>
+        <View style={[styles.foodIndexBadge, { borderColor: colors.accentGreen, backgroundColor: colors.accentGreen + "28" }]}>
+          <Text style={[styles.foodIndexText, { color: colors.accentGreen }]}>{index}</Text>
         </View>
         <Text style={styles.attractionEmoji}>{emoji}</Text>
         <View style={styles.flex1}>
-          <Text style={styles.foodStopName} numberOfLines={2}>{displayName}</Text>
+          <Text style={[styles.foodStopName, { color: colors.text }]} numberOfLines={2}>{displayName}</Text>
           {!!displayDesc && (
-            <Text style={styles.foodStopDesc} numberOfLines={2}>{displayDesc}</Text>
+            <Text style={[styles.foodStopDesc, { color: isDark ? "#7aa895" : "#3d7a65" }]} numberOfLines={2}>{displayDesc}</Text>
           )}
         </View>
         <TouchableOpacity
           onPress={openMaps}
           activeOpacity={0.7}
-          style={styles.mapsIcon}
+          style={[styles.mapsIcon, { backgroundColor: colors.accentGreen + "18", borderColor: colors.accentGreen + "44" }]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="location-outline" size={18} color="#6ee7b7" />
+          <Ionicons name="location-outline" size={18} color={colors.accentGreen} />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
+// ── Attraction stop ───────────────────────────────────────────────────────────
+
 function AttractionStop({
-  stop,
-  index,
-  expanded,
-  setExpanded,
-  lang,
-  levelLabels,
-  onReplace,
+  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, colors, isDark,
 }: {
   stop: Stop;
   index: number;
@@ -138,6 +144,8 @@ function AttractionStop({
   lang: string;
   levelLabels: Record<number, string>;
   onReplace?: () => void;
+  colors: any;
+  isDark: boolean;
 }) {
   const color  = LEVEL_COLORS[stop.category_level ?? 1] ?? "#ccc";
   const museum = isMuseum(stop.attraction_type);
@@ -146,8 +154,10 @@ function AttractionStop({
   const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
   const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
 
-  const cardBg     = museum ? "#1a0f2e" : "#1e1e30";
-  const cardBorder = museum ? "#7c3aed55" : "#2a2a42";
+  // Museum gets a subtle purple tint that works on both themes
+  const cardBg     = museum ? (isDark ? "#1a0f2e" : "#f0eaff") : colors.card2;
+  const cardBorder = museum ? "#7c3aed55" : colors.border;
+  const expandedBorderColor = museum ? (isDark ? "#7c3aed22" : "#c4b0f0") : colors.border;
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -161,8 +171,7 @@ function AttractionStop({
   };
 
   const openMaps = async () => {
-    const query = stop.city ? `${stop.name}, ${stop.city}` : stop.name;
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
     catch { Alert.alert("Errore", "Impossibile aprire Maps."); }
   };
@@ -183,11 +192,11 @@ function AttractionStop({
         <View style={styles.flex1}>
           <View style={styles.nameRow}>
             <Text style={styles.attractionEmoji}>{emoji}</Text>
-            <Text style={styles.attractionName} numberOfLines={2}>{displayName}</Text>
+            <Text style={[styles.attractionName, { color: colors.text }]} numberOfLines={2}>{displayName}</Text>
           </View>
           <View style={styles.row}>
-            <Ionicons name="time-outline" size={12} color="#777" />
-            <Text style={styles.metaText}>{stop.estimated_visit_time} min</Text>
+            <Ionicons name="time-outline" size={12} color={colors.textSub} />
+            <Text style={[styles.metaText, { color: colors.textSub }]}>{stop.estimated_visit_time} min</Text>
             {stop.category_level !== undefined && (
               <View style={[styles.levelBadge, { backgroundColor: color + "22" }]}>
                 <Text style={[styles.levelText, { color }]}>
@@ -203,10 +212,10 @@ function AttractionStop({
           <TouchableOpacity
             onPress={openTickets}
             activeOpacity={0.7}
-            style={styles.ticketBtn}
+            style={[styles.ticketBtn, { backgroundColor: colors.accentPurple + "18", borderColor: colors.accentPurple + "44" }]}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="ticket-outline" size={18} color="#a78bfa" />
+            <Ionicons name="ticket-outline" size={18} color={colors.accentPurple} />
           </TouchableOpacity>
         )}
 
@@ -214,41 +223,41 @@ function AttractionStop({
         <TouchableOpacity
           onPress={openMaps}
           activeOpacity={0.7}
-          style={styles.mapsIcon}
+          style={[styles.mapsIcon, { backgroundColor: colors.accentGreen + "18", borderColor: colors.accentGreen + "44" }]}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="location-outline" size={18} color="#6ee7b7" />
+          <Ionicons name="location-outline" size={18} color={colors.accentGreen} />
         </TouchableOpacity>
 
-        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color="#555" />
+        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
       </View>
 
       {expanded && (
-        <View style={[styles.expandedBody, { borderTopColor: museum ? "#7c3aed22" : "#2a2a42" }]}>
+        <View style={[styles.expandedBody, { borderTopColor: expandedBorderColor }]}>
           {!!displayDesc && (
-            <Text style={styles.description}>{displayDesc}</Text>
+            <Text style={[styles.description, { color: colors.textSub }]}>{displayDesc}</Text>
           )}
           {museum && !!stop.ticket_url && (
             <TouchableOpacity
-              style={styles.ticketFullBtn}
+              style={[styles.ticketFullBtn, { backgroundColor: colors.accentPurple + "15", borderColor: colors.accentPurple + "44" }]}
               onPress={openTickets}
               activeOpacity={0.8}
             >
-              <Ionicons name="ticket-outline" size={14} color="#a78bfa" />
-              <Text style={styles.ticketFullText}>
+              <Ionicons name="ticket-outline" size={14} color={colors.accentPurple} />
+              <Text style={[styles.ticketFullText, { color: colors.accentPurple }]}>
                 {lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
               </Text>
-              <Ionicons name="open-outline" size={13} color="#a78bfa" />
+              <Ionicons name="open-outline" size={13} color={colors.accentPurple} />
             </TouchableOpacity>
           )}
           {!!onReplace && (
             <TouchableOpacity
               onPress={onReplace}
               activeOpacity={0.8}
-              style={styles.replaceBtn}
+              style={[styles.replaceBtn, { backgroundColor: colors.accentBlue + "12", borderColor: colors.accentBlue + "40" }]}
             >
-              <Ionicons name="shuffle-outline" size={14} color="#7eb8f7" />
-              <Text style={styles.replaceBtnText}>
+              <Ionicons name="shuffle-outline" size={14} color={colors.accentBlue} />
+              <Text style={[styles.replaceBtnText, { color: colors.accentBlue }]}>
                 {lang === "en" ? "Replace with nearby" : "Sostituisci con alternativa vicina"}
               </Text>
             </TouchableOpacity>
@@ -256,8 +265,8 @@ function AttractionStop({
           {(stop.tags ?? []).length > 0 && (
             <View style={styles.tags}>
               {stop.tags!.map((tag) => (
-                <View key={tag} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag}</Text>
+                <View key={tag} style={[styles.tag, { backgroundColor: colors.border }]}>
+                  <Text style={[styles.tagText, { color: colors.textSub }]}>{tag}</Text>
                 </View>
               ))}
             </View>
@@ -271,25 +280,21 @@ function AttractionStop({
 // ── Free Time ─────────────────────────────────────────────────────────────────
 
 function FreeTimeStop({
-  stop,
-  lang,
-  freeTimeLabel,
+  stop, lang, freeTimeLabel, colors,
 }: {
-  stop: Stop;
-  lang: string;
-  freeTimeLabel: string;
+  stop: Stop; lang: string; freeTimeLabel: string; colors: any;
 }) {
   const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
   const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
 
   return (
-    <View style={styles.freeTimeCard}>
+    <View style={[styles.freeTimeCard, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "40" }]}>
       <Text style={styles.freeTimeEmoji}>🚶</Text>
       <View style={styles.flex1}>
-        <Text style={styles.freeTimeLabel}>{freeTimeLabel}</Text>
-        <Text style={styles.freeTimeName}>{displayName}</Text>
+        <Text style={[styles.freeTimeLabel, { color: colors.accentGreen }]}>{freeTimeLabel}</Text>
+        <Text style={[styles.freeTimeName, { color: colors.text }]}>{displayName}</Text>
         {!!displayDesc && (
-          <Text style={styles.freeTimeDesc}>{displayDesc}</Text>
+          <Text style={[styles.freeTimeDesc, { color: colors.textSub }]}>{displayDesc}</Text>
         )}
       </View>
     </View>
@@ -317,48 +322,40 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  indexText:      { fontWeight: "700", fontSize: 13 },
-  attractionEmoji:{ fontSize: 15, lineHeight: 20, flexShrink: 0 },
-  attractionName: { color: "#f0f0f0", fontWeight: "600", fontSize: 14, flex: 1, lineHeight: 19 },
-  metaText:       { color: "#777", fontSize: 12, marginRight: 6 },
+  indexText:       { fontWeight: "700", fontSize: 13 },
+  attractionEmoji: { fontSize: 15, lineHeight: 20, flexShrink: 0 },
+  attractionName:  { fontWeight: "600", fontSize: 14, flex: 1, lineHeight: 19 },
+  metaText:        { fontSize: 12, marginRight: 6 },
   foodStopCard: {
-    backgroundColor: "#0f1f1a",
     borderRadius: 14,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#1e3a2e",
   },
   foodIndexBadge: {
     width: 30,
     height: 30,
     borderRadius: 15,
     borderWidth: 1.5,
-    borderColor: "#6ee7b7",
-    backgroundColor: "#6ee7b728",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
-  foodIndexText: { color: "#6ee7b7", fontWeight: "700", fontSize: 13 },
-  foodStopName: { color: "#f0f0f0", fontWeight: "600", fontSize: 14, lineHeight: 19 },
-  foodStopDesc: { color: "#7aa895", fontSize: 12, lineHeight: 17, marginTop: 2 },
-  levelBadge:     { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
-  levelText:      { fontSize: 10, fontWeight: "600" },
+  foodIndexText: { fontWeight: "700", fontSize: 13 },
+  foodStopName:  { fontWeight: "600", fontSize: 14, lineHeight: 19 },
+  foodStopDesc:  { fontSize: 12, lineHeight: 17, marginTop: 2 },
+  levelBadge:    { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  levelText:     { fontSize: 10, fontWeight: "600" },
   ticketBtn: {
     padding: 4,
     borderRadius: 8,
-    backgroundColor: "#a78bfa18",
     borderWidth: 1,
-    borderColor: "#a78bfa44",
     flexShrink: 0,
   },
   mapsIcon: {
     padding: 4,
     borderRadius: 8,
-    backgroundColor: "#6ee7b718",
     borderWidth: 1,
-    borderColor: "#6ee7b744",
     flexShrink: 0,
   },
   expandedBody: {
@@ -367,61 +364,49 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     gap: 8,
   },
-  description: { color: "#b0b0c8", fontSize: 13, lineHeight: 19 },
+  description:   { fontSize: 13, lineHeight: 19 },
   ticketFullBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#a78bfa15",
     borderWidth: 1,
-    borderColor: "#a78bfa44",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     alignSelf: "flex-start",
   },
-  ticketFullText: { color: "#a78bfa", fontWeight: "600", fontSize: 13 },
+  ticketFullText: { fontWeight: "600", fontSize: 13 },
   replaceBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    backgroundColor: "#7eb8f712",
     borderWidth: 1,
-    borderColor: "#7eb8f740",
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 7,
   },
-  replaceBtnText: { color: "#7eb8f7", fontSize: 12, fontWeight: "600" },
-  tags: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
-  tag: {
-    backgroundColor: "#2a2a42",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  tagText: { color: "#777", fontSize: 11 },
+  replaceBtnText: { fontSize: 12, fontWeight: "600" },
+  tags:  { flexDirection: "row", flexWrap: "wrap", gap: 5 },
+  tag:   { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  tagText: { fontSize: 11 },
   freeTimeCard: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-    backgroundColor: "#6ee7b712",
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#6ee7b740",
     padding: 12,
     marginBottom: 8,
     marginLeft: 12,
   },
   freeTimeEmoji: { fontSize: 22, marginTop: 2 },
   freeTimeLabel: {
-    color: "#6ee7b7",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
     textTransform: "uppercase",
   },
-  freeTimeName: { color: "#f0f0f0", fontWeight: "600", fontSize: 14, marginTop: 1 },
-  freeTimeDesc: { color: "#888", fontSize: 12, marginTop: 3, lineHeight: 17 },
+  freeTimeName: { fontWeight: "600", fontSize: 14, marginTop: 1 },
+  freeTimeDesc: { fontSize: 12, marginTop: 3, lineHeight: 17 },
 });

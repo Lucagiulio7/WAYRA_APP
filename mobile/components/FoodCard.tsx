@@ -10,6 +10,44 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// ── Emoji dinamica per piatto ─────────────────────────────────────────────────
+
+const FOOD_EMOJI_MAP: Array<[RegExp, string]> = [
+  [/pizza/i,                                                           "🍕"],
+  [/gelato|ice.?cream/i,                                               "🍦"],
+  [/pasta|spaghetti|tagliat|fettuc|penne|rigatoni|lasagna|gnocchi|carbonara|amatriciana|cacio/i, "🍝"],
+  [/risotto/i,                                                         "🍚"],
+  [/paella/i,                                                          "🥘"],
+  [/tagine|tajin|couscous/i,                                           "🫕"],
+  [/moussaka|musaka/i,                                                 "🥘"],
+  [/gyro|souvlaki|kebab|shawarma|doner/i,                              "🥙"],
+  [/schnitzel|wurst|bratwurst|sausage/i,                               "🥩"],
+  [/fish|pesce|baccalà|bacalhau|cod|salmon|sardine|trout/i,            "🐟"],
+  [/seafood|gamberi|calamari|prawn|shrimp/i,                           "🦐"],
+  [/meat|carne|steak|bistecca/i,                                       "🥩"],
+  [/burger|sandwich|panino/i,                                          "🥪"],
+  [/salad|insalata/i,                                                  "🥗"],
+  [/cheese|formaggio|raclette|fondue/i,                                "🧀"],
+  [/soup|zuppa|minestra|stew|gazpacho|borsch/i,                        "🍲"],
+  [/curry|tikka|masala/i,                                              "🍛"],
+  [/baklava|pastry|strudel|pasteis|tart|dolce|torta/i,                 "🥐"],
+  [/chocolate|cioccolat/i,                                             "🍫"],
+  [/coffee|caffè|espresso/i,                                           "☕"],
+  [/beer|birra|bier/i,                                                 "🍺"],
+  [/wine|vino/i,                                                       "🍷"],
+];
+
+function getFoodEmoji(name: string, description?: string | null): string {
+  const text = `${name} ${description ?? ""}`;
+  for (const [regex, emoji] of FOOD_EMOJI_MAP) {
+    if (regex.test(text)) return emoji;
+  }
+  return "🍴";
+}
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
   food: Food;
@@ -20,6 +58,7 @@ interface Props {
 export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props) {
   const [internalExpanded, setInternalExpanded] = useState(false);
   const { lang, t } = useLanguage();
+  const { colors } = useTheme();
   const expanded = controlledExpanded ?? internalExpanded;
 
   const displayName        = (lang === "en" && food.name_en)         ? food.name_en         : food.name;
@@ -27,6 +66,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
   const displayIngredients = (lang === "en" && food.ingredients_en?.length) ? food.ingredients_en : food.ingredients;
 
   const places = food.places ?? [];
+  const emoji  = getFoodEmoji(displayName, displayDesc);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -35,23 +75,27 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={toggle} activeOpacity={0.85}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+      onPress={toggle}
+      activeOpacity={0.85}
+    >
       <View style={styles.header}>
-        <Text style={styles.emoji}>🍝</Text>
-        <Text style={styles.name}>{displayName}</Text>
-        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color="#666" />
+        <Text style={styles.emoji}>{emoji}</Text>
+        <Text style={[styles.name, { color: colors.text }]}>{displayName}</Text>
+        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.textMuted} />
       </View>
 
       {expanded && (
-        <View style={styles.body}>
-          <Text style={styles.description}>{displayDesc}</Text>
+        <View style={[styles.body, { borderTopColor: colors.border }]}>
+          <Text style={[styles.description, { color: colors.textSub }]}>{displayDesc}</Text>
 
           {/* Ingredienti */}
           <View style={styles.ingredientsBlock}>
             <View style={styles.ingredientsList}>
               {displayIngredients.map((ing, i) => (
-                <View key={i} style={styles.ingredientChip}>
-                  <Text style={styles.ingredientText}>{ing}</Text>
+                <View key={i} style={[styles.ingredientChip, { backgroundColor: colors.accentGold + "22", borderColor: colors.accentGold + "44" }]}>
+                  <Text style={[styles.ingredientText, { color: colors.accentGold }]}>{ing}</Text>
                 </View>
               ))}
             </View>
@@ -59,18 +103,20 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
 
           {/* Ristoranti consigliati */}
           {places.length > 0 && (
-            <View style={styles.placesBlock}>
-              <Text style={styles.placesTitle}>📍 {t.whereToEat}</Text>
+            <View style={[styles.placesBlock, { borderTopColor: colors.border }]}>
+              <Text style={[styles.placesTitle, { color: colors.textMuted }]}>
+                📍 {t.whereToEat}
+              </Text>
               {places.map((place, i) => (
                 <TouchableOpacity
                   key={i}
-                  style={styles.placeRow}
+                  style={[styles.placeRow, { backgroundColor: colors.card2, borderColor: colors.border }]}
                   onPress={() => Linking.openURL(place.maps_link)}
                   activeOpacity={0.75}
                 >
-                  <Ionicons name="restaurant-outline" size={14} color="#e8c06a" style={styles.placeIcon} />
-                  <Text style={styles.placeName}>{place.name}</Text>
-                  <Ionicons name="open-outline" size={13} color="#666" />
+                  <Ionicons name="restaurant-outline" size={14} color={colors.accentGold} style={styles.placeIcon} />
+                  <Text style={[styles.placeName, { color: colors.text }]}>{place.name}</Text>
+                  <Ionicons name="open-outline" size={13} color={colors.textMuted} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -83,12 +129,10 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1e1e30",
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#2a2a42",
   },
   header: {
     flexDirection: "row",
@@ -100,7 +144,6 @@ const styles = StyleSheet.create({
   },
   name: {
     flex: 1,
-    color: "#f0f0f0",
     fontWeight: "600",
     fontSize: 15,
   },
@@ -108,11 +151,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#2a2a42",
     gap: 12,
   },
   description: {
-    color: "#c0c0d8",
     fontSize: 13,
     lineHeight: 20,
   },
@@ -125,25 +166,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   ingredientChip: {
-    backgroundColor: "#e8c06a22",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderWidth: 1,
-    borderColor: "#e8c06a44",
   },
   ingredientText: {
-    color: "#e8c06a",
     fontSize: 12,
   },
   placesBlock: {
     gap: 6,
     paddingTop: 4,
     borderTopWidth: 1,
-    borderTopColor: "#2a2a42",
   },
   placesTitle: {
-    color: "#a0a0c0",
     fontSize: 12,
     fontWeight: "600",
     marginBottom: 2,
@@ -154,17 +190,14 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingVertical: 6,
     paddingHorizontal: 10,
-    backgroundColor: "#252540",
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#33334a",
   },
   placeIcon: {
     width: 16,
   },
   placeName: {
     flex: 1,
-    color: "#dcdcf0",
     fontSize: 13,
     fontWeight: "500",
   },

@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ItineraryDay, Restaurant } from "@/types";
 import { StopCard } from "./StopCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const DAY_ACCENTS = ["#e8c06a", "#7eb8f7", "#a78bfa", "#6ee7b7", "#f97316"];
 
@@ -118,6 +119,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
   const [mealOpen, setMealOpen]   = useState(false);
   const accent = DAY_ACCENTS[(day.day - 1) % DAY_ACCENTS.length];
   const { lang, t } = useLanguage();
+  const { colors } = useTheme();
   const open = controlledOpen ?? internalOpen;
 
   const attractionStops = day.stops.filter((s) => s.type === "attraction");
@@ -170,7 +172,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
   let attractionIndex = 0;
 
   return (
-    <View style={[styles.wrapper, open && { borderColor: accent, backgroundColor: accent + "10" }]}>
+    <View style={[styles.wrapper, { backgroundColor: colors.card, borderColor: colors.border }, open && { borderColor: accent, backgroundColor: accent + "10" }]}>
       {/* Header giorno — struttura piatta: left togglabile + right pulsanti separati */}
       <View style={[styles.header, open && { backgroundColor: accent + "12" }]}>
         {/* Area toggle (badge + testi + chevron) */}
@@ -180,7 +182,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
           </View>
           <View style={styles.flex1}>
             <View style={styles.dayTitleRow}>
-              <Text style={styles.dayTitle}>{t.day} {day.day}</Text>
+              <Text style={[styles.dayTitle, { color: colors.text }]}>{t.day} {day.day}</Text>
               {walkingKm > 0 && (
                 <View style={[styles.walkBadge, { borderColor: accent + "66", backgroundColor: accent + "18" }]}>
                   <Ionicons name="walk-outline" size={12} color={accent} />
@@ -190,11 +192,11 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
                 </View>
               )}
             </View>
-            <Text style={styles.dayMeta}>
+            <Text style={[styles.dayMeta, { color: colors.textSub }]}>
               {attractionStops.length} {t.places} · {hours}h{mins > 0 ? ` ${mins}min` : ""}
             </Text>
           </View>
-          <Ionicons name={open ? "chevron-up" : "chevron-down"} size={20} color="#555" />
+          <Ionicons name={open ? "chevron-up" : "chevron-down"} size={20} color={colors.textMuted} />
         </TouchableOpacity>
 
         {/* Pulsanti azione — fuori dal TouchableOpacity del toggle */}
@@ -203,7 +205,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
             <TouchableOpacity
               onPress={onReloadDay}
               activeOpacity={0.7}
-              style={styles.reloadBtn}
+              style={[styles.reloadBtn, { backgroundColor: colors.border + "30", borderColor: colors.border }]}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Ionicons name="refresh-outline" size={16} color={accent} />
@@ -232,7 +234,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
           {/* Pulsante percorso Maps */}
           {!!day.maps_link && (
             <TouchableOpacity
-              style={[styles.mapsBtn, { borderColor: accent }]}
+              style={[styles.mapsBtn, { borderColor: accent, backgroundColor: colors.bg }]}
               onPress={() => openMaps(day.maps_link)}
               activeOpacity={0.8}
             >
@@ -244,7 +246,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
 
           {/* Sezione cibo */}
           {allRestaurants.length > 0 && (
-            <View style={styles.foodSection}>
+            <View style={[styles.foodSection, { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "08" }]}>
               {/* Header principale */}
               <TouchableOpacity
                 style={styles.foodHeader}
@@ -252,16 +254,16 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
                 activeOpacity={0.8}
               >
                 <Text style={styles.foodHeaderEmoji}>🍴</Text>
-                <Text style={styles.foodHeaderText}>{t.wantToEat}</Text>
+                <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>{t.wantToEat}</Text>
                 <Ionicons
                   name={foodOpen ? "chevron-up" : "chevron-down"}
                   size={16}
-                  color="#6ee7b7"
+                  color={colors.accentGreen}
                 />
               </TouchableOpacity>
 
               {foodOpen && (
-                <View style={styles.subSections}>
+                <View style={[styles.subSections, { borderTopColor: colors.accentGreen + "20" }]}>
                   {/* ── Spuntino ── */}
                   {snacks.length > 0 && (
                     <SubSection
@@ -278,6 +280,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
                           key={r.id}
                           restaurant={r}
                           lang={lang}
+                          colors={colors}
                           onMaps={() => openMaps(r.maps_link)}
                         />
                       ))}
@@ -300,6 +303,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
                           key={r.id}
                           restaurant={r}
                           lang={lang}
+                          colors={colors}
                           onMaps={() => openMaps(r.maps_link)}
                         />
                       ))}
@@ -331,12 +335,17 @@ function SubSection({
   onToggle: () => void;
   children: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.subSection}>
-      <TouchableOpacity style={styles.subHeader} onPress={onToggle} activeOpacity={0.8}>
+    <View style={[styles.subSection, { borderTopColor: colors.accentGreen + "15" }]}>
+      <TouchableOpacity
+        style={[styles.subHeader, { backgroundColor: colors.accentGreen + "06" }]}
+        onPress={onToggle}
+        activeOpacity={0.8}
+      >
         <Text style={styles.subEmoji}>{emoji}</Text>
-        <Text style={styles.subLabel}>{label}</Text>
-        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={14} color="#6ee7b799" />
+        <Text style={[styles.subLabel, { color: colors.accentGreen + "cc" }]}>{label}</Text>
+        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={14} color={colors.accentGreen + "99"} />
       </TouchableOpacity>
       {open && <View style={styles.subBody}>{children}</View>}
     </View>
@@ -348,34 +357,36 @@ function SubSection({
 function RestaurantRow({
   restaurant,
   lang,
+  colors,
   onMaps,
 }: {
   restaurant: Restaurant;
   lang: string;
+  colors: any;
   onMaps: () => void;
 }) {
   const price       = getPriceRange(restaurant.food_type);
   const displayName = (lang === "en" && restaurant.name_en) ? restaurant.name_en : restaurant.name;
 
   return (
-    <View style={styles.restaurantRow}>
+    <View style={[styles.restaurantRow, { borderTopColor: colors.border2 }]}>
       <View style={styles.restaurantInfo}>
-        <Text style={styles.restaurantName}>{displayName}</Text>
+        <Text style={[styles.restaurantName, { color: colors.text }]}>{displayName}</Text>
         {!!restaurant.food_type && (
-          <Text style={styles.restaurantType}>{restaurant.food_type}</Text>
+          <Text style={[styles.restaurantType, { color: colors.textSub }]}>{restaurant.food_type}</Text>
         )}
       </View>
 
       <View style={styles.restaurantRight}>
-        <Text style={styles.priceRange}>{price}</Text>
+        <Text style={[styles.priceRange, { color: colors.accentGreen }]}>{price}</Text>
         {restaurant.rating != null && (
-          <View style={styles.ratingBadge}>
-            <Ionicons name="star" size={11} color="#e8c06a" />
-            <Text style={styles.ratingText}>{restaurant.rating.toFixed(1)}</Text>
+          <View style={[styles.ratingBadge, { backgroundColor: colors.accentGold + "18" }]}>
+            <Ionicons name="star" size={11} color={colors.accentGold} />
+            <Text style={[styles.ratingText, { color: colors.accentGold }]}>{restaurant.rating.toFixed(1)}</Text>
           </View>
         )}
         <TouchableOpacity onPress={onMaps} activeOpacity={0.7} style={styles.mapsIcon}>
-          <Ionicons name="location-outline" size={20} color="#6ee7b7" />
+          <Ionicons name="location-outline" size={20} color={colors.accentGreen} />
         </TouchableOpacity>
       </View>
     </View>
@@ -386,11 +397,9 @@ function RestaurantRow({
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: "#161625",
     borderRadius: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#2a2a42",
     overflow: "hidden",
   },
   header: {
@@ -427,8 +436,8 @@ const styles = StyleSheet.create({
     gap: 8,
     flexWrap: "wrap",
   },
-  dayTitle: { color: "#f0f0f0", fontSize: 16, fontWeight: "700" },
-  dayMeta:  { color: "#777", fontSize: 12, marginTop: 2 },
+  dayTitle: { fontSize: 16, fontWeight: "700" },
+  dayMeta:  { fontSize: 12, marginTop: 2 },
   walkBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -446,9 +455,7 @@ const styles = StyleSheet.create({
   reloadBtn: {
     padding: 5,
     borderRadius: 8,
-    backgroundColor: "#ffffff0a",
     borderWidth: 1,
-    borderColor: "#ffffff18",
   },
   mapsBtn: {
     flexDirection: "row",
@@ -459,7 +466,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     marginTop: 10,
-    backgroundColor: "#0f0f1e",
   },
   mapsBtnText: { fontWeight: "700", fontSize: 14 },
 
@@ -467,9 +473,7 @@ const styles = StyleSheet.create({
   foodSection: {
     marginTop: 10,
     borderWidth: 1.5,
-    borderColor: "#6ee7b740",
     borderRadius: 14,
-    backgroundColor: "#6ee7b708",
     overflow: "hidden",
   },
   foodHeader: {
@@ -482,19 +486,16 @@ const styles = StyleSheet.create({
   foodHeaderEmoji: { fontSize: 18 },
   foodHeaderText: {
     flex: 1,
-    color: "#6ee7b7",
     fontWeight: "700",
     fontSize: 14,
   },
   subSections: {
     borderTopWidth: 1,
-    borderTopColor: "#6ee7b720",
     gap: 0,
   },
   // ── Sub-sezione (spuntino / pasto) ───────────────────────────
   subSection: {
     borderTopWidth: 1,
-    borderTopColor: "#6ee7b715",
   },
   subHeader: {
     flexDirection: "row",
@@ -502,12 +503,10 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 11,
     paddingHorizontal: 14,
-    backgroundColor: "#6ee7b706",
   },
   subEmoji: { fontSize: 16 },
   subLabel: {
     flex: 1,
-    color: "#6ee7b7cc",
     fontWeight: "600",
     fontSize: 13,
   },
@@ -519,15 +518,13 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 14,
     borderTopWidth: 1,
-    borderTopColor: "#1e1e30",
     gap: 10,
   },
   restaurantInfo:  { flex: 1 },
-  restaurantName:  { color: "#f0f0f0", fontWeight: "600", fontSize: 14 },
-  restaurantType:  { color: "#777", fontSize: 12, marginTop: 2, textTransform: "capitalize" },
+  restaurantName:  { fontWeight: "600", fontSize: 14 },
+  restaurantType:  { fontSize: 12, marginTop: 2, textTransform: "capitalize" },
   restaurantRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   priceRange: {
-    color: "#6ee7b7",
     fontWeight: "700",
     fontSize: 13,
     minWidth: 28,
@@ -537,11 +534,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#e8c06a18",
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 3,
   },
-  ratingText: { color: "#e8c06a", fontWeight: "700", fontSize: 12 },
+  ratingText: { fontWeight: "700", fontSize: 12 },
   mapsIcon:   { padding: 4 },
 });
