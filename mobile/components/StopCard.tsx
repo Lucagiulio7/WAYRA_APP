@@ -67,7 +67,8 @@ export function StopCard({ stop, index, onReplace }: Props) {
     return <FreeTimeStop stop={stop} lang={lang} freeTimeLabel={t.freeTimeLabel} colors={colors} />;
   }
 
-  if (stop.type === "food") {
+  // "food" = vecchio formato, "meal" = formato backend attuale
+  if (stop.type === "food" || stop.type === "meal") {
     return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} />;
   }
 

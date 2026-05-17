@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
   Alert,
   Animated,
   Linking,
@@ -286,7 +287,10 @@ function makeSlot(kind: SlotKind = "attraction"): SlotData {
   return { id: `slot_${++_slotCounter}`, kind, attraction: null };
 }
 
-function getDayStats(day: DayPlan): DayStats {
+const EMPTY_STATS: DayStats = { minutes: 0, distanceKm: 0, museums: 0, attractions: 0, filled: 0 };
+
+function getDayStats(day: DayPlan | undefined): DayStats {
+  if (!day) return EMPTY_STATS;
   const filledSlots = day.slots.filter((s) => s.attraction !== null);
   const attractionSlots = filledSlots.filter((s) => s.kind === "attraction");
   const route = filledSlots.map((s) => s.attraction!);
@@ -299,7 +303,8 @@ function getDayStats(day: DayPlan): DayStats {
   };
 }
 
-function dayDistanceWith(day: DayPlan, slotId: string, attraction: BuilderAttraction): number {
+function dayDistanceWith(day: DayPlan | undefined, slotId: string, attraction: BuilderAttraction): number {
+  if (!day) return 0;
   const nextSlots = day.slots.map((s) => s.id === slotId ? { ...s, attraction } : s);
   return getDayStats({ ...day, slots: nextSlots }).distanceKm;
 }
@@ -425,7 +430,7 @@ export default function CreateItineraryScreen() {
     Math.max(0, days.findIndex((d) => d.day === expandedDay)),
   [days, expandedDay]);
 
-  const activeDay = days[activeDayIndex] ?? days[0];
+  const activeDay: DayPlan | undefined = days[activeDayIndex] ?? days[0];
   const activeDayStats = useMemo(() => getDayStats(activeDay), [activeDay]);
 
   // ── Dati per BuilderMap ────────────────────────────────────────────────────
@@ -817,6 +822,15 @@ export default function CreateItineraryScreen() {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
+
+  // Guard: mostra loading finché il builder store non ha inizializzato i giorni
+  if (days.length === 0) {
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: "center", alignItems: "center" }]} edges={["top", "bottom"]}>
+        <ActivityIndicator color={colors.accentGold} size="large" />
+      </SafeAreaView>
+    );
+  }
 
   const currentCategories = activeTab === "food" ? foodCategories : attractionCategories;
 

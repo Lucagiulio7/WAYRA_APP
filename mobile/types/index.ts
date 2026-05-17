@@ -1,5 +1,5 @@
 export interface Stop {
-  type: "attraction" | "food" | "free_time";
+  type: "attraction" | "food" | "meal" | "free_time";
   id: number;
   name: string;
   name_en?: string | null;
