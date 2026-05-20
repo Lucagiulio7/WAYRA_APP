@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Dimensions,
   Modal,
   ScrollView,
@@ -47,13 +48,24 @@ const LEVEL_COLORS: Record<number, string> = {
   3: "#a78bfa",
 };
 const FOOD_COLOR = "#6ee7b7";
-const SCREEN_H = Dimensions.get("window").height;
+const SCREEN_H   = Dimensions.get("window").height;
 
 const ATTR_EMOJI: Record<string, string> = {
   museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
   archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
   panorama: "🌅", mercato: "🛒", palazzo: "🏰",
 };
+
+// ── Stato pannello inferiore ──────────────────────────────────────────────────
+
+type PanelMode = "list" | "detail" | "food-insert";
+
+interface FilterState {
+  levels: number[];   // livelli visibili: sottoinsieme di [1,2,3]
+  food: boolean;      // marker cibo visibili
+}
+
+const ALL_FILTERS: FilterState = { levels: [1, 2, 3], food: true };
 
 // ── HTML Leaflet ──────────────────────────────────────────────────────────────
 
@@ -176,6 +188,22 @@ function updateState(selAIds,routeCoords,selFIds){
   }
 }
 
+/* ── Filtro marker ── */
+function setFilter(levels, showFood) {
+  ATTRS.forEach(function(a){
+    try {
+      var el = AM[a.id] && AM[a.id].getElement ? AM[a.id].getElement() : null;
+      if (el) el.style.display = (levels.indexOf(a.level) >= 0) ? '' : 'none';
+    } catch(e) {}
+  });
+  FOODS.forEach(function(f){
+    try {
+      var el = FM[f.id] && FM[f.id].getElement ? FM[f.id].getElement() : null;
+      if (el) el.style.display = showFood ? '' : 'none';
+    } catch(e) {}
+  });
+}
+
 window.ReactNativeWebView.postMessage(JSON.stringify({type:'ready'}));
 </script>
 </body>
@@ -191,34 +219,69 @@ export function BuilderMap({
 }: Props) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const wvRef = useRef<WebView>(null);
-  const [ready, setReady] = useState(false);
-  const [pendingFood, setPendingFood] = useState<BuilderAttraction | null>(null);
-  const htmlRef = useRef("");
+  const wvRef  = useRef<WebView>(null);
 
-  // Ricostruisce l'HTML ogni volta che il modal si apre
+  const [ready,       setReady]       = useState(false);
+  const [mapHtml,     setMapHtml]     = useState("");
+  const [mapError,    setMapError]    = useState(false);
+  const [panelMode,   setPanelMode]   = useState<PanelMode>("list");
+  const [preview,     setPreview]     = useState<BuilderAttraction | null>(null);
+  const [previewKind, setPreviewKind] = useState<"attraction" | "meal" | null>(null);
+  const [filter,      setFilter]      = useState<FilterState>(ALL_FILTERS);
+
+  const panelFadeA = useRef(new Animated.Value(1)).current;
+
+  const switchPanel = useCallback((mode: PanelMode, cb?: () => void) => {
+    Animated.timing(panelFadeA, { toValue: 0, duration: 100, useNativeDriver: true }).start(() => {
+      setPanelMode(mode);
+      cb?.();
+      Animated.timing(panelFadeA, { toValue: 1, duration: 150, useNativeDriver: true }).start();
+    });
+  }, [panelFadeA]);
+
+  // Apre il modal: ricostruisce HTML e resetta tutto
   useEffect(() => {
     if (visible) {
       setReady(false);
-      setPendingFood(null);
-      htmlRef.current = buildMapHtml(attractions, foodSpots, isDark);
+      setMapError(false);
+      setPanelMode("list");
+      setPreview(null);
+      setPreviewKind(null);
+      setFilter(ALL_FILTERS);
+      setMapHtml(buildMapHtml(attractions, foodSpots, isDark));
+      panelFadeA.setValue(1); // reset fade nel caso il modal fosse stato chiuso durante un'animazione
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sincronizza lo stato dei marker via injectJavaScript
+  // Timeout: se Leaflet non risponde in 15s (es. offline) mostra errore
+  useEffect(() => {
+    if (!mapHtml || ready || mapError) return;
+    const t = setTimeout(() => setMapError(true), 15_000);
+    return () => clearTimeout(t);
+  }, [mapHtml, ready, mapError]);
+
+  // Sincronizza i marker selezionati
   useEffect(() => {
     if (!ready) return;
-    const selAIds = currentSlots.filter((s) => s.kind === "attraction").map((s) => s.attraction.id);
-    const routeCoords = currentSlots
-      .filter((s) => s.kind === "attraction")
+    const selAIds     = currentSlots.filter((s) => s.kind === "attraction").map((s) => s.attraction.id);
+    const routeCoords = currentSlots.filter((s) => s.kind === "attraction")
       .map((s) => [s.attraction.latitude, s.attraction.longitude]);
-    const selFIds = currentSlots.filter((s) => s.kind === "meal").map((s) => s.attraction.id);
+    const selFIds     = currentSlots.filter((s) => s.kind === "meal").map((s) => s.attraction.id);
     wvRef.current?.injectJavaScript(
       `updateState(${JSON.stringify(selAIds)},${JSON.stringify(routeCoords)},${JSON.stringify(selFIds)});true;`,
     );
   }, [currentSlots, ready]);
 
-  // Messaggi dalla WebView
+  // Applica i filtri via JS quando cambiano
+  useEffect(() => {
+    if (!ready) return;
+    wvRef.current?.injectJavaScript(
+      `setFilter(${JSON.stringify(filter.levels)},${filter.food});true;`,
+    );
+  }, [filter, ready]);
+
+  // ── Messaggi dalla WebView ────────────────────────────────────────────────
+
   const handleMessage = useCallback(
     (event: any) => {
       try {
@@ -226,36 +289,68 @@ export function BuilderMap({
         if (msg.type === "ready") { setReady(true); return; }
 
         if (msg.type === "tapA") {
-          const ex = currentSlots.find((s) => s.kind === "attraction" && s.attraction.id === msg.id);
-          if (ex) {
-            onRemove(ex.slotId);
-          } else {
-            const a = attractions.find((x) => x.id === msg.id);
-            if (a) onAddAttraction(a);
-          }
+          const a = attractions.find((x) => x.id === msg.id);
+          if (!a) return;
+          switchPanel("detail", () => {
+            setPreview(a);
+            setPreviewKind("attraction");
+          });
         }
 
         if (msg.type === "tapF") {
-          const ex = currentSlots.find((s) => s.kind === "meal" && s.attraction.id === msg.id);
-          if (ex) {
-            onRemove(ex.slotId);
-          } else {
-            const f = foodSpots.find((x) => x.id === msg.id);
-            if (f) {
-              if (currentSlots.length === 0) {
-                onAddFood(f, null);
-              } else {
-                setPendingFood(f);
-              }
-            }
-          }
+          const f = foodSpots.find((x) => x.id === msg.id);
+          if (!f) return;
+          switchPanel("detail", () => {
+            setPreview(f);
+            setPreviewKind("meal");
+          });
         }
       } catch { /* ignore */ }
     },
-    [currentSlots, attractions, foodSpots, onRemove, onAddAttraction, onAddFood],
+    [attractions, foodSpots, switchPanel],
   );
 
-  // Riordino
+  // ── Azioni dal pannello ───────────────────────────────────────────────────
+
+  const handleAdd = () => {
+    if (!preview || !previewKind) return;
+    if (previewKind === "attraction") {
+      onAddAttraction(preview);
+      switchPanel("list", () => setPreview(null));
+    } else {
+      // food
+      if (currentSlots.length === 0) {
+        onAddFood(preview, null);
+        switchPanel("list", () => setPreview(null));
+      } else {
+        switchPanel("food-insert");
+      }
+    }
+  };
+
+  const handleRemove = () => {
+    if (!preview || !previewKind) return;
+    const kind = previewKind === "attraction" ? "attraction" : "meal";
+    const ex   = currentSlots.find((s) => s.kind === kind && s.attraction.id === preview.id);
+    if (ex) onRemove(ex.slotId);
+    switchPanel("list", () => setPreview(null));
+  };
+
+  const insertFood = (afterSlotId: string | null) => {
+    if (!preview) return;
+    onAddFood(preview, afterSlotId);
+    switchPanel("list", () => setPreview(null));
+  };
+
+  const backToList = () => {
+    switchPanel("list", () => {
+      setPreview(null);
+      setPreviewKind(null);
+    });
+  };
+
+  // ── Riordino slot ─────────────────────────────────────────────────────────
+
   const moveUp = (idx: number) => {
     if (idx === 0) return;
     const ids = currentSlots.map((s) => s.slotId);
@@ -270,24 +365,56 @@ export function BuilderMap({
     onReorder(ids);
   };
 
-  // Inserimento food
-  const insertFood = (afterSlotId: string | null) => {
-    if (!pendingFood) return;
-    onAddFood(pendingFood, afterSlotId);
-    setPendingFood(null);
-  };
+  // ── Helper display ────────────────────────────────────────────────────────
 
-  // Helper display
   const slotEmoji = (s: MapSlot) => {
     if (s.kind === "meal") return "🍴";
     return ATTR_EMOJI[(s.attraction.attraction_type ?? "").toLowerCase()] ?? "📍";
   };
-
   const slotName = (s: MapSlot) =>
     (lang === "en" && s.attraction.name_en) ? s.attraction.name_en : s.attraction.name;
-
   const attrOrder = (idx: number) =>
     currentSlots.slice(0, idx + 1).filter((s) => s.kind === "attraction").length;
+
+  const previewName = preview
+    ? ((lang === "en" && preview.name_en) ? preview.name_en : preview.name)
+    : "";
+  const previewDesc = preview
+    ? ((lang === "en" && preview.description_en) ? preview.description_en : preview.description) ?? ""
+    : "";
+  const previewEmoji = preview
+    ? (previewKind === "meal"
+        ? "🍴"
+        : (ATTR_EMOJI[(preview.attraction_type ?? "").toLowerCase()] ?? "📍"))
+    : "";
+  const previewColor = preview && previewKind === "attraction"
+    ? (LEVEL_COLORS[preview.category_level] ?? colors.accentGold)
+    : FOOD_COLOR;
+
+  const isAlreadyAdded = !!preview && (previewKind === "attraction"
+    ? currentSlots.some((s) => s.kind === "attraction" && s.attraction.id === preview.id)
+    : currentSlots.some((s) => s.kind === "meal"       && s.attraction.id === preview.id));
+
+  // ── Filtri ────────────────────────────────────────────────────────────────
+
+  const toggleLevel = (lvl: number) => {
+    setFilter((prev) => {
+      const next = prev.levels.includes(lvl)
+        ? prev.levels.filter((l) => l !== lvl)
+        : [...prev.levels, lvl];
+      return { ...prev, levels: next };
+    });
+  };
+  const toggleFood = () => setFilter((prev) => ({ ...prev, food: !prev.food }));
+
+  const FILTER_CHIPS = [
+    { id: 1,      label: lang === "en" ? "Iconic"   : "Iconica",  color: LEVEL_COLORS[1], onPress: () => toggleLevel(1), active: filter.levels.includes(1) },
+    { id: 2,      label: lang === "en" ? "Curated"  : "Ricercata",color: LEVEL_COLORS[2], onPress: () => toggleLevel(2), active: filter.levels.includes(2) },
+    { id: 3,      label: lang === "en" ? "Hidden"   : "Nascosta", color: LEVEL_COLORS[3], onPress: () => toggleLevel(3), active: filter.levels.includes(3) },
+    { id: "food", label: lang === "en" ? "Food"     : "Cibo",     color: FOOD_COLOR,      onPress: toggleFood,            active: filter.food               },
+  ] as const;
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -310,47 +437,176 @@ export function BuilderMap({
           </TouchableOpacity>
         </View>
 
-        {/* ── Mappa ── */}
+        {/* ── Mappa + chip filtri sovrapposti ── */}
         <View style={styles.mapWrap}>
           <WebView
             ref={wvRef}
-            source={{ html: htmlRef.current, baseUrl: "https://unpkg.com" }}
+            source={{ html: mapHtml, baseUrl: "https://unpkg.com" }}
             originWhitelist={["*"]}
             javaScriptEnabled
             domStorageEnabled
             allowUniversalAccessFromFileURLs
             onMessage={handleMessage}
+            onError={() => setMapError(true)}
             style={[styles.webview, { backgroundColor: colors.bg }]}
             scrollEnabled={false}
             bounces={false}
             overScrollMode="never"
           />
-          {!ready && (
+          {!ready && !mapError && (
             <View style={[styles.loadingOverlay, { backgroundColor: colors.bg }]}>
               <ActivityIndicator color={colors.accentGold} size="large" />
+            </View>
+          )}
+          {mapError && (
+            <View style={[styles.loadingOverlay, { backgroundColor: colors.bg }]}>
+              <Ionicons name="wifi-outline" size={40} color={colors.textMuted} />
+              <Text style={[styles.mapErrorTitle, { color: colors.text }]}>
+                {lang === "en" ? "Map unavailable" : "Mappa non disponibile"}
+              </Text>
+              <Text style={[styles.mapErrorBody, { color: colors.textMuted }]}>
+                {lang === "en"
+                  ? "Check your internet connection and try again."
+                  : "Controlla la connessione internet e riprova."}
+              </Text>
+              <TouchableOpacity
+                style={[styles.mapRetryBtn, { backgroundColor: colors.accentGold }]}
+                onPress={() => {
+                  setMapError(false);
+                  setReady(false);
+                  setMapHtml(buildMapHtml(attractions, foodSpots, isDark));
+                }}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="refresh-outline" size={16} color={colors.bg} />
+                <Text style={[styles.mapRetryText, { color: colors.bg }]}>
+                  {lang === "en" ? "Retry" : "Riprova"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* ── Chip filtri (floating) ── */}
+          {ready && (
+            <View style={styles.filterRow} pointerEvents="box-none">
+              {FILTER_CHIPS.map((chip) => (
+                <TouchableOpacity
+                  key={String(chip.id)}
+                  onPress={chip.onPress}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.filterChip,
+                    chip.active
+                      ? { backgroundColor: chip.color, borderColor: chip.color }
+                      : { backgroundColor: colors.bg + "ee", borderColor: colors.border },
+                  ]}
+                >
+                  <Text style={[styles.filterChipText, { color: chip.active ? "#fff" : colors.textMuted }]}>
+                    {chip.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           )}
         </View>
 
         {/* ── Pannello inferiore ── */}
         <View style={[styles.panel, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
-          {pendingFood ? (
-            /* ── Picker posizione food ── */
+          <Animated.View style={[styles.panelInner, { opacity: panelFadeA }]}>
+
+          {/* ── MODE: dettaglio tappa ── */}
+          {panelMode === "detail" && preview && (
+            <>
+              {/* Testa pannello: back + titolo */}
+              <View style={styles.panelHeader}>
+                <TouchableOpacity onPress={backToList} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Ionicons name="arrow-back" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+                <Text style={[styles.panelTitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+                  {lang === "en" ? "Stop details" : "Dettagli tappa"}
+                </Text>
+              </View>
+
+              <ScrollView contentContainerStyle={styles.detailBody} showsVerticalScrollIndicator={false}>
+                {/* Nome + emoji + badge livello */}
+                <View style={styles.detailNameRow}>
+                  <Text style={styles.detailEmoji}>{previewEmoji}</Text>
+                  <View style={styles.detailNameWrap}>
+                    <Text style={[styles.detailName, { color: colors.text }]}>{previewName}</Text>
+                    {previewKind === "attraction" && (
+                      <View style={[styles.levelBadge, { backgroundColor: previewColor + "22" }]}>
+                        <Text style={[styles.levelBadgeText, { color: previewColor }]}>
+                          {preview.category_level === 1
+                            ? (lang === "en" ? "Iconic"   : "Iconica")
+                            : preview.category_level === 2
+                              ? (lang === "en" ? "Curated" : "Ricercata")
+                              : (lang === "en" ? "Hidden"  : "Nascosta")}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                {/* Meta: durata visita */}
+                {!!preview.estimated_visit_time && (
+                  <View style={styles.metaRow}>
+                    <Ionicons name="time-outline" size={14} color={colors.textSub} />
+                    <Text style={[styles.metaText, { color: colors.textSub }]}>
+                      {preview.estimated_visit_time} min
+                    </Text>
+                  </View>
+                )}
+
+                {/* Descrizione */}
+                {!!previewDesc && (
+                  <Text style={[styles.detailDesc, { color: colors.textSub }]}>{previewDesc}</Text>
+                )}
+
+                {/* Divider */}
+                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                {/* CTA */}
+                {isAlreadyAdded ? (
+                  <TouchableOpacity
+                    style={[styles.ctaRemove, { borderColor: colors.danger + "55", backgroundColor: colors.danger + "10" }]}
+                    onPress={handleRemove}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="trash-outline" size={16} color={colors.danger} />
+                    <Text style={[styles.ctaText, { color: colors.danger }]}>
+                      {lang === "en" ? "Remove from day" : "Rimuovi dalla giornata"}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.ctaAdd, { backgroundColor: previewColor }]}
+                    onPress={handleAdd}
+                    activeOpacity={0.85}
+                  >
+                    <Ionicons name="add-circle-outline" size={18} color="#fff" />
+                    <Text style={[styles.ctaText, { color: "#fff" }]}>
+                      {lang === "en" ? "Add to day" : "Aggiungi alla giornata"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+            </>
+          )}
+
+          {/* ── MODE: inserimento posizione food ── */}
+          {panelMode === "food-insert" && preview && (
             <>
               <View style={styles.panelHeader}>
+                <TouchableOpacity onPress={() => switchPanel("detail")} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Ionicons name="arrow-back" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
                 <Ionicons name="restaurant-outline" size={15} color={FOOD_COLOR} />
                 <Text style={[styles.panelTitle, { color: colors.text }]} numberOfLines={1}>
                   {lang === "en" ? "Insert after…" : "Inserisci dopo…"}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => setPendingFood(null)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                </TouchableOpacity>
               </View>
               <Text style={[styles.pendingFoodName, { color: FOOD_COLOR }]} numberOfLines={1}>
-                🍴 {slotName({ slotId: "", kind: "meal", attraction: pendingFood })}
+                🍴 {previewName}
               </Text>
               <ScrollView contentContainerStyle={styles.insertList} showsVerticalScrollIndicator={false}>
                 <TouchableOpacity
@@ -378,13 +634,15 @@ export function BuilderMap({
                 ))}
               </ScrollView>
             </>
-          ) : (
-            /* ── Lista tappe ── */
+          )}
+
+          {/* ── MODE: lista tappe giornata ── */}
+          {panelMode === "list" && (
             <>
               <View style={styles.panelHeader}>
                 <Text style={[styles.panelTitle, { color: colors.text }]}>
                   {currentSlots.length === 0
-                    ? (lang === "en" ? "Tap attractions on the map" : "Tocca le attrazioni sulla mappa")
+                    ? (lang === "en" ? "Tap a marker to see details" : "Tocca un marker per i dettagli")
                     : `${currentSlots.length} ${lang === "en"
                         ? `stop${currentSlots.length !== 1 ? "s" : ""}`
                         : `tapp${currentSlots.length !== 1 ? "e" : "a"}`}`}
@@ -396,8 +654,8 @@ export function BuilderMap({
                   <Ionicons name="map-outline" size={36} color={colors.border} />
                   <Text style={[styles.emptyHint, { color: colors.textMuted }]}>
                     {lang === "en"
-                      ? "Tap a marker to add a stop.\nGreen markers are food spots."
-                      : "Tocca un marker per aggiungere una tappa.\nI marker verdi sono ristoranti."}
+                      ? "Tap a marker to view details and add a stop.\nGreen markers are food spots."
+                      : "Tocca un marker per vedere i dettagli e aggiungere la tappa.\nI marker verdi sono ristoranti."}
                   </Text>
                 </View>
               ) : (
@@ -449,8 +707,9 @@ export function BuilderMap({
               )}
             </>
           )}
-        </View>
 
+          </Animated.View>
+        </View>
       </View>
     </Modal>
   );
@@ -458,7 +717,7 @@ export function BuilderMap({
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const PANEL_H = Math.round(SCREEN_H * 0.38);
+const PANEL_H = Math.round(SCREEN_H * 0.40);
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -470,32 +729,127 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
-  headerText: { flex: 1 },
+  headerText:  { flex: 1 },
   headerTitle: { fontSize: 16, fontWeight: "700" },
-  headerSub: { fontSize: 12, marginTop: 1 },
+  headerSub:   { fontSize: 12, marginTop: 1 },
   closeBtn: {
     width: 32, height: 32, borderRadius: 16,
     alignItems: "center", justifyContent: "center",
     marginLeft: 10,
   },
-  mapWrap: { flex: 1 },
-  webview: { flex: 1 },
+
+  // ── Mappa + filtri ──────────────────────────────────────────────────────────
+  mapWrap:      { flex: 1 },
+  webview:      { flex: 1 },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
   },
-  panel: { height: PANEL_H, borderTopWidth: 1 },
-  panelHeader: {
+
+  mapErrorTitle: { fontSize: 16, fontWeight: "700", marginTop: 14, textAlign: "center" },
+  mapErrorBody:  { fontSize: 13, textAlign: "center", lineHeight: 18, marginTop: 6, paddingHorizontal: 32 },
+  mapRetryBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  mapRetryText: { fontSize: 14, fontWeight: "700" },
+
+  filterRow: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    right: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  filterChip: {
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  // ── Pannello ────────────────────────────────────────────────────────────────
+  panel:      { height: PANEL_H, borderTopWidth: 1 },
+  panelInner: { flex: 1 },
+  panelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 6,
   },
   panelTitle: { fontSize: 14, fontWeight: "700", flex: 1 },
+
+  // ── Detail panel ────────────────────────────────────────────────────────────
+  detailBody: { paddingHorizontal: 14, paddingBottom: 14, gap: 8 },
+  detailNameRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  detailEmoji:    { fontSize: 28, lineHeight: 34 },
+  detailNameWrap: { flex: 1, gap: 4 },
+  detailName:     { fontSize: 16, fontWeight: "700", lineHeight: 21 },
+  levelBadge: {
+    alignSelf: "flex-start",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  levelBadgeText: { fontSize: 11, fontWeight: "700" },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaText: { fontSize: 13 },
+  detailDesc: { fontSize: 13, lineHeight: 18 },
+  divider:    { height: 1, marginVertical: 4 },
+
+  ctaAdd: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 13,
+  },
+  ctaRemove: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 13,
+    borderWidth: 1.5,
+  },
+  ctaText: { fontSize: 15, fontWeight: "800" },
+
+  // ── Food insert ─────────────────────────────────────────────────────────────
   pendingFoodName: { fontSize: 13, fontWeight: "600", paddingHorizontal: 14, marginBottom: 6 },
+  insertList: { paddingHorizontal: 12, paddingBottom: 12, gap: 6 },
+  insertRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  insertEmoji: { fontSize: 15 },
+  insertLabel: { fontSize: 13, flex: 1 },
+
+  // ── Stop list ───────────────────────────────────────────────────────────────
   emptyPanel: {
     flex: 1,
     alignItems: "center",
@@ -503,8 +857,8 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 40,
   },
-  emptyHint: { fontSize: 13, textAlign: "center", lineHeight: 19 },
-  stopList: { paddingHorizontal: 12, paddingBottom: 12, gap: 6 },
+  emptyHint:  { fontSize: 13, textAlign: "center", lineHeight: 19 },
+  stopList:   { paddingHorizontal: 12, paddingBottom: 12, gap: 6 },
   stopRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -519,19 +873,7 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     flexShrink: 0,
   },
-  badgeText: { fontSize: 10, fontWeight: "800", color: "#fff" },
-  stopName: { flex: 1, fontSize: 13, fontWeight: "600" },
+  badgeText:  { fontSize: 10, fontWeight: "800", color: "#fff" },
+  stopName:   { flex: 1, fontSize: 13, fontWeight: "600" },
   rowActions: { flexDirection: "row", alignItems: "center", gap: 6 },
-  insertList: { paddingHorizontal: 12, paddingBottom: 12, gap: 6 },
-  insertRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  insertEmoji: { fontSize: 15 },
-  insertLabel: { fontSize: 13, flex: 1 },
 });

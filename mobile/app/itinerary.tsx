@@ -197,11 +197,7 @@ function neighborhoodProsCons(tags: string[] | undefined, lang: string): { pros:
   if (hasAny(["tranquillo", "famiglie", "sicuro"])) add(cons, copy.calm);
   if (hasAny(["budget"])) add(cons, copy.simple);
   if (hasAny(["collina", "panoramica", "vista panoramica"])) add(cons, copy.hilly);
-
-  add(pros, copy.sights);
-  add(pros, copy.connected);
-  add(cons, copy.crowds);
-  add(cons, copy.variable);
+  if (hasAny(["mare", "spiaggia", "porto", "lusso", "turistico"])) add(cons, copy.variable);
 
   return { pros, cons };
 }
@@ -652,19 +648,28 @@ export default function ItineraryScreen() {
   // Legge l'itinerario da AsyncStorage (passato da index/create/saved senza URL params)
   useEffect(() => {
     AsyncStorage.getItem("wayra_pending_itinerary")
-      .then((val) => {
+      .then(async (val) => {
         if (val) {
+          // Itinerario appena generato: ha la precedenza su tutto
           try { setItinerary(JSON.parse(val) as Itinerary); } catch (e) {
             if (__DEV__) console.warn("[itinerary] JSON parse failed:", e);
           }
-          AsyncStorage.removeItem("wayra_pending_itinerary");
+          await AsyncStorage.removeItem("wayra_pending_itinerary");
         } else {
-          // Fallback: vecchio metodo con URL params (backward compat)
-          const rawData = params.data;
-          const dataStr = Array.isArray(rawData) ? rawData[0] : rawData;
-          if (dataStr) {
-            try { setItinerary(JSON.parse(dataStr as string) as Itinerary); } catch (e) {
-              if (__DEV__) console.warn("[itinerary] JSON parse (params) failed:", e);
+          // Prova il draft autosalvato (app chiusa/backgroundata con itinerario aperto)
+          const draft = await AsyncStorage.getItem("wayra_draft_itinerary").catch(() => null);
+          if (draft) {
+            try { setItinerary(JSON.parse(draft) as Itinerary); } catch (e) {
+              if (__DEV__) console.warn("[itinerary] draft parse failed:", e);
+            }
+          } else {
+            // Fallback: vecchio metodo con URL params (backward compat)
+            const rawData = params.data;
+            const dataStr = Array.isArray(rawData) ? rawData[0] : rawData;
+            if (dataStr) {
+              try { setItinerary(JSON.parse(dataStr as string) as Itinerary); } catch (e) {
+                if (__DEV__) console.warn("[itinerary] JSON parse (params) failed:", e);
+              }
             }
           }
         }
@@ -676,6 +681,15 @@ export default function ItineraryScreen() {
         setItineraryLoading(false);
       });
   }, []);
+
+  // Auto-salva il draft ogni volta che l'itinerario cambia (500 ms debounce)
+  useEffect(() => {
+    if (!itinerary) return;
+    const timer = setTimeout(() => {
+      AsyncStorage.setItem("wayra_draft_itinerary", JSON.stringify(itinerary)).catch(() => {});
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [itinerary]);
 
   const { attractions } = useAttractions(itinerary?.city ?? "");
   const { neighborhoods, loading: neighborhoodsLoading } = useNeighborhoods(itinerary?.city ?? "");
@@ -1047,6 +1061,45 @@ export default function ItineraryScreen() {
     setReloadState(null);
   }, [itinerary?.city]);
 
+  // ── Aggiorna nota di una tappa ───────────────────────────────────────────────
+
+  const handleNoteChange = useCallback((dayIndex: number, stopIndex: number, note: string) => {
+    setItinerary((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        days: prev.days.map((d, i) =>
+          i !== dayIndex ? d : {
+            ...d,
+            stops: d.stops.map((s, si) =>
+              si !== stopIndex ? s : { ...s, notes: note },
+            ),
+          },
+        ),
+      };
+    });
+  }, []);
+
+  // ── Riordina tappe di un giorno ─────────────────────────────────────────────
+
+  const handleReorderStops = useCallback((dayIndex: number, newStops: Stop[]) => {
+    setItinerary((prev) => {
+      if (!prev) return prev;
+      const attractionStops = newStops.filter((s) => s.type === "attraction");
+      const newMapsLink = attractionStops.length >= 2
+        ? "https://www.google.com/maps/dir/" +
+          attractionStops.map((s) => mapsWaypoint(s, prev.city)).join("/") +
+          "?travelmode=walking"
+        : prev.days[dayIndex]?.maps_link ?? "";
+      return {
+        ...prev,
+        days: prev.days.map((d, i) =>
+          i !== dayIndex ? d : { ...d, stops: newStops, maps_link: newMapsLink },
+        ),
+      };
+    });
+  }, []);
+
   const handleExportPdf = async () => {
     if (!itinerary) return;
 
@@ -1211,6 +1264,8 @@ export default function ItineraryScreen() {
                 onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
                 onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
                 onReloadDay={() => handleReloadDay(i)}
+                onReorder={(newStops) => handleReorderStops(i, newStops)}
+                onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
               />
             ))}
           </>

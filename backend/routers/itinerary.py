@@ -43,6 +43,7 @@ class ItineraryRequest(BaseModel):
 @router.get("/city-info")
 def city_info(city: str = "roma", db: Session = Depends(get_db)):
     """Return max sensible days per level for a city."""
+    city = city.lower().strip()
     base = (
         db.query(Attraction)
         .filter(Attraction.city == city, Attraction.is_food_spot == False)  # noqa: E712

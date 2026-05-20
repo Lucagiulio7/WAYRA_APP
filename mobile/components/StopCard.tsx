@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   LayoutAnimation,
@@ -50,9 +51,10 @@ interface Props {
   stop: Stop;
   index?: number;
   onReplace?: () => void;
+  onNoteChange?: (note: string) => void;
 }
 
-export function StopCard({ stop, index, onReplace }: Props) {
+export function StopCard({ stop, index, onReplace, onNoteChange }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { lang, t } = useLanguage();
   const { colors, isDark } = useTheme();
@@ -69,7 +71,7 @@ export function StopCard({ stop, index, onReplace }: Props) {
 
   // "food" = vecchio formato, "meal" = formato backend attuale
   if (stop.type === "food" || stop.type === "meal") {
-    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} />;
+    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} onNoteChange={onNoteChange} />;
   }
 
   return (
@@ -81,6 +83,7 @@ export function StopCard({ stop, index, onReplace }: Props) {
       lang={lang}
       levelLabels={LEVEL_LABELS}
       onReplace={onReplace}
+      onNoteChange={onNoteChange}
       colors={colors}
       isDark={isDark}
     />
@@ -90,10 +93,15 @@ export function StopCard({ stop, index, onReplace }: Props) {
 // ── Food stop ─────────────────────────────────────────────────────────────────
 
 function FoodStop({
-  stop, lang, index, colors, isDark,
+  stop, lang, index, colors, isDark, onNoteChange,
 }: {
   stop: Stop; lang: string; index: number; colors: any; isDark: boolean;
+  onNoteChange?: (note: string) => void;
 }) {
+  const [expanded, setExpanded]   = useState(false);
+  const [noteText, setNoteText]   = useState(stop.notes ?? "");
+  useEffect(() => { setNoteText(stop.notes ?? ""); }, [stop.notes]);
+
   const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
   const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
   const emoji = stop.attraction_type ? getAttractionEmoji(stop.attraction_type) : "🍴";
@@ -104,11 +112,20 @@ function FoodStop({
     catch { Alert.alert("Errore", "Impossibile aprire Maps."); }
   };
 
+  const toggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded((v) => !v);
+  };
+
   const foodBg     = isDark ? "#0f1f1a" : "#eaf7f3";
   const foodBorder = isDark ? "#1e3a2e" : "#b8dfd4";
 
   return (
-    <View style={[styles.foodStopCard, { backgroundColor: foodBg, borderColor: foodBorder }]}>
+    <TouchableOpacity
+      style={[styles.foodStopCard, { backgroundColor: foodBg, borderColor: foodBorder }]}
+      onPress={toggle}
+      activeOpacity={0.85}
+    >
       <View style={styles.row}>
         <View style={[styles.foodIndexBadge, { borderColor: colors.accentGreen, backgroundColor: colors.accentGreen + "28" }]}>
           <Text style={[styles.foodIndexText, { color: colors.accentGreen }]}>{index}</Text>
@@ -128,15 +145,28 @@ function FoodStop({
         >
           <Ionicons name="location-outline" size={18} color={colors.accentGreen} />
         </TouchableOpacity>
+        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
       </View>
-    </View>
+
+      {expanded && (
+        <View style={[styles.expandedBody, { borderTopColor: foodBorder }]}>
+          <NoteInput
+            value={noteText}
+            onChange={setNoteText}
+            onBlur={() => onNoteChange?.(noteText)}
+            lang={lang}
+            colors={colors}
+          />
+        </View>
+      )}
+    </TouchableOpacity>
   );
 }
 
 // ── Attraction stop ───────────────────────────────────────────────────────────
 
 function AttractionStop({
-  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, colors, isDark,
+  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, onNoteChange, colors, isDark,
 }: {
   stop: Stop;
   index: number;
@@ -145,9 +175,13 @@ function AttractionStop({
   lang: string;
   levelLabels: Record<number, string>;
   onReplace?: () => void;
+  onNoteChange?: (note: string) => void;
   colors: any;
   isDark: boolean;
 }) {
+  const [noteText, setNoteText] = useState(stop.notes ?? "");
+  useEffect(() => { setNoteText(stop.notes ?? ""); }, [stop.notes]);
+
   const color  = LEVEL_COLORS[stop.category_level ?? 1] ?? "#ccc";
   const museum = isMuseum(stop.attraction_type);
   const emoji  = getAttractionEmoji(stop.attraction_type);
@@ -272,9 +306,45 @@ function AttractionStop({
               ))}
             </View>
           )}
+          <NoteInput
+            value={noteText}
+            onChange={setNoteText}
+            onBlur={() => onNoteChange?.(noteText)}
+            lang={lang}
+            colors={colors}
+          />
         </View>
       )}
     </TouchableOpacity>
+  );
+}
+
+// ── Note Input ────────────────────────────────────────────────────────────────
+
+function NoteInput({
+  value, onChange, onBlur, lang, colors,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onBlur: () => void;
+  lang: string;
+  colors: any;
+}) {
+  return (
+    <View style={[styles.noteWrap, { borderColor: colors.border, backgroundColor: colors.inputBg ?? colors.bg }]}>
+      <Ionicons name="pencil-outline" size={13} color={colors.textMuted} style={styles.noteIcon} />
+      <TextInput
+        style={[styles.noteInput, { color: colors.text }]}
+        value={value}
+        onChangeText={onChange}
+        onBlur={onBlur}
+        placeholder={lang === "en" ? "Add a note…" : "Aggiungi una nota…"}
+        placeholderTextColor={colors.textMuted}
+        multiline
+        maxLength={300}
+        selectionColor={colors.accentGold}
+      />
+    </View>
   );
 }
 
@@ -391,6 +461,25 @@ const styles = StyleSheet.create({
   tags:  { flexDirection: "row", flexWrap: "wrap", gap: 5 },
   tag:   { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   tagText: { fontSize: 11 },
+  noteWrap: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginTop: 2,
+  },
+  noteIcon: { marginTop: 3, flexShrink: 0 },
+  noteInput: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    minHeight: 36,
+    paddingVertical: 0,
+  },
+
   freeTimeCard: {
     flexDirection: "row",
     alignItems: "flex-start",

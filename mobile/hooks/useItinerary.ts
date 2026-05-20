@@ -9,6 +9,16 @@ interface GenerateParams {
   level: ExperienceLevel;
 }
 
+// ── Cache sessione ────────────────────────────────────────────────────────────
+// Vive a livello di modulo: sopravvive ai re-render ma non al riavvio dell'app.
+// Evita una seconda chiamata API per la stessa combinazione città+giorni+livello.
+
+const generationCache = new Map<string, Itinerary>();
+
+function cacheKey(p: GenerateParams): string {
+  return `${p.city}|${p.num_days}|${p.level}`;
+}
+
 interface UseItineraryReturn {
   itinerary: Itinerary | null;
   loading: boolean;
@@ -22,22 +32,47 @@ async function generateItinerary(
   params: GenerateParams,
   signal: AbortSignal,
 ): Promise<Itinerary> {
+  // ── Cache hit ──
+  const key = cacheKey(params);
+  const cached = generationCache.get(key);
+  if (cached) return cached;
+
   const apiLevel = params.level === "mix" ? [1, 2, 3] : params.level;
 
-  const resp = await fetch(`${API_BASE_URL}/api/itinerary/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      city: params.city,
-      num_days: params.num_days,
-      level: apiLevel,
-    }),
-    signal,
-  });
+  let resp: Response;
+  try {
+    resp = await fetch(`${API_BASE_URL}/api/itinerary/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        city: params.city,
+        num_days: params.num_days,
+        level: apiLevel,
+      }),
+      signal,
+    });
+  } catch (err: any) {
+    // Network-level error (server unreachable, no connection, etc.)
+    if (err?.name === "AbortError") throw err;
+    throw new Error(
+      `Impossibile contattare il server (${API_BASE_URL}). Assicurati di essere connesso alla stessa rete del backend.`,
+    );
+  }
 
-  const json = await resp.json();
+  let json: any;
+  try {
+    json = await resp.json();
+  } catch {
+    throw new Error(`Il server ha risposto con dati non validi (HTTP ${resp.status}).`);
+  }
+
   // FastAPI restituisce errori con { detail: "..." }, successi con { data: ... }
-  if (!resp.ok) throw new Error(json.detail ?? json.error ?? "Errore sconosciuto dal server");
+  if (!resp.ok) throw new Error(json.detail ?? json.error ?? `Errore del server (HTTP ${resp.status}).`);
+  if (!json.data) throw new Error("Il server non ha restituito dati. Verifica che il backend sia aggiornato.");
+
+  // ── Salva in cache ──
+  generationCache.set(key, json.data as Itinerary);
+
   return json.data as Itinerary;
 }
 
@@ -79,7 +114,7 @@ export function useItinerary(): UseItineraryReturn {
 
   const errorMessage = mutation.error
     ? mutation.error.name === "AbortError"
-      ? "Timeout: la funzione non risponde. Riprova tra qualche secondo."
+      ? "Timeout: la generazione ha impiegato troppo. Riprova tra qualche secondo."
       : (mutation.error.message ?? "Impossibile raggiungere il server.")
     : null;
 

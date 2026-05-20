@@ -13,7 +13,7 @@ def list_attractions(
     level: int | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    q = db.query(Attraction).filter(Attraction.city == city.lower())
+    q = db.query(Attraction).filter(Attraction.city == city.lower(), Attraction.is_food_spot == False)  # noqa: E712
     if level is not None:
         q = q.filter(Attraction.category_level == level)
     return {"data": [a.to_dict() for a in q.all()]}

@@ -105,6 +105,63 @@ export function SkeletonList({ count = 6 }: ListProps) {
   );
 }
 
+// ─── ItinerarySkeleton ────────────────────────────────────────────────────────
+// Usato nell'overlay di generazione per mostrare visivamente "cosa stiamo costruendo".
+
+function DaySkeletonMini({ stopsCount }: { stopsCount: number }) {
+  const { colors } = useTheme();
+  return (
+    <View style={[iStyles.dayCard, { backgroundColor: colors.card2, borderColor: colors.border }]}>
+      {/* Header giorno */}
+      <View style={iStyles.dayHeader}>
+        <SkeletonBox width={68} height={11} borderRadius={4} />
+        <SkeletonBox width={28} height={11} borderRadius={4} />
+      </View>
+      {/* Tappe */}
+      {Array.from({ length: stopsCount }).map((_, i) => (
+        <View key={i} style={iStyles.stopRow}>
+          <SkeletonBox width={22} height={22} borderRadius={11} style={{ flexShrink: 0 }} />
+          <View style={iStyles.stopText}>
+            <SkeletonBox width="70%" height={10} borderRadius={4} />
+            <SkeletonBox width="42%" height={8}  borderRadius={4} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export function ItinerarySkeleton({ days = 2 }: { days?: number }) {
+  return (
+    <View style={iStyles.wrap}>
+      {Array.from({ length: days }).map((_, d) => (
+        <DaySkeletonMini key={d} stopsCount={d === 0 ? 3 : 2} />
+      ))}
+    </View>
+  );
+}
+
+const iStyles = StyleSheet.create({
+  wrap:    { width: "100%", gap: 8 },
+  dayCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 10,
+    gap: 8,
+  },
+  dayHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  stopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  stopText: { flex: 1, gap: 5 },
+});
+
 // ─── Stili ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({

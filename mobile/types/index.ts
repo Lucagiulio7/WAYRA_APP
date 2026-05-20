@@ -17,6 +17,7 @@ export interface Stop {
   meal_type?: string | null;
   rating?: number | null;
   ticket_url?: string | null;
+  notes?: string;           // nota libera dell'utente
 }
 
 export interface Attraction {

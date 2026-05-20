@@ -9,8 +9,8 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ItineraryDay, Restaurant } from "@/types";
-import { StopCard } from "./StopCard";
+import { ItineraryDay, Restaurant, Stop } from "@/types";
+import { DraggableStopList } from "./DraggableStopList";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -110,9 +110,11 @@ interface Props {
   onToggleOpen?: () => void;
   onReplaceStop?: (stopId: number) => void;
   onReloadDay?: () => void;
+  onReorder?: (newStops: Stop[]) => void;
+  onNoteChange?: (stopIndex: number, note: string) => void;
 }
 
-export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop, onReloadDay }: Props) {
+export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop, onReloadDay, onReorder, onNoteChange }: Props) {
   const [internalOpen, setInternalOpen] = useState(day.day === 1);
   const [foodOpen, setFoodOpen] = useState(false);
   const [snackOpen, setSnackOpen] = useState(false);
@@ -159,7 +161,8 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
     if (foodOpen) { setSnackOpen(false); setMealOpen(false); }
   };
 
-  const openMaps = async (url: string) => {
+  const openMaps = async (url: string | null | undefined) => {
+    if (!url) return;
     try {
       const canOpen = await Linking.canOpenURL(url);
       if (canOpen) await Linking.openURL(url);
@@ -168,8 +171,6 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
       Alert.alert("Errore", "Impossibile aprire il link.");
     }
   };
-
-  let attractionIndex = 0;
 
   return (
     <View style={[styles.wrapper, { backgroundColor: colors.card, borderColor: colors.border }, open && { borderColor: accent, backgroundColor: accent + "10" }]}>
@@ -216,20 +217,15 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
 
       {open && (
         <View style={styles.body}>
-          {/* Stop attrazioni */}
-          {day.stops.map((stop, i) => {
-            const idx = stop.type === "attraction" ? ++attractionIndex : undefined;
-            return (
-              <StopCard
-                key={`${stop.type}-${stop.id}-${i}`}
-                stop={stop}
-                index={idx}
-                onReplace={stop.type === "attraction" && stop.id > 0 && onReplaceStop
-                  ? () => onReplaceStop(stop.id)
-                  : undefined}
-              />
-            );
-          })}
+          {/* Stop attrazioni — drag-and-drop */}
+          <DraggableStopList
+            stops={day.stops}
+            onReorder={onReorder ?? (() => {})}
+            onReplaceStop={onReplaceStop}
+            onNoteChange={onNoteChange}
+            lang={lang}
+            colors={colors}
+          />
 
           {/* Pulsante percorso Maps */}
           {!!day.maps_link && (

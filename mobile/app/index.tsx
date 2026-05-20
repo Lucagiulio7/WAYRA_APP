@@ -24,7 +24,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
-import { SkeletonBox } from "@/components/Skeleton";
+import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
@@ -232,6 +232,7 @@ export default function HomeScreen() {
   const [showWorldMap, setShowWorldMap]     = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
+  const [genSeconds, setGenSeconds]         = useState(0);
   const guideTargets = useRef<Map<string, View>>(new Map());
 
   const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : GENERATING_MESSAGES_IT;
@@ -260,6 +261,14 @@ export default function HomeScreen() {
     const id = setInterval(() => {
       setGenMsgIndex((i) => Math.min(i + 1, genMessages.length - 1));
     }, 3000);
+    return () => clearInterval(id);
+  }, [loading]);
+
+  // ── Contatore secondi durante la generazione ────────────────────────────────
+  useEffect(() => {
+    if (!loading) { setGenSeconds(0); return; }
+    setGenSeconds(0);
+    const id = setInterval(() => setGenSeconds((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [loading]);
 
@@ -541,6 +550,14 @@ export default function HomeScreen() {
                 />
               ))}
             </View>
+
+            {/* Anteprima skeleton itinerario */}
+            <ItinerarySkeleton days={numDays >= 2 ? 2 : 1} />
+
+            {/* Contatore secondi */}
+            <Text style={[styles.genTimer, { color: genSeconds >= 20 ? colors.danger : colors.textMuted }]}>
+              {genSeconds}s{genSeconds >= 20 ? (lang === "it" ? " · quasi…" : " · almost…") : ""}
+            </Text>
             <TouchableOpacity onPress={cancel} style={[styles.genCancel, { borderColor: colors.border }]} activeOpacity={0.7}>
               <Text style={[styles.genCancelText, { color: colors.textMuted }]}>
                 {lang === "it" ? "Annulla" : "Cancel"}
@@ -1290,8 +1307,14 @@ const styles = StyleSheet.create({
   },
   genDots: { flexDirection: "row", gap: 6, marginTop: 16 },
   genDot: { width: 6, height: 6, borderRadius: 3 },
+  genTimer: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 8,
+    letterSpacing: 0.5,
+  },
   genCancel: {
-    marginTop: 20,
+    marginTop: 12,
     paddingVertical: 8,
     paddingHorizontal: 24,
     borderRadius: 10,
