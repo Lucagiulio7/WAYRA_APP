@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import true, false
 from sqlalchemy.orm import Session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from database.db import get_db
 from database.models import Attraction, Food
@@ -9,6 +11,7 @@ from database.cities import ALL_CITIES
 from services.itinerary_builder import build_itinerary
 
 router = APIRouter(prefix="/api/itinerary", tags=["itinerary"])
+limiter = Limiter(key_func=get_remote_address)
 
 CULTURE_FACTS: dict[str, list[dict]] = {city.CITY_ID: city.CULTURE_FACTS for city in ALL_CITIES}
 
@@ -61,7 +64,8 @@ def city_info(city: str = "roma", db: Session = Depends(get_db)):
 
 
 @router.post("/generate")
-def generate(request: ItineraryRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute;50/hour")
+def generate(http_request: Request, request: ItineraryRequest, db: Session = Depends(get_db)):
     city = request.city
 
     # Fetch attractions and food spots separately

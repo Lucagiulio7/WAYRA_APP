@@ -1,4 +1,5 @@
 import "react-native-url-polyfill/auto";
+import * as Sentry from "@sentry/react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -15,6 +16,17 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { queryClient, asyncStoragePersister } from "@/lib/queryClient";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
+
+// ── Sentry: error monitoring in produzione ────────────────────────────────────
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: __DEV__ ? "development" : "production",
+    tracesSampleRate: __DEV__ ? 0 : 0.2,
+    enableNativeNagger: false, // silenzia warning su web/Expo Go
+  });
+}
 
 SplashScreen.preventAutoHideAsync();
 
