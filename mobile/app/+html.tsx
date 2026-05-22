@@ -15,14 +15,6 @@ export default function Root({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         <ScrollViewStyleReset />
-        {/* Preload Ionicons – evita il FOUT (flash of unstyled text) */}
-        <link
-          rel="preload"
-          href="https://cdn.jsdelivr.net/npm/@expo/vector-icons@15.0.3/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
         {/* Preload BebasNeue da Google Fonts */}
         <link
           rel="preconnect"
@@ -35,14 +27,6 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* Ionicons – font icone vettoriali */
-            @font-face {
-              font-family: 'Ionicons';
-              src: url('https://cdn.jsdelivr.net/npm/@expo/vector-icons@15.0.3/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf') format('truetype');
-              font-weight: normal;
-              font-style: normal;
-              font-display: block;
-            }
             /* BebasNeue – logo WAYRA (fallback CSS se useFonts è lento) */
             @font-face {
               font-family: 'BebasNeue_400Regular';

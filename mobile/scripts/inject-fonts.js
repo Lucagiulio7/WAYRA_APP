@@ -8,13 +8,18 @@
  * silenziosamente e le icone mostrano □ vuoti.
  *
  * Soluzione: dichiarare @font-face nell'<head> HTML prima che JS carichi,
- * usando il percorso esatto dei .ttf bundlati da Expo.
+ * usando il percorso esatto dei .ttf bundlati da Expo, con font-display:block
+ * per garantire la visibilità immediata senza flash o blocchi da CDN esterni.
+ *
+ * NOTA: sostituisce sempre il blocco <style id="expo-fonts"> esistente
+ * (generato da Expo o da una run precedente) per garantire che i path locali
+ * siano sempre aggiornati e non confliggano con CDN.
  */
 
 const fs   = require("fs");
 const path = require("path");
 
-const DIST      = path.join(__dirname, "../dist");
+const DIST       = path.join(__dirname, "../dist");
 const INDEX_HTML = path.join(DIST, "index.html");
 
 // ── Trova tutti i .ttf nella cartella assets ──────────────────────────────────
@@ -35,9 +40,8 @@ function findTtfFiles(dir) {
 // "BebasNeue_400Regular.b2b293....ttf"             → "BebasNeue_400Regular"
 
 function extractFontFamily(filePath) {
-  const base  = path.basename(filePath, ".ttf");   // es. "Ionicons.b4eb09..."
+  const base  = path.basename(filePath, ".ttf");
   const parts = base.split(".");
-  // L'hash è sempre l'ultimo segmento — tutto prima è il nome del font
   return parts.length >= 2 ? parts.slice(0, -1).join(".") : base;
 }
 
@@ -55,12 +59,13 @@ if (ttfFiles.length === 0) {
   process.exit(0);
 }
 
-// Genera una riga @font-face per ogni font
+// Genera una riga @font-face per ogni font, con font-display:block
+// per garantire che le icone siano visibili subito senza dipendenze da CDN.
 const declarations = ttfFiles
   .map((filePath) => {
     const webPath    = "/" + path.relative(DIST, filePath).replace(/\\/g, "/");
     const fontFamily = extractFontFamily(filePath);
-    return `    @font-face{font-family:'${fontFamily}';src:url('${webPath}')format('truetype');font-weight:normal;font-style:normal;}`;
+    return `    @font-face{font-family:'${fontFamily}';src:url('${webPath}') format('truetype');font-weight:normal;font-style:normal;font-display:block;}`;
   })
   .join("\n");
 
@@ -68,16 +73,17 @@ const styleBlock = `  <style id="expo-fonts">\n${declarations}\n  </style>`;
 
 let html = fs.readFileSync(INDEX_HTML, "utf8");
 
-// Evita doppia iniezione
+// Rimuovi sempre il blocco expo-fonts esistente (Expo o run precedente)
+// per garantire path locali aggiornati senza conflitti CDN.
 if (html.includes('id="expo-fonts"')) {
-  console.log("ℹ️  Font già iniettati — skip.");
-  process.exit(0);
+  html = html.replace(/<style id="expo-fonts">[\s\S]*?<\/style>/, "");
+  console.log("ℹ️  Rimosso blocco expo-fonts esistente (verrà riscritto con path locali).");
 }
 
 html = html.replace("</head>", `${styleBlock}\n</head>`);
 fs.writeFileSync(INDEX_HTML, html, "utf8");
 
-console.log(`✅  Iniettati ${ttfFiles.length} @font-face in dist/index.html`);
+console.log(`✅  Iniettati ${ttfFiles.length} @font-face (font-display:block) in dist/index.html`);
 ttfFiles.forEach((f) => {
   console.log(`   • ${extractFontFamily(f)}`);
 });
