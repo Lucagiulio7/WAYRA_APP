@@ -38,7 +38,7 @@ const translations = {
     itineraryUnavailable: "Itinerario non disponibile.",
     goBack: "Torna indietro",
     // DayCard
-    day: "Giorno",
+    dayLabel: "Giorno",
     places: "luoghi",
     openRouteMaps: "Apri percorso su Maps",
     wantToEat: "Vuoi mangiare qualcosa?",
@@ -96,7 +96,7 @@ const translations = {
     itineraryUnavailable: "Itinerary not available.",
     goBack: "Go back",
     // DayCard
-    day: "Day",
+    dayLabel: "Day",
     places: "places",
     openRouteMaps: "Open route on Maps",
     wantToEat: "Want to eat something?",

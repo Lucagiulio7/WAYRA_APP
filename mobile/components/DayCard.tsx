@@ -183,7 +183,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
           </View>
           <View style={styles.flex1}>
             <View style={styles.dayTitleRow}>
-              <Text style={[styles.dayTitle, { color: colors.text }]}>{t.day} {day.day}</Text>
+              <Text style={[styles.dayTitle, { color: colors.text }]}>{t.dayLabel} {day.day}</Text>
               {walkingKm > 0 && (
                 <View style={[styles.walkBadge, { borderColor: accent + "66", backgroundColor: accent + "18" }]}>
                   <Ionicons name="walk-outline" size={12} color={accent} />
