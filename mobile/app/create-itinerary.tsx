@@ -39,6 +39,18 @@ const ATTRACTION_EMOJI: Record<string, string> = {
   panorama: "🌅", mercato: "🛒", palazzo: "🏰",
 };
 
+const ATTRACTION_TYPE_EN: Record<string, string> = {
+  museo: "Museum", chiesa: "Church", parco: "Park", piazza: "Square",
+  archeologia: "Archaeology", monumento: "Monument", quartiere: "District",
+  panorama: "Viewpoint", mercato: "Market", palazzo: "Palace",
+  viale: "Avenue", strada: "Street", ponte: "Bridge", teatro: "Theatre",
+  fontana: "Fountain", giardino: "Garden", castello: "Castle",
+  basilica: "Basilica", attrazione: "Attraction",
+  ristorante: "Restaurant", pizzeria: "Pizzeria", bar: "Bar",
+  gelateria: "Gelateria", osteria: "Inn", trattoria: "Trattoria",
+  friggitoria: "Fried food", "street food": "Street food",
+};
+
 const FOOD_EMOJI: Record<string, string> = {
   ristorante: "🍽️", trattoria: "🍝", osteria: "🫕", pizzeria: "🍕",
   gelateria: "🍦", "street food": "🥪", bar: "☕", friggitoria: "🍟",
@@ -157,6 +169,13 @@ function getEmoji(type?: string | null, isFood = false): string {
   const key = (type ?? "").toLowerCase();
   if (isFood) return FOOD_EMOJI[key] ?? "🍴";
   return ATTRACTION_EMOJI[key] ?? "📍";
+}
+
+function translateType(type?: string | null, lang = "it"): string | null {
+  if (!type) return null;
+  const key = type.toLowerCase();
+  if (lang === "en") return ATTRACTION_TYPE_EN[key] ?? (type.charAt(0).toUpperCase() + type.slice(1));
+  return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
 function priceLabel(level: number): string {
@@ -608,6 +627,12 @@ export default function CreateItineraryScreen() {
     setAttractionDetail({ item: a, kind });
   }, []);
 
+  const handleAddFromDetail = useCallback(() => {
+    if (!attractionDetail) return;
+    placeItemFromList(attractionDetail.item, attractionDetail.kind);
+    setAttractionDetail(null);
+  }, [attractionDetail, placeItemFromList]);
+
   const handleSwitchTab = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);
     if (tab !== "attractions" && tab !== "food") return;
@@ -811,10 +836,9 @@ export default function CreateItineraryScreen() {
           : "";
         return { day: d.day, stops, maps_link: mapsLink, restaurants: [] };
       })
-      .filter((d) => d.stops.length > 0);
 
     const itinerary = {
-      city, num_days: itineraryDays.length, level: 1,
+      city, num_days: days.length, level: 1,
       days: itineraryDays, food_recommendations: foods, culture_facts: cultureFacts,
     };
     await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(itinerary));
@@ -1243,7 +1267,7 @@ export default function CreateItineraryScreen() {
                     <Text style={[styles.detailMeta, attractionDetail.kind === "meal" && styles.detailMetaMeal]}>
                       {attractionDetail.kind === "meal"
                         ? priceLabel(attractionDetail.item.category_level)
-                        : (attractionDetail.item.attraction_type ?? (lang === "en" ? "Attraction" : "Attrazione"))}
+                        : (translateType(attractionDetail.item.attraction_type, lang) ?? (lang === "en" ? "Attraction" : "Attrazione"))}
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setAttractionDetail(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -1257,6 +1281,18 @@ export default function CreateItineraryScreen() {
                       : (attractionDetail.item.description || (lang === "en" ? "No description available." : "Descrizione non disponibile."))}
                   </Text>
                 </ScrollView>
+                <TouchableOpacity
+                  style={styles.detailAddBtn}
+                  onPress={handleAddFromDetail}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="add-circle-outline" size={16} color={colors.bg} />
+                  <Text style={styles.detailAddText}>
+                    {lang === "en"
+                      ? `Add to Day ${days[activeDayIndex]?.day ?? 1}`
+                      : `Aggiungi al Giorno ${days[activeDayIndex]?.day ?? 1}`}
+                  </Text>
+                </TouchableOpacity>
                 <View style={styles.detailActionsRow}>
                   <TouchableOpacity
                     style={styles.detailMapBtn}
@@ -1602,12 +1638,14 @@ function AttractionCard({
   const isMuseum = !isFood && (attraction.attraction_type ?? "").toLowerCase() === "museo";
   const name = lang === "en" && attraction.name_en ? attraction.name_en : attraction.name;
   const emoji = getEmoji(attraction.attraction_type, isFood);
-  const typeLabel = attraction.attraction_type
-    ? attraction.attraction_type.charAt(0).toUpperCase() + attraction.attraction_type.slice(1)
-    : null;
+  const typeLabel = translateType(attraction.attraction_type, lang);
 
   return (
-    <View {...panResponder.panHandlers}>
+    <View
+      {...panResponder.panHandlers}
+      // @ts-ignore — cursor è proprietà web non tipizzata in RN
+      style={Platform.OS === "web" ? { cursor: "grab" } : undefined}
+    >
       <TouchableOpacity
         style={[
           styles.attrCard,
@@ -1617,6 +1655,15 @@ function AttractionCard({
         onPress={() => { if (!dragStarted.current) onPress(); }}
         activeOpacity={0.8}
       >
+        {/* Drag handle — visibile solo su web come affordance */}
+        {Platform.OS === "web" && (
+          <Ionicons
+            name="reorder-three-outline"
+            size={18}
+            color={colors.textMuted}
+            style={{ marginRight: 6, opacity: 0.5 }}
+          />
+        )}
         <View style={styles.attrInfo}>
           <View style={styles.attrTopRow}>
             <Text style={styles.attrEmoji}>{emoji}</Text>
@@ -2320,6 +2367,17 @@ function makeStyles(colors: any) {
     detailMetaMeal: { color: colors.accentGreen },
     detailDescriptionScroll: { maxHeight: 260 },
     detailDescription: { color: colors.textSub, fontSize: 14, lineHeight: 20 },
+    detailAddBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7,
+      backgroundColor: colors.accentGold,
+      borderRadius: 12,
+      paddingVertical: 13,
+      marginBottom: 10,
+    },
+    detailAddText: { color: colors.bg, fontSize: 14, fontWeight: "800" },
     detailActionsRow: {
       flexDirection: "row",
       gap: 10,

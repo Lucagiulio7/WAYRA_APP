@@ -217,7 +217,17 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
 
       {open && (
         <View style={styles.body}>
+          {/* Placeholder giorno vuoto */}
+          {attractionStops.length === 0 && (
+            <View style={[styles.emptyDay, { borderColor: colors.border }]}>
+              <Text style={styles.emptyDayEmoji}>📭</Text>
+              <Text style={[styles.emptyDayText, { color: colors.textMuted }]}>
+                {lang === "en" ? "No attractions added for this day" : "Nessuna attrazione aggiunta per questo giorno"}
+              </Text>
+            </View>
+          )}
           {/* Stop attrazioni — drag-and-drop */}
+          {attractionStops.length > 0 && (
           <DraggableStopList
             stops={day.stops}
             onReorder={onReorder ?? (() => {})}
@@ -226,6 +236,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
             lang={lang}
             colors={colors}
           />
+          )}
 
           {/* Pulsante percorso Maps */}
           {!!day.maps_link && (
@@ -392,6 +403,23 @@ function RestaurantRow({
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  emptyDay: {
+    alignItems: "center",
+    paddingVertical: 24,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: "dashed",
+  },
+  emptyDayEmoji: {
+    fontSize: 28,
+    marginBottom: 6,
+  },
+  emptyDayText: {
+    fontSize: 13,
+    textAlign: "center",
+    opacity: 0.7,
+  },
   wrapper: {
     borderRadius: 18,
     marginBottom: 14,

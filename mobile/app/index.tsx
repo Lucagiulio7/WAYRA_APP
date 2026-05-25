@@ -435,13 +435,13 @@ export default function HomeScreen() {
             <View style={styles.daysGrid}>
               <View style={styles.daysRow}>
                 {daysRow1.map((d) => (
-                  <Option key={d} label={`${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
+                  <Option key={d} label={lang === "en" ? `${d}d` : `${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
                 ))}
               </View>
               {daysRow2.length > 0 && (
                 <View style={styles.daysRow}>
                   {daysRow2.map((d) => (
-                    <Option key={d} label={`${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
+                    <Option key={d} label={lang === "en" ? `${d}d` : `${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
                   ))}
                 </View>
               )}

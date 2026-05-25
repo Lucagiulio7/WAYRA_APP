@@ -1208,7 +1208,7 @@ export default function ItineraryScreen() {
             <Text style={[styles.topCity, { color: colors.text }]}>{itinerary.city.replace(/_/g, " ").toUpperCase()}</Text>
           </View>
           <Text style={[styles.topMeta, { color: colors.textMuted }]}>
-            {itinerary.num_days} {t.days} · {levelLabel}
+            {itinerary.num_days} {itinerary.num_days === 1 ? t.day : t.days} · {levelLabel}
           </Text>
         </View>
         <TouchableOpacity onPress={handleSavePress} activeOpacity={0.7} style={[styles.saveBtn, { backgroundColor: colors.card2 }]}>
