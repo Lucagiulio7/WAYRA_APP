@@ -148,12 +148,20 @@ function mkIcon(color,label,sel,isFood){
   });
 }
 
+function sendMsg(payload){
+  var s=JSON.stringify(payload);
+  try{
+    if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(s);}
+    else if(window.parent&&window.parent!==window){window.parent.postMessage(s,'*');}
+  }catch(e){}
+}
+
 ATTRS.forEach(function(a){
   const color=LC[a.level]||'#e8c06a';
   const mk=L.marker([a.lat,a.lng],{icon:mkIcon(color,'',false,false),interactive:true,zIndexOffset:0});
   mk.on('click',function(e){
     L.DomEvent.stopPropagation(e);
-    window.ReactNativeWebView.postMessage(JSON.stringify({type:'tapA',id:a.id}));
+    sendMsg({type:'tapA',id:a.id});
   });
   mk.addTo(map);
   AM[a.id]=mk;
@@ -163,7 +171,7 @@ FOODS.forEach(function(f){
   const mk=L.marker([f.lat,f.lng],{icon:mkIcon(FC,'',false,true),interactive:true,zIndexOffset:0});
   mk.on('click',function(e){
     L.DomEvent.stopPropagation(e);
-    window.ReactNativeWebView.postMessage(JSON.stringify({type:'tapF',id:f.id}));
+    sendMsg({type:'tapF',id:f.id});
   });
   mk.addTo(map);
   FM[f.id]=mk;
@@ -204,7 +212,7 @@ function setFilter(levels, showFood) {
   });
 }
 
-window.ReactNativeWebView.postMessage(JSON.stringify({type:'ready'}));
+sendMsg({type:'ready'});
 </script>
 </body>
 </html>`;
