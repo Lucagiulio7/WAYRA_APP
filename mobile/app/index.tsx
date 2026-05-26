@@ -815,21 +815,25 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   const cutoutRight  = rect ? Math.min(SCREEN_WIDTH,  rect.x + rect.width + PAD)  : SCREEN_WIDTH;
 
   // Posizione card: sotto l'elemento se c'è spazio, altrimenti sopra
+  // SAFE_BOTTOM: 48px tengono conto della safe area + home indicator + respiro visivo
+  const SAFE_BOTTOM = 48;
   const fitsBelow = rect
-    ? rect.y + rect.height + cardHeight + 32 <= SCREEN_HEIGHT
+    ? rect.y + rect.height + cardHeight + SAFE_BOTTOM <= SCREEN_HEIGHT
     : false;
-  const tooltipTop = rect
-    ? Math.max(16, fitsBelow
+  const rawTooltipTop = rect
+    ? (fitsBelow
         ? rect.y + rect.height + PAD + 16
-        : Math.max(16, rect.y - cardHeight - PAD - 16))
-    : Math.max(16, (SCREEN_HEIGHT - cardHeight) / 2);
+        : rect.y - cardHeight - PAD - 16)
+    : (SCREEN_HEIGHT - cardHeight) / 2;
+  // Clamp: mai sopra il bordo superiore (16px) né sotto il bordo inferiore (SAFE_BOTTOM)
+  const tooltipTop = Math.max(16, Math.min(SCREEN_HEIGHT - cardHeight - SAFE_BOTTOM, rawTooltipTop));
   const tooltipLeft = Math.max(16, Math.min(
     SCREEN_WIDTH - tooltipWidth - 16,
     rect ? rect.x + rect.width / 2 - tooltipWidth / 2 : (SCREEN_WIDTH - tooltipWidth) / 2,
   ));
 
   useEffect(() => {
-    setCardHeight(270); // reset stima ad ogni cambio slide (il contenuto cambia)
+    setCardHeight((prev) => Math.max(prev, 400)); // stima conservativa: non scendere sotto 400 per evitare overflow
     const target = targetRefs.get(current.target);
     if (!target) { setRect(null); return; }
     const id = setTimeout(() => {
