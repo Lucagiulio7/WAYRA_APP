@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   ActivityIndicator,
-  Dimensions,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { WebView } from "react-native-webview";
@@ -48,7 +48,6 @@ const LEVEL_COLORS: Record<number, string> = {
   3: "#a78bfa",
 };
 const FOOD_COLOR = "#6ee7b7";
-const SCREEN_H   = Dimensions.get("window").height;
 
 const ATTR_EMOJI: Record<string, string> = {
   museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
@@ -219,6 +218,8 @@ export function BuilderMap({
 }: Props) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: screenH } = useWindowDimensions();
+  const panelH = Math.round(screenH * 0.40);
   const wvRef      = useRef<WebView>(null);
   const panelFadeA = useRef(new Animated.Value(1)).current;
 
@@ -505,7 +506,7 @@ export function BuilderMap({
         </View>
 
         {/* ── Pannello inferiore ── */}
-        <View style={[styles.panel, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+        <View style={[styles.panel, { height: panelH, backgroundColor: colors.card, borderTopColor: colors.border }]}>
           <Animated.View style={[styles.panelInner, { opacity: panelFadeA }]}>
 
           {/* ── MODE: dettaglio tappa ── */}
@@ -711,8 +712,6 @@ export function BuilderMap({
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const PANEL_H = Math.round(SCREEN_H * 0.40);
-
 const styles = StyleSheet.create({
   root: { flex: 1 },
   header: {
@@ -775,7 +774,7 @@ const styles = StyleSheet.create({
   },
 
   // ── Pannello ────────────────────────────────────────────────────────────────
-  panel: { height: PANEL_H, borderTopWidth: 1 },
+  panel: { borderTopWidth: 1 },  // height è dinamica via inline style (useWindowDimensions)
   panelInner: { flex: 1 },
   panelHeader: {
     flexDirection: "row",

@@ -63,6 +63,10 @@ const translations = {
     practicalUsefulApps: "App utili",
     practicalTips: "Consigli pratici",
     noPracticalData: "Informazioni pratiche non ancora disponibili per questa città.",
+    // Alert errori di apertura link
+    errTitle: "Errore",
+    errOpenMaps: "Impossibile aprire Maps",
+    errOpenLink: "Impossibile aprire il link.",
   },
   en: {
     // Home
@@ -121,6 +125,10 @@ const translations = {
     practicalUsefulApps: "Useful apps",
     practicalTips: "Practical tips",
     noPracticalData: "Practical information not yet available for this city.",
+    // Alert errors opening links
+    errTitle: "Error",
+    errOpenMaps: "Cannot open Maps",
+    errOpenLink: "Cannot open the link.",
   },
 };
 

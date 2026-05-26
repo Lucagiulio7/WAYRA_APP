@@ -166,9 +166,9 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
     try {
       const canOpen = await Linking.canOpenURL(url);
       if (canOpen) await Linking.openURL(url);
-      else Alert.alert("Impossibile aprire Maps");
+      else Alert.alert(t.errOpenMaps);
     } catch {
-      Alert.alert("Errore", "Impossibile aprire il link.");
+      Alert.alert(t.errTitle, t.errOpenLink);
     }
   };
 

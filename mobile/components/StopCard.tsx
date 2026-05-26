@@ -109,7 +109,7 @@ function FoodStop({
   const openMaps = async () => {
     const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
-    catch { Alert.alert("Errore", "Impossibile aprire Maps."); }
+    catch { Alert.alert(t.errTitle, t.errOpenMaps); }
   };
 
   const toggle = () => {
@@ -202,13 +202,13 @@ function AttractionStop({
   const openTickets = async () => {
     if (!stop.ticket_url) return;
     try { await Linking.openURL(stop.ticket_url); }
-    catch { Alert.alert("Errore", "Impossibile aprire il link."); }
+    catch { Alert.alert(t.errTitle, t.errOpenLink); }
   };
 
   const openMaps = async () => {
     const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
-    catch { Alert.alert("Errore", "Impossibile aprire Maps."); }
+    catch { Alert.alert(t.errTitle, t.errOpenMaps); }
   };
 
   return (
