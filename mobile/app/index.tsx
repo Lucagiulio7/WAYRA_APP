@@ -304,18 +304,13 @@ export default function HomeScreen() {
     );
   }
 
-  // Redirect quando l'itinerario è pronto
-  useEffect(() => {
-    if (itinerary) {
-      AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(itinerary)).then(() => {
-        router.push({ pathname: "/itinerary" });
-      });
-    }
-  }, [itinerary]);
-
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
-    await generate({ city, num_days: numDays, level });
+    const result = await generate({ city, num_days: numDays, level });
+    if (result) {
+      await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
+      router.push({ pathname: "/itinerary" });
+    }
   }
 
   function handleCreate() {

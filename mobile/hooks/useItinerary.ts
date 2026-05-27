@@ -23,7 +23,7 @@ interface UseItineraryReturn {
   itinerary: Itinerary | null;
   loading: boolean;
   error: string | null;
-  generate: (params: GenerateParams) => Promise<void>;
+  generate: (params: GenerateParams) => Promise<Itinerary | null>;
   cancel: () => void;
   reset: () => void;
 }
@@ -94,11 +94,12 @@ export function useItinerary(): UseItineraryReturn {
   });
 
   const generate = useCallback(
-    async (params: GenerateParams) => {
+    async (params: GenerateParams): Promise<Itinerary | null> => {
       try {
-        await mutation.mutateAsync(params);
+        return await mutation.mutateAsync(params);
       } catch {
         // l'errore è già in mutation.error, non serve rilanciare
+        return null;
       }
     },
     [mutation.mutateAsync],

@@ -603,9 +603,27 @@ const ATTRACTION_EMOJI: Record<string, string> = {
   museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
   archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
   panorama: "🌅", mercato: "🛒", palazzo: "🏰",
+  castello: "🏰", fortezza: "🏰", torre: "🗼",
+  giardino: "🌸", lago: "🏞️", spiaggia: "🏖️",
+  ponte: "🌉", fontana: "⛲", statua: "🗿",
+  teatro: "🎭", galleria: "🖼️", biblioteca: "📚",
+  tempio: "🛕", moschea: "🕌", sinagoga: "🕍",
+  anfiteatro: "🏟️", arco: "🏛️", basilica: "⛪",
+  abbazia: "⛪", cattedrale: "⛪", duomo: "⛪",
+  lungomare: "🌊", porto: "⚓", acquario: "🐠",
+  funicolare: "🚡", funivia: "🚠", belvedere: "🔭",
+  percorso: "🥾", area: "🗺️", borgo: "🏡",
+  strada: "🛤️", viale: "🛤️", canale: "🌊",
+  passeggiata: "🚶", spazio: "🏙️", molo: "⚓",
+  edificio: "🏢", palazzo: "🏰", villa: "🏡",
+  centro: "🏢",
 };
-function stopEmoji(s: Stop) {
-  return ATTRACTION_EMOJI[s.attraction_type ?? ""] ?? "📍";
+function stopEmoji(s: Stop): string {
+  const key = (s.attraction_type ?? "").toLowerCase();
+  if (ATTRACTION_EMOJI[key]) return ATTRACTION_EMOJI[key];
+  // Fallback substring per tipi composti (es. "parco storico" → 🌿)
+  const match = Object.keys(ATTRACTION_EMOJI).find((k) => k.length >= 4 && key.includes(k));
+  return match ? ATTRACTION_EMOJI[match] : "📍";
 }
 
 // ── Tipi per il modal opzioni ─────────────────────────────────────────────────

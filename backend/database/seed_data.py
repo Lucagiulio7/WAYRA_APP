@@ -52,6 +52,9 @@ def migrate_db():
             ("zone",            "TEXT"),
             ("block_id",        "INTEGER"),
             ("attraction_type", "TEXT"),
+            ("name_en",         "TEXT"),
+            ("description_en",  "TEXT"),
+            ("ticket_url",      "TEXT"),
         ]:
             if col_name not in existing_attr:
                 conn.execute(text(f"ALTER TABLE attractions ADD COLUMN {col_name} {col_def}"))
@@ -115,10 +118,15 @@ def seed():
                 row.block_id          = data["block_id"]
                 row.zone              = data["zone"]
                 row.attraction_type   = data.get("attraction_type")
+                row.name_en           = data.get("name_en")
+                row.description_en    = data.get("description_en")
+                row.ticket_url        = data.get("ticket_url")
             else:
                 db.add(Attraction(
                     name=data["name"],
+                    name_en=data.get("name_en"),
                     description=data["description"],
+                    description_en=data.get("description_en"),
                     category_level=data["category_level"],
                     block_id=data["block_id"],
                     zone=data["zone"],
@@ -127,6 +135,7 @@ def seed():
                     estimated_visit_time=data["estimated_visit_time"],
                     tags=json.dumps(data["tags"], ensure_ascii=False),
                     attraction_type=data.get("attraction_type"),
+                    ticket_url=data.get("ticket_url"),
                     city=city,
                     is_food_spot=False,
                 ))

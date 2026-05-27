@@ -509,6 +509,13 @@ def build_itinerary(
 ) -> list[dict]:
     filtered = filter_attractions(attractions, level)
     if not filtered:
+        # Fallback: ignora il controllo di isolamento (città piccole o blocchi sparsi)
+        levels = level if isinstance(level, list) else [level]
+        filtered = [
+            a for a in attractions
+            if not a.get("is_food_spot") and a["category_level"] in levels
+        ]
+    if not filtered:
         return []
 
     days_raw = _ensure_day_count(split_days(filtered, num_days), num_days)
