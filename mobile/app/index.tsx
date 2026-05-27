@@ -272,9 +272,9 @@ export default function HomeScreen() {
     return () => clearInterval(id);
   }, [loading]);
 
-  const LEVELS: { id: ExperienceLevel; label: string; color: string }[] = [
-    { id: 1,     label: t.iconicLabel,   color: "#e8c06a" },
-    { id: "mix", label: t.explorerLabel, color: "#6ee7b7" },
+  const LEVELS: { id: ExperienceLevel; label: string; subtitle: string; color: string }[] = [
+    { id: 1,     label: t.iconicLabel,   subtitle: t.iconicSubtitle,   color: "#e8c06a" },
+    { id: "mix", label: t.explorerLabel, subtitle: t.explorerSubtitle, color: "#6ee7b7" },
   ];
 
   const { max_days_iconico, max_days_esploratore, loading: cityInfoLoading } = useCityInfo(city);
@@ -457,6 +457,7 @@ export default function HomeScreen() {
             {LEVELS.map((l) => (
               <LevelOption key={String(l.id)} {...l} selected={level === l.id} onPress={() => setLevel(l.id)} colors={colors} />
             ))}
+
           </View>
         </Section>
         </View>
@@ -924,7 +925,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
 
 function Section({ title, children, colors }: { title: string; children: React.ReactNode; colors: any }) {
   return (
-    <View style={styles.section}>
+    <View style={[styles.section, { borderColor: colors.border }]}>
       <Text style={[styles.sectionTitle, { color: colors.accentGold }]}>{title}</Text>
       {children}
     </View>
@@ -945,8 +946,8 @@ function Option({ label, selected, onPress, color, colors }: {
   );
 }
 
-function LevelOption({ id, label, color, selected, onPress, colors }: {
-  id: ExperienceLevel; label: string;
+function LevelOption({ id, label, subtitle, color, selected, onPress, colors }: {
+  id: ExperienceLevel; label: string; subtitle: string;
   color: string; selected: boolean; onPress: () => void; colors: any;
 }) {
   return (
@@ -959,6 +960,9 @@ function LevelOption({ id, label, color, selected, onPress, colors }: {
       <View style={styles.levelTextWrap}>
         <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
           {label}
+        </Text>
+        <Text style={[styles.levelSub, { color: colors.textMuted }]} numberOfLines={2}>
+          {subtitle}
         </Text>
       </View>
     </TouchableOpacity>
@@ -974,7 +978,7 @@ function WalkModeSelector({
   colors: any;
 }) {
   return (
-    <View style={[styles.walkCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <View style={styles.walkCard}>
       <View style={styles.walkTopRow}>
         <View>
           <Text style={[styles.walkValue, { color: colors.accentGold }]}>
@@ -1038,27 +1042,30 @@ const styles = StyleSheet.create({
     borderWidth: 1, alignItems: "center", justifyContent: "center",
   },
   appName: {
-    fontSize: 40,
+    fontSize: 32,
     fontFamily: "BebasNeue_400Regular",
     letterSpacing: 5,
   },
   appSlogan: {
-    fontSize: 9,
+    fontSize: 8,
     fontFamily: "BebasNeue_400Regular",
     letterSpacing: 1.6,
-    marginTop: -5,
+    marginTop: -4,
   },
-  flagEmoji: { fontSize: 19 },
+  flagEmoji: { fontSize: 18 },
 
-  scroll: { paddingHorizontal: 16, paddingBottom: 24, paddingTop: 4, flexGrow: 1, justifyContent: "space-between" },
-  section: { marginBottom: 0 },
+  scroll: { paddingHorizontal: 14, paddingBottom: 20, paddingTop: 4, flexGrow: 1, justifyContent: "space-between" },
+  section: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+  },
   sectionTitle: {
-    // colore gestito dinamicamente via colors.accentGold nel componente Section
-    fontSize: 11,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 6,
+    letterSpacing: 1.2,
+    marginBottom: 10,
   },
 
   // City picker
@@ -1073,36 +1080,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     borderWidth: 1.5,
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 11,
   },
   cityPickerLabel: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
   },
   mapBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
 
   // Days
-  daysGrid: { gap: 7 },
+  daysGrid: { gap: 6 },
   daysRow: { flexDirection: "row", gap: DAYS_GAP },
   option: {
     flex: 1,
     borderWidth: 1.5,
     borderRadius: 10,
-    paddingVertical: 9,
+    paddingVertical: 11,
     alignItems: "center",
   },
-  optionText: { fontWeight: "600", fontSize: 14 },
-  daysLoading: { gap: 7 },
+  optionText: { fontWeight: "700", fontSize: 14 },
+  daysLoading: { gap: 6 },
 
   // Level
   levelRow: {
@@ -1112,25 +1119,20 @@ const styles = StyleSheet.create({
   levelOption: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
+    alignItems: "flex-start",
+    gap: 8,
     borderWidth: 1.5,
     borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 11,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
   },
-  levelDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
-  levelTextWrap: { flex: 1 },
-  levelLabel: { fontWeight: "800", fontSize: 15 },
+  levelDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0, marginTop: 3 },
+  levelTextWrap: { flex: 1, gap: 3 },
+  levelLabel: { fontWeight: "800", fontSize: 14 },
+  levelSub: { fontSize: 11, lineHeight: 15 },
 
-  // Walking slider
-  walkCard: {
-    borderWidth: 1.5,
-    borderRadius: 12,
-    padding: 12,
-    gap: 8,
-  },
+  // Walking
+  walkCard: { gap: 10 },
   walkTopRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1142,14 +1144,13 @@ const styles = StyleSheet.create({
   },
   walkModeBtn: {
     flex: 1,
-    minHeight: 38,
     borderWidth: 1.5,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 5,
     paddingHorizontal: 4,
-    paddingVertical: 7,
+    paddingVertical: 10,
   },
   walkModeLabel: {
     fontSize: 11,
@@ -1179,14 +1180,14 @@ const styles = StyleSheet.create({
   // CTA
   cta: {
     borderRadius: 14,
-    paddingVertical: 13,
+    paddingVertical: 15,
     alignItems: "center",
   },
   ctaCreate: {
     borderRadius: 14,
-    paddingVertical: 13,
+    paddingVertical: 15,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 0,
     borderWidth: 1.5,
   },
   ctaDisabled: { opacity: 0.6 },
@@ -1195,9 +1196,9 @@ const styles = StyleSheet.create({
   ctaCreateText: { fontSize: 16, fontWeight: "800" },
   orDivider: {
     textAlign: "center",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "800",
-    marginVertical: 6,
+    marginVertical: 8,
     textTransform: "uppercase",
     letterSpacing: 0.8,
   },
