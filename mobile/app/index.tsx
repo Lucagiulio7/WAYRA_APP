@@ -306,11 +306,18 @@ export default function HomeScreen() {
 
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
+    console.log("[gen] start →", city, numDays, level);
     const result = await generate({ city, num_days: numDays, level });
-    if (result) {
-      await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
-      router.push({ pathname: "/itinerary" });
+    console.log("[gen] result →", result ? `OK (${result.days?.length}g)` : "null");
+    if (!result) {
+      // Se non c'è né risultato né errore visibile, mostra alert debug
+      const msg = error ?? "Nessun messaggio d'errore ricevuto — verifica che il backend sia avviato e raggiungibile.";
+      if (__DEV__) Alert.alert("Genera: nessun risultato", msg);
+      return;
     }
+    await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
+    console.log("[gen] navigating → /itinerary");
+    router.push({ pathname: "/itinerary" });
   }
 
   function handleCreate() {

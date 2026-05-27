@@ -35,9 +35,13 @@ async function generateItinerary(
   // ── Cache hit ──
   const key = cacheKey(params);
   const cached = generationCache.get(key);
-  if (cached) return cached;
+  if (cached) {
+    console.log("[gen] cache hit →", key);
+    return cached;
+  }
 
   const apiLevel = params.level === "mix" ? [1, 2, 3] : params.level;
+  console.log("[gen] fetch →", `${API_BASE_URL}/api/itinerary/generate`, { city: params.city, num_days: params.num_days, level: apiLevel });
 
   let resp: Response;
   try {
@@ -51,8 +55,10 @@ async function generateItinerary(
       }),
       signal,
     });
+    console.log("[gen] HTTP", resp.status);
   } catch (err: any) {
     // Network-level error (server unreachable, no connection, etc.)
+    console.log("[gen] fetch error →", err?.message);
     if (err?.name === "AbortError") throw err;
     throw new Error(
       `Impossibile contattare il server (${API_BASE_URL}). Assicurati di essere connesso alla stessa rete del backend.`,
@@ -67,8 +73,14 @@ async function generateItinerary(
   }
 
   // FastAPI restituisce errori con { detail: "..." }, successi con { data: ... }
-  if (!resp.ok) throw new Error(json.detail ?? json.error ?? `Errore del server (HTTP ${resp.status}).`);
+  if (!resp.ok) {
+    const detail = json.detail ?? json.error ?? `Errore del server (HTTP ${resp.status}).`;
+    console.log("[gen] backend error →", detail);
+    throw new Error(detail);
+  }
   if (!json.data) throw new Error("Il server non ha restituito dati. Verifica che il backend sia aggiornato.");
+
+  console.log("[gen] success → giorni:", (json.data as Itinerary).days?.length);
 
   // ── Salva in cache ──
   generationCache.set(key, json.data as Itinerary);
