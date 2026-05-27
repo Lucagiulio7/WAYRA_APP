@@ -1847,17 +1847,18 @@ function SlotCard({
         onPress={onTap}
         activeOpacity={0.82}
       >
-        {/* Numero progressivo */}
-        <View style={[styles.slotIndex, isMeal && styles.slotIndexMeal]}>
-          <Text style={[styles.slotIndexText, isMeal && styles.slotIndexTextMeal]}>{index}</Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.slotNameCompact} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.72}>{name}</Text>
-        </View>
-        <View style={styles.slotActions}>
-          <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} activeOpacity={0.7} style={styles.slotDeleteBtn}>
+        {/* Colonna sinistra: numero sopra, cestino sotto */}
+        <View style={styles.slotLeftCol}>
+          <View style={[styles.slotIndex, isMeal && styles.slotIndexMeal]}>
+            <Text style={[styles.slotIndexText, isMeal && styles.slotIndexTextMeal]}>{index}</Text>
+          </View>
+          <TouchableOpacity onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} activeOpacity={0.7} style={styles.slotDeleteBtn}>
             <Ionicons name="trash-outline" size={18} color={colors.danger} />
           </TouchableOpacity>
+        </View>
+        {/* Nome: 3 righe con ellissi */}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.slotNameCompact} numberOfLines={3} ellipsizeMode="tail">{name}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -2222,10 +2223,10 @@ function makeStyles(colors: any) {
 
     // ── Slot filled ─────────────────────────────────────────────────────────
     slotFilled: {
-      height: 56,
+      minHeight: 72,
       flexDirection: "row", alignItems: "center", gap: 10,
       backgroundColor: colors.border, borderRadius: 12,
-      paddingHorizontal: 12, marginTop: 10, borderWidth: 1, borderColor: colors.border2,
+      paddingHorizontal: 12, paddingVertical: 10, marginTop: 10, borderWidth: 1, borderColor: colors.border2,
     },
     slotFilledMeal: { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "30" },
     slotFilledMuseum: { backgroundColor: colors.accentPurple + "18", borderColor: colors.accentPurple + "44" },
@@ -2240,7 +2241,7 @@ function makeStyles(colors: any) {
     slotIndexEmptyText: { color: colors.textMuted, fontSize: 11, fontWeight: "800" },
     slotEmoji: { fontSize: 20, flexShrink: 0 },
     slotName: { color: colors.text, fontSize: 14, fontWeight: "600", lineHeight: 19, flex: 1 },
-    slotNameCompact: { color: colors.text, fontSize: 13, fontWeight: "700", lineHeight: 15, flex: 1 },
+    slotNameCompact: { color: colors.text, fontSize: 14, fontWeight: "700", lineHeight: 18, flex: 1 },
     slotMetaRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
     slotTime: { color: colors.textMuted, fontSize: 12 },
     slotPrice: { color: colors.accentGreen, fontSize: 12, fontWeight: "800" },
@@ -2249,10 +2250,14 @@ function makeStyles(colors: any) {
       paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.border2, minHeight: 18,
     },
     slotActions: { alignItems: "center", justifyContent: "center", flexShrink: 0 },
+    slotLeftCol: {
+      flexDirection: "column", alignItems: "center", justifyContent: "center",
+      gap: 6, flexShrink: 0,
+    },
     slotDeleteBtn: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+      width: 30,
+      height: 30,
+      borderRadius: 15,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.danger + "18",

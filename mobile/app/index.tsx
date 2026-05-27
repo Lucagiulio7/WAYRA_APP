@@ -278,10 +278,8 @@ export default function HomeScreen() {
   ];
 
   const { max_days_iconico, max_days_esploratore, loading: cityInfoLoading } = useCityInfo(city);
-  // Fallback a 7 se la colonna non è ancora presente nel DB per questa città
-  const maxDays = city
-    ? (level === 1 ? (max_days_iconico || 5) : (max_days_esploratore || 5))
-    : 5;
+  // useCityInfo già applica fallback (5 per iconico, 7 per esploratore) anche senza città
+  const maxDays = level === 1 ? max_days_iconico : max_days_esploratore;
   const availableDays = Array.from({ length: maxDays }, (_, i) => i + 1);
 
   const daysPerRow = availableDays.length <= 5
@@ -956,15 +954,9 @@ function LevelOption({ id, label, subtitle, color, selected, onPress, colors }: 
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.levelDot, { backgroundColor: selected ? color : colors.border }]} />
-      <View style={styles.levelTextWrap}>
-        <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
-          {label}
-        </Text>
-        <Text style={[styles.levelSub, { color: colors.textMuted }]} numberOfLines={2}>
-          {subtitle}
-        </Text>
-      </View>
+      <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -1118,17 +1110,16 @@ const styles = StyleSheet.create({
   },
   levelOption: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
-    paddingVertical: 12,
+    paddingVertical: 16,
   },
-  levelDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0, marginTop: 3 },
+  levelDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
   levelTextWrap: { flex: 1, gap: 3 },
-  levelLabel: { fontWeight: "800", fontSize: 14 },
+  levelLabel: { fontWeight: "800", fontSize: 17 },
   levelSub: { fontSize: 11, lineHeight: 15 },
 
   // Walking
