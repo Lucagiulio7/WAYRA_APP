@@ -50,10 +50,45 @@ const LEVEL_COLORS: Record<number, string> = {
 const FOOD_COLOR = "#6ee7b7";
 
 const ATTR_EMOJI: Record<string, string> = {
+  // Già presenti
   museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
   archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
   panorama: "🌅", mercato: "🛒", palazzo: "🏰",
+  // Edifici religiosi
+  basilica: "⛪", cattedrale: "⛪", abbazia: "⛪", convento: "⛪",
+  monastero: "⛪", cappella: "⛪", santuario: "⛪",
+  sinagoga: "🕍", moschea: "🕌", tempio: "🛕",
+  // Strutture e monumenti
+  castello: "🏰", fortezza: "🏯", torre: "🗼",
+  ponte: "🌉", fontana: "⛲", villa: "🏡",
+  anfiteatro: "🏟️", statua: "🗿", arco: "🏛️",
+  obelisco: "🗿", mausoleo: "🏛️",
+  // Arte e cultura
+  teatro: "🎭", opera: "🎭", auditorium: "🎭",
+  galleria: "🖼️", arte: "🎨", biblioteca: "📚",
+  // Natura e outdoor
+  giardino: "🌸", orto: "🌱", lago: "🏞️",
+  spiaggia: "🏖️", costa: "🌊", fiordo: "🌊",
+  collina: "⛰️", montagna: "🏔️",
+  // Strade e percorsi
+  viale: "🌳", strada: "🛤️", passeggiata: "🚶",
+  // Infrastrutture
+  porto: "⚓", stazione: "🚉", terme: "♨️",
+  acquario: "🐠", zoo: "🦁", stadio: "🏟️",
+  // Belvedere / punti panoramici
+  belvedere: "🌅", miradouro: "🌅",
+  // Murales e arte di strada
+  murales: "🎨",
+  // Attrazione generica (esplicita)
+  attrazione: "📌",
 };
+
+function attrEmoji(type?: string | null): string {
+  const key = (type ?? "").toLowerCase();
+  if (ATTR_EMOJI[key]) return ATTR_EMOJI[key];
+  const match = Object.keys(ATTR_EMOJI).find((k) => k.length >= 4 && key.includes(k));
+  return match ? ATTR_EMOJI[match] : "📍";
+}
 
 // ── Stato pannello inferiore ──────────────────────────────────────────────────
 
@@ -393,7 +428,7 @@ export function BuilderMap({
 
   const slotEmoji = (s: MapSlot) => {
     if (s.kind === "meal") return "🍴";
-    return ATTR_EMOJI[(s.attraction.attraction_type ?? "").toLowerCase()] ?? "📍";
+    return attrEmoji(s.attraction.attraction_type);
   };
   const slotName = (s: MapSlot) =>
     (lang === "en" && s.attraction.name_en) ? s.attraction.name_en : s.attraction.name;
@@ -407,9 +442,7 @@ export function BuilderMap({
     ? ((lang === "en" && preview.description_en) ? preview.description_en : preview.description) ?? ""
     : "";
   const previewEmoji = preview
-    ? (previewKind === "meal"
-        ? "🍴"
-        : (ATTR_EMOJI[(preview.attraction_type ?? "").toLowerCase()] ?? "📍"))
+    ? (previewKind === "meal" ? "🍴" : attrEmoji(preview.attraction_type))
     : "";
   const previewColor = preview && previewKind === "attraction"
     ? (LEVEL_COLORS[preview.category_level] ?? colors.accentGold)

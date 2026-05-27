@@ -34,9 +34,37 @@ import { SkeletonList } from "@/components/Skeleton";
 // ── Costanti visive ───────────────────────────────────────────────────────────
 
 const ATTRACTION_EMOJI: Record<string, string> = {
+  // Già presenti
   museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
   archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
   panorama: "🌅", mercato: "🛒", palazzo: "🏰",
+  // Edifici religiosi
+  basilica: "⛪", cattedrale: "⛪", abbazia: "⛪", convento: "⛪",
+  monastero: "⛪", cappella: "⛪", santuario: "⛪",
+  sinagoga: "🕍", moschea: "🕌", tempio: "🛕",
+  // Strutture e monumenti
+  castello: "🏰", fortezza: "🏯", torre: "🗼",
+  ponte: "🌉", fontana: "⛲", villa: "🏡",
+  anfiteatro: "🏟️", statua: "🗿", arco: "🏛️",
+  obelisco: "🗿", mausoleo: "🏛️",
+  // Arte e cultura
+  teatro: "🎭", opera: "🎭", auditorium: "🎭",
+  galleria: "🖼️", arte: "🎨", biblioteca: "📚",
+  // Natura e outdoor
+  giardino: "🌸", orto: "🌱", lago: "🏞️",
+  spiaggia: "🏖️", costa: "🌊", fiordo: "🌊",
+  collina: "⛰️", montagna: "🏔️",
+  // Strade e percorsi
+  viale: "🌳", strada: "🛤️", passeggiata: "🚶",
+  // Infrastrutture
+  porto: "⚓", stazione: "🚉", terme: "♨️",
+  acquario: "🐠", zoo: "🦁", stadio: "🏟️",
+  // Belvedere / punti panoramici
+  belvedere: "🌅", miradouro: "🌅",
+  // Murales e arte di strada
+  murales: "🎨",
+  // Attrazione generica (esplicita)
+  attrazione: "📌",
 };
 
 const ATTRACTION_TYPE_EN: Record<string, string> = {
@@ -168,7 +196,12 @@ const MANUAL_GUIDE_SLIDES_EN = [
 function getEmoji(type?: string | null, isFood = false): string {
   const key = (type ?? "").toLowerCase();
   if (isFood) return FOOD_EMOJI[key] ?? "🍴";
-  return ATTRACTION_EMOJI[key] ?? "📍";
+  if (ATTRACTION_EMOJI[key]) return ATTRACTION_EMOJI[key];
+  // Substring fallback for compound types (e.g. "parco storico" → 🌿)
+  const match = Object.keys(ATTRACTION_EMOJI).find(
+    (k) => k.length >= 4 && key.includes(k)
+  );
+  return match ? ATTRACTION_EMOJI[match] : "📍";
 }
 
 function translateType(type?: string | null, lang = "it"): string | null {
