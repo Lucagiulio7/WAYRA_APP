@@ -1050,15 +1050,15 @@ const styles = StyleSheet.create({
   },
   flagEmoji: { fontSize: 19 },
 
-  scroll: { paddingHorizontal: 16, paddingBottom: 14, paddingTop: 6 },
-  section: { marginBottom: 14 },
+  scroll: { paddingHorizontal: 16, paddingBottom: 24, paddingTop: 4, flexGrow: 1, justifyContent: "space-between" },
+  section: { marginBottom: 0 },
   sectionTitle: {
     // colore gestito dinamicamente via colors.accentGold nel componente Section
     fontSize: 11,
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginBottom: 7,
+    marginBottom: 6,
   },
 
   // City picker
@@ -1181,13 +1181,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 13,
     alignItems: "center",
-    marginTop: 0,
   },
   ctaCreate: {
     borderRadius: 14,
     paddingVertical: 13,
     alignItems: "center",
-    marginTop: 6,
+    marginTop: 8,
     borderWidth: 1.5,
   },
   ctaDisabled: { opacity: 0.6 },
@@ -1198,7 +1197,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 12,
     fontWeight: "800",
-    marginTop: 6,
+    marginVertical: 6,
     textTransform: "uppercase",
     letterSpacing: 0.8,
   },
