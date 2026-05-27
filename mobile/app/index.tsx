@@ -219,7 +219,7 @@ const GENERATING_MESSAGES_EN = [
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { generate, cancel, loading, error, itinerary } = useItinerary();
+  const { generate, cancel, loading, error } = useItinerary();
   const { lang, t, toggle } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();

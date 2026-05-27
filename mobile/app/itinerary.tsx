@@ -615,7 +615,7 @@ const ATTRACTION_EMOJI: Record<string, string> = {
   percorso: "🥾", area: "🗺️", borgo: "🏡",
   strada: "🛤️", viale: "🛤️", canale: "🌊",
   passeggiata: "🚶", spazio: "🏙️", molo: "⚓",
-  edificio: "🏢", palazzo: "🏰", villa: "🏡",
+  edificio: "🏢", villa: "🏡",
   centro: "🏢",
 };
 function stopEmoji(s: Stop): string {
