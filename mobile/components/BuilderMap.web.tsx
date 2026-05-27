@@ -118,6 +118,7 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,s
   transition:transform 0.12s;
 }
 .mk-bubble.sel{transform:scale(1.3)}
+.mk-bubble.foc{transform:scale(1.65)!important;border-width:3px!important;border-color:#fff!important;box-shadow:0 0 0 3px rgba(255,255,255,0.3),0 4px 14px rgba(0,0,0,0.8)!important}
 .mk-pin{width:2px;height:5px;margin-top:-1px}
 </style>
 </head>
@@ -138,12 +139,14 @@ L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
 
 const AM={},FM={};
 let routeLine=null;
+var _selAIds=[],_selFIds=[],_focId=null,_focFood=false;
 
-function mkIcon(color,label,sel,isFood){
+function mkIcon(color,label,sel,isFood,foc){
   const bg=sel?color:'rgba(10,10,26,0.72)';
   const content=isFood?'🍴':(sel&&label?label:'·');
+  const cls='mk-bubble'+(sel?' sel':'')+(foc?' foc':'');
   return L.divIcon({
-    html:'<div class="mk-wrap"><div class="mk-bubble'+(sel?' sel':'')+'" style="border-color:'+color+';background:'+bg+'">'+content+'</div><div class="mk-pin" style="background:'+color+'"></div></div>',
+    html:'<div class="mk-wrap"><div class="'+cls+'" style="border-color:'+color+';background:'+bg+'">'+content+'</div><div class="mk-pin" style="background:'+color+'"></div></div>',
     className:'',iconSize:[0,0],iconAnchor:[0,0]
   });
 }
@@ -177,19 +180,27 @@ FOODS.forEach(function(f){
   FM[f.id]=mk;
 });
 
-function updateState(selAIds,routeCoords,selFIds){
+function _applyStyles(){
   ATTRS.forEach(function(a){
-    const color=LC[a.level]||'#e8c06a';
-    const si=selAIds.indexOf(a.id);
-    const sel=si>=0;
-    AM[a.id].setIcon(mkIcon(color,sel?String(si+1):'',sel,false));
-    AM[a.id].setZIndexOffset(sel?1000:0);
+    var c=LC[a.level]||'#e8c06a',si=_selAIds.indexOf(a.id),sel=si>=0,foc=!_focFood&&a.id===_focId;
+    AM[a.id].setIcon(mkIcon(c,sel?String(si+1):'',sel,false,foc));
+    AM[a.id].setZIndexOffset(foc?2000:(sel?1000:0));
   });
   FOODS.forEach(function(f){
-    const sel=selFIds.indexOf(f.id)>=0;
-    FM[f.id].setIcon(mkIcon(FC,'',sel,true));
-    FM[f.id].setZIndexOffset(sel?900:0);
+    var sel=_selFIds.indexOf(f.id)>=0,foc=_focFood&&f.id===_focId;
+    FM[f.id].setIcon(mkIcon(FC,'',sel,true,foc));
+    FM[f.id].setZIndexOffset(foc?2000:(sel?900:0));
   });
+}
+function focusMarker(id,isFood){
+  _focId=id;_focFood=!!isFood;
+  _applyStyles();
+  var mk=isFood?FM[id]:AM[id];
+  if(id!=null&&mk){map.flyTo(mk.getLatLng(),Math.max(map.getZoom(),15),{animate:true,duration:0.4});}
+}
+function updateState(selAIds,routeCoords,selFIds){
+  _selAIds=selAIds;_selFIds=selFIds;
+  _applyStyles();
   if(routeLine){map.removeLayer(routeLine);routeLine=null;}
   if(routeCoords.length>=2){
     routeLine=L.polyline(routeCoords,{color:'#e8c06a',weight:2.5,opacity:0.8,dashArray:'6,10'}).addTo(map);
@@ -229,13 +240,15 @@ export function BuilderMap({
   const insets = useSafeAreaInsets();
   const wvRef  = useRef<WebView>(null);
 
-  const [ready,       setReady]       = useState(false);
-  const [mapHtml,     setMapHtml]     = useState("");
-  const [mapError,    setMapError]    = useState(false);
-  const [panelMode,   setPanelMode]   = useState<PanelMode>("list");
-  const [preview,     setPreview]     = useState<BuilderAttraction | null>(null);
-  const [previewKind, setPreviewKind] = useState<"attraction" | "meal" | null>(null);
-  const [filter,      setFilter]      = useState<FilterState>(ALL_FILTERS);
+  const [ready,          setReady]          = useState(false);
+  const [mapHtml,        setMapHtml]        = useState("");
+  const [mapError,       setMapError]       = useState(false);
+  const [panelMode,      setPanelMode]      = useState<PanelMode>("list");
+  const [preview,        setPreview]        = useState<BuilderAttraction | null>(null);
+  const [previewKind,    setPreviewKind]    = useState<"attraction" | "meal" | null>(null);
+  const [filter,         setFilter]         = useState<FilterState>(ALL_FILTERS);
+  const [focusedAttrId,  setFocusedAttrId]  = useState<number | null>(null);
+  const [focusedIsFood,  setFocusedIsFood]  = useState(false);
 
   const panelFadeA = useRef(new Animated.Value(1)).current;
 
@@ -256,6 +269,8 @@ export function BuilderMap({
       setPreview(null);
       setPreviewKind(null);
       setFilter(ALL_FILTERS);
+      setFocusedAttrId(null);
+      setFocusedIsFood(false);
       setMapHtml(buildMapHtml(attractions, foodSpots, isDark));
       panelFadeA.setValue(1); // reset fade nel caso il modal fosse stato chiuso durante un'animazione
     }
@@ -288,6 +303,14 @@ export function BuilderMap({
     );
   }, [filter, ready]);
 
+  // Sincronizza il marker evidenziato
+  useEffect(() => {
+    if (!ready) return;
+    wvRef.current?.injectJavaScript(
+      `focusMarker(${focusedAttrId !== null ? focusedAttrId : "null"},${focusedIsFood});true;`,
+    );
+  }, [focusedAttrId, focusedIsFood, ready]);
+
   // ── Messaggi dalla WebView ────────────────────────────────────────────────
 
   const handleMessage = useCallback(
@@ -299,6 +322,8 @@ export function BuilderMap({
         if (msg.type === "tapA") {
           const a = attractions.find((x) => x.id === msg.id);
           if (!a) return;
+          setFocusedAttrId(msg.id);
+          setFocusedIsFood(false);
           switchPanel("detail", () => {
             setPreview(a);
             setPreviewKind("attraction");
@@ -308,6 +333,8 @@ export function BuilderMap({
         if (msg.type === "tapF") {
           const f = foodSpots.find((x) => x.id === msg.id);
           if (!f) return;
+          setFocusedAttrId(msg.id);
+          setFocusedIsFood(true);
           switchPanel("detail", () => {
             setPreview(f);
             setPreviewKind("meal");
@@ -351,6 +378,8 @@ export function BuilderMap({
   };
 
   const backToList = () => {
+    setFocusedAttrId(null);
+    setFocusedIsFood(false);
     switchPanel("list", () => {
       setPreview(null);
       setPreviewKind(null);
@@ -673,10 +702,24 @@ export function BuilderMap({
                       ? FOOD_COLOR
                       : (LEVEL_COLORS[slot.attraction.category_level] ?? colors.accentGold);
                     const label = slot.kind === "attraction" ? String(attrOrder(idx)) : "🍴";
+                    const isFocused = focusedAttrId === slot.attraction.id;
                     return (
-                      <View
+                      <TouchableOpacity
                         key={slot.slotId}
-                        style={[styles.stopRow, { borderColor: colors.border, backgroundColor: colors.card2 }]}
+                        activeOpacity={0.75}
+                        onPress={() => {
+                          setFocusedAttrId(slot.attraction.id);
+                          setFocusedIsFood(slot.kind === "meal");
+                          switchPanel("detail", () => {
+                            setPreview(slot.attraction);
+                            setPreviewKind(slot.kind === "meal" ? "meal" : "attraction");
+                          });
+                        }}
+                        style={[
+                          styles.stopRow,
+                          { borderColor: colors.border, backgroundColor: colors.card2 },
+                          isFocused && { borderColor: color, backgroundColor: color + "18" },
+                        ]}
                       >
                         <View style={[styles.badge, { backgroundColor: color }]}>
                           <Text style={styles.badgeText}>{label}</Text>
@@ -708,7 +751,7 @@ export function BuilderMap({
                             <Ionicons name="trash-outline" size={15} color={colors.danger} />
                           </TouchableOpacity>
                         </View>
-                      </View>
+                      </TouchableOpacity>
                     );
                   })}
                 </ScrollView>
