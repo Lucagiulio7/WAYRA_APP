@@ -380,12 +380,14 @@ export default function CreateItineraryScreen() {
   const [dragging, setDragging] = useState<DragState>(null);
   const [mapVisible, setMapVisible] = useState(false);
 
-  const pianoScrollRef = useRef<ScrollView>(null);
-  const dayOffsets = useRef<Map<number, number>>(new Map());
-  const slotTargets = useRef<Map<string, SlotTarget>>(new Map());
-  const draggingRef = useRef<DragState>(null);
-  const guideTargets = useRef<Map<string, View>>(new Map());
-  const dragPosition = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const pianoScrollRef     = useRef<ScrollView>(null);
+  const dayOffsets         = useRef<Map<number, number>>(new Map());
+  const slotTargets        = useRef<Map<string, SlotTarget>>(new Map());
+  const draggingRef        = useRef<DragState>(null);
+  const guideTargets       = useRef<Map<string, View>>(new Map());
+  const dragPosition       = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const attrListRef        = useRef<FlashList<BuilderAttraction>>(null);
+  const foodListRef        = useRef<FlashList<BuilderAttraction>>(null);
 
   // ── Derivati ──────────────────────────────────────────────────────────────
 
@@ -414,6 +416,13 @@ export default function CreateItineraryScreen() {
     });
     return map;
   }, [attractions, foodSpots, lastInExpanded]);
+
+  // Quando cambia l'ultima tappa posizionata (e quindi si ricalcolano le distanze),
+  // riporta entrambe le liste all'inizio in modo che la più vicina sia sempre visibile
+  useEffect(() => {
+    attrListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    foodListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [lastInExpanded?.id]);
 
   const attractionCategories = useMemo(() =>
     [...new Set(attractions.map((a) => a.attraction_type).filter(Boolean) as string[])].sort(),
@@ -1053,9 +1062,9 @@ export default function CreateItineraryScreen() {
                 <Text style={styles.errorText}>{error}</Text>
               ) : (
                 <FlashList
+                  ref={attrListRef}
                   data={available}
                   keyExtractor={(a) => String(a.id)}
-
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.listScroll}
                   renderItem={({ item: a }) => (
@@ -1085,9 +1094,9 @@ export default function CreateItineraryScreen() {
                 <SkeletonList count={5} />
               ) : (
                 <FlashList
+                  ref={foodListRef}
                   data={availableFood}
                   keyExtractor={(a) => String(a.id)}
-
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.listScroll}
                   renderItem={({ item: a }) => (
@@ -1856,8 +1865,9 @@ function SlotCard({
             <Ionicons name="trash-outline" size={18} color={colors.danger} />
           </TouchableOpacity>
         </View>
-        {/* Nome: 3 righe con ellissi */}
-        <View style={{ flex: 1 }}>
+        {/* Emoji + nome: centrati insieme nella riga */}
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text style={styles.slotEmoji}>{getEmoji(slot.attraction!.attraction_type, isMeal)}</Text>
           <Text style={styles.slotNameCompact} numberOfLines={3} ellipsizeMode="tail">{name}</Text>
         </View>
       </TouchableOpacity>
