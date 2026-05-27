@@ -58,7 +58,8 @@ async function generateItinerary(
     console.log("[gen] HTTP", resp.status);
   } catch (err: any) {
     // Network-level error (server unreachable, no connection, etc.)
-    console.log("[gen] fetch error →", err?.message);
+    console.log("[gen] fetch error → name:", err?.name, "| message:", err?.message);
+    // Re-throw AbortError così il mutationFn può distinguere timeout vs abort di rete
     if (err?.name === "AbortError") throw err;
     throw new Error(
       `Impossibile contattare il server (${API_BASE_URL}). Assicurati di essere connesso alla stessa rete del backend.`,
@@ -96,12 +97,35 @@ export function useItinerary(): UseItineraryReturn {
       const controller = new AbortController();
       controllerRef.current = controller;
 
-      // timeout di 30 s (la generazione può richiedere qualche secondo)
-      const timeout = setTimeout(() => controller.abort(), 30_000);
-      return generateItinerary(params, controller.signal).finally(() => {
-        clearTimeout(timeout);
-        controllerRef.current = null;
-      });
+      // Traccia se l'abort è stato causato dal NOSTRO timer (timeout reale)
+      // vs un abort immediato della rete (es. connection refused su Android)
+      let timedOut = false;
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, 30_000);
+
+      return generateItinerary(params, controller.signal)
+        .catch((err) => {
+          if (err?.name === "AbortError") {
+            if (timedOut) {
+              // Timeout reale: il server non ha risposto entro 30 s
+              throw new Error("__TIMEOUT__");
+            } else {
+              // Abort immediato: connessione rifiutata o server non raggiungibile
+              throw new Error(
+                `Impossibile raggiungere il server (${API_BASE_URL}).\n` +
+                `Assicurati che il backend sia avviato e che il dispositivo\n` +
+                `sia sulla stessa rete WiFi del PC.`,
+              );
+            }
+          }
+          throw err;
+        })
+        .finally(() => {
+          clearTimeout(timeout);
+          controllerRef.current = null;
+        });
     },
   });
 
@@ -126,8 +150,8 @@ export function useItinerary(): UseItineraryReturn {
   }, [mutation.reset]);
 
   const errorMessage = mutation.error
-    ? mutation.error.name === "AbortError"
-      ? "Timeout: la generazione ha impiegato troppo. Riprova tra qualche secondo."
+    ? mutation.error.message === "__TIMEOUT__"
+      ? "Timeout: il server non ha risposto entro 30 secondi. Riprova tra qualche secondo."
       : (mutation.error.message ?? "Impossibile raggiungere il server.")
     : null;
 

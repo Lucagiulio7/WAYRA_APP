@@ -234,6 +234,9 @@ export default function HomeScreen() {
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
   const guideTargets = useRef<Map<string, View>>(new Map());
+  // Ref per leggere l'errore più recente dentro handleGenerate (evita stale closure)
+  const latestErrorRef = useRef<string | null>(null);
+  useEffect(() => { latestErrorRef.current = error; }, [error]);
 
   const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : GENERATING_MESSAGES_IT;
 
@@ -310,8 +313,8 @@ export default function HomeScreen() {
     const result = await generate({ city, num_days: numDays, level });
     console.log("[gen] result →", result ? `OK (${result.days?.length}g)` : "null");
     if (!result) {
-      // Se non c'è né risultato né errore visibile, mostra alert debug
-      const msg = error ?? "Nessun messaggio d'errore ricevuto — verifica che il backend sia avviato e raggiungibile.";
+      // Mostra l'errore come Alert (il ref ha il valore aggiornato, non la closure stale)
+      const msg = latestErrorRef.current ?? "Impossibile raggiungere il server. Verifica che il backend sia avviato e che il dispositivo sia sulla stessa rete WiFi.";
       if (__DEV__) Alert.alert("Genera: nessun risultato", msg);
       return;
     }
