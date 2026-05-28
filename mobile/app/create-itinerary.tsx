@@ -365,9 +365,9 @@ function dayDistanceWith(day: DayPlan | undefined, slotId: string, attraction: B
 
 export default function CreateItineraryScreen() {
   const router = useRouter();
-  const { city = "roma", numDays: ndStr = "3", cityLabel = "" } =
+  const { city = "roma", numDays: ndStr = "1", cityLabel = "" } =
     useLocalSearchParams<{ city: string; numDays: string; cityLabel: string }>();
-  const numDays = Math.max(1, parseInt(ndStr, 10) || 3);
+  const numDays = Math.max(1, parseInt(ndStr, 10) || 1);
   const { lang, toggle } = useLanguage();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -390,6 +390,7 @@ export default function CreateItineraryScreen() {
     addFilledSlot,
     mapAddFood: storeMapAddFood,
     mapReorderSlots,
+    addDay: storeAddDay,
     init: initBuilder,
   } = useBuilderStore();
 
@@ -419,8 +420,8 @@ export default function CreateItineraryScreen() {
   const draggingRef        = useRef<DragState>(null);
   const guideTargets       = useRef<Map<string, View>>(new Map());
   const dragPosition       = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const attrListRef        = useRef<FlashList<BuilderAttraction>>(null);
-  const foodListRef        = useRef<FlashList<BuilderAttraction>>(null);
+  const attrListRef        = useRef<any>(null);
+  const foodListRef        = useRef<any>(null);
 
   // ── Derivati ──────────────────────────────────────────────────────────────
 
@@ -784,6 +785,11 @@ export default function CreateItineraryScreen() {
     storeAddSlot(dayIdx, "meal");
   }, [storeAddSlot]);
 
+  const handleAddDay = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    storeAddDay();
+  }, [storeAddDay]);
+
   const handleDockSlotPress = useCallback((slot: SlotData) => {
     if (slot.attraction) {
       setDockDetail({ dayIdx: activeDayIndex, slot });
@@ -916,7 +922,7 @@ export default function CreateItineraryScreen() {
             {cityLabel || city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </Text>
           <Text style={styles.headerSub}>
-            {numDays} {numDays === 1 ? (lang === "en" ? "day" : "giorno") : (lang === "en" ? "days" : "giorni")}
+            {days.length} {days.length === 1 ? (lang === "en" ? "day" : "giorno") : (lang === "en" ? "days" : "giorni")}
             {totalPlaced > 0 ? ` · ${totalPlaced} ${lang === "en" ? "placed" : "inserite"}` : ""}
           </Text>
         </View>
@@ -1083,6 +1089,14 @@ export default function CreateItineraryScreen() {
                       onOptimize={() => handleOptimizeDay(dayIdx)}
                     />
                   ))}
+                  {days.length < 15 && (
+                    <TouchableOpacity style={styles.addDayBtn} onPress={handleAddDay} activeOpacity={0.7}>
+                      <Ionicons name="add" size={15} color={colors.accentGold} />
+                      <Text style={styles.addDayBtnText}>
+                        {lang === "en" ? "Add day" : "Aggiungi giorno"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </ScrollView>
               </View>
 
@@ -1189,6 +1203,14 @@ export default function CreateItineraryScreen() {
                 />
               </View>
             ))}
+            {days.length < 15 && (
+              <TouchableOpacity style={[styles.addDayBtn, styles.addDayBtnPiano]} onPress={handleAddDay} activeOpacity={0.7}>
+                <Ionicons name="add" size={15} color={colors.accentGold} />
+                <Text style={styles.addDayBtnText}>
+                  {lang === "en" ? "Add day" : "Aggiungi giorno"}
+                </Text>
+              </TouchableOpacity>
+            )}
           </ScrollView>
         )}
       </View>
@@ -2365,6 +2387,24 @@ function makeStyles(colors: any) {
       backgroundColor: colors.accentGreen + "12", borderWidth: 1, borderColor: colors.accentGreen + "30",
     },
     addMealText: { color: colors.accentGreen, fontSize: 13, fontWeight: "700" },
+    addDayBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 5,
+      paddingVertical: 11,
+      borderRadius: 10,
+      borderWidth: 1.5,
+      borderStyle: "dashed" as const,
+      borderColor: colors.accentGold + "50",
+      backgroundColor: colors.accentGold + "0a",
+      marginTop: 6,
+    },
+    addDayBtnPiano: {
+      marginHorizontal: 0,
+      marginTop: 4,
+    },
+    addDayBtnText: { color: colors.accentGold, fontSize: 12, fontWeight: "800" as const },
 
     // ── Selection bar ────────────────────────────────────────────────────────
     selectionBar: {

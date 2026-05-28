@@ -115,6 +115,8 @@ function optimizeSlots(slots: SlotData[]): SlotData[] {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
+const MAX_DAYS = 15;
+
 interface BuilderState {
   days: DayPlan[];
   expandedDay: number;
@@ -124,6 +126,7 @@ interface BuilderState {
 
   // Giorni
   setExpandedDay: (day: number) => void;
+  addDay: () => void;
 
   // Slot
   dropAttraction: (dayIdx: number, slotId: string, attraction: BuilderAttraction) => void;
@@ -152,6 +155,16 @@ export const useBuilderStore = create<BuilderState>()((set) => ({
 
   setExpandedDay: (day) =>
     set({ expandedDay: day }),
+
+  addDay: () =>
+    set((s) => {
+      if (s.days.length >= MAX_DAYS) return s;
+      const nextDay = s.days.length + 1;
+      return {
+        days: [...s.days, { day: nextDay, slots: [makeSlot(), makeSlot()] }],
+        expandedDay: nextDay,
+      };
+    }),
 
   dropAttraction: (dayIdx, slotId, attraction) =>
     set((s) => {

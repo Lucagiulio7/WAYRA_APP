@@ -21,6 +21,7 @@ import * as Sharing from "expo-sharing";
 import { WebView } from "react-native-webview";
 import { CityInfo, CultureFact, Food, Itinerary, Neighborhood, Stop } from "@/types";
 import { useAttractions, BuilderAttraction } from "@/hooks/useAttractions";
+import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useCityInfo } from "@/hooks/useCityInfo";
 import { DayCard } from "@/components/DayCard";
@@ -232,7 +233,7 @@ function walkingDistanceFactor(straightKm: number): number {
 }
 
 function routeWalkingKm(stops: Stop[]): number {
-  const route = stops.filter((s) => s.type === "attraction");
+  const route = stops.filter((s) => s.type === "attraction" || isFoodStop(s));
   return route.slice(0, -1).reduce((sum, stop, index) => sum + walkingKm(stop, route[index + 1]), 0);
 }
 
@@ -574,6 +575,83 @@ function twoOptStops(stops: Stop[]): Stop[] {
   return best;
 }
 
+function isFoodStop(stop: Stop): boolean {
+  return stop.type === "food" || stop.type === "meal";
+}
+
+function optimizeAttractionsBetweenFoodStops(stops: Stop[]): Stop[] {
+  const result: Stop[] = [];
+  let segment: Stop[] = [];
+
+  const flush = () => {
+    if (segment.length > 0) {
+      result.push(...twoOptStops(segment));
+      segment = [];
+    }
+  };
+
+  for (const stop of stops) {
+    if (stop.type === "attraction") {
+      segment.push(stop);
+    } else {
+      flush();
+      result.push(stop);
+    }
+  }
+  flush();
+  return result;
+}
+
+function stopMinutes(stop: Stop): number {
+  return stop.estimated_visit_time ?? 60;
+}
+
+function insertAttractionInLightestSegment(stops: Stop[], attraction: Stop): Stop[] {
+  const segments: Stop[][] = [[]];
+  const anchors: Stop[] = [];
+
+  for (const stop of stops) {
+    if (stop.type === "attraction") {
+      segments[segments.length - 1].push(stop);
+    } else {
+      anchors.push(stop);
+      segments.push([]);
+    }
+  }
+
+  let targetSegment = 0;
+  let lowestMinutes = Number.POSITIVE_INFINITY;
+  segments.forEach((segment, index) => {
+    const minutes = segment.reduce((sum, stop) => sum + stopMinutes(stop), 0);
+    if (minutes < lowestMinutes) {
+      lowestMinutes = minutes;
+      targetSegment = index;
+    }
+  });
+
+  segments[targetSegment] = twoOptStops([...segments[targetSegment], attraction]);
+
+  const result: Stop[] = [];
+  segments.forEach((segment, index) => {
+    result.push(...segment);
+    if (anchors[index]) result.push(anchors[index]);
+  });
+  return result;
+}
+
+function routeLinkStops(stops: Stop[]): Stop[] {
+  return stops.filter((s) => s.type !== "free_time" && !s.empty_meal_slot);
+}
+
+function buildMapsLink(stops: Stop[], city: string): string {
+  const routeStops = routeLinkStops(stops);
+  return routeStops.length >= 2
+    ? "https://www.google.com/maps/dir/" +
+      routeStops.map((s) => mapsWaypoint(s, city)).join("/") +
+      "?travelmode=walking"
+    : "";
+}
+
 function builderToStop(a: BuilderAttraction, city: string): Stop {
   return {
     type: "attraction",
@@ -591,6 +669,29 @@ function builderToStop(a: BuilderAttraction, city: string): Stop {
     is_food_spot: false,
     attraction_type: a.attraction_type,
     ticket_url: a.ticket_url,
+  };
+}
+
+function foodSpotToStop(a: BuilderAttraction, city: string, previous?: Stop): Stop {
+  return {
+    type: previous?.type === "food" ? "food" : "meal",
+    id: a.id,
+    name: a.name,
+    name_en: a.name_en,
+    description: a.description ?? undefined,
+    description_en: a.description_en ?? undefined,
+    latitude: a.latitude,
+    longitude: a.longitude,
+    category_level: a.category_level,
+    estimated_visit_time: a.estimated_visit_time ?? previous?.estimated_visit_time ?? 60,
+    tags: a.tags ?? [],
+    city,
+    is_food_spot: true,
+    attraction_type: a.attraction_type,
+    food_type: a.food_type,
+    meal_type: a.meal_type ?? previous?.meal_type,
+    rating: a.rating,
+    notes: previous?.notes,
   };
 }
 
@@ -643,6 +744,7 @@ interface ReplaceState {
   dayIndex: number;
   stopId: number;
   stopName: string;
+  kind: "attraction" | "food";
   options: ReplaceOption[];
 }
 
@@ -710,6 +812,7 @@ export default function ItineraryScreen() {
   }, [itinerary]);
 
   const { attractions } = useAttractions(itinerary?.city ?? "");
+  const { foodSpots } = useFoodSpots(itinerary?.city ?? "");
   const { neighborhoods, loading: neighborhoodsLoading } = useNeighborhoods(itinerary?.city ?? "");
   const { cityInfo, loading: cityInfoLoading } = useCityInfo(itinerary?.city ?? "");
 
@@ -730,6 +833,7 @@ export default function ItineraryScreen() {
   const [pdfPreviewHtml, setPdfPreviewHtml] = useState<string | null>(null);
   const [mapVisible, setMapVisible] = useState(false);
   const [mapDayNumber, setMapDayNumber] = useState(1);
+  const [foodSelection, setFoodSelection] = useState<{ dayIndex: number; stopId: number; mealType?: string | null } | null>(null);
 
   const savedId = itinerary ? findSavedId(itinerary) : null;
 
@@ -804,12 +908,50 @@ export default function ItineraryScreen() {
       dayIndex,
       stopId,
       stopName: (lang === "en" && target.name_en) ? target.name_en : target.name,
+      kind: "attraction",
       options: candidates.map((c) => ({
         stop: builderToStop(c.attraction, itinerary.city),
         distanceKm: c.distanceKm,
       })),
     });
   }, [itinerary, attractions, lang]);
+
+  const handleReplaceFood = useCallback((dayIndex: number, stopId: number) => {
+    if (!itinerary) return;
+    const day = itinerary.days[dayIndex];
+    const target = day.stops.find((s) => s.id === stopId && isFoodStop(s));
+    if (!target) return;
+
+    setFoodSelection({ dayIndex, stopId, mealType: target.meal_type });
+    setMapDayNumber(day.day);
+    setMapVisible(true);
+  }, [itinerary]);
+
+  const handleSelectFoodFromMap = useCallback((foodSpotId: number) => {
+    if (!itinerary || !foodSelection) return;
+    const spot = foodSpots.find((f) => f.id === foodSpotId);
+    if (!spot) return;
+
+    const { dayIndex, stopId } = foodSelection;
+    const day = itinerary.days[dayIndex];
+    const previous = day?.stops.find((s) => s.id === stopId && isFoodStop(s));
+    if (!day || !previous) return;
+
+    const replacement = foodSpotToStop(spot, itinerary.city, previous);
+    setItinerary((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        days: prev.days.map((d, i) => {
+          if (i !== dayIndex) return d;
+          const nextStops = d.stops.map((s) => s.id === stopId && isFoodStop(s) ? replacement : s);
+          return { ...d, stops: nextStops, maps_link: buildMapsLink(nextStops, prev.city) };
+        }),
+      };
+    });
+    setFoodSelection(null);
+    setMapVisible(false);
+  }, [itinerary, foodSelection, foodSpots]);
 
   const applyReplaceOption = useCallback((dayIndex: number, stopId: number, replacement: Stop) => {
     setItinerary((prev) => {
@@ -820,13 +962,7 @@ export default function ItineraryScreen() {
           i !== dayIndex ? d : {
             ...d,
             stops: d.stops.map((s) => s.id === stopId ? replacement : s),
-            maps_link: d.stops.filter((s) => s.type === "attraction").length >= 2
-              ? "https://www.google.com/maps/dir/" + d.stops
-                .map((s) => s.id === stopId ? replacement : s)
-                .filter((s) => s.type === "attraction")
-                .map((s) => mapsWaypoint(s, prev.city))
-                .join("/") + "?travelmode=walking"
-              : "",
+            maps_link: buildMapsLink(d.stops.map((s) => s.id === stopId ? replacement : s), prev.city),
           },
         ),
       };
@@ -954,18 +1090,7 @@ export default function ItineraryScreen() {
     if (day.stops.some((s) => s.id === attractionId)) return; // già presente
 
     const newStop = builderToStop(attraction, itinerary.city);
-    const currentAttractions = day.stops.filter((s) => s.type === "attraction");
-    // twoOpt ottimizza solo le attrazioni; gli altri stop (food, free_time) sono preservati separatamente
-    const optimizedAttractions = twoOptStops([...currentAttractions, newStop]);
-
-    const newMapsLink = optimizedAttractions.length >= 2
-      ? "https://www.google.com/maps/dir/" +
-        optimizedAttractions.map((s) => mapsWaypoint(s, itinerary.city)).join("/") +
-        "?travelmode=walking"
-      : "";
-
-    // Recupera gli stop non-attrazione (food, free_time) per non perderli
-    const nonAttractionStops = day.stops.filter((s) => s.type !== "attraction");
+    const nextStops = insertAttractionInLightestSegment(day.stops, newStop);
 
     setItinerary((prev) => {
       if (!prev) return prev;
@@ -974,7 +1099,7 @@ export default function ItineraryScreen() {
         days: prev.days.map((d, i) =>
           i !== dayIndex
             ? d
-            : { ...d, stops: [...optimizedAttractions, ...nonAttractionStops], maps_link: newMapsLink },
+            : { ...d, stops: nextStops, maps_link: buildMapsLink(nextStops, prev.city) },
         ),
       };
     });
@@ -995,25 +1120,10 @@ export default function ItineraryScreen() {
     const stop: Stop = sourceStop ?? (attractionData ? builderToStop(attractionData, itinerary.city) : null!);
     if (!stop) return;
 
-    // Ottimizza le attrazioni del giorno destinazione aggiungendo la nuova tappa
-    const targetAttractions = targetDay.stops.filter((s) => s.type === "attraction");
-    const newTargetAttractions = twoOptStops([...targetAttractions, stop]);
-
-    // Ottimizza le attrazioni del giorno sorgente rimuovendo la tappa spostata
-    const newSourceAttractions = twoOptStops(
-      sourceDay.stops.filter((s) => s.type === "attraction" && s.id !== attractionId),
+    const newTargetStops = insertAttractionInLightestSegment(targetDay.stops, stop);
+    const newSourceStops = optimizeAttractionsBetweenFoodStops(
+      sourceDay.stops.filter((s) => !(s.type === "attraction" && s.id === attractionId)),
     );
-
-    // Preserva gli stop non-attrazione (food, free_time) di entrambi i giorni
-    const sourceNonAttractionStops = sourceDay.stops.filter((s) => s.type !== "attraction");
-    const targetNonAttractionStops = targetDay.stops.filter((s) => s.type !== "attraction");
-
-    const buildLink = (stops: Stop[]) =>
-      stops.length >= 2
-        ? "https://www.google.com/maps/dir/" +
-          stops.map((s) => mapsWaypoint(s, itinerary.city)).join("/") +
-          "?travelmode=walking"
-        : "";
 
     setItinerary((prev) => {
       if (!prev) return prev;
@@ -1022,13 +1132,13 @@ export default function ItineraryScreen() {
         days: prev.days.map((d, i) => {
           if (i === sourceDayIndex) return {
             ...d,
-            stops: [...newSourceAttractions, ...sourceNonAttractionStops],
-            maps_link: buildLink(newSourceAttractions),
+            stops: newSourceStops,
+            maps_link: buildMapsLink(newSourceStops, prev.city),
           };
           if (i === dayIndex) return {
             ...d,
-            stops: [...newTargetAttractions, ...targetNonAttractionStops],
-            maps_link: buildLink(newTargetAttractions),
+            stops: newTargetStops,
+            maps_link: buildMapsLink(newTargetStops, prev.city),
           };
           return d;
         }),
@@ -1041,15 +1151,9 @@ export default function ItineraryScreen() {
   const handleRemoveAttraction = useCallback((dayIndex: number, attractionId: number) => {
     if (!itinerary) return;
     const day = itinerary.days[dayIndex];
-    const remainingAttractions = twoOptStops(
-      day.stops.filter((s) => s.type === "attraction" && s.id !== attractionId),
+    const remainingStops = optimizeAttractionsBetweenFoodStops(
+      day.stops.filter((s) => !(s.type === "attraction" && s.id === attractionId)),
     );
-    const nonAttractionStops = day.stops.filter((s) => s.type !== "attraction");
-    const newMapsLink = remainingAttractions.length >= 2
-      ? "https://www.google.com/maps/dir/" +
-        remainingAttractions.map((s) => mapsWaypoint(s, itinerary.city)).join("/") +
-        "?travelmode=walking"
-      : "";
     setItinerary((prev) => {
       if (!prev) return prev;
       return {
@@ -1057,27 +1161,24 @@ export default function ItineraryScreen() {
         days: prev.days.map((d, i) =>
           i !== dayIndex
             ? d
-            : { ...d, stops: [...remainingAttractions, ...nonAttractionStops], maps_link: newMapsLink },
+            : { ...d, stops: remainingStops, maps_link: buildMapsLink(remainingStops, prev.city) },
         ),
       };
     });
   }, [itinerary]);
 
   const applyReloadOption = useCallback((dayIndex: number, newStops: Stop[]) => {
-    const newMapsLink = newStops.length >= 2
-      ? "https://www.google.com/maps/dir/" + newStops.map((s) => mapsWaypoint(s, itinerary?.city ?? "")).join("/") + "?travelmode=walking"
-      : "";
     setItinerary((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         days: prev.days.map((d, i) =>
-          i !== dayIndex ? d : { ...d, stops: newStops, maps_link: newMapsLink },
+          i !== dayIndex ? d : { ...d, stops: newStops, maps_link: buildMapsLink(newStops, prev.city) },
         ),
       };
     });
     setReloadState(null);
-  }, [itinerary?.city]);
+  }, []);
 
   // ── Aggiorna nota di una tappa ───────────────────────────────────────────────
 
@@ -1103,16 +1204,27 @@ export default function ItineraryScreen() {
   const handleReorderStops = useCallback((dayIndex: number, newStops: Stop[]) => {
     setItinerary((prev) => {
       if (!prev) return prev;
-      const attractionStops = newStops.filter((s) => s.type === "attraction");
-      const newMapsLink = attractionStops.length >= 2
-        ? "https://www.google.com/maps/dir/" +
-          attractionStops.map((s) => mapsWaypoint(s, prev.city)).join("/") +
-          "?travelmode=walking"
-        : prev.days[dayIndex]?.maps_link ?? "";
       return {
         ...prev,
         days: prev.days.map((d, i) =>
-          i !== dayIndex ? d : { ...d, stops: newStops, maps_link: newMapsLink },
+          i !== dayIndex ? d : { ...d, stops: newStops, maps_link: buildMapsLink(newStops, prev.city) },
+        ),
+      };
+    });
+  }, []);
+
+  const handleOptimizeDayOrder = useCallback((dayIndex: number) => {
+    setItinerary((prev) => {
+      if (!prev) return prev;
+      const day = prev.days[dayIndex];
+      if (!day) return prev;
+      const optimizedStops = optimizeAttractionsBetweenFoodStops(day.stops);
+      return {
+        ...prev,
+        days: prev.days.map((d, i) =>
+          i !== dayIndex
+            ? d
+            : { ...d, stops: optimizedStops, maps_link: buildMapsLink(optimizedStops, prev.city) },
         ),
       };
     });
@@ -1265,7 +1377,7 @@ export default function ItineraryScreen() {
             {attractions.length > 0 && (
               <TouchableOpacity
                 style={[styles.globalMapBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "44" }]}
-                onPress={() => { setMapDayNumber(itinerary.days[0]?.day ?? 1); setMapVisible(true); }}
+                onPress={() => { setFoodSelection(null); setMapDayNumber(itinerary.days[0]?.day ?? 1); setMapVisible(true); }}
                 activeOpacity={0.8}
               >
                 <Ionicons name="map-outline" size={16} color={colors.accentGold} />
@@ -1280,8 +1392,9 @@ export default function ItineraryScreen() {
                 day={day}
                 open={openDay === day.day}
                 onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
+                onOptimizeDay={() => handleOptimizeDayOrder(i)}
                 onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
-                onReloadDay={() => handleReloadDay(i)}
+                onReplaceFood={(stopId) => handleReplaceFood(i, stopId)}
                 onReorder={(newStops) => handleReorderStops(i, newStops)}
                 onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
               />
@@ -1535,7 +1648,9 @@ export default function ItineraryScreen() {
             <View style={[styles.modalHandle, { backgroundColor: colors.border2 }]} />
 
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              {lang === "en" ? "Nearby alternatives" : "Alternative vicine"}
+              {replaceState?.kind === "food"
+                ? (lang === "en" ? "Food alternatives" : "Alternative cibo")
+                : (lang === "en" ? "Nearby alternatives" : "Alternative vicine")}
             </Text>
             <Text style={[styles.modalSub, { color: colors.textMuted }]}>
               {lang === "en"
@@ -1560,7 +1675,11 @@ export default function ItineraryScreen() {
                     {option.stop.estimated_visit_time ?? 60} min · {formatDistance(option.distanceKm)}
                   </Text>
                 </View>
-                <Ionicons name="swap-horizontal-outline" size={18} color={colors.accentBlue} />
+                <Ionicons
+                  name={replaceState?.kind === "food" ? "restaurant-outline" : "swap-horizontal-outline"}
+                  size={18}
+                  color={replaceState?.kind === "food" ? colors.accentGreen : colors.accentBlue}
+                />
               </TouchableOpacity>
             ))}
 
@@ -1579,17 +1698,25 @@ export default function ItineraryScreen() {
         return mapDay ? (
           <DayMap
             visible={mapVisible}
-            onClose={() => setMapVisible(false)}
+            onClose={() => { setMapVisible(false); setFoodSelection(null); }}
             day={mapDay}
             allAttractions={attractions}
+            allFoodSpots={foodSpots}
+            foodSelection={foodSelection && foodSelection.dayIndex === safeIndex
+              ? { stopId: foodSelection.stopId, mealType: foodSelection.mealType }
+              : null}
             assignedMap={assignedMap}
             lang={lang}
             accent={DAY_ACCENTS[(mapDay.day - 1) % DAY_ACCENTS.length]}
             onAddAttraction={(id) => handleAddAttraction(safeIndex, id)}
             onMoveAttraction={(id, fromDay) => handleMoveAttraction(safeIndex, id, fromDay)}
             onRemoveAttraction={(id) => handleRemoveAttraction(safeIndex, id)}
+            onSelectFood={handleSelectFoodFromMap}
             allDays={itinerary.days}
-            onDayChange={setMapDayNumber}
+            onDayChange={(dayNumber) => {
+              setFoodSelection(null);
+              setMapDayNumber(dayNumber);
+            }}
           />
         ) : null;
       })()}

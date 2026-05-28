@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -252,10 +252,10 @@ export default function HomeScreen() {
     setShowOnboarding(false);
   };
 
-  const setGuideTarget = (key: string, ref: View | null) => {
+  const setGuideTarget = useCallback((key: string, ref: View | null) => {
     if (ref) guideTargets.current.set(key, ref);
     else guideTargets.current.delete(key);
-  };
+  }, []);
 
   // ── Cicla i messaggi durante la generazione ─────────────────────────────────
   useEffect(() => {
@@ -307,19 +307,22 @@ export default function HomeScreen() {
     );
   }
 
+  function handleLevelSelect(nextLevel: ExperienceLevel) {
+    if (nextLevel === level) return;
+    // Quando si passa a iconico e i giorni selezionati superano il massimo, riduci subito.
+    // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha più giorni);
+    // l'utente può scegliere più giorni autonomamente dalla griglia aggiornata.
+    if (nextLevel === 1 && numDays > max_days_iconico) {
+      setNumDays(max_days_iconico);
+    }
+    setLevel(nextLevel);
+  }
+
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
-    console.log("[gen] start →", city, numDays, level);
-    const result = await generate({ city, num_days: numDays, level });
-    console.log("[gen] result →", result ? `OK (${result.days?.length}g)` : "null");
-    if (!result) {
-      // Mostra l'errore come Alert (il ref ha il valore aggiornato, non la closure stale)
-      const msg = latestErrorRef.current ?? "Impossibile raggiungere il server. Verifica che il backend sia avviato e che il dispositivo sia sulla stessa rete WiFi.";
-      if (__DEV__) Alert.alert("Genera: nessun risultato", msg);
-      return;
-    }
+    const result = await generate({ city, num_days: numDays, level, max_walk_km: maxWalkKm });
+    if (!result) return;
     await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
-    console.log("[gen] navigating → /itinerary");
     router.push({ pathname: "/itinerary" });
   }
 
@@ -330,7 +333,7 @@ export default function HomeScreen() {
       pathname: "/create-itinerary",
       params: {
         city,
-        numDays: String(numDays),
+        numDays: "1",
         cityLabel: cityObj ? `${cityObj.emoji} ${cityObj.label}` : city,
       },
     });
@@ -458,7 +461,7 @@ export default function HomeScreen() {
         <Section title={t.experienceType} colors={colors}>
           <View style={styles.levelRow}>
             {LEVELS.map((l) => (
-              <LevelOption key={String(l.id)} {...l} selected={level === l.id} onPress={() => setLevel(l.id)} colors={colors} />
+              <LevelOption key={String(l.id)} {...l} selected={level === l.id} onPress={() => handleLevelSelect(l.id)} colors={colors} />
             ))}
 
           </View>
@@ -524,7 +527,11 @@ export default function HomeScreen() {
         selectedId={city}
         lang={lang}
         colors={colors}
-        onSelect={(id) => { setCity(id); setShowCityPicker(false); }}
+        onSelect={(id) => {
+          setCity(id);
+          if (level === "mix") setNumDays(max_days_esploratore);
+          setShowCityPicker(false);
+        }}
         onClose={() => setShowCityPicker(false)}
       />
 
@@ -532,7 +539,11 @@ export default function HomeScreen() {
       <WorldMapModal
         visible={showWorldMap}
         lang={lang}
-        onSelect={(id) => { setCity(id); setShowWorldMap(false); }}
+        onSelect={(id) => {
+          setCity(id);
+          if (level === "mix") setNumDays(max_days_esploratore);
+          setShowWorldMap(false);
+        }}
         onClose={() => setShowWorldMap(false)}
       />
 

@@ -68,7 +68,7 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 
 function estimatedWalkingKm(stops: ItineraryDay["stops"]): number {
   const routeStops = stops.filter((s) =>
-    s.type === "attraction" &&
+    (s.type === "attraction" || s.type === "food" || s.type === "meal") &&
     Number.isFinite(s.latitude) &&
     Number.isFinite(s.longitude),
   );
@@ -108,13 +108,14 @@ interface Props {
   day: ItineraryDay;
   open?: boolean;
   onToggleOpen?: () => void;
+  onOptimizeDay?: () => void;
   onReplaceStop?: (stopId: number) => void;
-  onReloadDay?: () => void;
+  onReplaceFood?: (stopId: number) => void;
   onReorder?: (newStops: Stop[]) => void;
   onNoteChange?: (stopIndex: number, note: string) => void;
 }
 
-export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop, onReloadDay, onReorder, onNoteChange }: Props) {
+export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay, onReplaceStop, onReplaceFood, onReorder, onNoteChange }: Props) {
   const [internalOpen, setInternalOpen] = useState(day.day === 1);
   const [foodOpen, setFoodOpen] = useState(false);
   const [snackOpen, setSnackOpen] = useState(false);
@@ -202,14 +203,15 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
 
         {/* Pulsanti azione — fuori dal TouchableOpacity del toggle */}
         <View style={styles.headerActions}>
-          {!!onReloadDay && (
+          {!!onOptimizeDay && attractionStops.length > 1 && (
             <TouchableOpacity
-              onPress={onReloadDay}
+              onPress={onOptimizeDay}
               activeOpacity={0.7}
-              style={[styles.reloadBtn, { backgroundColor: colors.border + "30", borderColor: colors.border }]}
+              style={[styles.optimizeBtn, { backgroundColor: colors.accentBlue + "16", borderColor: colors.accentBlue + "55" }]}
+              accessibilityLabel={lang === "en" ? "Optimize stop order" : "Ottimizza ordine tappe"}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="refresh-outline" size={16} color={accent} />
+              <Ionicons name="shuffle-outline" size={16} color={colors.accentBlue} />
             </TouchableOpacity>
           )}
         </View>
@@ -232,6 +234,7 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onReplaceStop
             stops={day.stops}
             onReorder={onReorder ?? (() => {})}
             onReplaceStop={onReplaceStop}
+            onReplaceFood={onReplaceFood}
             onNoteChange={onNoteChange}
             lang={lang}
             colors={colors}
@@ -475,8 +478,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
   },
-  body:     { paddingHorizontal: 12, paddingBottom: 14 },
-  reloadBtn: {
+  body:     { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 14 },
+  optimizeBtn: {
     padding: 5,
     borderRadius: 8,
     borderWidth: 1,
