@@ -234,9 +234,6 @@ export default function HomeScreen() {
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
   const guideTargets = useRef<Map<string, View>>(new Map());
-  // Ref per leggere l'errore più recente dentro handleGenerate (evita stale closure)
-  const latestErrorRef = useRef<string | null>(null);
-  useEffect(() => { latestErrorRef.current = error; }, [error]);
 
   const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : GENERATING_MESSAGES_IT;
 
@@ -294,6 +291,19 @@ export default function HomeScreen() {
   useEffect(() => {
     if (numDays > maxDays) setNumDays(maxDays);
   }, [maxDays]);
+
+  // Quando l'utente cambia città in modalità esploratore, porta i giorni
+  // selezionati al massimo disponibile per la nuova città — ma solo dopo
+  // che useCityInfo ha caricato i dati reali (evita stale read).
+  const prevCityRef = useRef(city);
+  useEffect(() => {
+    if (prevCityRef.current !== city) {
+      prevCityRef.current = city;
+      if (level === "mix" && !cityInfoLoading) {
+        setNumDays(max_days_esploratore);
+      }
+    }
+  }, [city, max_days_esploratore, cityInfoLoading, level]);
 
   const selectedCity = CITIES.find((c) => c.id === city) ?? null;
 
@@ -529,7 +539,6 @@ export default function HomeScreen() {
         colors={colors}
         onSelect={(id) => {
           setCity(id);
-          if (level === "mix") setNumDays(max_days_esploratore);
           setShowCityPicker(false);
         }}
         onClose={() => setShowCityPicker(false)}
@@ -541,7 +550,6 @@ export default function HomeScreen() {
         lang={lang}
         onSelect={(id) => {
           setCity(id);
-          if (level === "mix") setNumDays(max_days_esploratore);
           setShowWorldMap(false);
         }}
         onClose={() => setShowWorldMap(false)}

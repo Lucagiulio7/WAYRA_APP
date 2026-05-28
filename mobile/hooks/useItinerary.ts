@@ -124,7 +124,9 @@ export function useItinerary(): UseItineraryReturn {
 
   // Ref che punta sempre all'ultima versione di mutateAsync — evita dipendenza instabile
   const mutateAsyncRef = useRef(mutation.mutateAsync);
-  useEffect(() => { mutateAsyncRef.current = mutation.mutateAsync; });
+  useEffect(() => {
+    mutateAsyncRef.current = mutation.mutateAsync;
+  }, [mutation.mutateAsync]);
 
   const generate = useCallback(
     async (params: GenerateParams): Promise<Itinerary | null> => {
