@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Linking,
   Modal,
   Platform,
@@ -17,6 +18,7 @@ import { ItineraryDay, Stop } from "@/types";
 import { BuilderAttraction } from "@/hooks/useAttractions";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DraggableStopList } from "./DraggableStopList";
+import { BottomSheet, PressableCard } from "./ui";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -712,11 +714,32 @@ OTHER_DAY.forEach(function(s){
   attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:200}), popup).addTo(map);
 });
 
-// ── Layer 1: tappe del giorno + polilinea ─────────────────────────────────────
+// ── Layer 1: tappe del giorno + polilinea (animata segmento per segmento) ───
+// Disegniamo i segmenti uno alla volta con un piccolo delay, ognuno con
+// fade-in d'opacity: effetto "rotta che si traccia da inizio a fine giornata".
 if(DAY_STOPS.length>1){
-  L.polyline(DAY_STOPS.map(function(s){return[s.lat,s.lon];}),{
-    color:ACCENT,weight:2.5,dashArray:'8,8',opacity:0.85
-  }).addTo(map);
+  var segCount = DAY_STOPS.length - 1;
+  var STEP_MS  = Math.max(80, Math.min(160, 600 / segCount)); // 80..160ms, totale ~max 600ms
+  var FADE_MS  = 320;
+  for (var i = 0; i < segCount; i++) {
+    (function(idx){
+      var s = DAY_STOPS[idx];
+      var n = DAY_STOPS[idx+1];
+      setTimeout(function(){
+        var pl = L.polyline([[s.lat,s.lon],[n.lat,n.lon]],{
+          color:ACCENT, weight:2.5, dashArray:'8,8', opacity:0
+        }).addTo(map);
+        var path = pl._path;
+        if (path && path.style) {
+          path.style.transition = 'opacity '+FADE_MS+'ms ease-out';
+          // Forza un reflow prima del cambio opacity per assicurare la transizione
+          requestAnimationFrame(function(){ path.style.opacity = '0.85'; });
+        } else {
+          pl.setStyle({opacity:0.85});
+        }
+      }, idx * STEP_MS);
+    })(i);
+  }
 }
 
 DAY_STOPS.forEach(function(s){
@@ -780,6 +803,20 @@ export function DayMap({
 
   // Chiudi la sheet quando si cambia giorno o si chiude la mappa
   useEffect(() => { setShowStopsSheet(false); setIsDraggingStop(false); }, [day.day, visible]);
+
+  // ── Crossfade quando si cambia giorno ─────────────────────────────────────
+  // Per evitare il flash bianco della WebView durante il reload, facciamo dip
+  // di opacity quando day.day cambia: 1 → 0.35 (200ms) → 1 (350ms).
+  const mapFade = useRef(new Animated.Value(1)).current;
+  const prevDayRef = useRef(day.day);
+  useEffect(() => {
+    if (prevDayRef.current === day.day) return;
+    prevDayRef.current = day.day;
+    Animated.sequence([
+      Animated.timing(mapFade, { toValue: 0.35, duration: 180, useNativeDriver: true }),
+      Animated.timing(mapFade, { toValue: 1,    duration: 320, delay: 120, useNativeDriver: true }),
+    ]).start();
+  }, [day.day, mapFade]);
   const stopOrderSignature = useMemo(
     () => day.stops.map((s) => `${s.type}:${s.id}:${s.latitude}:${s.longitude}`).join("|"),
     [day.stops],
@@ -870,16 +907,21 @@ export function DayMap({
                 const da = DAY_ACCENTS[(d.day - 1) % DAY_ACCENTS.length];
                 const active = d.day === day.day;
                 return (
-                  <TouchableOpacity
+                  <PressableCard
                     key={d.day}
                     onPress={() => onDayChange(d.day)}
-                    style={[styles.dayPill, { borderColor: colors.border, backgroundColor: colors.card2 }, active && { borderColor: da, backgroundColor: da + "22" }]}
-                    activeOpacity={0.75}
+                    haptic="selection"
+                    pressScale={0.94}
+                    style={[
+                      styles.dayPill,
+                      { borderColor: colors.border, backgroundColor: colors.card2 },
+                      active && { borderColor: da, backgroundColor: da + "22" },
+                    ]}
                   >
                     <Text style={[styles.dayPillText, { color: active ? da : colors.textMuted }]}>
                       {isEn ? `Day ${d.day}` : `Giorno ${d.day}`}
                     </Text>
-                  </TouchableOpacity>
+                  </PressableCard>
                 );
               })}
             </ScrollView>
@@ -906,23 +948,25 @@ export function DayMap({
           </View>
         </View>
 
-        {/* Mappa */}
+        {/* Mappa — wrappata in Animated.View per il crossfade su cambio giorno */}
         <View style={styles.mapWrap}>
-          {Platform.OS === "web" ? iframe : (
-            <WebView
-              key={stopOrderSignature}
-              source={{ html, baseUrl: "https://unpkg.com" }}
-              originWhitelist={["*"]}
-              javaScriptEnabled
-              domStorageEnabled
-              onMessage={handleMessage}
-              onLoadEnd={handleLoadEnd}
-              onError={() => setStatus("error")}
-              style={[styles.webview, { backgroundColor: colors.bg }]}
-              bounces={false}
-              overScrollMode="never"
-            />
-          )}
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: mapFade }]}>
+            {Platform.OS === "web" ? iframe : (
+              <WebView
+                key={stopOrderSignature}
+                source={{ html, baseUrl: "https://unpkg.com" }}
+                originWhitelist={["*"]}
+                javaScriptEnabled
+                domStorageEnabled
+                onMessage={handleMessage}
+                onLoadEnd={handleLoadEnd}
+                onError={() => setStatus("error")}
+                style={[styles.webview, { backgroundColor: colors.bg }]}
+                bounces={false}
+                overScrollMode="never"
+              />
+            )}
+          </Animated.View>
 
           {status === "loading" && (
             <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
@@ -963,61 +1007,45 @@ export function DayMap({
           )}
         </View>
 
-        {/* ── Bottom sheet riordino tappe ── */}
+        {/* ── Bottom sheet riordino tappe — drag-to-dismiss + rubber-band ── */}
         {!!onReorderStops && (
-          <Modal
+          <BottomSheet
             visible={showStopsSheet}
-            transparent
-            animationType="slide"
-            onRequestClose={() => setShowStopsSheet(false)}
+            onClose={() => setShowStopsSheet(false)}
+            heightFraction={0.88}
           >
-            <View style={styles.sheetBackdrop}>
+            <View style={styles.sheetHeader}>
+              <Text style={[styles.sheetTitle, { color: accent }]}>
+                {isEn ? `Day ${day.day} · Reorder stops` : `Giorno ${day.day} · Riordina tappe`}
+              </Text>
               <TouchableOpacity
-                style={StyleSheet.absoluteFill}
-                activeOpacity={1}
                 onPress={() => setShowStopsSheet(false)}
-              />
-              <View
-                style={[
-                  styles.sheetContainer,
-                  { backgroundColor: colors.bg, borderColor: colors.border, paddingBottom: insets.bottom + 12 },
-                ]}
+                style={[styles.closeBtn, { backgroundColor: colors.card2 }]}
+                activeOpacity={0.7}
               >
-                <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-                <View style={styles.sheetHeader}>
-                  <Text style={[styles.sheetTitle, { color: accent }]}>
-                    {isEn ? `Day ${day.day} · Reorder stops` : `Giorno ${day.day} · Riordina tappe`}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setShowStopsSheet(false)}
-                    style={[styles.closeBtn, { backgroundColor: colors.card2 }]}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="close" size={20} color={colors.textMuted} />
-                  </TouchableOpacity>
-                </View>
-                <Text style={[styles.sheetHint, { color: colors.textMuted }]}>
-                  {isEn
-                    ? "Long-press the ≡ handle on a stop and drag up or down to reorder."
-                    : "Tieni premuto l'icona ≡ a sinistra di una tappa e trascina per riordinare."}
-                </Text>
-                <ScrollView
-                  style={styles.sheetScroll}
-                  contentContainerStyle={styles.sheetScrollContent}
-                  showsVerticalScrollIndicator={true}
-                  scrollEnabled={!isDraggingStop}
-                >
-                  <DraggableStopList
-                    stops={day.stops}
-                    onReorder={(newStops) => onReorderStops(newStops)}
-                    onDragStateChange={setIsDraggingStop}
-                    lang={lang}
-                    colors={colors}
-                  />
-                </ScrollView>
-              </View>
+                <Ionicons name="close" size={20} color={colors.textMuted} />
+              </TouchableOpacity>
             </View>
-          </Modal>
+            <Text style={[styles.sheetHint, { color: colors.textMuted }]}>
+              {isEn
+                ? "Long-press the ≡ handle on a stop and drag up or down to reorder."
+                : "Tieni premuto l'icona ≡ a sinistra di una tappa e trascina per riordinare."}
+            </Text>
+            <ScrollView
+              style={styles.sheetScroll}
+              contentContainerStyle={styles.sheetScrollContent}
+              showsVerticalScrollIndicator={true}
+              scrollEnabled={!isDraggingStop}
+            >
+              <DraggableStopList
+                stops={day.stops}
+                onReorder={(newStops) => onReorderStops(newStops)}
+                onDragStateChange={setIsDraggingStop}
+                lang={lang}
+                colors={colors}
+              />
+            </ScrollView>
+          </BottomSheet>
         )}
       </View>
     </Modal>
@@ -1102,26 +1130,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
-  sheetBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "flex-end",
-  },
-  sheetContainer: {
-    height: "88%",
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    borderTopWidth: 1,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-  },
-  sheetHandle: {
-    alignSelf: "center",
-    width: 38,
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 12,
-  },
+  // (sheetBackdrop/sheetContainer/sheetHandle ora gestiti da BottomSheet)
   sheetHeader: {
     flexDirection: "row",
     alignItems: "center",

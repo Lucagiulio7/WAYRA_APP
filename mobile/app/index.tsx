@@ -26,7 +26,7 @@ import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
 import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
-import { PressableCard, FadeInUp, staggerDelay } from "@/components/ui";
+import { PressableCard, FadeInUp, staggerDelay, PulseGlow } from "@/components/ui";
 import { shadowLevel } from "@/utils/shadow";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -539,23 +539,31 @@ export default function HomeScreen() {
         {/* ── CTA ── */}
         <FadeInUp delay={staggerDelay(4)}>
         <View ref={(ref) => setGuideTarget("actions", ref)}>
-          <PressableCard
-            style={[
-              styles.cta,
-              { backgroundColor: colors.accentGold },
-              shadowLevel(3),
-              (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled,
-            ]}
-            onPress={handleGenerate}
-            disabled={loading || cityInfoLoading || !isOnline}
-            haptic="medium"
-            pressScale={0.97}
-          >
-            <View style={styles.ctaInner}>
-              <Ionicons name="sparkles-outline" size={20} color={colors.bg} />
-              <Text style={[styles.ctaText, { color: colors.bg }]}>{t.generate}</Text>
-            </View>
-          </PressableCard>
+          {/* Wrapper relativo per posizionare PulseGlow dietro al bottone */}
+          <View style={styles.ctaWrap}>
+            <PulseGlow
+              active={!!city && !loading && !cityInfoLoading && isOnline}
+              color={colors.accentGold}
+              borderRadius={14}
+            />
+            <PressableCard
+              style={[
+                styles.cta,
+                { backgroundColor: colors.accentGold },
+                shadowLevel(3),
+                (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled,
+              ]}
+              onPress={handleGenerate}
+              disabled={loading || cityInfoLoading || !isOnline}
+              haptic="medium"
+              pressScale={0.97}
+            >
+              <View style={styles.ctaInner}>
+                <Ionicons name="sparkles-outline" size={20} color={colors.bg} />
+                <Text style={[styles.ctaText, { color: colors.bg }]}>{t.generate}</Text>
+              </View>
+            </PressableCard>
+          </View>
 
           <Text style={[styles.orDivider, { color: colors.textMuted }]}>
             {lang === "it" ? "o" : "or"}
@@ -1258,6 +1266,7 @@ const styles = StyleSheet.create({
   errorText: { flex: 1, fontSize: 13, lineHeight: 18 },
 
   // CTA
+  ctaWrap: { position: "relative" },
   cta: {
     borderRadius: 14,
     paddingVertical: 15,

@@ -10,7 +10,10 @@ import {
   Linking,
   ActivityIndicator,
   Dimensions,
+  LayoutAnimation,
   Platform,
+  UIManager,
+  Animated,
 } from "react-native";
 import { useFonts, BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,7 +29,7 @@ import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useCityInfo } from "@/hooks/useCityInfo";
 import { DayCard } from "@/components/DayCard";
-import { FadeInUp, staggerDelay } from "@/components/ui";
+import { FadeInUp, staggerDelay, PressableCard } from "@/components/ui";
 import { DayMap } from "@/components/DayMap";
 import { FoodCard } from "@/components/FoodCard";
 import { PracticalInfoTab } from "@/components/PracticalInfoTab";
@@ -34,6 +37,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useSavedItineraries } from "@/hooks/useSavedItineraries";
 import { useTheme } from "@/contexts/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// LayoutAnimation è disabilitato di default su Android — abilitiamolo per la tab bar
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type Tab = "itinerary" | "neighborhoods" | "food" | "culture" | "practical";
 type GuideStep = { icon: string; title: string; body: string; target: string };
@@ -895,7 +903,23 @@ export default function ItineraryScreen() {
   const router = useRouter();
   const { lang, t, toggle } = useLanguage();
   const { colors } = useTheme();
-  const [tab, setTab] = useState<Tab>("itinerary");
+  const [tab, setTabRaw] = useState<Tab>("itinerary");
+
+  // Wrapper con animazione spring sulla tab bar:
+  // - Il tab attivo cresce (flex 2) e mostra la label, gli inattivi si comprimono
+  // - LayoutAnimation interpola le dimensioni dei figli durante setTab
+  const setTab = useCallback((next: Tab) => {
+    setTabRaw((current) => {
+      if (next === current) return current;
+      LayoutAnimation.configureNext({
+        duration: 280,
+        create:  { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+        update:  { type: LayoutAnimation.Types.spring, springDamping: 0.78 },
+        delete:  { type: LayoutAnimation.Types.easeInEaseOut, property: LayoutAnimation.Properties.opacity },
+      });
+      return next;
+    });
+  }, []);
   const [openDay, setOpenDay] = useState<number | null>(1);
   const [showGuide, setShowGuide] = useState(false);
   const { save, remove, findSavedId } = useSavedItineraries();
@@ -1884,15 +1908,51 @@ function TabButton({ label, icon, active, onPress }: {
   label: string; icon: keyof typeof Ionicons.glyphMap; active: boolean; onPress: () => void;
 }) {
   const { colors } = useTheme();
+  // Animazione fluida di colore icona + opacity label tra active/inactive
+  const labelOpacity = useRef(new Animated.Value(active ? 1 : 0)).current;
+  const iconScale    = useRef(new Animated.Value(active ? 1 : 1.15)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(labelOpacity, {
+        toValue: active ? 1 : 0,
+        duration: active ? 220 : 120,
+        delay: active ? 80 : 0,           // label appare DOPO che il bottone si è allargato
+        useNativeDriver: true,
+      }),
+      Animated.spring(iconScale, {
+        toValue: active ? 1 : 1.15,
+        useNativeDriver: true,
+        speed: 26,
+        bounciness: 4,
+      }),
+    ]).start();
+  }, [active, labelOpacity, iconScale]);
+
   return (
-    <TouchableOpacity
-      style={[styles.tabBtn, active ? [styles.tabBtnActive, { backgroundColor: colors.accentGold }] : styles.tabBtnInactive]}
+    <PressableCard
+      style={[
+        styles.tabBtn,
+        active
+          ? [styles.tabBtnActive, { backgroundColor: colors.accentGold }]
+          : styles.tabBtnInactive,
+      ]}
       onPress={onPress}
-      activeOpacity={0.8}
+      haptic="selection"
+      pressScale={0.94}
     >
-      <Ionicons name={icon} size={active ? 15 : 18} color={active ? colors.bg : colors.textMuted} />
-      {active && <Text style={[styles.tabLabel, { color: colors.bg }]}>{label}</Text>}
-    </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+        <Ionicons name={icon} size={active ? 15 : 18} color={active ? colors.bg : colors.textMuted} />
+      </Animated.View>
+      {active && (
+        <Animated.Text
+          style={[styles.tabLabel, { color: colors.bg, opacity: labelOpacity }]}
+          numberOfLines={1}
+        >
+          {label}
+        </Animated.Text>
+      )}
+    </PressableCard>
   );
 }
 
