@@ -26,6 +26,7 @@ import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useCityInfo } from "@/hooks/useCityInfo";
 import { DayCard } from "@/components/DayCard";
+import { FadeInUp, staggerDelay } from "@/components/ui";
 import { DayMap } from "@/components/DayMap";
 import { FoodCard } from "@/components/FoodCard";
 import { PracticalInfoTab } from "@/components/PracticalInfoTab";
@@ -1484,16 +1485,17 @@ export default function ItineraryScreen() {
               </TouchableOpacity>
             )}
             {itinerary.days.map((day, i) => (
-              <DayCard
-                key={day.day}
-                day={day}
-                open={openDay === day.day}
-                onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
-                onOptimizeDay={() => handleOptimizeDayOrder(i)}
-                onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
-                onReorder={(newStops) => handleReorderStops(i, newStops)}
-                onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
-              />
+              <FadeInUp key={day.day} delay={staggerDelay(i, 70, 350)}>
+                <DayCard
+                  day={day}
+                  open={openDay === day.day}
+                  onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
+                  onOptimizeDay={() => handleOptimizeDayOrder(i)}
+                  onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
+                  onReorder={(newStops) => handleReorderStops(i, newStops)}
+                  onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
+                />
+              </FadeInUp>
             ))}
           </>
         )}

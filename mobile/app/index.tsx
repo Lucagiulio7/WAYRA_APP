@@ -26,6 +26,8 @@ import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
 import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
+import { PressableCard, FadeInUp, staggerDelay } from "@/components/ui";
+import { shadowLevel } from "@/utils/shadow";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
@@ -420,6 +422,7 @@ export default function HomeScreen() {
         keyboardDismissMode="on-drag"
       >
         {/* ── Selezione città ── */}
+        <FadeInUp delay={staggerDelay(0)}>
         <View ref={(ref) => setGuideTarget("destination", ref)}>
         <Section title={t.destination} colors={colors}>
           <View style={styles.cityPickerRow}>
@@ -453,8 +456,10 @@ export default function HomeScreen() {
           </View>
         </Section>
         </View>
+        </FadeInUp>
 
         {/* ── Giorni ── */}
+        <FadeInUp delay={staggerDelay(1)}>
         <View ref={(ref) => setGuideTarget("days", ref)}>
         <Section title={t.numDays} colors={colors}>
           {cityInfoLoading ? (
@@ -484,8 +489,10 @@ export default function HomeScreen() {
           )}
         </Section>
         </View>
+        </FadeInUp>
 
         {/* ── Tipo esperienza ── */}
+        <FadeInUp delay={staggerDelay(2)}>
         <View ref={(ref) => setGuideTarget("experience", ref)}>
         <Section title={t.experienceType} colors={colors}>
           <View style={styles.levelRow}>
@@ -496,7 +503,9 @@ export default function HomeScreen() {
           </View>
         </Section>
         </View>
+        </FadeInUp>
 
+        <FadeInUp delay={staggerDelay(3)}>
         <View ref={(ref) => setGuideTarget("walk", ref)}>
           <Section title={lang === "it" ? "Camminata max" : "Max walking"} colors={colors}>
             <WalkModeSelector
@@ -507,6 +516,7 @@ export default function HomeScreen() {
             />
           </Section>
         </View>
+        </FadeInUp>
 
         {/* ── Banner offline ── */}
         {!isOnline && (
@@ -527,28 +537,41 @@ export default function HomeScreen() {
         )}
 
         {/* ── CTA ── */}
+        <FadeInUp delay={staggerDelay(4)}>
         <View ref={(ref) => setGuideTarget("actions", ref)}>
-          <TouchableOpacity
-            style={[styles.cta, { backgroundColor: colors.accentGold }, (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled]}
+          <PressableCard
+            style={[
+              styles.cta,
+              { backgroundColor: colors.accentGold },
+              shadowLevel(3),
+              (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled,
+            ]}
             onPress={handleGenerate}
             disabled={loading || cityInfoLoading || !isOnline}
-            activeOpacity={0.85}
+            haptic="medium"
+            pressScale={0.97}
           >
             <View style={styles.ctaInner}>
               <Ionicons name="sparkles-outline" size={20} color={colors.bg} />
               <Text style={[styles.ctaText, { color: colors.bg }]}>{t.generate}</Text>
             </View>
-          </TouchableOpacity>
+          </PressableCard>
 
           <Text style={[styles.orDivider, { color: colors.textMuted }]}>
             {lang === "it" ? "o" : "or"}
           </Text>
 
-          <TouchableOpacity
-            style={[styles.ctaCreate, { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" }, (loading || cityInfoLoading) && styles.ctaDisabled]}
+          <PressableCard
+            style={[
+              styles.ctaCreate,
+              { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" },
+              shadowLevel(2),
+              (loading || cityInfoLoading) && styles.ctaDisabled,
+            ]}
             onPress={handleCreate}
             disabled={loading || cityInfoLoading}
-            activeOpacity={0.85}
+            haptic="light"
+            pressScale={0.97}
           >
             <View style={styles.ctaInner}>
               <Ionicons name="construct-outline" size={20} color={colors.accentGreen} />
@@ -556,8 +579,9 @@ export default function HomeScreen() {
                 {lang === "it" ? "Crea itinerario" : "Build itinerary"}
               </Text>
             </View>
-          </TouchableOpacity>
+          </PressableCard>
         </View>
+        </FadeInUp>
       </ScrollView>
 
       {/* ── Modal selezione città (lista) ── */}
@@ -987,13 +1011,19 @@ function Option({ label, selected, onPress, color, colors }: {
   label: string; selected: boolean; onPress: () => void; color: string; colors: any;
 }) {
   return (
-    <TouchableOpacity
-      style={[styles.option, { backgroundColor: colors.card, borderColor: colors.border }, selected && { borderColor: color, backgroundColor: color + "22" }]}
+    <PressableCard
+      style={[
+        styles.option,
+        { backgroundColor: colors.card, borderColor: colors.border },
+        selected && { borderColor: color, backgroundColor: color + "22" },
+        selected && shadowLevel(1),
+      ]}
       onPress={onPress}
-      activeOpacity={0.8}
+      haptic="selection"
+      pressScale={0.92}
     >
       <Text style={[styles.optionText, { color: colors.textSub }, selected && { color }]}>{label}</Text>
-    </TouchableOpacity>
+    </PressableCard>
   );
 }
 
@@ -1002,15 +1032,21 @@ function LevelOption({ id, label, subtitle, color, selected, onPress, colors }: 
   color: string; selected: boolean; onPress: () => void; colors: any;
 }) {
   return (
-    <TouchableOpacity
-      style={[styles.levelOption, { backgroundColor: colors.card, borderColor: colors.border }, selected && { borderColor: color, backgroundColor: color + "18" }]}
+    <PressableCard
+      style={[
+        styles.levelOption,
+        { backgroundColor: colors.card, borderColor: colors.border },
+        selected && { borderColor: color, backgroundColor: color + "18" },
+        selected && shadowLevel(2),
+      ]}
       onPress={onPress}
-      activeOpacity={0.8}
+      haptic="light"
+      pressScale={0.97}
     >
       <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
         {label}
       </Text>
-    </TouchableOpacity>
+    </PressableCard>
   );
 }
 

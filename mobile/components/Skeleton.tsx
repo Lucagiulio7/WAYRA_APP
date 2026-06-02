@@ -7,29 +7,33 @@
  *  - SkeletonList      N card skeleton pronte per sostituire ActivityIndicator
  */
 
-import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View, ViewStyle } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, View, ViewStyle, LayoutChangeEvent } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/contexts/ThemeContext";
 
-// ─── Animazione ───────────────────────────────────────────────────────────────
+// ─── Animazione shimmer ───────────────────────────────────────────────────────
+// Un gradient che scorre da sinistra a destra, infinitamente.
+// Più fluido del classico pulse-opacity, comunica "lavoro in corso".
 
-const DURATION = 900; // ms di un ciclo pulse
+const SHIMMER_DURATION = 1100; // ms per ciclo
 
-function usePulse() {
+function useShimmer() {
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim, { toValue: 1, duration: DURATION, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0, duration: DURATION, useNativeDriver: true }),
-      ]),
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: SHIMMER_DURATION,
+        useNativeDriver: true,
+      }),
     );
     loop.start();
     return () => loop.stop();
   }, [anim]);
 
-  return anim.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.7] });
+  return anim;
 }
 
 // ─── SkeletonBox ─────────────────────────────────────────────────────────────
@@ -42,22 +46,56 @@ interface BoxProps {
 }
 
 export function SkeletonBox({ width = "100%", height = 14, borderRadius = 6, style }: BoxProps) {
-  const { colors } = useTheme();
-  const opacity = usePulse();
+  const { colors, isDark } = useTheme();
+  const anim = useShimmer();
+  const [boxWidth, setBoxWidth] = useState(0);
+
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w !== boxWidth) setBoxWidth(w);
+  };
+
+  // Il gradient è largo 2× la box e scorre da -boxWidth a +boxWidth
+  const translateX = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-boxWidth, boxWidth],
+  });
+
+  // Colore base e highlight del shimmer
+  const baseColor = colors.border;
+  const highlight = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.55)";
 
   return (
-    <Animated.View
+    <View
+      onLayout={handleLayout}
       style={[
         {
           width: width as ViewStyle["width"],
           height,
           borderRadius,
-          backgroundColor: colors.border,
-          opacity,
+          backgroundColor: baseColor,
+          overflow: "hidden",
         },
         style,
       ]}
-    />
+    >
+      {boxWidth > 0 && (
+        <Animated.View
+          style={{
+            width: boxWidth * 2,
+            height: "100%",
+            transform: [{ translateX }],
+          }}
+        >
+          <LinearGradient
+            colors={["transparent", highlight, "transparent"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+      )}
+    </View>
   );
 }
 
