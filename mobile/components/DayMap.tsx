@@ -714,29 +714,22 @@ OTHER_DAY.forEach(function(s){
   attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:200}), popup).addTo(map);
 });
 
-// ── Layer 1: tappe del giorno + polilinea (animata segmento per segmento) ───
-// Disegniamo i segmenti uno alla volta con un piccolo delay, ognuno con
-// fade-in d'opacity: effetto "rotta che si traccia da inizio a fine giornata".
+// ── Layer 1: tappe del giorno + polilinea (segment-by-segment stagger) ─────
+// Disegniamo i segmenti uno alla volta con un piccolo delay (effetto "rotta
+// che si traccia"). Ogni segmento è creato direttamente con opacity finale —
+// niente CSS transition perché su WebView i browser engine spesso non
+// scatenano il reflow necessario, lasciando il path invisibile.
 if(DAY_STOPS.length>1){
   var segCount = DAY_STOPS.length - 1;
-  var STEP_MS  = Math.max(80, Math.min(160, 600 / segCount)); // 80..160ms, totale ~max 600ms
-  var FADE_MS  = 320;
+  var STEP_MS  = Math.max(70, Math.min(150, 500 / segCount));
   for (var i = 0; i < segCount; i++) {
     (function(idx){
       var s = DAY_STOPS[idx];
       var n = DAY_STOPS[idx+1];
       setTimeout(function(){
-        var pl = L.polyline([[s.lat,s.lon],[n.lat,n.lon]],{
-          color:ACCENT, weight:2.5, dashArray:'8,8', opacity:0
+        L.polyline([[s.lat,s.lon],[n.lat,n.lon]],{
+          color:ACCENT, weight:2.5, dashArray:'8,8', opacity:0.85
         }).addTo(map);
-        var path = pl._path;
-        if (path && path.style) {
-          path.style.transition = 'opacity '+FADE_MS+'ms ease-out';
-          // Forza un reflow prima del cambio opacity per assicurare la transizione
-          requestAnimationFrame(function(){ path.style.opacity = '0.85'; });
-        } else {
-          pl.setStyle({opacity:0.85});
-        }
       }, idx * STEP_MS);
     })(i);
   }

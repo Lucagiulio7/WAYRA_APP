@@ -648,25 +648,46 @@ def build_itinerary(
     days_museum_capped, freed = _rebalance_museums(days_limited, max_walk_km)
     days_capped, post_museum_overflow = _cap_days_by_limits(days_museum_capped, max_walk_km)
 
-    # assigned_ids does NOT include time-overflow or freed museums → backup sweeps them
+    # Backup pool — usato da _fill_thin_days e insert_meal_stops per riempire
+    # giorni sotto soglia. IMPORTANTE:
+    #   1. Solo attrazioni del LIVELLO richiesto (usa `filtered`, non `attractions`)
+    #      altrimenti chi sceglie iconico vedrebbe anche attrazioni livello 2/3.
+    #   2. Niente duplicati (overflow + freed + post_overflow possono sovrapporsi
+    #      con la sweep finale "attrazioni non assegnate").
     assigned_ids = {a["id"] for day in days_capped for a in day}
-    backup = [
-        *overflow,
-        *freed,  # musei liberati dal rebalancing tornano nel pool
-        *post_museum_overflow,
-        *[a for a in attractions if not a.get("is_food_spot") and a["id"] not in assigned_ids],
-    ]
+    backup: list[dict] = []
+    seen_ids: set[int] = set()
+
+    def _add_to_backup(items: list[dict]) -> None:
+        for item in items:
+            aid = item.get("id")
+            if aid is None or aid in seen_ids:
+                continue
+            seen_ids.add(aid)
+            backup.append(item)
+
+    _add_to_backup(overflow)
+    _add_to_backup(freed)
+    _add_to_backup(post_museum_overflow)
+    # Sweep finale: solo attrazioni FILTRATE (cioè del livello richiesto)
+    # e non già assegnate a un giorno.
+    _add_to_backup([a for a in filtered if a["id"] not in assigned_ids])
 
     # Fill any day that ended up with too few attractions
     days_filled, backup = _fill_thin_days(days_capped, backup, max_walk_km)
     days_ordered = [order_day(day) for day in days_filled]
 
-    days_with_stops = [
-        [{**attraction, "type": "attraction"} for attraction in day]
+    # Inserisce slot pranzo/cena ("Pranzo da scegliere" / "Cena da scegliere")
+    # tra le attrazioni di ogni giorno. L'utente potrà poi scegliere il vero
+    # ristorante dalla mappa via "Dove mangio?".
+    used_food_ids: set[int] = set()
+    used_backup_ids: set[int] = set()
+    days_with_meals = [
+        insert_meal_stops(day, food_spots, used_food_ids, backup, used_backup_ids, max_walk_km)
         for day in days_ordered
     ]
 
     return [
         {"day": i, "stops": stops, "maps_link": generate_maps_link(stops)}
-        for i, stops in enumerate(days_with_stops, start=1)
+        for i, stops in enumerate(days_with_meals, start=1)
     ]

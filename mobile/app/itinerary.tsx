@@ -1908,42 +1908,44 @@ function TabButton({ label, icon, active, onPress }: {
   label: string; icon: keyof typeof Ionicons.glyphMap; active: boolean; onPress: () => void;
 }) {
   const { colors } = useTheme();
-  // Animazione fluida di colore icona + opacity label tra active/inactive
+  // Label appare solo quando active, con fade-in delayed dopo l'espansione del tab
   const labelOpacity = useRef(new Animated.Value(active ? 1 : 0)).current;
-  const iconScale    = useRef(new Animated.Value(active ? 1 : 1.15)).current;
+  const iconScale = useRef(new Animated.Value(active ? 1 : 1.08)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(labelOpacity, {
         toValue: active ? 1 : 0,
-        duration: active ? 220 : 120,
-        delay: active ? 80 : 0,           // label appare DOPO che il bottone si è allargato
+        duration: active ? 180 : 100,
+        delay: active ? 120 : 0,        // aspetta che il tab si sia allargato
         useNativeDriver: true,
       }),
       Animated.spring(iconScale, {
-        toValue: active ? 1 : 1.15,
+        toValue: active ? 1 : 1.08,
         useNativeDriver: true,
-        speed: 26,
-        bounciness: 4,
+        speed: 24,
+        bounciness: 5,
       }),
     ]).start();
   }, [active, labelOpacity, iconScale]);
+
+  const iconColor = active ? colors.bg : colors.textMuted;
 
   return (
     <PressableCard
       style={[
         styles.tabBtn,
-        active
-          ? [styles.tabBtnActive, { backgroundColor: colors.accentGold }]
-          : styles.tabBtnInactive,
+        active ? [styles.tabBtnActive, { backgroundColor: colors.accentGold }] : styles.tabBtnInactive,
       ]}
       onPress={onPress}
       haptic="selection"
       pressScale={0.94}
     >
-      <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-        <Ionicons name={icon} size={active ? 15 : 18} color={active ? colors.bg : colors.textMuted} />
+      {/* Icona — centrata orizzontalmente, larghezza esplicita per stabilità */}
+      <Animated.View style={[styles.tabIconWrap, { transform: [{ scale: iconScale }] }]}>
+        <Ionicons name={icon} size={18} color={iconColor} />
       </Animated.View>
+      {/* Label solo se active */}
       {active && (
         <Animated.Text
           style={[styles.tabLabel, { color: colors.bg, opacity: labelOpacity }]}
@@ -2122,20 +2124,35 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: "row", marginHorizontal: 16, marginVertical: 12,
     borderRadius: 14, padding: 4, gap: 2,
-    alignItems: "center",
+    alignItems: "stretch",
   },
+  // Layout verticale (icona sopra, testo sotto) — centrato sul cross axis
   tabBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 5, paddingVertical: 8, borderRadius: 10,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 10,
   },
-  tabBtnActive: {
-    flex: 2,                    // il tab attivo occupa più spazio per mostrare il testo
-    paddingHorizontal: 10,
+  // Tab attivo: occupa più spazio e mostra il testo
+  tabBtnActive: { flex: 2, paddingHorizontal: 10 },
+  // Tab inattivi: stretti, solo icona
+  tabBtnInactive: { flex: 1 },
+  // Wrapper icona con larghezza fissa + alignSelf center:
+  // - width fissa → la transform: scale non disallinea l'icona
+  // - alignSelf: center → si centra orizzontalmente nel parent (necessario perché
+  //   l'inner Animated.View di PressableCard usa alignItems: stretch di default,
+  //   altrimenti l'icona resterebbe ancorata a sinistra del testo)
+  tabIconWrap: {
+    width: 24,
+    height: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 3,
   },
-  tabBtnInactive: {
-    flex: 1,                    // i tab inattivi sono compatti (solo icona)
-  },
-  tabLabel: { fontWeight: "700", fontSize: 11 },
+  tabLabel: { fontSize: 12, fontWeight: "800", textAlign: "center", letterSpacing: 0.2, alignSelf: "center" },
 
   scroll: { paddingHorizontal: 16, paddingBottom: 40 },
   sectionIntro: { fontSize: 13, fontStyle: "italic", marginBottom: 16, lineHeight: 20 },
