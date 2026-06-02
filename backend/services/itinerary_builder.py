@@ -677,17 +677,14 @@ def build_itinerary(
     days_filled, backup = _fill_thin_days(days_capped, backup, max_walk_km)
     days_ordered = [order_day(day) for day in days_filled]
 
-    # Inserisce slot pranzo/cena ("Pranzo da scegliere" / "Cena da scegliere")
-    # tra le attrazioni di ogni giorno. L'utente potrà poi scegliere il vero
-    # ristorante dalla mappa via "Dove mangio?".
-    used_food_ids: set[int] = set()
-    used_backup_ids: set[int] = set()
-    days_with_meals = [
-        insert_meal_stops(day, food_spots, used_food_ids, backup, used_backup_ids, max_walk_km)
+    # Niente slot pranzo/cena auto-generati: i ristoranti li sceglie l'utente
+    # via mappa con "Dove mangio?" / "Cambia ristorante".
+    days_with_stops = [
+        [{**attraction, "type": "attraction"} for attraction in day]
         for day in days_ordered
     ]
 
     return [
         {"day": i, "stops": stops, "maps_link": generate_maps_link(stops)}
-        for i, stops in enumerate(days_with_meals, start=1)
+        for i, stops in enumerate(days_with_stops, start=1)
     ]
