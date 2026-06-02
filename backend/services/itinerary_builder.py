@@ -383,41 +383,74 @@ def _fill_thin_days(
     max_walk_km: float = MAX_DAILY_WALK_KM,
 ) -> tuple[list[list[dict]], list[dict]]:
     """
-    For each day below the minimum target, pull from
-    the backup pool (sorted by proximity to the day's centroid) until the day
-    reaches the minimum time/count target or the pool is exhausted.
+    Per ogni giorno sotto la soglia minima, pesca dal backup pool (ordinato
+    per prossimità al centroide del giorno) finché il giorno raggiunge il
+    target di tempo/conteggio o il pool si esaurisce.
+
+    Strategia ROUND-ROBIN: invece di riempire un giorno completamente prima
+    di passare al successivo, fa più "giri" — in ogni giro aggiunge UNA tappa
+    per ogni giorno sotto soglia. Questo evita che i primi giorni si
+    "mangino" tutto il backup vicino al centro, lasciando i giorni
+    periferici con poche tappe.
 
     Returns (updated_days, remaining_backup).
     """
     result = [list(day) for day in days]
     used_ids: set[int] = set()
-    min_attractions, max_attractions = _day_limits(max_walk_km)
+    min_attractions, _max_attractions = _day_limits(max_walk_km)
 
+    def _needs_more(d: list[dict]) -> bool:
+        if not d:
+            return False  # giorno vuoto: skip (centroide non calcolabile)
+        return len(d) < min_attractions or _day_minutes(d) < MIN_DAILY_MINUTES
+
+    # PASS A — round robin: aggiungi 1 tappa per giorno magro a ogni giro,
+    # finché tutti i giorni raggiungono almeno `min_attractions`.
+    max_rounds = min_attractions + 4  # safety cap
+    for _ in range(max_rounds):
+        any_added = False
+        for day in result:
+            if not day:
+                continue
+            if len(day) >= min_attractions:
+                continue
+            c_lat = sum(a["latitude"] for a in day) / len(day)
+            c_lon = sum(a["longitude"] for a in day) / len(day)
+            available = sorted(
+                [a for a in backup if a["id"] not in used_ids and not a.get("is_food_spot")],
+                key=lambda a: haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
+            )
+            for candidate in available:
+                if _can_add_to_day(day, candidate, max_walk_km):
+                    day.append(candidate)
+                    used_ids.add(candidate["id"])
+                    any_added = True
+                    break
+        if not any_added:
+            break
+
+    # PASS B — i giorni che hanno il count minimo ma sono ancora corti di minuti
+    # possono pescare attrazioni aggiuntive (più gradualmente di prima per non
+    # sbilanciare). Limite: massimo 2 tappe extra oltre min_attractions.
+    extra_cap = 2
     for day in result:
-        if not day or (
-            len(day) >= min_attractions
-            and _day_minutes(day) >= MIN_DAILY_MINUTES
-        ):
+        if not day or _day_minutes(day) >= MIN_DAILY_MINUTES:
             continue
-
+        extras = 0
         c_lat = sum(a["latitude"] for a in day) / len(day)
         c_lon = sum(a["longitude"] for a in day) / len(day)
-
         available = sorted(
             [a for a in backup if a["id"] not in used_ids and not a.get("is_food_spot")],
             key=lambda a: haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
         )
-
         for candidate in available:
-            if (
-                len(day) >= min_attractions
-                and _day_minutes(day) >= MIN_DAILY_MINUTES
-            ):
+            if extras >= extra_cap or _day_minutes(day) >= MIN_DAILY_MINUTES:
                 break
             if not _can_add_to_day(day, candidate, max_walk_km):
                 continue
             day.append(candidate)
             used_ids.add(candidate["id"])
+            extras += 1
 
     remaining = [a for a in backup if a["id"] not in used_ids]
     return result, remaining
@@ -672,6 +705,30 @@ def build_itinerary(
     # Sweep finale: solo attrazioni FILTRATE (cioè del livello richiesto)
     # e non già assegnate a un giorno.
     _add_to_backup([a for a in filtered if a["id"] not in assigned_ids])
+
+    # ── Fallback progressivo livello 2 → livello 3 ─────────────────────────────
+    # Se l'utente ha richiesto SOLO Iconico (livello 1) e le attrazioni iconico
+    # non bastano a riempire ragionevolmente tutti i giorni (num_days * min/day),
+    # estendiamo il pool di backup con livello 2 (Ricercato). Se ancora non basta,
+    # con livello 3 (Nascosto). SOLO il backup viene esteso: l'algoritmo principale
+    # continua a usare per primo le iconiche, quelle di livello superiore servono
+    # solo a riempire i giorni "magri" via _fill_thin_days.
+    if level == 1:  # soltanto iconico singolo, non lista né mix
+        min_per_day = _day_limits(max_walk_km)[0]
+        target_total = num_days * min_per_day
+        already_assigned_or_in_backup = len({a["id"] for day in days_capped for a in day}) + len(backup)
+        if already_assigned_or_in_backup < target_total:
+            level_2_pool = filter_attractions(attractions, 2) or [
+                a for a in attractions
+                if not a.get("is_food_spot") and a["category_level"] == 2
+            ]
+            _add_to_backup(level_2_pool)
+            if len({a["id"] for day in days_capped for a in day}) + len(backup) < target_total:
+                level_3_pool = filter_attractions(attractions, 3) or [
+                    a for a in attractions
+                    if not a.get("is_food_spot") and a["category_level"] == 3
+                ]
+                _add_to_backup(level_3_pool)
 
     # Fill any day that ended up with too few attractions
     days_filled, backup = _fill_thin_days(days_capped, backup, max_walk_km)
