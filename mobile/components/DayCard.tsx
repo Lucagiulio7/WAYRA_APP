@@ -113,9 +113,11 @@ interface Props {
   onReplaceFood?: (stopId: number) => void;
   onReorder?: (newStops: Stop[]) => void;
   onNoteChange?: (stopIndex: number, note: string) => void;
+  /** Apre la mappa in food-mode per scegliere ristoranti per questo giorno */
+  onFindFood?: () => void;
 }
 
-export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay, onReplaceStop, onReplaceFood, onReorder, onNoteChange }: Props) {
+export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay, onReplaceStop, onReplaceFood, onReorder, onNoteChange, onFindFood }: Props) {
   const [internalOpen, setInternalOpen] = useState(day.day === 1);
   const [foodOpen, setFoodOpen] = useState(false);
   const [snackOpen, setSnackOpen] = useState(false);
@@ -254,25 +256,47 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay
             </TouchableOpacity>
           )}
 
-          {/* Sezione cibo */}
-          {allRestaurants.length > 0 && (
+          {/* Sezione cibo — visibile SEMPRE; mostra CTA se restaurants è vuoto */}
+          {(allRestaurants.length > 0 || !!onFindFood) && (
             <View style={[styles.foodSection, { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "08" }]}>
-              {/* Header principale */}
-              <TouchableOpacity
-                style={styles.foodHeader}
-                onPress={toggleFood}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.foodHeaderEmoji}>🍴</Text>
-                <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>{t.wantToEat}</Text>
-                <Ionicons
-                  name={foodOpen ? "chevron-up" : "chevron-down"}
-                  size={16}
-                  color={colors.accentGreen}
-                />
-              </TouchableOpacity>
+              {allRestaurants.length === 0 ? (
+                // Stato vuoto: CTA per scegliere ristoranti dalla mappa
+                <TouchableOpacity
+                  style={styles.foodHeader}
+                  onPress={() => onFindFood?.()}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.foodHeaderEmoji}>🍴</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>
+                      {lang === "en" ? "Where should I eat?" : "Dove mangio?"}
+                    </Text>
+                    <Text style={[styles.foodEmptyHint, { color: colors.textMuted }]}>
+                      {lang === "en"
+                        ? "Tap to pick restaurants on the map"
+                        : "Tocca per scegliere ristoranti sulla mappa"}
+                    </Text>
+                  </View>
+                  <Ionicons name="restaurant-outline" size={18} color={colors.accentGreen} />
+                </TouchableOpacity>
+              ) : (
+                // Stato pieno: comportamento attuale
+                <TouchableOpacity
+                  style={styles.foodHeader}
+                  onPress={toggleFood}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.foodHeaderEmoji}>🍴</Text>
+                  <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>{t.wantToEat}</Text>
+                  <Ionicons
+                    name={foodOpen ? "chevron-up" : "chevron-down"}
+                    size={16}
+                    color={colors.accentGreen}
+                  />
+                </TouchableOpacity>
+              )}
 
-              {foodOpen && (
+              {foodOpen && allRestaurants.length > 0 && (
                 <View style={[styles.subSections, { borderTopColor: colors.accentGreen + "20" }]}>
                   {/* ── Spuntino ── */}
                   {snacks.length > 0 && (
@@ -514,6 +538,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: "700",
     fontSize: 14,
+  },
+  foodEmptyHint: {
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: "500",
   },
   subSections: {
     borderTopWidth: 1,

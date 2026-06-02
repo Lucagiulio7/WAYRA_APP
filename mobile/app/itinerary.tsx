@@ -1518,6 +1518,7 @@ export default function ItineraryScreen() {
                   onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
                   onReorder={(newStops) => handleReorderStops(i, newStops)}
                   onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
+                  onFindFood={foodSpots.length > 0 ? () => handleFindFood(i) : undefined}
                 />
               </FadeInUp>
             ))}
