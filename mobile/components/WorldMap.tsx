@@ -290,8 +290,6 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
             originWhitelist={["*"]}
             javaScriptEnabled
             domStorageEnabled
-            allowFileAccessFromFileURLs
-            allowUniversalAccessFromFileURLs
             onMessage={handleMessage}
             style={[styles.webview, { backgroundColor: colors.bg }]}
             scrollEnabled={false}

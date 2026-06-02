@@ -16,6 +16,10 @@ export interface BuilderAttraction {
   ticket_url?: string | null;
   block_id?: number | null;
   zone?: string | null;
+  is_food_spot?: boolean | null;
+  food_type?: string | null;
+  meal_type?: string | null;
+  rating?: number | null;
 }
 
 export function useAttractions(city: string) {

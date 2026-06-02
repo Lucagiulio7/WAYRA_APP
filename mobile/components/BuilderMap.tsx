@@ -502,7 +502,6 @@ export function BuilderMap({
             originWhitelist={["*"]}
             javaScriptEnabled
             domStorageEnabled
-            allowUniversalAccessFromFileURLs
             onMessage={handleMessage}
             onError={() => setMapError(true)}
             style={[styles.webview, { backgroundColor: colors.bg }]}

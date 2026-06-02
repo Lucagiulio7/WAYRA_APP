@@ -15,6 +15,7 @@ export interface Stop {
   attraction_type?: string | null;
   food_type?: string | null;
   meal_type?: string | null;
+  empty_meal_slot?: boolean;
   rating?: number | null;
   ticket_url?: string | null;
   notes?: string;           // nota libera dell'utente
@@ -41,6 +42,7 @@ export interface Restaurant {
   description?: string;
   description_en?: string | null;
   food_type?: string;
+  meal_type?: "lunch" | "dinner" | "both" | string | null;
   rating?: number;
   latitude: number;
   longitude: number;

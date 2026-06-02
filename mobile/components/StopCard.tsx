@@ -51,10 +51,11 @@ interface Props {
   stop: Stop;
   index?: number;
   onReplace?: () => void;
+  onReplaceFood?: () => void;
   onNoteChange?: (note: string) => void;
 }
 
-export function StopCard({ stop, index, onReplace, onNoteChange }: Props) {
+export function StopCard({ stop, index, onReplace, onReplaceFood, onNoteChange }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { lang, t } = useLanguage();
   const { colors, isDark } = useTheme();
@@ -71,7 +72,7 @@ export function StopCard({ stop, index, onReplace, onNoteChange }: Props) {
 
   // "food" = vecchio formato, "meal" = formato backend attuale
   if (stop.type === "food" || stop.type === "meal") {
-    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} onNoteChange={onNoteChange} />;
+    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} labels={t} onReplaceFood={onReplaceFood} onNoteChange={onNoteChange} />;
   }
 
   return (
@@ -86,6 +87,7 @@ export function StopCard({ stop, index, onReplace, onNoteChange }: Props) {
       onNoteChange={onNoteChange}
       colors={colors}
       isDark={isDark}
+      labels={t}
     />
   );
 }
@@ -93,15 +95,18 @@ export function StopCard({ stop, index, onReplace, onNoteChange }: Props) {
 // ── Food stop ─────────────────────────────────────────────────────────────────
 
 function FoodStop({
-  stop, lang, index, colors, isDark, onNoteChange,
+  stop, lang, index, colors, isDark, labels, onReplaceFood, onNoteChange,
 }: {
   stop: Stop; lang: string; index: number; colors: any; isDark: boolean;
+  labels: any;
+  onReplaceFood?: () => void;
   onNoteChange?: (note: string) => void;
 }) {
   const [expanded, setExpanded]   = useState(false);
   const [noteText, setNoteText]   = useState(stop.notes ?? "");
   useEffect(() => { setNoteText(stop.notes ?? ""); }, [stop.notes]);
 
+  const isEmptySlot = stop.empty_meal_slot || stop.id < 0;
   const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
   const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
   const emoji = stop.attraction_type ? getAttractionEmoji(stop.attraction_type) : "🍴";
@@ -109,7 +114,7 @@ function FoodStop({
   const openMaps = async () => {
     const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
-    catch { Alert.alert(t.errTitle, t.errOpenMaps); }
+    catch { Alert.alert(labels.errTitle, labels.errOpenMaps); }
   };
 
   const toggle = () => {
@@ -123,7 +128,13 @@ function FoodStop({
   return (
     <TouchableOpacity
       style={[styles.foodStopCard, { backgroundColor: foodBg, borderColor: foodBorder }]}
-      onPress={toggle}
+      onPress={() => {
+        if (isEmptySlot && onReplaceFood) {
+          onReplaceFood();
+          return;
+        }
+        toggle();
+      }}
       activeOpacity={0.85}
     >
       <View style={styles.row}>
@@ -133,23 +144,50 @@ function FoodStop({
         <Text style={styles.attractionEmoji}>{emoji}</Text>
         <View style={styles.flex1}>
           <Text style={[styles.foodStopName, { color: colors.text }]} numberOfLines={2}>{displayName}</Text>
-          {!!displayDesc && (
+          {isEmptySlot ? (
+            <Text style={[styles.foodStopDesc, { color: isDark ? "#7aa895" : "#3d7a65" }]} numberOfLines={2}>
+              {lang === "en" ? "Tap to choose on the map" : "Tocca per scegliere sulla mappa"}
+            </Text>
+          ) : !!displayDesc && (
             <Text style={[styles.foodStopDesc, { color: isDark ? "#7aa895" : "#3d7a65" }]} numberOfLines={2}>{displayDesc}</Text>
           )}
         </View>
-        <TouchableOpacity
-          onPress={openMaps}
-          activeOpacity={0.7}
-          style={[styles.mapsIcon, { backgroundColor: colors.accentGreen + "18", borderColor: colors.accentGreen + "44" }]}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="location-outline" size={18} color={colors.accentGreen} />
-        </TouchableOpacity>
-        <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
+        {isEmptySlot ? (
+          <View style={[styles.mapsIcon, { backgroundColor: colors.accentGreen + "18", borderColor: colors.accentGreen + "44" }]}>
+            <Ionicons name="map-outline" size={18} color={colors.accentGreen} />
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              onPress={openMaps}
+              activeOpacity={0.7}
+              style={[styles.mapsIcon, { backgroundColor: colors.accentGreen + "18", borderColor: colors.accentGreen + "44" }]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="location-outline" size={18} color={colors.accentGreen} />
+            </TouchableOpacity>
+            <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
+          </>
+        )}
       </View>
 
-      {expanded && (
+      {!isEmptySlot && expanded && (
         <View style={[styles.expandedBody, { borderTopColor: foodBorder }]}>
+          {!!displayDesc && (
+            <Text style={[styles.description, { color: colors.textSub }]}>{displayDesc}</Text>
+          )}
+          {!!onReplaceFood && (
+            <TouchableOpacity
+              onPress={onReplaceFood}
+              activeOpacity={0.8}
+              style={[styles.replaceBtn, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "40" }]}
+            >
+              <Ionicons name="restaurant-outline" size={14} color={colors.accentGreen} />
+              <Text style={[styles.replaceBtnText, { color: colors.accentGreen }]}>
+                {lang === "en" ? "Replace food stop" : "Sostituisci tappa cibo"}
+              </Text>
+            </TouchableOpacity>
+          )}
           <NoteInput
             value={noteText}
             onChange={setNoteText}
@@ -166,7 +204,7 @@ function FoodStop({
 // ── Attraction stop ───────────────────────────────────────────────────────────
 
 function AttractionStop({
-  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, onNoteChange, colors, isDark,
+  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, onNoteChange, colors, isDark, labels,
 }: {
   stop: Stop;
   index: number;
@@ -178,6 +216,7 @@ function AttractionStop({
   onNoteChange?: (note: string) => void;
   colors: any;
   isDark: boolean;
+  labels: any;
 }) {
   const [noteText, setNoteText] = useState(stop.notes ?? "");
   useEffect(() => { setNoteText(stop.notes ?? ""); }, [stop.notes]);
@@ -202,13 +241,13 @@ function AttractionStop({
   const openTickets = async () => {
     if (!stop.ticket_url) return;
     try { await Linking.openURL(stop.ticket_url); }
-    catch { Alert.alert(t.errTitle, t.errOpenLink); }
+    catch { Alert.alert(labels.errTitle, labels.errOpenLink); }
   };
 
   const openMaps = async () => {
     const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
     try { await Linking.openURL(url); }
-    catch { Alert.alert(t.errTitle, t.errOpenMaps); }
+    catch { Alert.alert(labels.errTitle, labels.errOpenMaps); }
   };
 
   return (

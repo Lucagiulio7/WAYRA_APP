@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useItinerary } from "@/hooks/useItinerary";
 import { useCityInfo } from "@/hooks/useCityInfo";
 import { useCityDownload } from "@/hooks/useCityDownload";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -33,6 +34,8 @@ const WALK_MODES = [
   { id: "balanced", km: 5, labelIt: "Bilanciato", labelEn: "Balanced", icon: "walk-outline" },
   { id: "intense", km: 7, labelIt: "Intenso", labelEn: "Intense", icon: "flash-outline" },
 ] as const;
+const ICONIC_MAX_DAYS = 5;
+const EXPLORER_MAX_DAYS = 7;
 const ONBOARDING_KEY = "wayra_generate_guide_v1";
 type GuideStep = { icon: string; title: string; body: string; target: string };
 type GuideRect = { x: number; y: number; width: number; height: number };
@@ -223,6 +226,7 @@ export default function HomeScreen() {
   const { lang, t, toggle } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
+  const { isOnline } = useNetworkStatus();
 
   const [city, setCity]           = useState<string>("");
   const [numDays, setNumDays]     = useState<number>(3);
@@ -277,9 +281,9 @@ export default function HomeScreen() {
     { id: "mix", label: t.explorerLabel, subtitle: t.explorerSubtitle, color: "#6ee7b7" },
   ];
 
-  const { max_days_iconico, max_days_esploratore, loading: cityInfoLoading } = useCityInfo(city);
+  const { loading: cityInfoLoading } = useCityInfo(city);
   // useCityInfo già applica fallback (5 per iconico, 7 per esploratore) anche senza città
-  const maxDays = level === 1 ? max_days_iconico : max_days_esploratore;
+  const maxDays = level === 1 ? ICONIC_MAX_DAYS : EXPLORER_MAX_DAYS;
   const availableDays = Array.from({ length: maxDays }, (_, i) => i + 1);
 
   const daysPerRow = availableDays.length <= 5
@@ -300,10 +304,10 @@ export default function HomeScreen() {
     if (prevCityRef.current !== city) {
       prevCityRef.current = city;
       if (level === "mix" && !cityInfoLoading) {
-        setNumDays(max_days_esploratore);
+        setNumDays(EXPLORER_MAX_DAYS);
       }
     }
-  }, [city, max_days_esploratore, cityInfoLoading, level]);
+  }, [city, cityInfoLoading, level]);
 
   const selectedCity = CITIES.find((c) => c.id === city) ?? null;
 
@@ -322,14 +326,29 @@ export default function HomeScreen() {
     // Quando si passa a iconico e i giorni selezionati superano il massimo, riduci subito.
     // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha più giorni);
     // l'utente può scegliere più giorni autonomamente dalla griglia aggiornata.
-    if (nextLevel === 1 && numDays > max_days_iconico) {
-      setNumDays(max_days_iconico);
+    if (nextLevel === "mix") {
+      setLevel(nextLevel);
+      setNumDays(EXPLORER_MAX_DAYS);
+      return;
+    }
+    if (nextLevel === 1 && numDays > ICONIC_MAX_DAYS) {
+      setNumDays(ICONIC_MAX_DAYS);
     }
     setLevel(nextLevel);
   }
 
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
+    if (!isOnline) {
+      Alert.alert(
+        lang === "it" ? "Sei offline" : "You're offline",
+        lang === "it"
+          ? "Per generare l'itinerario serve una connessione internet. Controlla WiFi o dati mobili e riprova."
+          : "An internet connection is required to generate the itinerary. Check WiFi or mobile data and try again.",
+        [{ text: "OK" }],
+      );
+      return;
+    }
     const result = await generate({ city, num_days: numDays, level, max_walk_km: maxWalkKm });
     if (!result) return;
     await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
@@ -489,6 +508,16 @@ export default function HomeScreen() {
           </Section>
         </View>
 
+        {/* ── Banner offline ── */}
+        {!isOnline && (
+          <View style={[styles.errorBox, { backgroundColor: colors.textMuted + "22", borderColor: colors.textMuted + "44" }]}>
+            <Ionicons name="cloud-offline-outline" size={16} color={colors.textMuted} />
+            <Text style={[styles.errorText, { color: colors.textSub }]}>
+              {lang === "it" ? "Sei offline. La generazione richiede una connessione internet." : "You're offline. Generating requires an internet connection."}
+            </Text>
+          </View>
+        )}
+
         {/* ── Errore ── */}
         {!!error && (
           <View style={[styles.errorBox, { backgroundColor: colors.danger + "22", borderColor: colors.danger + "44" }]}>
@@ -500,9 +529,9 @@ export default function HomeScreen() {
         {/* ── CTA ── */}
         <View ref={(ref) => setGuideTarget("actions", ref)}>
           <TouchableOpacity
-            style={[styles.cta, { backgroundColor: colors.accentGold }, (loading || cityInfoLoading) && styles.ctaDisabled]}
+            style={[styles.cta, { backgroundColor: colors.accentGold }, (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled]}
             onPress={handleGenerate}
-            disabled={loading || cityInfoLoading}
+            disabled={loading || cityInfoLoading || !isOnline}
             activeOpacity={0.85}
           >
             <View style={styles.ctaInner}>

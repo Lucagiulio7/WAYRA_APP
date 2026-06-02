@@ -11,8 +11,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ItineraryDay } from "@/types";
+import { ItineraryDay, Stop } from "@/types";
 import { BuilderAttraction } from "@/hooks/useAttractions";
+import { DraggableStopList } from "./DraggableStopList";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
@@ -20,12 +21,16 @@ interface Props {
   onClose: () => void;
   day: ItineraryDay;
   allAttractions: BuilderAttraction[];
+  allFoodSpots?: BuilderAttraction[];
+  foodSelection?: { mealType?: string | null; origin?: { latitude: number; longitude: number; name?: string } } | null;
   assignedMap: Map<number, number>;
   lang: string;
   accent: string;
   onAddAttraction?: (attractionId: number) => void;
   onMoveAttraction?: (attractionId: number, fromDay: number) => void;
   onRemoveAttraction?: (attractionId: number) => void;
+  onReorderStops?: (newStops: Stop[]) => void;
+  onSelectFood?: (foodSpotId: number) => void;
   allDays?: ItineraryDay[];
   onDayChange?: (dayNumber: number) => void;
 }
@@ -47,6 +52,8 @@ function esc(str: unknown): string {
 function buildHtml(
   day: ItineraryDay,
   allAttractions: BuilderAttraction[],
+  allFoodSpots: BuilderAttraction[],
+  foodSelection: { mealType?: string | null; origin?: { latitude: number; longitude: number; name?: string } } | null | undefined,
   assignedMap: Map<number, number>,
   lang: string,
   accent: string,
@@ -73,7 +80,17 @@ function buildHtml(
     typeof lat === "number" && isFinite(lat) &&
     typeof lon === "number" && isFinite(lon);
 
-  const dayStops = day.stops
+  const foodMode = !!foodSelection;
+  const foodOrigin = foodSelection?.origin && validCoords(foodSelection.origin.latitude, foodSelection.origin.longitude)
+    ? {
+        lat: foodSelection.origin.latitude,
+        lon: foodSelection.origin.longitude,
+        name: esc(foodSelection.origin.name ?? (isEn ? "Your position" : "La tua posizione")),
+      }
+    : null;
+  const contextStops = day.stops;
+
+  const dayStops = contextStops
     .filter((s) => s.type === "attraction" && s.id > 0 && validCoords(s.latitude, s.longitude))
     .map((s, idx) => ({
       id: s.id,
@@ -104,7 +121,7 @@ function buildHtml(
       dayNum: assignedMap.get(a.id)!,
     }));
 
-  const unassigned = allAttractions
+  const unassigned = foodMode ? [] : allAttractions
     .filter((a) => !assignedMap.has(a.id) && !dayStopIds.has(a.id) && validCoords(a.latitude, a.longitude))
     .map((a) => ({
       id: a.id,
@@ -115,6 +132,27 @@ function buildHtml(
       type: esc(a.attraction_type ?? ""),
       mins: a.estimated_visit_time ?? 0,
       level: a.category_level ?? 1,
+    }));
+
+  const usedFoodIds = new Set(
+    (day.restaurants ?? []).map((r) => r.id),
+  );
+  const targetMeal = foodSelection?.mealType;
+  const foodSpots = !foodMode ? [] : allFoodSpots
+    .filter((a) =>
+      !usedFoodIds.has(a.id) &&
+      validCoords(a.latitude, a.longitude) &&
+      (targetMeal === "meal" || !targetMeal || !a.meal_type || a.meal_type === targetMeal || a.meal_type === "both"),
+    )
+    .map((a) => ({
+      id: a.id,
+      lat: a.latitude,
+      lon: a.longitude,
+      name: esc(isEn && a.name_en ? a.name_en : a.name),
+      desc: esc((isEn && a.description_en ? a.description_en : a.description) ?? ""),
+      type: esc(a.food_type ?? a.attraction_type ?? ""),
+      mins: a.estimated_visit_time ?? 60,
+      rating: a.rating ?? null,
     }));
 
   const L = {
@@ -131,11 +169,15 @@ function buildHtml(
     filterHidden:   isEn ? "Hidden" : "Nascosto",
     distFromRoute:  isEn ? "from today's stops" : "dalle tappe di oggi",
     rulerLabel:     isEn ? "Measure distance" : "Misura distanza",
+    foodLabel:      isEn ? "Food spot" : "Posto cibo",
+    selectFood:     isEn ? "Choose this place" : "Scegli questo posto",
   };
 
   const stopsJson      = JSON.stringify(dayStops);
   const otherDayJson   = JSON.stringify(otherDay);
   const unassignedJson = JSON.stringify(unassigned);
+  const foodJson       = JSON.stringify(foodSpots);
+  const originJson     = JSON.stringify(foodOrigin);
 
   return `<!DOCTYPE html>
 <html>
@@ -164,10 +206,16 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .pop-add{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#6ee7b7;background:#6ee7b714;border:1px solid #6ee7b750;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-move{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#e8c06a;background:#e8c06a14;border:1px solid #e8c06a50;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-remove{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#f97316;background:#f9731614;border:1px solid #f9731650;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
+.pop-food{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#6ee7b7;background:#6ee7b714;border:1px solid #6ee7b750;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .stop-circle{width:30px;height:30px;border-radius:50%;background:${accent};border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#0f0f1e;box-shadow:0 2px 10px rgba(0,0,0,.55);line-height:1}
 .other-circle{width:26px;height:26px;border-radius:50%;background:#7eb8f7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#0f0f1e;box-shadow:0 2px 8px rgba(0,0,0,.5);line-height:1;opacity:.9}
 .unass-dot{width:24px;height:24px;border-radius:50%;background:${mapBg};border:1.5px solid ${filterBdr};display:flex;align-items:center;justify-content:center;font-size:13px;opacity:.85;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
+.food-dot{width:30px;height:30px;border-radius:50%;background:#6ee7b7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 10px rgba(0,0,0,.45);line-height:1}
+.origin-dot{width:28px;height:28px;border-radius:50%;background:#7eb8f7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.45);line-height:1}
 .pop-dist{font-size:10px;color:#7eb8f7;margin-top:3px;margin-bottom:2px}
+.leaflet-marker-icon.measure-selected > div{box-shadow:0 0 0 3px #7eb8f7,0 0 14px rgba(126,184,247,.85)!important;transform:scale(1.18);transition:transform .15s ease,box-shadow .15s ease}
+@keyframes measurePulse{0%{box-shadow:0 0 0 3px #7eb8f7,0 0 0 rgba(126,184,247,.85)}60%{box-shadow:0 0 0 6px rgba(126,184,247,.2),0 0 18px rgba(126,184,247,.95)}100%{box-shadow:0 0 0 3px #7eb8f7,0 0 0 rgba(126,184,247,.85)}}
+.leaflet-marker-icon.measure-selected.measure-active > div{animation:measurePulse 1.2s ease-in-out infinite}
 #ruler-btn{position:absolute;top:12px;right:12px;z-index:1000;width:38px;height:38px;border-radius:10px;background:${rulerBg};border:1px solid ${filterBdr};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;color:${rulerColor};font-family:inherit;outline:none;padding:0}
 .dist-label{background:${rulerBg};border:1px solid #7eb8f755;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#7eb8f7;white-space:nowrap;pointer-events:none;transform:translateX(-50%) translateY(-50%)}
 #filter-bar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:4px;background:${filterBg};border:1px solid ${filterBdr};border-radius:999px;padding:5px 8px;backdrop-filter:blur(6px)}
@@ -196,6 +244,9 @@ try {
 const DAY_STOPS    = ${stopsJson};
 const OTHER_DAY    = ${otherDayJson};
 const UNASSIGNED   = ${unassignedJson};
+const FOOD_SPOTS   = ${foodJson};
+const FOOD_ORIGIN  = ${originJson};
+const FOOD_MODE    = ${JSON.stringify(foodMode)};
 const ACCENT       = ${JSON.stringify(accent)};
 const DAY_NUM      = ${day.day};
 const DAY_LABEL    = ${JSON.stringify(L.dayLabel)};
@@ -211,6 +262,8 @@ const FILTER_CURATED = ${JSON.stringify(L.filterCurated)};
 const FILTER_HIDDEN  = ${JSON.stringify(L.filterHidden)};
 const DIST_FROM_ROUTE = ${JSON.stringify(L.distFromRoute)};
 const RULER_LABEL    = ${JSON.stringify(L.rulerLabel)};
+const FOOD_LABEL       = ${JSON.stringify(L.foodLabel)};
+const SELECT_FOOD_LABEL = ${JSON.stringify(L.selectFood)};
 const LEVEL_COLORS   = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa'};
 
 function typeEmoji(t){
@@ -241,6 +294,7 @@ function wKm(lat1,lon1,lat2,lon2){
 }
 function fDist(km){ return km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km'; }
 function nearestDayDist(lat,lon){
+  if(FOOD_ORIGIN) return wKm(lat, lon, FOOD_ORIGIN.lat, FOOD_ORIGIN.lon);
   if(!DAY_STOPS.length) return null;
   var best=Infinity;
   DAY_STOPS.forEach(function(s){ var k=wKm(lat,lon,s.lat,s.lon); if(k<best) best=k; });
@@ -257,6 +311,7 @@ document.addEventListener('click', function(e){
   if (action === 'add')    sendMessage({type:'addAttraction',   id: Number(btn.dataset.id)});
   if (action === 'move')   sendMessage({type:'moveAttraction',  id: Number(btn.dataset.id), fromDay: Number(btn.dataset.from)});
   if (action === 'remove') sendMessage({type:'removeAttraction',id: Number(btn.dataset.id)});
+  if (action === 'selectFood') sendMessage({type:'selectFood', id: Number(btn.dataset.id)});
 });
 
 var unassLayers = {};
@@ -277,9 +332,72 @@ function setFilter(level) {
 
 var measureStart = null;
 var measureLayer = null;
+var measureHighlights = [];
+
+function isRulerActive(){
+  var btn = document.getElementById('ruler-btn');
+  return !!(btn && btn.dataset.active === '1');
+}
+
+function clearMeasureHighlights(){
+  for(var i=0;i<measureHighlights.length;i++){
+    var m = measureHighlights[i];
+    if(m && m._icon){
+      m._icon.classList.remove('measure-selected');
+      m._icon.classList.remove('measure-active');
+    }
+  }
+  measureHighlights = [];
+}
+
+function highlightMeasureMarker(marker, isActive){
+  if(!marker || !marker._icon) return;
+  marker._icon.classList.add('measure-selected');
+  if(isActive) marker._icon.classList.add('measure-active');
+  measureHighlights.push(marker);
+}
+
+function handleMeasureClick(ll, marker){
+  if(!measureLayer) return;
+  if(!measureStart){
+    measureLayer.clearLayers();
+    clearMeasureHighlights();
+    measureStart = ll;
+    L.circleMarker(ll,{radius:7,color:'#7eb8f7',fillColor:'#7eb8f7',fillOpacity:.9,weight:2}).addTo(measureLayer);
+    if(marker) highlightMeasureMarker(marker, true);
+  } else {
+    var p1 = measureStart, p2 = ll;
+    L.circleMarker(p2,{radius:7,color:'#7eb8f7',fillColor:'#7eb8f7',fillOpacity:.9,weight:2}).addTo(measureLayer);
+    L.polyline([p1,p2],{color:'#7eb8f7',weight:2.5,dashArray:'7,5',opacity:.9}).addTo(measureLayer);
+    var km = wKm(p1.lat,p1.lng,p2.lat,p2.lng);
+    var mid = L.latLng((p1.lat+p2.lat)/2,(p1.lng+p2.lng)/2);
+    L.marker(mid,{icon:L.divIcon({html:'<div class="dist-label">~'+fDist(km)+'</div>',className:'',iconAnchor:[0,0]}),interactive:false,zIndexOffset:2000}).addTo(measureLayer);
+    if(marker) highlightMeasureMarker(marker, false);
+    for(var j=0;j<measureHighlights.length;j++){
+      var mm = measureHighlights[j];
+      if(mm && mm._icon) mm._icon.classList.remove('measure-active');
+    }
+    measureStart = null;
+  }
+}
+
+function attachMarker(marker, popupHtml, popupOpts){
+  marker.bindPopup(popupHtml, popupOpts || {maxWidth:250});
+  marker.off('click');
+  marker.on('click', function(){
+    if(isRulerActive()){
+      handleMeasureClick(marker.getLatLng(), marker);
+    } else {
+      marker.openPopup();
+    }
+  });
+  return marker;
+}
+
 function toggleMeasure(){
   measureStart = null;
   if(measureLayer) measureLayer.clearLayers();
+  clearMeasureHighlights();
   var btn = document.getElementById('ruler-btn');
   if(!btn) return;
   var active = btn.dataset.active !== '1';
@@ -293,6 +411,7 @@ function mapsButton(url){ return '<button type="button" class="pop-maps" data-ac
 function addButton(id)  { return '<button type="button" class="pop-add"  data-action="add"  data-id="'+id+'">'+ADD_LABEL+'</button>'; }
 function moveButton(id,from){ return '<button type="button" class="pop-move" data-action="move" data-id="'+id+'" data-from="'+from+'">'+MOVE_LABEL+'</button>'; }
 function removeButton(id){ return '<button type="button" class="pop-remove" data-action="remove" data-id="'+id+'">'+REMOVE_LABEL+'</button>'; }
+function selectFoodButton(id){ return '<button type="button" class="pop-food" data-action="selectFood" data-id="'+id+'">'+SELECT_FOOD_LABEL+'</button>'; }
 
 var map = L.map('map',{zoomControl:false,attributionControl:false,minZoom:12,maxZoom:19});
 L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
@@ -311,11 +430,35 @@ UNASSIGNED.forEach(function(a){
     (a.desc?'<div class="pop-desc">'+a.desc+'</div>':'')+
     (a.mins?'<div class="pop-meta">~'+a.mins+' '+MINS_LABEL+'</div>':'')+
     addButton(a.id)+mapsButton(url);
-  L.marker([a.lat,a.lon],{icon:icon,zIndexOffset:100}).bindPopup(popup,{maxWidth:250}).addTo(unassLayers[lv]);
+  attachMarker(L.marker([a.lat,a.lon],{icon:icon,zIndexOffset:100}), popup).addTo(unassLayers[lv]);
 });
 [1,2,3].forEach(function(lv){ unassLayers[lv].addTo(map); });
 
+FOOD_SPOTS.forEach(function(f){
+  var icon=L.divIcon({html:'<div class="food-dot">🍽</div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-17]});
+  var url=mapsUrl(f.lat,f.lon,f.name);
+  var nd=nearestDayDist(f.lat,f.lon);
+  var popup='<div class="pop-badge pop-badge-expl">'+FOOD_LABEL+'</div>'+
+    '<div class="pop-name">'+f.name+'</div>'+
+    (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
+    (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
+    (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
+    selectFoodButton(f.id)+mapsButton(url);
+  attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:900}), popup).addTo(map);
+});
+
+if(FOOD_ORIGIN){
+  var originIcon=L.divIcon({html:'<div class="origin-dot">⌖</div>',className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-16]});
+  attachMarker(
+    L.marker([FOOD_ORIGIN.lat,FOOD_ORIGIN.lon],{icon:originIcon,zIndexOffset:1100}),
+    '<div class="pop-badge pop-badge-day">'+FOOD_ORIGIN.name+'</div>',
+    {maxWidth:220}
+  ).addTo(map);
+}
+
 (function(){
+  if (FOOD_MODE) return;
   var bar=document.createElement('div'); bar.id='filter-bar';
   [{level:0,label:FILTER_ALL,color:'rgba(240,240,240,0.15)'},{level:1,label:FILTER_ICONIC,color:LEVEL_COLORS[1]},{level:2,label:FILTER_CURATED,color:LEVEL_COLORS[2]},{level:3,label:FILTER_HIDDEN,color:LEVEL_COLORS[3]}]
   .forEach(function(f){
@@ -334,23 +477,10 @@ UNASSIGNED.forEach(function(a){
 })();
 
 map.on('click', function(e){
-  var btn=document.getElementById('ruler-btn');
-  if(!btn||btn.dataset.active!=='1') return;
+  if(!isRulerActive()) return;
   var tgt=e.originalEvent&&e.originalEvent.target;
   if(tgt&&tgt.closest&&(tgt.closest('#filter-bar')||tgt.closest('#ruler-btn'))) return;
-  var ll=e.latlng;
-  if(!measureStart){
-    measureLayer.clearLayers(); measureStart=ll;
-    L.circleMarker(ll,{radius:7,color:'#7eb8f7',fillColor:'#7eb8f7',fillOpacity:.9,weight:2}).addTo(measureLayer);
-  } else {
-    var p1=measureStart,p2=ll;
-    L.circleMarker(p2,{radius:7,color:'#7eb8f7',fillColor:'#7eb8f7',fillOpacity:.9,weight:2}).addTo(measureLayer);
-    L.polyline([p1,p2],{color:'#7eb8f7',weight:2.5,dashArray:'7,5',opacity:.9}).addTo(measureLayer);
-    var km=wKm(p1.lat,p1.lng,p2.lat,p2.lng);
-    var mid=L.latLng((p1.lat+p2.lat)/2,(p1.lng+p2.lng)/2);
-    L.marker(mid,{icon:L.divIcon({html:'<div class="dist-label">~'+fDist(km)+'</div>',className:'',iconAnchor:[0,0]}),interactive:false,zIndexOffset:2000}).addTo(measureLayer);
-    measureStart=null;
-  }
+  handleMeasureClick(e.latlng);
 });
 
 OTHER_DAY.forEach(function(s){
@@ -364,7 +494,7 @@ OTHER_DAY.forEach(function(s){
     (s.desc?'<div class="pop-desc">'+s.desc+'</div>':'')+
     (s.mins?'<div class="pop-meta">~'+s.mins+' '+MINS_LABEL+'</div>':'')+
     moveButton(s.id,s.dayNum)+mapsButton(url);
-  L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:200}).bindPopup(popup,{maxWidth:250}).addTo(map);
+  attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:200}), popup).addTo(map);
 });
 
 if(DAY_STOPS.length>1){
@@ -378,15 +508,18 @@ DAY_STOPS.forEach(function(s){
     (s.desc?'<div class="pop-desc">'+s.desc+'</div>':'')+
     (s.mins?'<div class="pop-meta">~'+s.mins+' '+MINS_LABEL+'</div>':'')+
     removeButton(s.id)+mapsButton(url);
-  L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:1000}).bindPopup(popup,{maxWidth:250}).addTo(map);
+  attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:1000}), popup).addTo(map);
 });
 
 setTimeout(function(){
   map.invalidateSize();
   if(DAY_STOPS.length>0){
-    map.fitBounds(L.latLngBounds(DAY_STOPS.map(function(s){return[s.lat,s.lon];})),{padding:[55,55],maxZoom:16});
+    var bounds=L.latLngBounds(DAY_STOPS.map(function(s){return[s.lat,s.lon];}));
+    FOOD_SPOTS.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
+    if(FOOD_ORIGIN) bounds.extend([FOOD_ORIGIN.lat,FOOD_ORIGIN.lon]);
+    map.fitBounds(bounds,{padding:[55,55],maxZoom:16});
   } else {
-    var all=[].concat(OTHER_DAY).concat(UNASSIGNED).filter(function(a){return a.lat&&a.lon;});
+    var all=[].concat(FOOD_SPOTS).concat(OTHER_DAY).concat(UNASSIGNED).filter(function(a){return a.lat&&a.lon;});
     if(all.length>0) map.fitBounds(L.latLngBounds(all.map(function(a){return[a.lat,a.lon];})),{padding:[40,40]});
     else map.setView([48,13],4);
   }
@@ -404,18 +537,26 @@ setTimeout(function(){
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export function DayMap({
-  visible, onClose, day, allAttractions, assignedMap, lang, accent,
-  onAddAttraction, onMoveAttraction, onRemoveAttraction,
+  visible, onClose, day, allAttractions, allFoodSpots = [], foodSelection, assignedMap, lang, accent,
+  onAddAttraction, onMoveAttraction, onRemoveAttraction, onReorderStops, onSelectFood,
   allDays, onDayChange,
 }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [showStopsSheet, setShowStopsSheet] = useState(false);
+  const [isDraggingStop, setIsDraggingStop] = useState(false);
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
 
+  useEffect(() => { setShowStopsSheet(false); setIsDraggingStop(false); }, [day.day, visible]);
+  const stopOrderSignature = useMemo(
+    () => day.stops.map((s) => `${s.type}:${s.id}:${s.latitude}:${s.longitude}`).join("|"),
+    [day.stops],
+  );
+
   const html = useMemo(
-    () => buildHtml(day, allAttractions, assignedMap, lang, accent, isDark),
+    () => buildHtml(day, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day.day, day.stops.length, assignedMap.size, allAttractions.length, lang, accent, isDark],
+    [day.day, stopOrderSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark],
   );
 
   useEffect(() => {
@@ -433,12 +574,13 @@ export function DayMap({
         if (msg.type === "addAttraction"    && onAddAttraction)    onAddAttraction(msg.id);
         if (msg.type === "moveAttraction"   && onMoveAttraction)   onMoveAttraction(msg.id, msg.fromDay);
         if (msg.type === "removeAttraction" && onRemoveAttraction) onRemoveAttraction(msg.id);
+        if (msg.type === "selectFood"       && onSelectFood)       onSelectFood(msg.id);
       } catch { /* ignore */ }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onAddAttraction, onMoveAttraction, onRemoveAttraction]);
+  }, [onAddAttraction, onMoveAttraction, onRemoveAttraction, onSelectFood]);
 
   const isEn = lang === "en";
 
@@ -501,6 +643,7 @@ export function DayMap({
         {/* Mappa */}
         <View style={styles.mapWrap}>
           <iframe
+            key={stopOrderSignature}
             srcDoc={html}
             style={{ width: "100%", height: "100%", border: "none", backgroundColor: colors.bg } as any}
             sandbox="allow-scripts allow-same-origin"
@@ -523,7 +666,65 @@ export function DayMap({
               </TouchableOpacity>
             </View>
           )}
+
+          {/* FAB riordino — in basso a sinistra accanto al filtro */}
+          {status === "ready" && !!onReorderStops && day.stops.length > 1 && (
+            <TouchableOpacity
+              onPress={() => setShowStopsSheet(true)}
+              activeOpacity={0.8}
+              style={[styles.reorderFab, { backgroundColor: colors.card2, borderColor: accent + "55" }]}
+              accessibilityLabel={isEn ? "Reorder stops" : "Riordina tappe"}
+            >
+              <Ionicons name="reorder-three-outline" size={22} color={accent} />
+            </TouchableOpacity>
+          )}
         </View>
+
+        {/* Bottom sheet riordino tappe */}
+        {!!onReorderStops && (
+          <Modal
+            visible={showStopsSheet}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowStopsSheet(false)}
+          >
+            <View style={styles.sheetBackdrop}>
+              <TouchableOpacity
+                style={StyleSheet.absoluteFill}
+                activeOpacity={1}
+                onPress={() => setShowStopsSheet(false)}
+              />
+              <View style={[styles.sheetContainer, { backgroundColor: colors.bg, borderColor: colors.border, paddingBottom: insets.bottom + 12 }]}>
+                <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+                <View style={styles.sheetHeader}>
+                  <Text style={[styles.sheetTitle, { color: accent }]}>
+                    {isEn ? `Day ${day.day} · Reorder stops` : `Giorno ${day.day} · Riordina tappe`}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowStopsSheet(false)} style={[styles.closeBtn, { backgroundColor: colors.card2 }]} activeOpacity={0.7}>
+                    <Ionicons name="close" size={20} color={colors.textMuted} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={[styles.sheetHint, { color: colors.textMuted }]}>
+                  {isEn ? "Long-press the ≡ handle on a stop and drag up or down to reorder." : "Tieni premuto l'icona ≡ a sinistra di una tappa e trascina per riordinare."}
+                </Text>
+                <ScrollView
+                  style={styles.sheetScroll}
+                  contentContainerStyle={styles.sheetScrollContent}
+                  showsVerticalScrollIndicator={true}
+                  scrollEnabled={!isDraggingStop}
+                >
+                  <DraggableStopList
+                    stops={day.stops}
+                    onReorder={(newStops) => onReorderStops(newStops)}
+                    onDragStateChange={setIsDraggingStop}
+                    lang={lang}
+                    colors={colors}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
+        )}
       </View>
     </Modal>
   );
@@ -576,4 +777,30 @@ const styles = StyleSheet.create({
     borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24,
   },
   retryText: { fontSize: 14, fontWeight: "600" },
+
+  // FAB riordino + bottom sheet
+  reorderFab: {
+    position: "absolute", bottom: 68, left: 14,    // sopra il filter bar per dare aria
+    width: 44, height: 44, borderRadius: 22,
+    borderWidth: 1.5,
+    alignItems: "center", justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+  sheetContainer: {
+    height: "88%",
+    borderTopLeftRadius: 22, borderTopRightRadius: 22,
+    borderTopWidth: 1,
+    paddingHorizontal: 16, paddingTop: 10,
+  },
+  sheetHandle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, marginBottom: 12 },
+  sheetHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 },
+  sheetTitle: { fontSize: 16, fontWeight: "800", letterSpacing: 0.4, flex: 1 },
+  sheetHint: { fontSize: 12, marginBottom: 12, lineHeight: 17 },
+  sheetScroll: { flex: 1 },
+  sheetScrollContent: { paddingBottom: 12 },
 });

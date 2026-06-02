@@ -10,8 +10,9 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
+from services.rate_limit import proxy_aware_remote_address
 
 from database.db import engine
 from database.models import Base
@@ -38,7 +39,7 @@ migrate_db()
 seed()
 
 # ── Rate limiter ──────────────────────────────────────────────────────────────
-limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour"])
+limiter = Limiter(key_func=proxy_aware_remote_address, default_limits=["200/hour"])
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(

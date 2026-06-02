@@ -68,7 +68,7 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 
 function estimatedWalkingKm(stops: ItineraryDay["stops"]): number {
   const routeStops = stops.filter((s) =>
-    (s.type === "attraction" || s.type === "food" || s.type === "meal") &&
+    s.type === "attraction" &&
     Number.isFinite(s.latitude) &&
     Number.isFinite(s.longitude),
   );
@@ -495,7 +495,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   mapsBtnText: { fontWeight: "700", fontSize: 14 },
-
   // ── Food section ────────────────────────────────────────────
   foodSection: {
     marginTop: 10,

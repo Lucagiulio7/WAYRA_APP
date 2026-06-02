@@ -11,8 +11,8 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, PanResponder, StyleSheet, View } from "react-native";
-import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Stop } from "@/types";
 import { StopCard } from "./StopCard";
 import { ITEM_GAP, DEFAULT_H, sKey, touchToSlot, reorderStops } from "@/utils/draggableUtils";
@@ -27,7 +27,10 @@ interface Props {
   stops: Stop[];
   onReorder: (newStops: Stop[]) => void;
   onReplaceStop?: (stopId: number) => void;
+  onReplaceFood?: (stopId: number) => void;
   onNoteChange?: (stopIndex: number, note: string) => void;
+  /** Notifica quando il drag inizia/finisce — utile per disabilitare ScrollView esterni */
+  onDragStateChange?: (dragging: boolean) => void;
   lang: string;
   colors: any;
 }
@@ -38,7 +41,9 @@ export function DraggableStopList({
   stops,
   onReorder,
   onReplaceStop,
+  onReplaceFood,
   onNoteChange,
+  onDragStateChange,
   lang,
   colors,
 }: Props) {
@@ -102,10 +107,12 @@ export function DraggableStopList({
   const makePanResponder = useCallback(
     (orderIdx: number) =>
       PanResponder.create({
-        onStartShouldSetPanResponder:    () => true,
-        onMoveShouldSetPanResponder:     () => isDragging.current,
-        onPanResponderTerminationRequest: () => !isDragging.current,
-        onShouldBlockNativeResponder:    () => isDragging.current,
+        onStartShouldSetPanResponder:        () => displayedRef.current[orderIdx]?.type === "attraction",
+        // Capture: ruba il responder ANCHE alla ScrollView se siamo già in drag mode
+        onMoveShouldSetPanResponderCapture:  () => isDragging.current,
+        onMoveShouldSetPanResponder:         () => isDragging.current,
+        onPanResponderTerminationRequest:    () => !isDragging.current,
+        onShouldBlockNativeResponder:        () => isDragging.current,
 
         onPanResponderGrant: () => {
           longPressTimer.current = setTimeout(() => {
@@ -118,6 +125,7 @@ export function DraggableStopList({
             dragAnim.setValue(0);
             shiftAnims.current.forEach((a) => a.setValue(0));
             setDraggingIdx(orderIdx);
+            onDragStateChange?.(true);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
           }, LONG_PRESS);
         },
@@ -157,20 +165,23 @@ export function DraggableStopList({
           setDisplayed(newStops);
           setDraggingIdx(null);
           activeDragIdx.current = null;
+          onDragStateChange?.(false);
           onReorder(newStops);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         },
 
         onPanResponderTerminate: () => {
           clearTimeout(longPressTimer.current!);
+          const wasDragging = isDragging.current;
           isDragging.current    = false;
           activeDragIdx.current = null;
           dragAnim.setValue(0);
           resetShifts();
           setDraggingIdx(null);
+          if (wasDragging) onDragStateChange?.(false);
         },
       }),
-    [dragAnim, updateShifts, resetShifts, onReorder],
+    [dragAnim, updateShifts, resetShifts, onReorder, onDragStateChange],
   );
 
   // Ricostruisce i PanResponder quando la lista cambia
@@ -201,7 +212,8 @@ export function DraggableStopList({
         const shiftAnim = isDrag
           ? dragAnim
           : (shiftAnims.current[orderIdx] ?? new Animated.Value(0));
-
+        const isAttraction = stop.type === "attraction";
+        const panResponder = panResponders.current[orderIdx];
         return (
           <Animated.View
             key={key}
@@ -214,29 +226,40 @@ export function DraggableStopList({
               heights.current.set(key, e.nativeEvent.layout.height);
             }}
           >
-            {/* ── Grip handle ── */}
-            <View
-              style={[
-                styles.handle,
-                isDrag && { backgroundColor: colors.accentGold + "22" },
-              ]}
-              {...panResponders.current[orderIdx]?.panHandlers}
-            >
-              <Ionicons
-                name="reorder-three-outline"
-                size={22}
-                color={isDrag ? colors.accentGold : colors.textMuted}
-              />
-            </View>
+            {/* ── Handle drag — solo per le attrazioni (food/free-time non si riordinano) ── */}
+            {isAttraction && panResponder ? (
+              <View
+                {...panResponder.panHandlers}
+                style={[
+                  styles.dragHandle,
+                  { borderColor: (colors?.border ?? "#3a3a4a") },
+                  isDrag && { borderColor: (colors?.accentGold ?? "#e8c06a") },
+                ]}
+                hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
+              >
+                <Ionicons
+                  name="reorder-three"
+                  size={20}
+                  color={isDrag ? (colors?.accentGold ?? "#e8c06a") : (colors?.textMuted ?? "#888")}
+                />
+              </View>
+            ) : (
+              <View style={styles.dragHandlePlaceholder} />
+            )}
 
             {/* ── Tappa ── */}
             <View style={styles.card}>
-              <StopCard
-                stop={stop}
-                index={attrIdx}
+            <StopCard
+              stop={stop}
+              index={attrIdx}
                 onReplace={
                   stop.type === "attraction" && stop.id > 0 && onReplaceStop
                     ? () => onReplaceStop(stop.id)
+                    : undefined
+                }
+                onReplaceFood={
+                  (stop.type === "food" || stop.type === "meal") && onReplaceFood
+                    ? () => onReplaceFood(stop.id)
                     : undefined
                 }
                 onNoteChange={
@@ -269,13 +292,16 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     opacity: 0.96,
   },
-  handle: {
+  card: { flex: 1 },
+  dragHandle: {
     width: 30,
-    height: 48,
+    height: 44,
     borderRadius: 8,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
+    alignSelf: "stretch",
+    marginVertical: 4,
   },
-  card: { flex: 1 },
+  dragHandlePlaceholder: { width: 30 },
 });

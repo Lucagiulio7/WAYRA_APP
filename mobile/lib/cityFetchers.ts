@@ -43,7 +43,7 @@ export async function fetchFoodSpots(city: string): Promise<BuilderAttraction[]>
     `&is_food_spot=eq.true` +
     `&select=id,name,name_en,description,description_en,` +
     `category_level,latitude,longitude,estimated_visit_time,` +
-    `tags,attraction_type,ticket_url` +
+    `tags,attraction_type,ticket_url,is_food_spot,food_type,meal_type,rating,block_id,zone` +
     `&order=attraction_type.asc,name.asc`;
   return safeFetch<BuilderAttraction[]>(url);
 }

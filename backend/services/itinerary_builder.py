@@ -5,7 +5,6 @@ Pipeline:
   filter_attractions
   → split_days   (block-aware: group by block_id → merge blocks into days by time budget)
   → order_day    (2-opt refinement within each day)
-  → insert_meal_stops
   → generate_maps_link
 """
 import math
@@ -14,14 +13,23 @@ from collections import defaultdict
 from typing import Optional
 
 MAX_DAILY_MINUTES     = 420   # 7 hours max of attraction time per day
-MIN_DAILY_MINUTES     = 240   # 4 hours min of attraction time per day
-MAX_DAILY_ATTRACTIONS = 8     # hard cap on stops per day (meals excluded)
-MIN_DAILY_ATTRACTIONS = 4     # soft floor on stops per day
-MAX_MUSEUMS_PER_DAY   = 1     # no more than 1 museum per day
+MIN_DAILY_MINUTES     = 300   # 5 hours min of attraction time per day
+MAX_DAILY_ATTRACTIONS = 8     # fallback hard cap (meals excluded)
+MIN_DAILY_ATTRACTIONS = 4     # fallback soft floor
+MAX_MUSEUMS_PER_DAY   = 2     # no more than 2 museums per day
 MAX_DAILY_WALK_KM     = 4.0   # max walking route distance per day
 BACKUP_MAX_KM         = 5.0   # max distance to pull a backup attraction into the afternoon slot
 CLUSTER_RADIUS_KM     = 1.5   # proximity radius for the isolation check
 MIN_CLUSTER_NEIGHBORS = 2     # minimum other attractions within CLUSTER_RADIUS_KM to be included
+
+
+def _day_limits(max_walk_km: float) -> tuple[int, int]:
+    """Return min/max attraction count for the selected walking mode."""
+    if max_walk_km <= 3:
+        return 4, 5
+    if max_walk_km <= 5:
+        return 4, 8
+    return 4, 10
 
 
 # ── Geo utilities ─────────────────────────────────────────────────────────────
@@ -46,21 +54,80 @@ def _route_distance(route: list[dict]) -> float:
 
 
 def _two_opt(route: list[dict]) -> list[dict]:
-    if len(route) < 4:
-        return route
-    best = list(route)
-    best_dist = _route_distance(best)
-    improved = True
-    while improved:
-        improved = False
-        for i in range(1, len(best) - 1):
-            for j in range(i + 1, len(best)):
-                candidate = best[:i] + best[i:j + 1][::-1] + best[j + 1:]
-                dist = _route_distance(candidate)
-                if dist < best_dist - 1e-9:
-                    best = candidate
-                    best_dist = dist
-                    improved = True
+    """
+    Return the shortest open walking path for a day's stops.
+
+    The old 2-opt pass preserved too much of the input order, so a day could
+    still bounce between nearby areas. Day sizes are small, so an exact
+    Held-Karp dynamic program gives a stable shortest path without fixing
+    start/end points.
+    """
+    n = len(route)
+    if n <= 2:
+        return list(route)
+    if n > 11:
+        return _nearest_open_route(route)
+
+    dist = [
+        [
+            haversine_km(a["latitude"], a["longitude"], b["latitude"], b["longitude"])
+            for b in route
+        ]
+        for a in route
+    ]
+    size = 1 << n
+    dp = [[float("inf")] * n for _ in range(size)]
+    parent = [[-1] * n for _ in range(size)]
+
+    for i in range(n):
+        dp[1 << i][i] = 0.0
+
+    for mask in range(size):
+        for last in range(n):
+            current = dp[mask][last]
+            if current == float("inf"):
+                continue
+            for nxt in range(n):
+                if mask & (1 << nxt):
+                    continue
+                nxt_mask = mask | (1 << nxt)
+                candidate = current + dist[last][nxt]
+                if candidate < dp[nxt_mask][nxt]:
+                    dp[nxt_mask][nxt] = candidate
+                    parent[nxt_mask][nxt] = last
+
+    full = size - 1
+    last = min(range(n), key=lambda i: dp[full][i])
+    order: list[int] = []
+    mask = full
+    while last != -1:
+        order.append(last)
+        prev = parent[mask][last]
+        mask ^= 1 << last
+        last = prev
+    order.reverse()
+    return [route[i] for i in order]
+
+
+def _nearest_open_route(route: list[dict]) -> list[dict]:
+    """Fallback for unexpectedly large days."""
+    best: list[dict] = []
+    best_dist = float("inf")
+    for start in route:
+        remaining = [a for a in route if a is not start]
+        ordered = [start]
+        while remaining:
+            cur = ordered[-1]
+            nxt = min(
+                remaining,
+                key=lambda a: haversine_km(cur["latitude"], cur["longitude"], a["latitude"], a["longitude"]),
+            )
+            ordered.append(nxt)
+            remaining.remove(nxt)
+        distance = _route_distance(ordered)
+        if distance < best_dist:
+            best = ordered
+            best_dist = distance
     return best
 
 
@@ -68,17 +135,22 @@ def _optimized_distance(attractions: list[dict]) -> float:
     return _route_distance(_two_opt(list(attractions)))
 
 
-def _can_add_to_day(day: list[dict], candidate: dict) -> bool:
+def _can_add_to_day(day: list[dict], candidate: dict, max_walk_km: float = MAX_DAILY_WALK_KM) -> bool:
+    min_attractions, max_attractions = _day_limits(max_walk_km)
     if any(a["id"] == candidate["id"] for a in day):
         return False
     nxt = [*day, candidate]
-    if len(nxt) > MAX_DAILY_ATTRACTIONS:
+    has_minimum_activity = (
+        len(day) >= min_attractions
+        and _day_minutes(day) >= MIN_DAILY_MINUTES
+    )
+    if has_minimum_activity and len(nxt) > max_attractions:
         return False
     if _day_minutes(nxt) > MAX_DAILY_MINUTES:
         return False
     if _museum_count(nxt) > MAX_MUSEUMS_PER_DAY:
         return False
-    return _optimized_distance(nxt) <= MAX_DAILY_WALK_KM
+    return _optimized_distance(nxt) <= max_walk_km
 
 
 def _pick_removal_index(day: list[dict]) -> int:
@@ -94,7 +166,7 @@ def _pick_removal_index(day: list[dict]) -> int:
         museum_penalty = (
             1000
             if _museum_count(day) > MAX_MUSEUMS_PER_DAY
-            and (attraction.get("attraction_type") or "").lower() == "museo"
+            and "muse" in (attraction.get("attraction_type") or "").lower()
             else 0
         )
         score = museum_penalty + distance_gain * 100 + minutes_gain / 10
@@ -162,10 +234,10 @@ def _day_minutes(day: list[dict]) -> int:
 
 
 def _museum_count(attractions: list[dict]) -> int:
-    return sum(1 for a in attractions if (a.get("attraction_type") or "").lower() == "museo")
+    return sum(1 for a in attractions if "muse" in (a.get("attraction_type") or "").lower())
 
 
-def split_days(attractions: list[dict], num_days: int) -> list[list[dict]]:
+def split_days(attractions: list[dict], num_days: int, max_walk_km: float = MAX_DAILY_WALK_KM) -> list[list[dict]]:
     """
     Block-aware day builder — splits by time/count only.
     Museum balancing is handled separately by _rebalance_museums.
@@ -173,6 +245,7 @@ def split_days(attractions: list[dict], num_days: int) -> list[list[dict]]:
     """
     if not attractions:
         return []
+    min_attractions, max_attractions = _day_limits(max_walk_km)
 
     by_block: dict[int, list[dict]] = defaultdict(list)
     for a in attractions:
@@ -191,9 +264,9 @@ def split_days(attractions: list[dict], num_days: int) -> list[list[dict]]:
 
         new_count   = len(current_day) + len(block_attrs)
         new_minutes = _day_minutes(current_day) + _day_minutes(block_attrs)
-        hit_max     = new_count > MAX_DAILY_ATTRACTIONS or new_minutes > MAX_DAILY_MINUTES
+        hit_max     = new_count > max_attractions or new_minutes > MAX_DAILY_MINUTES
         met_min     = (_day_minutes(current_day) >= MIN_DAILY_MINUTES
-                       and len(current_day) >= MIN_DAILY_ATTRACTIONS)
+                       and len(current_day) >= min_attractions)
 
         if current_day and (hit_max or met_min) and slots_left > 1 and blocks_after > 0:
             days.append(list(current_day))
@@ -202,14 +275,14 @@ def split_days(attractions: list[dict], num_days: int) -> list[list[dict]]:
         current_day.extend(block_attrs)
 
     if current_day and len(days) < num_days:
-        days.append(current_day[:MAX_DAILY_ATTRACTIONS])
+        days.append(current_day)
 
     return [d for d in days if d]
 
 
 # ── Step 2b: cap days by time / count hard limits ────────────────────────────
 
-def _cap_days_by_limits(days: list[list[dict]]) -> tuple[list[list[dict]], list[dict]]:
+def _cap_days_by_limits(days: list[list[dict]], max_walk_km: float = MAX_DAILY_WALK_KM) -> tuple[list[list[dict]], list[dict]]:
     """
     Trim each day so that it never exceeds MAX_DAILY_ATTRACTIONS or
     MAX_DAILY_MINUTES. Excess attractions are dropped here; they will be
@@ -218,13 +291,14 @@ def _cap_days_by_limits(days: list[list[dict]]) -> tuple[list[list[dict]], list[
     """
     result = []
     overflow: list[dict] = []
+    min_attractions, max_attractions = _day_limits(max_walk_km)
     for day in days:
         kept = list(day)
         while (
-            len(kept) > MAX_DAILY_ATTRACTIONS
+            (len(kept) > max_attractions and _day_minutes(kept) >= MIN_DAILY_MINUTES and len(kept) > min_attractions)
             or _day_minutes(kept) > MAX_DAILY_MINUTES
             or _museum_count(kept) > MAX_MUSEUMS_PER_DAY
-            or _optimized_distance(kept) > MAX_DAILY_WALK_KM
+            or _optimized_distance(kept) > max_walk_km
         ):
             if len(kept) <= 1:
                 break
@@ -253,7 +327,7 @@ def _ensure_day_count(days: list[list[dict]], num_days: int) -> list[list[dict]]
     return result[:num_days]
 
 
-def _rebalance_museums(days: list[list[dict]]) -> tuple[list[list[dict]], list[dict]]:
+def _rebalance_museums(days: list[list[dict]], max_walk_km: float = MAX_DAILY_WALK_KM) -> tuple[list[list[dict]], list[dict]]:
     """
     Mirrors TypeScript rebalanceMuseums.
     Removes museums exceeding MAX_MUSEUMS_PER_DAY from each day,
@@ -261,13 +335,14 @@ def _rebalance_museums(days: list[list[dict]]) -> tuple[list[list[dict]], list[d
     """
     result = [list(day) for day in days]
     overflow: list[dict] = []
+    min_attractions, max_attractions = _day_limits(max_walk_km)
 
     # Pass 1: collect excess museums
     for day in result:
         count = 0
         keep: list[dict] = []
         for a in day:
-            if (a.get("attraction_type") or "").lower() == "museo":
+            if "muse" in (a.get("attraction_type") or "").lower():
                 if count < MAX_MUSEUMS_PER_DAY:
                     keep.append(a)
                     count += 1
@@ -284,7 +359,11 @@ def _rebalance_museums(days: list[list[dict]]) -> tuple[list[list[dict]], list[d
         for day in result:
             if (
                 _museum_count(day) < MAX_MUSEUMS_PER_DAY
-                and len(day) < MAX_DAILY_ATTRACTIONS
+                and (
+                    len(day) < max_attractions
+                    or len(day) < min_attractions
+                    or _day_minutes(day) < MIN_DAILY_MINUTES
+                )
                 and _day_minutes(day) + (museum.get("estimated_visit_time") or 60) <= MAX_DAILY_MINUTES
             ):
                 day.append(museum)
@@ -301,6 +380,7 @@ def _rebalance_museums(days: list[list[dict]]) -> tuple[list[list[dict]], list[d
 def _fill_thin_days(
     days: list[list[dict]],
     backup: list[dict],
+    max_walk_km: float = MAX_DAILY_WALK_KM,
 ) -> tuple[list[list[dict]], list[dict]]:
     """
     For each day below the minimum target, pull from
@@ -311,10 +391,11 @@ def _fill_thin_days(
     """
     result = [list(day) for day in days]
     used_ids: set[int] = set()
+    min_attractions, max_attractions = _day_limits(max_walk_km)
 
     for day in result:
         if not day or (
-            len(day) >= MIN_DAILY_ATTRACTIONS
+            len(day) >= min_attractions
             and _day_minutes(day) >= MIN_DAILY_MINUTES
         ):
             continue
@@ -329,11 +410,11 @@ def _fill_thin_days(
 
         for candidate in available:
             if (
-                len(day) >= MIN_DAILY_ATTRACTIONS
+                len(day) >= min_attractions
                 and _day_minutes(day) >= MIN_DAILY_MINUTES
-            ) or len(day) >= MAX_DAILY_ATTRACTIONS:
+            ):
                 break
-            if not _can_add_to_day(day, candidate):
+            if not _can_add_to_day(day, candidate, max_walk_km):
                 continue
             day.append(candidate)
             used_ids.add(candidate["id"])
@@ -396,12 +477,62 @@ def _free_time(ref: dict, minutes: int = 60) -> dict:
     }
 
 
+def _meal_slot(ref: dict, meal_type: str) -> dict:
+    is_lunch = meal_type == "lunch"
+    return {
+        "id": -201 if is_lunch else -202,
+        "type": "meal",
+        "name": "Pranzo da scegliere" if is_lunch else "Cena da scegliere",
+        "description": (
+            "Tocca lo slot per scegliere sulla mappa un posto dove pranzare vicino alle tappe della mattina."
+            if is_lunch
+            else "Tocca lo slot per scegliere sulla mappa un posto dove cenare vicino alle tappe della giornata."
+        ),
+        "latitude": ref["latitude"],
+        "longitude": ref["longitude"],
+        "estimated_visit_time": 75 if is_lunch else 90,
+        "tags": ["cibo"],
+        "category_level": 0,
+        "zone": ref.get("zone"),
+        "is_food_spot": True,
+        "city": ref.get("city", "roma"),
+        "food_type": None,
+        "meal_type": meal_type,
+        "rating": None,
+        "empty_meal_slot": True,
+        "meal": meal_type,
+    }
+
+
+def _split_day_around_lunch(day: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Split attractions so morning/afternoon visit time stays balanced."""
+    if len(day) <= 1:
+        return list(day), []
+
+    morning: list[dict] = []
+    afternoon: list[dict] = []
+    morning_minutes = 0
+    afternoon_minutes = 0
+
+    for attraction in sorted(day, key=lambda a: a.get("estimated_visit_time") or 0, reverse=True):
+        minutes = attraction.get("estimated_visit_time") or 0
+        if morning_minutes <= afternoon_minutes:
+            morning.append(attraction)
+            morning_minutes += minutes
+        else:
+            afternoon.append(attraction)
+            afternoon_minutes += minutes
+
+    return _two_opt(morning), _two_opt(afternoon)
+
+
 def insert_meal_stops(
     day: list[dict],
     food_spots: list[dict],
     used_food_ids: set[int],
     backup_attractions: list[dict],
     used_backup_ids: set[int],
+    max_walk_km: float = MAX_DAILY_WALK_KM,
 ) -> list[dict]:
     """
     [morning attractions] → PRANZO → [afternoon attractions] → CENA
@@ -411,23 +542,19 @@ def insert_meal_stops(
       2. Nearest unused backup within BACKUP_MAX_KM
       3. "Tempo libero" placeholder
     """
-    n = len(day)
-    morning_count = max(1, (n + 1) // 2)
-    morning = day[:morning_count]
-    afternoon = day[morning_count:]
+    if not day:
+        return []
+
+    morning, afternoon = _split_day_around_lunch(day)
 
     result: list[dict] = []
 
     for attr in morning:
         result.append({**attr, "type": "attraction"})
 
-    lunch_ref = morning[-1]
-    lunch_spot = _find_nearest_food(lunch_ref, food_spots, "lunch", used_food_ids)
-    if lunch_spot:
-        result.append({**lunch_spot, "type": "meal", "meal": "lunch"})
-        used_food_ids.add(lunch_spot["id"])
-
-    position_ref = lunch_spot if lunch_spot else lunch_ref
+    lunch_ref = morning[-1] if morning else day[0]
+    result.append(_meal_slot(lunch_ref, "lunch"))
+    position_ref = lunch_ref
 
     if afternoon:
         for attr in afternoon:
@@ -449,7 +576,7 @@ def insert_meal_stops(
                 position_ref["latitude"], position_ref["longitude"],
                 nearest["latitude"], nearest["longitude"],
             )
-            if dist <= BACKUP_MAX_KM and _can_add_to_day(day, nearest):
+            if dist <= max_walk_km and _can_add_to_day(day, nearest, max_walk_km):
                 result.append({**nearest, "type": "attraction"})
                 used_backup_ids.add(nearest["id"])
             else:
@@ -470,10 +597,7 @@ def insert_meal_stops(
         if activity_minutes < MIN_DAILY_MINUTES:
             result.append(_free_time(last_real, MIN_DAILY_MINUTES - activity_minutes))
 
-        dinner_spot = _find_nearest_food(last_real, food_spots, "dinner", used_food_ids)
-        if dinner_spot:
-            result.append({**dinner_spot, "type": "meal", "meal": "dinner"})
-            used_food_ids.add(dinner_spot["id"])
+        result.append(_meal_slot(last_real, "dinner"))
 
     return result
 
@@ -484,7 +608,7 @@ def generate_maps_link(stops: list[dict]) -> str:
     waypoints: list[str] = []
     prev = None
     for s in stops:
-        if s.get("type") == "free_time":
+        if s.get("type") == "free_time" or s.get("empty_meal_slot"):
             continue
         name = s.get("name")
         if not name:
@@ -506,6 +630,7 @@ def build_itinerary(
     food_spots: list[dict],
     num_days: int,
     level: int | list[int],
+    max_walk_km: float = MAX_DAILY_WALK_KM,
 ) -> list[dict]:
     filtered = filter_attractions(attractions, level)
     if not filtered:
@@ -518,10 +643,10 @@ def build_itinerary(
     if not filtered:
         return []
 
-    days_raw = _ensure_day_count(split_days(filtered, num_days), num_days)
-    days_limited, overflow = _cap_days_by_limits(days_raw)
-    days_museum_capped, freed = _rebalance_museums(days_limited)
-    days_capped, post_museum_overflow = _cap_days_by_limits(days_museum_capped)
+    days_raw = _ensure_day_count(split_days(filtered, num_days, max_walk_km), num_days)
+    days_limited, overflow = _cap_days_by_limits(days_raw, max_walk_km)
+    days_museum_capped, freed = _rebalance_museums(days_limited, max_walk_km)
+    days_capped, post_museum_overflow = _cap_days_by_limits(days_museum_capped, max_walk_km)
 
     # assigned_ids does NOT include time-overflow or freed museums → backup sweeps them
     assigned_ids = {a["id"] for day in days_capped for a in day}
@@ -533,17 +658,15 @@ def build_itinerary(
     ]
 
     # Fill any day that ended up with too few attractions
-    days_filled, backup = _fill_thin_days(days_capped, backup)
+    days_filled, backup = _fill_thin_days(days_capped, backup, max_walk_km)
     days_ordered = [order_day(day) for day in days_filled]
 
-    used_food_ids: set[int] = set()
-    used_backup_ids: set[int] = set()
-    days_with_meals = [
-        insert_meal_stops(day, food_spots, used_food_ids, backup, used_backup_ids)
+    days_with_stops = [
+        [{**attraction, "type": "attraction"} for attraction in day]
         for day in days_ordered
     ]
 
     return [
         {"day": i, "stops": stops, "maps_link": generate_maps_link(stops)}
-        for i, stops in enumerate(days_with_meals, start=1)
+        for i, stops in enumerate(days_with_stops, start=1)
     ]
