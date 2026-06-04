@@ -1,4 +1,4 @@
-﻿CITY_ID = "barcellona"
+CITY_ID = "barcellona"
 
 ATTRACTIONS = [
  {'city': 'barcellona', 'block_id': 17, 'zone': 'gotic', 'category_level': 1, 'name': 'Catedral de Barcelona', 'name_en': 'Barcelona Cathedral', 'description': "Cattedrale gotica del XIV secolo con chiostro delle oche e cripta di Santa Eulalia, cuore spirituale e architettonico del Barri Gotic.", 'description_en': 'A 14th century Gothic cathedral with a goose cloister and the crypt of Saint Eulalia, the spiritual and architectural heart of the Gothic Quarter.', 'latitude': 41.3837, 'longitude': 2.1762, 'estimated_visit_time': 75, 'tags': ['storia', 'architettura', 'religione'], 'attraction_type': 'chiesa', 'ticket_url': 'https://catedralbcn.org/en/visit/'},

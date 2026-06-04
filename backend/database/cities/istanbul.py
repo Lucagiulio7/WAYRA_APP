@@ -1,4 +1,4 @@
-﻿CITY_ID = "istanbul"
+CITY_ID = "istanbul"
 
 ATTRACTIONS = [
  {'city': 'istanbul', 'block_id': 97, 'zone': 'sultanahmet', 'category_level': 1, 'name': 'Hagia Sophia', 'name_en': 'Hagia Sophia', 'description': 'Monumento chiave di Istanbul, dove si leggono insieme Bisanzio, Impero Ottomano e identità contemporanea.', 'description_en': 'A key monument of Istanbul where Byzantium, the Ottoman Empire and contemporary identity can all be read together.', 'latitude': 41.0086, 'longitude': 28.9802, 'estimated_visit_time': 75, 'tags': ['storia', 'religione', 'bizantino'], 'attraction_type': 'moschea', 'ticket_url': 'https://muze.gen.tr/muze-detay/ayasofya'},
