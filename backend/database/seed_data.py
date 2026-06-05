@@ -21,7 +21,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from database.db import engine, SessionLocal
 from database.models import Base, Attraction, Food
 
@@ -44,11 +44,23 @@ FOODS_BY_CITY = {city.CITY_ID: city.FOODS_BY_CITY for city in ALL_CITIES}
 
 def migrate_db():
     with engine.connect() as conn:
+        dialect = engine.dialect.name
+        inspector = inspect(conn)
+
+        def existing_columns(table_name: str) -> set[str]:
+            if table_name not in inspector.get_table_names():
+                return set()
+            return {col["name"] for col in inspector.get_columns(table_name)}
+
+        def column_def(sqlite_def: str, postgres_def: str | None = None) -> str:
+            if dialect == "postgresql":
+                return postgres_def or sqlite_def
+            return sqlite_def
+
         # Migrazione tabella attractions
-        result = conn.execute(text("PRAGMA table_info(attractions)"))
-        existing_attr = {row[1] for row in result}
+        existing_attr = existing_columns("attractions")
         for col_name, col_def in [
-            ("is_food_spot",    "BOOLEAN DEFAULT 0 NOT NULL"),
+            ("is_food_spot",    column_def("BOOLEAN DEFAULT 0 NOT NULL", "BOOLEAN DEFAULT false NOT NULL")),
             ("food_type",       "TEXT"),
             ("meal_type",       "TEXT"),
             ("rating",          "REAL"),
@@ -64,8 +76,7 @@ def migrate_db():
                 print(f"  [attractions] Colonna aggiunta: {col_name}")
 
         # Migrazione tabella foods
-        result = conn.execute(text("PRAGMA table_info(foods)"))
-        existing_food = {row[1] for row in result}
+        existing_food = existing_columns("foods")
         for col_name, col_def in [
             ("name_en",        "TEXT"),
             ("description_en", "TEXT"),
