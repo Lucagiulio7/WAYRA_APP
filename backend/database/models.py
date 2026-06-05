@@ -28,7 +28,11 @@ class Attraction(Base):
     rating = Column(Float)
 
     def tags_list(self) -> list:
-        return json.loads(self.tags) if self.tags else []
+        if not self.tags:
+            return []
+        if isinstance(self.tags, list):
+            return self.tags
+        return json.loads(self.tags)
 
     def to_dict(self) -> dict:
         return {
@@ -67,10 +71,18 @@ class Food(Base):
     city = Column(String(100), default="roma")
 
     def ingredients_list(self) -> list:
-        return json.loads(self.ingredients) if self.ingredients else []
+        if not self.ingredients:
+            return []
+        if isinstance(self.ingredients, list):
+            return self.ingredients
+        return json.loads(self.ingredients)
 
     def ingredients_en_list(self) -> list:
-        return json.loads(self.ingredients_en) if self.ingredients_en else []
+        if not self.ingredients_en:
+            return []
+        if isinstance(self.ingredients_en, list):
+            return self.ingredients_en
+        return json.loads(self.ingredients_en)
 
     def to_dict(self) -> dict:
         return {
