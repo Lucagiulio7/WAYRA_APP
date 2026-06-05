@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import os
 from dotenv import load_dotenv
 
@@ -20,6 +22,8 @@ from database.seed_data import seed, migrate_db
 from routers.itinerary import router as itinerary_router
 from routers.attractions import router as attractions_router
 
+logger = logging.getLogger("wayra")
+
 # ── Sentry ────────────────────────────────────────────────────────────────────
 _sentry_dsn = os.getenv("SENTRY_DSN", "")
 if _sentry_dsn:
@@ -34,9 +38,12 @@ if _sentry_dsn:
     )
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
-Base.metadata.create_all(bind=engine)
-migrate_db()
-seed()
+def bootstrap_database() -> None:
+    logger.info("Starting database bootstrap")
+    Base.metadata.create_all(bind=engine)
+    migrate_db()
+    seed()
+    logger.info("Database bootstrap completed")
 
 # ── Rate limiter ──────────────────────────────────────────────────────────────
 limiter = Limiter(key_func=proxy_aware_remote_address, default_limits=["200/hour"])
@@ -69,6 +76,21 @@ app.add_middleware(
 
 app.include_router(itinerary_router)
 app.include_router(attractions_router)
+
+
+@app.on_event("startup")
+async def startup_bootstrap_database():
+    if os.getenv("BOOTSTRAP_DATABASE", "true").lower() in {"0", "false", "no"}:
+        logger.info("Database bootstrap disabled")
+        return
+
+    async def run_bootstrap():
+        try:
+            await asyncio.to_thread(bootstrap_database)
+        except Exception:
+            logger.exception("Database bootstrap failed")
+
+    asyncio.create_task(run_bootstrap())
 
 
 @app.get("/")
