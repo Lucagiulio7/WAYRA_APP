@@ -132,16 +132,78 @@ FOOD_SPOTS = [
  {'city': 'lisbona', 'zone': 'parque_nacoes', 'category_level': 3, 'name': 'Sandwich do Tago', 'name_en': 'Tagus Sandwich Stand', 'description': 'Spuntino salato veloce da mangiare sul lungofiume.', 'description_en': 'A quick savoury snack to eat on the riverside.', 'latitude': 38.7650, 'longitude': -9.0944, 'estimated_visit_time': 10, 'tags': ['snack', 'street food', 'tago'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Bacalhau a Bras', 'name_en': 'Bacalhau a Bras', 'description': 'Baccalà sfilacciato con patate sottili, uova, olive e prezzemolo, uno dei piatti più riconoscibili di Lisbona.', 'description_en': "Shredded cod with thin potatoes, eggs, olives and parsley, one of Lisbon's most recognisable dishes.", 'ingredients': ['baccalà', 'patate', 'uova', 'olive nere', 'prezzemolo'], 'ingredients_en': ['salt cod', 'thin-cut potatoes', 'eggs', 'black olives', 'parsley'], 'places': [{'name': 'Tasca da Severa'}, {'name': 'Santo Antonio Kitchen'}, {'name': 'Baixa Kitchen'}]},
- {'name': 'Pastel de Nata', 'name_en': 'Pastel de Nata', 'description': "Dolce simbolo del Portogallo con crema all'uovo e sfoglia croccante, particolarmente identitario a Lisbona e Belem.", 'description_en': "Portugal's symbolic sweet with egg custard and crisp pastry, especially distinctive in Lisbon and Belem.", 'ingredients': ['pasta sfoglia', 'uova', 'latte', 'zucchero', 'cannella'], 'ingredients_en': ['puff pastry', 'eggs', 'milk', 'sugar', 'cinnamon'], 'places': [{'name': 'Pasteis de Belem'}, {'name': 'Manteigaria Chiado'}, {'name': 'Pastel de Nata LX'}]},
- {'name': 'Cataplana de Marisco', 'name_en': 'Seafood Cataplana', 'description': 'Piatto di frutti di mare cotto nella tradizionale pentola chiusa che concentra aromi e sughi.', 'description_en': 'A seafood dish cooked in the traditional closed pan that concentrates aromas and juices.', 'ingredients': ['vongole', 'gamberi', 'cozze', 'pomodoro', 'coriandolo'], 'ingredients_en': ['clams', 'prawns', 'mussels', 'tomato', 'coriander'], 'places': [{'name': 'Tagus Table Belem'}, {'name': 'Riverside Dinner House'}, {'name': 'Waterfront Kitchen'}]},
- {'name': 'Caldo Verde', 'name_en': 'Caldo Verde', 'description': 'Zuppa calda di patate e cavolo, semplice ma molto radicata nella tradizione portoghese.', 'description_en': 'A warm soup of potatoes and greens, simple yet deeply rooted in Portuguese tradition.', 'ingredients': ['patate', 'cavolo', 'cipolla', 'olio', 'chouriço'], 'ingredients_en': ['potatoes', 'kale', 'onion', 'olive oil', 'chouriço'], 'places': [{'name': 'Santo Antonio Kitchen'}, {'name': 'Rossio Stube'}, {'name': 'Anjos Kitchen'}]},
- {'name': 'Açorda de Mariscos', 'name_en': 'Seafood Bread Stew', 'description': 'Piatto morbido e saporito a base di pane, brodo e frutti di mare, molto legato alla cucina popolare.', 'description_en': 'A soft and savoury dish based on bread, broth and seafood, closely linked to popular cuisine.', 'ingredients': ['pane', 'gamberi', 'vongole', 'aglio', 'coriandolo'], 'ingredients_en': ['bread', 'prawns', 'clams', 'garlic', 'coriander'], 'places': [{'name': 'O Navegador'}, {'name': 'Tagus Table Belem'}, {'name': 'Expo Kitchen'}]},
- {'name': 'Arroz de Pato', 'name_en': 'Duck Rice', 'description': 'Riso al forno con anatra e chouriço, molto presente nelle trattorie portoghesi.', 'description_en': 'Oven-baked rice with duck and chouriço, often found in Portuguese taverns.', 'ingredients': ['anatra', 'riso', 'chouriço', 'cipolla', 'vino bianco'], 'ingredients_en': ['duck', 'rice', 'chouriço', 'onion', 'white wine'], 'places': [{'name': 'Bairro Alto Table'}, {'name': 'Pombalina Dining Room'}, {'name': 'Intendente Kitchen'}]},
- {'name': 'Ginjinha', 'name_en': 'Ginjinha', 'description': 'Liquore di amarena servito in piccoli bicchieri, tipicissimo del centro di Lisbona.', 'description_en': 'A sour cherry liqueur served in tiny cups, highly typical of central Lisbon.', 'ingredients': ['amarene', 'alcool', 'zucchero', 'cannella'], 'ingredients_en': ['sour cherries', 'alcohol', 'sugar', 'cinnamon'], 'places': [{'name': 'Ginjinha Stand Rossio'}, {'name': 'Manteigaria Chiado'}, {'name': 'Pastel Corner Alfama'}]},
- {'name': 'Bifana', 'name_en': 'Bifana', 'description': 'Panino con carne di maiale marinata, piccolo classico popolare da mangiare anche in piedi.', 'description_en': 'A sandwich of marinated pork, a small popular classic often eaten standing up.', 'ingredients': ['pane', 'maiale', 'aglio', 'paprika', 'vino bianco'], 'ingredients_en': ['bread', 'pork', 'garlic', 'paprika', 'white wine'], 'places': [{'name': 'Bifana da Moura'}, {'name': 'Bifana Bairro Alto'}, {'name': 'Street Bifana LX'}]},
-]
+FOODS_BY_CITY = [{'name': 'Bacalhau à Brás',
+  'name_en': 'Bacalhau à Brás',
+  'description': 'Uno dei piatti più lisboeti: baccalà dissalato e sfilacciato, patate tagliate sottilissime, cipolla, uova cremose, olive nere e prezzemolo. È semplice solo in '
+                 "apparenza: la riuscita dipende dall'equilibrio tra sapidità del bacalhau, morbidezza dell'uovo e croccantezza leggera delle patate.",
+  'description_en': "One of Lisbon's most characteristic dishes: desalted shredded cod, very thin potatoes, onion, creamy eggs, black olives and parsley. It is only apparently "
+                    'simple: its success depends on the balance between the saltiness of the bacalhau, the softness of the egg and the light crispness of the potatoes.',
+  'ingredients': ['baccalà', 'patate fiammifero', 'uova', 'cipolla', 'olive nere', 'prezzemolo'],
+  'ingredients_en': ['salt cod', 'matchstick potatoes', 'eggs', 'onion', 'black olives', 'parsley'],
+  'places': [{'name': 'O Vicentinho'}, {'name': 'Laurentina o Rei do Bacalhau'}, {'name': 'Miguel Castro e Silva'}]},
+ {'name': 'Pastel de Nata',
+  'name_en': 'Pastel de Nata',
+  'description': "Il dolce simbolo di Lisbona: una tartelletta di sfoglia friabile e caramellata, riempita con crema all'uovo morbida e leggermente bruciata in superficie. A "
+                 'Belém nasce la versione più storica, ma in città è un rito quotidiano da mangiare tiepido con cannella o zucchero a velo.',
+  'description_en': "Lisbon's symbolic sweet: a crisp, caramelised puff pastry tart filled with soft egg custard, lightly scorched on top. Belém is home to the most historic "
+                    'version, but across the city it is an everyday ritual, best eaten warm with cinnamon or icing sugar.',
+  'ingredients': ['pasta sfoglia', 'tuorli', 'latte', 'zucchero', 'cannella'],
+  'ingredients_en': ['puff pastry', 'egg yolks', 'milk', 'sugar', 'cinnamon'],
+  'places': [{'name': 'Pastéis de Belém'}, {'name': 'Manteigaria Chiado'}, {'name': 'Confeitaria Nacional'}]},
+ {'name': 'Cataplana de Marisco',
+  'name_en': 'Seafood Cataplana',
+  'description': 'Stufato di frutti di mare cotto nella cataplana, la pentola portoghese chiusa a conchiglia che trattiene vapore, profumi e succhi. Vongole, gamberi, cozze, '
+                 'pomodoro, cipolla e coriandolo creano un piatto molto aromatico, più legato al mare portoghese che al solo centro urbano.',
+  'description_en': 'A seafood stew cooked in the cataplana, the Portuguese clam-shaped sealed pan that traps steam, aromas and juices. Clams, prawns, mussels, tomato, onion and '
+                    "coriander create a very aromatic dish, tied to Portugal's maritime cooking more than to the city centre alone.",
+  'ingredients': ['vongole', 'gamberi', 'cozze', 'pomodoro', 'cipolla', 'coriandolo'],
+  'ingredients_en': ['clams', 'prawns', 'mussels', 'tomato', 'onion', 'coriander'],
+  'places': [{'name': 'Cervejaria Ramiro'}, {'name': 'Sea Me Peixaria Moderna'}, {'name': 'Solar dos Presuntos'}]},
+ {'name': 'Caldo Verde',
+  'name_en': 'Caldo Verde',
+  'description': "Zuppa portoghese essenziale e confortante, preparata con patate, cavolo tagliato finissimo, olio d'oliva e spesso una fetta di chouriço. È un piatto povero ma "
+                 'molto identitario, servito nelle tascas e nelle case come apertura calda e rassicurante.',
+  'description_en': 'An essential and comforting Portuguese soup made with potatoes, very finely sliced greens, olive oil and often a slice of chouriço. It is a humble but deeply '
+                    'identity-forming dish, served in tascas and homes as a warm, reassuring starter.',
+  'ingredients': ['patate', 'cavolo', 'cipolla', 'olio extravergine', 'chouriço'],
+  'ingredients_en': ['potatoes', 'kale', 'onion', 'extra virgin olive oil', 'chouriço'],
+  'places': [{'name': 'Zé dos Cornos'}, {'name': 'A Provinciana'}, {'name': 'O Trigueirinho'}]},
+ {'name': 'Açorda de Mariscos',
+  'name_en': 'Seafood Bread Stew',
+  'description': 'Piatto morbido e profondo a base di pane raffermo, aglio, coriandolo, brodo e frutti di mare. Il pane assorbe il sapore di gamberi e vongole fino a diventare '
+                 'una crema rustica, spesso completata con tuorlo o uovo, molto rappresentativa della cucina popolare portoghese.',
+  'description_en': 'A soft, deep dish based on stale bread, garlic, coriander, broth and seafood. The bread absorbs the flavour of prawns and clams until it becomes a rustic '
+                    'cream, often finished with egg yolk or egg, and is highly representative of Portuguese popular cooking.',
+  'ingredients': ['pane', 'gamberi', 'vongole', 'aglio', 'coriandolo', 'uovo'],
+  'ingredients_en': ['bread', 'prawns', 'clams', 'garlic', 'coriander', 'egg'],
+  'places': [{'name': 'Solar dos Presuntos'}, {'name': 'Cervejaria Trindade'}, {'name': 'Cervejaria Ramiro'}]},
+ {'name': 'Arroz de Pato',
+  'name_en': 'Duck Rice',
+  'description': 'Riso al forno con anatra sfilacciata, brodo ricco e chouriço in superficie, fino a ottenere una crosta dorata e saporita. È un piatto da trattoria, domestico e '
+                 "sostanzioso, dove la parte più importante è l'assorbimento del brodo nel riso prima della gratinatura.",
+  'description_en': 'Oven-baked rice with shredded duck, rich broth and chouriço on top, cooked until it forms a golden, savoury crust. It is a hearty tavern and home-style dish, '
+                    'where the crucial step is the rice absorbing the broth before the final baking.',
+  'ingredients': ['anatra', 'riso', 'chouriço', 'cipolla', 'brodo', 'vino bianco'],
+  'ingredients_en': ['duck', 'rice', 'chouriço', 'onion', 'broth', 'white wine'],
+  'places': [{'name': 'Zé da Mouraria'}, {'name': 'Tasca da Esquina'}, {'name': 'O Velho Eurico'}]},
+ {'name': 'Ginjinha',
+  'name_en': 'Ginjinha',
+  'description': 'Liquore dolce di amarene servito in piccoli bicchieri, spesso bevuto in piedi al bancone o davanti a minuscoli locali del centro. È più un rito urbano che un '
+                 'semplice drink: intenso, zuccherino, con o senza ciliegia sul fondo del bicchiere.',
+  'description_en': 'A sweet sour-cherry liqueur served in tiny cups, often drunk standing at the counter or outside small central bars. It is more an urban ritual than a simple '
+                    'drink: intense, sugary, with or without a cherry at the bottom of the glass.',
+  'ingredients': ['amarene', 'alcool', 'zucchero', 'cannella'],
+  'ingredients_en': ['sour cherries', 'alcohol', 'sugar', 'cinnamon'],
+  'places': [{'name': 'A Ginjinha'}, {'name': 'Ginjinha Sem Rival'}, {'name': 'Ginjinha do Carmo'}]},
+ {'name': 'Bifana',
+  'name_en': 'Bifana',
+  'description': 'Panino popolare con fettine di maiale marinate e cotte in salsa di aglio, vino, spezie e paprika. È piccolo, saporito e diretto: uno street food da banco, '
+                 'spesso accompagnato da senape o piccante, perfetto per una pausa veloce senza interrompere il giro.',
+  'description_en': 'A popular sandwich with thin slices of pork marinated and cooked in a sauce of garlic, wine, spices and paprika. It is small, savoury and direct: '
+                    'counter-style street food, often paired with mustard or chilli, perfect for a quick break without interrupting the walk.',
+  'ingredients': ['pane', 'maiale', 'aglio', 'paprika', 'vino bianco', 'spezie'],
+  'ingredients_en': ['bread', 'pork', 'garlic', 'paprika', 'white wine', 'spices'],
+  'places': [{'name': 'As Bifanas do Afonso'}, {'name': 'O Trevo'}, {'name': 'Beira Gare'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🧭', 'title': 'Lisbona è stata il centro di un impero oceanico', 'title_en': 'Lisbon was the centre of an oceanic empire', 'body': 'Per secoli la città ha guardato all\'Atlantico come a un orizzonte politico, commerciale e simbolico, diventando uno snodo globale.', 'body_en': 'For centuries the city looked to the Atlantic as a political, commercial and symbolic horizon, becoming a global hub.'},

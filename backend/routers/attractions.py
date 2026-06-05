@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database.db import get_db
 from database.models import Attraction, Food
+from services.must_see import annotate_must_see_many
 
 router = APIRouter(prefix="/api", tags=["data"])
 
@@ -16,7 +17,7 @@ def list_attractions(
     q = db.query(Attraction).filter(Attraction.city == city.lower(), Attraction.is_food_spot == False)  # noqa: E712
     if level is not None:
         q = q.filter(Attraction.category_level == level)
-    return {"data": [a.to_dict() for a in q.all()]}
+    return {"data": annotate_must_see_many([a.to_dict() for a in q.all()])}
 
 
 @router.get("/foods")

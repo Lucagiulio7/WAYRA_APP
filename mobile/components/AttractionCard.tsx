@@ -57,11 +57,18 @@ export function AttractionCard({ attraction, index }: Props) {
       activeOpacity={0.85}
     >
       <View style={styles.header}>
-        <View style={[styles.indexBadge, { backgroundColor: color + "33", borderColor: color }]}>
-          <Text style={[styles.indexText, { color }]}>{index}</Text>
+        <View style={styles.indexWrap}>
+          {attraction.must_see && (
+            <Ionicons name="star" size={12} color="#f5c84b" style={styles.mustSeeIndexIcon} />
+          )}
+          <View style={[styles.indexBadge, { backgroundColor: color + "33", borderColor: color }]}>
+            <Text style={[styles.indexText, { color }]}>{index}</Text>
+          </View>
         </View>
         <View style={styles.titleBlock}>
-          <Text style={[styles.name, { color: colors.text }]}>{displayName}</Text>
+          <View style={styles.nameRow}>
+            <Text style={[styles.name, { color: colors.text }]}>{displayName}</Text>
+          </View>
           <View style={styles.meta}>
             <Ionicons name="time-outline" size={12} color={colors.textSub} />
             <Text style={[styles.metaText, { color: colors.textSub }]}>{attraction.estimated_visit_time} min</Text>
@@ -115,6 +122,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
+  indexWrap: {
+    width: 32,
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  mustSeeIndexIcon: {
+    marginBottom: 2,
+  },
   indexBadge: {
     width: 32,
     height: 32,
@@ -130,14 +145,21 @@ const styles = StyleSheet.create({
   titleBlock: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 5,
+    marginBottom: 3,
+  },
   name: {
     fontWeight: "600",
     fontSize: 15,
-    marginBottom: 3,
+    flex: 1,
   },
   meta: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: 4,
   },
   metaText: {

@@ -12,39 +12,70 @@ import { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 
-// ── Emoji dinamica per piatto ─────────────────────────────────────────────────
+const emoji = (...points: number[]) => String.fromCodePoint(...points);
 
-const FOOD_EMOJI_MAP: Array<[RegExp, string]> = [
-  [/pizza/i,                                                           "🍕"],
-  [/gelato|ice.?cream/i,                                               "🍦"],
-  [/pasta|spaghetti|tagliat|fettuc|penne|rigatoni|lasagna|gnocchi|carbonara|amatriciana|cacio/i, "🍝"],
-  [/risotto/i,                                                         "🍚"],
-  [/paella/i,                                                          "🥘"],
-  [/tagine|tajin|couscous/i,                                           "🫕"],
-  [/moussaka|musaka/i,                                                 "🥘"],
-  [/gyro|souvlaki|kebab|shawarma|doner/i,                              "🥙"],
-  [/schnitzel|wurst|bratwurst|sausage/i,                               "🥩"],
-  [/fish|pesce|baccalà|bacalhau|cod|salmon|sardine|trout/i,            "🐟"],
-  [/seafood|gamberi|calamari|prawn|shrimp/i,                           "🦐"],
-  [/meat|carne|steak|bistecca/i,                                       "🥩"],
-  [/burger|sandwich|panino/i,                                          "🥪"],
-  [/salad|insalata/i,                                                  "🥗"],
-  [/cheese|formaggio|raclette|fondue/i,                                "🧀"],
-  [/soup|zuppa|minestra|stew|gazpacho|borsch/i,                        "🍲"],
-  [/curry|tikka|masala/i,                                              "🍛"],
-  [/baklava|pastry|strudel|pasteis|tart|dolce|torta/i,                 "🥐"],
-  [/chocolate|cioccolat/i,                                             "🍫"],
-  [/coffee|caffè|espresso/i,                                           "☕"],
-  [/beer|birra|bier/i,                                                 "🍺"],
-  [/wine|vino/i,                                                       "🍷"],
+const FOOD_EMOJI_RULES: Array<{ pattern: RegExp; icon: string }> = [
+  { pattern: /croissant/i, icon: emoji(0x1F950) },
+  { pattern: /tarte tatin|apple|mele|mela/i, icon: emoji(0x1F34E) },
+  { pattern: /croque monsieur|croque-monsieur|toast/i, icon: emoji(0x1F96A) },
+  { pattern: /macaron/i, icon: emoji(0x1F36A) },
+  { pattern: /escargot|snail|lumache|lumaca/i, icon: emoji(0x1F40C) },
+  { pattern: /pastel de nata|pasteis de nata|custard tart/i, icon: emoji(0x1F967) },
+  { pattern: /cataplana|marisco|mariscos/i, icon: emoji(0x1F990) },
+  { pattern: /acorda|bread stew/i, icon: emoji(0x1F963) },
+  { pattern: /ginjinha|sour cherry liqueur/i, icon: emoji(0x1F377) },
+  { pattern: /bifana/i, icon: emoji(0x1F96A) },
+  { pattern: /pa amb tomaquet|bread with tomato/i, icon: emoji(0x1F345) },
+  { pattern: /fideua/i, icon: emoji(0x1F958) },
+  { pattern: /croquetas|croquettes/i, icon: emoji(0x1F9C6) },
+  { pattern: /bombas de la barceloneta|barceloneta bombas/i, icon: emoji(0x1F954) },
+  { pattern: /crema catalana|catalan cream/i, icon: emoji(0x1F36E) },
+  { pattern: /escalivada/i, icon: emoji(0x1F957) },
+  { pattern: /patatas bravas/i, icon: emoji(0x1F954) },
+  { pattern: /coca de recapte/i, icon: emoji(0x1FAD3) },
+  { pattern: /cocido madrileno|cocido madrileño/i, icon: emoji(0x1F372) },
+  { pattern: /bocadillo de calamares|calamari sandwich/i, icon: emoji(0x1F991) },
+  { pattern: /tortilla espanola|tortilla española|spanish omelette/i, icon: emoji(0x1F373) },
+  { pattern: /callos|tripe/i, icon: emoji(0x1F372) },
+  { pattern: /churros/i, icon: emoji(0x1F369) },
+  { pattern: /croquetas de jamon|croquetas de jamón|ham croquettes/i, icon: emoji(0x1F9C6) },
+  { pattern: /oreja|pig ear/i, icon: emoji(0x1F969) },
+  { pattern: /suppli|suppli al telefono|arancini|arancino/i, icon: emoji(0x1F359) },
+  { pattern: /maritozzo|brioche/i, icon: emoji(0x1F950) },
+  { pattern: /carciofo|carciofi|artichoke|artichokes/i, icon: emoji(0x1F957) },
+  { pattern: /tarallo|pretzel/i, icon: emoji(0x1F968) },
+  { pattern: /sfogliatella/i, icon: emoji(0x1F950) },
+  { pattern: /baba|babà/i, icon: emoji(0x1F370) },
+  { pattern: /cuoppo|fritto misto|fried cone/i, icon: emoji(0x1F364) },
+  { pattern: /pizza|pinsa|pizzetta/i, icon: emoji(0x1F355) },
+  { pattern: /crepe|crepes|pancake|poffertjes|palacsinta/i, icon: emoji(0x1F95E) },
+  { pattern: /carbonara|amatriciana|cacio|pepe|gricia|ragu|genovese|pasta|spaghetti|bucatini|rigatoni|tagliatelle|fettucc|lasagn|gnocchi|pierogi|spaetzle/i, icon: emoji(0x1F35D) },
+  { pattern: /risotto|paella|rice|riso|arancini|suppli|rijsttafel/i, icon: emoji(0x1F35A) },
+  { pattern: /fish|pesce|baccal|bacalhau|cod|salmon|sardine|sarde|aringa|herring|trout|trota|seafood|gamber|calamari|prawn|shrimp|aalsuppe|eel|plaice|scholle/i, icon: emoji(0x1F41F) },
+  { pattern: /soup|zuppa|brodo|goulash|erwtensoep|aalsuppe|caldo/i, icon: emoji(0x1F963) },
+  { pattern: /steak|beef|bue|oxtail|coda|veal|vitello|pork|maiale|speck|salsiccia|sausage|kebab|lamb|agnello|abbacchio|schnitzel|kassler|meat|carne|cozido/i, icon: emoji(0x1F969) },
+  { pattern: /chicken|pollo|duck|anatra|goose|oca/i, icon: emoji(0x1F357) },
+  { pattern: /cheese|formaggio|pecorino|kaas|reblochon|raclette|fondue|feta|bryndza/i, icon: emoji(0x1F9C0) },
+  { pattern: /salad|insalata|piyaz|verdura|vegetable|artichoke|carciof|kale|grunkohl|gruenkohl|beans|bohnen/i, icon: emoji(0x1F957) },
+  { pattern: /bread|pane|focaccia|brotchen|sandwich|panino|baguette/i, icon: emoji(0x1F956) },
+  { pattern: /brioche|maritozzo|franzbrotchen|pastry|sfoglia|pasteis|pastel|strudel|baklava|waffel|waffle|stroopwafel|tart|torta|cake|dessert|dolce|chocolate|cioccolat/i, icon: emoji(0x1F370) },
+  { pattern: /gelato|ice.?cream|sorbet/i, icon: emoji(0x1F368) },
+  { pattern: /coffee|caffe|espresso/i, icon: emoji(0x2615) },
+  { pattern: /beer|birra|bier/i, icon: emoji(0x1F37A) },
+  { pattern: /wine|vino|vin |genepi|liqueur|porto|port wine/i, icon: emoji(0x1F377) },
+  { pattern: /olive|olio/i, icon: emoji(0x1FAD2) },
+  { pattern: /orange|arancia|nata|fruit|frutta|berry|grutze/i, icon: emoji(0x1F34A) },
+  { pattern: /potato|patata|kartoffel|stamppot|gratin/i, icon: emoji(0x1F954) },
+  { pattern: /fried|fritto|fritta|fritt|bitterballen|croquette|crocchett/i, icon: emoji(0x1F9C6) },
 ];
 
-function getFoodEmoji(name: string, description?: string | null): string {
-  const text = `${name} ${description ?? ""}`;
-  for (const [regex, emoji] of FOOD_EMOJI_MAP) {
-    if (regex.test(text)) return emoji;
-  }
-  return "🍴";
+function normalizeFoodText(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function getFoodEmoji(name: string, description?: string | null, ingredients?: string[]): string {
+  const text = normalizeFoodText(`${name} ${description ?? ""} ${(ingredients ?? []).join(" ")}`);
+  return FOOD_EMOJI_RULES.find((rule) => rule.pattern.test(text))?.icon ?? emoji(0x1F37D, 0xFE0F);
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -66,7 +97,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
   const displayIngredients = (lang === "en" && food.ingredients_en?.length) ? food.ingredients_en : food.ingredients;
 
   const places = food.places ?? [];
-  const emoji  = getFoodEmoji(displayName, displayDesc);
+  const foodIcon = getFoodEmoji(displayName, displayDesc, displayIngredients);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -81,7 +112,9 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
       activeOpacity={0.85}
     >
       <View style={styles.header}>
-        <Text style={styles.emoji}>{emoji}</Text>
+        <View style={[styles.iconBox, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "44" }]}>
+          <Text style={styles.foodEmoji}>{foodIcon}</Text>
+        </View>
         <Text style={[styles.name, { color: colors.text }]}>{displayName}</Text>
         <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.textMuted} />
       </View>
@@ -105,7 +138,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
           {places.length > 0 && (
             <View style={[styles.placesBlock, { borderTopColor: colors.border }]}>
               <Text style={[styles.placesTitle, { color: colors.textMuted }]}>
-                📍 {t.whereToEat}
+                {t.whereToEat}
               </Text>
               {places.map((place, i) => (
                 <TouchableOpacity
@@ -115,7 +148,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
                   activeOpacity={0.75}
                 >
                   <Ionicons name="restaurant-outline" size={14} color={colors.accentGold} style={styles.placeIcon} />
-                  <Text style={[styles.placeName, { color: colors.text }]}>{place.name}</Text>
+                  <Text style={[styles.placeName, { color: colors.text }]}>{lang === "en" && place.name_en ? place.name_en : place.name}</Text>
                   <Ionicons name="open-outline" size={13} color={colors.textMuted} />
                 </TouchableOpacity>
               ))}
@@ -139,8 +172,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  emoji: {
-    fontSize: 22,
+  iconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  foodEmoji: {
+    fontSize: 17,
+    lineHeight: 21,
   },
   name: {
     flex: 1,

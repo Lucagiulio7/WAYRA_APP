@@ -95,11 +95,30 @@ export async function fetchCityExtras(city: string): Promise<CityExtrasData> {
 // ─── Quartieri ────────────────────────────────────────────────────────────────
 
 export async function fetchNeighborhoods(city: string): Promise<Neighborhood[]> {
-  const url =
+  const baseUrl =
     `${SUPABASE_URL}/rest/v1/neighborhoods` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&select=id,name,name_en,description,description_en,vibe_tags,booking_url` +
+    `?city=eq.${encodeURIComponent(city)}`;
+  const withGeojsonUrl =
+    `${baseUrl}` +
+    `&select=id,name,name_en,description,description_en,vibe_tags,geojson` +
     `&order=sort_order.asc`;
-  const data = await safeFetch<Neighborhood[]>(url);
-  return Array.isArray(data) ? data : [];
+  const legacyUrl =
+    `${baseUrl}` +
+    `&select=id,name,name_en,description,description_en,vibe_tags` +
+    `&order=sort_order.asc`;
+
+  let data: Neighborhood[];
+  try {
+    data = await safeFetch<Neighborhood[]>(withGeojsonUrl);
+  } catch {
+    data = await safeFetch<Neighborhood[]>(legacyUrl);
+  }
+
+  const seen = new Set<string>();
+  return (Array.isArray(data) ? data : []).filter((item) => {
+    const key = `${item.name}`.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

@@ -19,6 +19,7 @@ import { useFonts, BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import CountryFlag from "react-native-country-flag";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as Location from "expo-location";
@@ -31,24 +32,27 @@ import { useCityInfo } from "@/hooks/useCityInfo";
 import { DayCard } from "@/components/DayCard";
 import { FadeInUp, staggerDelay, PressableCard } from "@/components/ui";
 import { DayMap } from "@/components/DayMap";
+import { NeighborhoodMap } from "@/components/NeighborhoodMap";
 import { FoodCard } from "@/components/FoodCard";
 import { PracticalInfoTab } from "@/components/PracticalInfoTab";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSavedItineraries } from "@/hooks/useSavedItineraries";
 import { useTheme } from "@/contexts/ThemeContext";
+import { cityLabel } from "@/utils/cityLabels";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// LayoutAnimation è disabilitato di default su Android — abilitiamolo per la tab bar
+// LayoutAnimation ÃƒÂ¨ disabilitato di default su Android Ã¢â‚¬â€ abilitiamolo per la tab bar
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 type Tab = "itinerary" | "neighborhoods" | "food" | "culture" | "practical";
-type GuideStep = { icon: string; title: string; body: string; target: string };
+type GuideStep = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; target: string };
 type GuideRect = { x: number; y: number; width: number; height: number };
 type MealType = "meal";
+type MapMode = "itinerary" | "food";
 type FoodOrigin = { latitude: number; longitude: number; name?: string };
-type FoodSelection = { dayIndex: number; mealType: MealType; origin: FoodOrigin };
+type FoodSelection = { dayIndex: number; mealType: MealType; origin?: FoodOrigin };
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ITINERARY_GUIDE_KEY = "wayra_itinerary_guide_v1";
@@ -56,37 +60,37 @@ const DAY_ACCENTS = ["#e8c06a", "#7eb8f7", "#a78bfa", "#6ee7b7", "#f97316"];
 
 const ITINERARY_GUIDE_IT: GuideStep[] = [
   {
-    icon: "🧭",
+    icon: "compass-outline",
     target: "header",
     title: "Barra superiore",
-    body: "Qui trovi città, durata e tipo di viaggio. La freccia torna indietro, il segnalibro salva l'itinerario, il punto interrogativo riapre questa guida e la bandiera cambia lingua.",
+    body: "Qui trovi citta, durata e tipo di viaggio. La freccia torna indietro, il segnalibro salva l'itinerario, il punto interrogativo riapre questa guida e la bandiera cambia lingua.",
   },
   {
-    icon: "📌",
+    icon: "list-outline",
     target: "tabs",
     title: "Sezioni",
     body: "Le tab dividono l'itinerario: giornate, quartieri, cibo, cultura e informazioni pratiche. Toccale per cambiare contenuto senza uscire dalla schermata.",
   },
   {
-    icon: "🗺️",
+    icon: "map-outline",
     target: "content",
     title: "Giornate",
     body: "Nella tab Itinerario trovi le schede giorno. Apri un giorno per vedere le tappe, i comandi di modifica, il percorso e i link a Google Maps.",
   },
   {
-    icon: "🏘️",
+    icon: "business-outline",
     target: "content",
     title: "Quartieri",
-    body: "La sezione Quartieri aiuta a scegliere dove dormire o dove passare più tempo, con vibe, distanze e link utili.",
+    body: "La sezione Quartieri aiuta a scegliere dove dormire o dove passare piu tempo, con atmosfera, distanze e link utili.",
   },
   {
-    icon: "🍽️",
+    icon: "restaurant-outline",
     target: "content",
     title: "Cibo e cultura",
-    body: "Cibo raccoglie i consigli gastronomici. Cultura mostra curiosità e note locali per capire meglio la città durante il viaggio.",
+    body: "Cibo raccoglie i consigli gastronomici. Cultura mostra curiosita e note locali per capire meglio la citta durante il viaggio.",
   },
   {
-    icon: "ℹ️",
+    icon: "information-circle-outline",
     target: "content",
     title: "Info pratiche",
     body: "Info pratiche contiene dati utili come trasporti, sicurezza, app consigliate e link esterni quando disponibili.",
@@ -95,78 +99,98 @@ const ITINERARY_GUIDE_IT: GuideStep[] = [
 
 const ITINERARY_GUIDE_EN: GuideStep[] = [
   {
-    icon: "🧭",
+    icon: "compass-outline",
     target: "header",
     title: "Top bar",
     body: "Here you find city, duration and travel type. The arrow goes back, the bookmark saves the itinerary, the question mark reopens this guide and the flag changes language.",
   },
   {
-    icon: "📌",
+    icon: "list-outline",
     target: "tabs",
     title: "Sections",
     body: "Tabs split the itinerary into days, neighborhoods, food, culture and practical info. Tap them to switch content without leaving the screen.",
   },
   {
-    icon: "🗺️",
+    icon: "map-outline",
     target: "content",
     title: "Days",
     body: "In the Itinerary tab you find day cards. Open a day to see stops, edit controls, the route and Google Maps links.",
   },
   {
-    icon: "🏘️",
+    icon: "business-outline",
     target: "content",
     title: "Neighborhoods",
     body: "Neighborhoods helps you choose where to stay or spend more time, with vibes, distances and useful links.",
   },
   {
-    icon: "🍽️",
+    icon: "restaurant-outline",
     target: "content",
     title: "Food and culture",
     body: "Food collects dining recommendations. Culture shows local notes and facts to understand the city better while travelling.",
   },
   {
-    icon: "ℹ️",
+    icon: "information-circle-outline",
     target: "content",
     title: "Practical info",
     body: "Practical info contains useful data such as transport, safety, recommended apps and external links when available.",
   },
 ];
 
-// ── Mappa vibe_tag → emoji + colore ──────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Mappa vibe_tag Ã¢â€ â€™ emoji + colore Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const VIBE_MAP: Record<string, { emoji: string; color: string; labelIt: string; labelEn: string }> = {
-  "centro":         { emoji: "🎯", color: "#e8c06a", labelIt: "Centrale",        labelEn: "Central" },
-  "centrale":       { emoji: "🎯", color: "#e8c06a", labelIt: "Centrale",        labelEn: "Central" },
-  "attrazioni":     { emoji: "🏛️", color: "#9333ea", labelIt: "Vicino attrazioni", labelEn: "Near sights" },
-  "vita notturna":  { emoji: "🌙", color: "#7c3aed", labelIt: "Vita notturna",  labelEn: "Nightlife" },
-  "metro":          { emoji: "🚇", color: "#2563eb", labelIt: "Metro vicina",    labelEn: "Near metro" },
-  "trasporti":      { emoji: "🚊", color: "#2563eb", labelIt: "Ben collegato",   labelEn: "Well connected" },
-  "stazione":       { emoji: "🚆", color: "#2563eb", labelIt: "Stazione",        labelEn: "Station" },
-  "tranquillo":     { emoji: "🤫", color: "#059669", labelIt: "Tranquillo",      labelEn: "Quiet" },
-  "budget":         { emoji: "💰", color: "#d97706", labelIt: "Budget",          labelEn: "Budget" },
-  "lusso":          { emoji: "💎", color: "#e8c06a", labelIt: "Lusso",           labelEn: "Luxury" },
-  "culturale":      { emoji: "🏛️", color: "#9333ea", labelIt: "Culturale",       labelEn: "Cultural" },
-  "mare":           { emoji: "🌊", color: "#0891b2", labelIt: "Mare",            labelEn: "Sea" },
-  "spiaggia":       { emoji: "🏖️", color: "#0891b2", labelIt: "Spiaggia",        labelEn: "Beach" },
-  "mercati":        { emoji: "🛒", color: "#ca8a04", labelIt: "Mercati",          labelEn: "Markets" },
-  "famiglie":       { emoji: "👨‍👩‍👧", color: "#16a34a", labelIt: "Famiglie",        labelEn: "Families" },
-  "panoramica":     { emoji: "🌅", color: "#ea580c", labelIt: "Panoramica",      labelEn: "Scenic" },
-  "vista panoramica":{ emoji: "🌅", color: "#ea580c", labelIt: "Vista panoramica",labelEn: "Great views" },
-  "gastronomia":    { emoji: "🍽️", color: "#dc2626", labelIt: "Gastronomia",     labelEn: "Food scene" },
-  "shopping":       { emoji: "🛍️", color: "#db2777", labelIt: "Shopping",        labelEn: "Shopping" },
-  "locali":         { emoji: "🍷", color: "#b45309", labelIt: "Atmosfera locale", labelEn: "Local vibe" },
-  "università":     { emoji: "🎓", color: "#4f46e5", labelIt: "Universitario",   labelEn: "University" },
-  "arte":           { emoji: "🎨", color: "#7c3aed", labelIt: "Arte",            labelEn: "Arts" },
-  "sicuro":         { emoji: "🛡️", color: "#16a34a", labelIt: "Sicuro",          labelEn: "Safe" },
-  "romantico":      { emoji: "✨", color: "#db2777", labelIt: "Romantico",       labelEn: "Romantic" },
-  "turistico":      { emoji: "📸", color: "#e8c06a", labelIt: "Turistico",       labelEn: "Touristy" },
-  "autentico":      { emoji: "🧭", color: "#b45309", labelIt: "Autentico",       labelEn: "Authentic" },
-  "collina":        { emoji: "⛰️", color: "#059669", labelIt: "Collina",         labelEn: "Hill" },
-  "porto":          { emoji: "⚓", color: "#0891b2", labelIt: "Porto",           labelEn: "Harbor" },
+  "centro":          { emoji: "??", color: "#e8c06a", labelIt: "Centrale",          labelEn: "Central" },
+  "centrale":        { emoji: "??", color: "#e8c06a", labelIt: "Centrale",          labelEn: "Central" },
+  "attrazioni":      { emoji: "???", color: "#9333ea", labelIt: "Vicino attrazioni", labelEn: "Near sights" },
+  "vita notturna":   { emoji: "??", color: "#7c3aed", labelIt: "Vita notturna",    labelEn: "Nightlife" },
+  "metro":           { emoji: "??", color: "#2563eb", labelIt: "Metro vicina",      labelEn: "Near metro" },
+  "trasporti":       { emoji: "??", color: "#2563eb", labelIt: "Ben collegato",     labelEn: "Well connected" },
+  "stazione":        { emoji: "??", color: "#2563eb", labelIt: "Stazione",          labelEn: "Station" },
+  "tranquillo":      { emoji: "??", color: "#059669", labelIt: "Tranquillo",        labelEn: "Quiet" },
+  "budget":          { emoji: "??", color: "#d97706", labelIt: "Budget",            labelEn: "Budget" },
+  "lusso":           { emoji: "??", color: "#e8c06a", labelIt: "Lusso",             labelEn: "Luxury" },
+  "culturale":       { emoji: "???", color: "#9333ea", labelIt: "Culturale",         labelEn: "Cultural" },
+  "mare":            { emoji: "??", color: "#0891b2", labelIt: "Mare",              labelEn: "Sea" },
+  "spiaggia":        { emoji: "???", color: "#0891b2", labelIt: "Spiaggia",          labelEn: "Beach" },
+  "mercati":         { emoji: "??", color: "#ca8a04", labelIt: "Mercati",           labelEn: "Markets" },
+  "famiglie":        { emoji: "????????", color: "#16a34a", labelIt: "Famiglie",          labelEn: "Families" },
+  "panoramica":      { emoji: "??", color: "#ea580c", labelIt: "Panoramica",        labelEn: "Scenic" },
+  "vista panoramica":{ emoji: "??", color: "#ea580c", labelIt: "Vista panoramica",  labelEn: "Great views" },
+  "gastronomia":     { emoji: "???", color: "#dc2626", labelIt: "Gastronomia",       labelEn: "Food scene" },
+  "shopping":        { emoji: "???", color: "#db2777", labelIt: "Shopping",          labelEn: "Shopping" },
+  "locali":          { emoji: "??", color: "#b45309", labelIt: "Atmosfera locale",  labelEn: "Local vibe" },
+  "universita":      { emoji: "??", color: "#4f46e5", labelIt: "Università",        labelEn: "University" },
+  "universit?":      { emoji: "??", color: "#4f46e5", labelIt: "Università",        labelEn: "University" },
+  "arte":            { emoji: "??", color: "#7c3aed", labelIt: "Arte",              labelEn: "Arts" },
+  "sicuro":          { emoji: "???", color: "#16a34a", labelIt: "Sicuro",            labelEn: "Safe" },
+  "romantico":       { emoji: "?", color: "#db2777", labelIt: "Romantico",         labelEn: "Romantic" },
+  "turistico":       { emoji: "??", color: "#e8c06a", labelIt: "Turistico",         labelEn: "Touristy" },
+  "autentico":       { emoji: "??", color: "#b45309", labelIt: "Autentico",         labelEn: "Authentic" },
+  "collina":         { emoji: "??", color: "#059669", labelIt: "Collina",           labelEn: "Hill" },
+  "porto":           { emoji: "?", color: "#0891b2", labelIt: "Porto",             labelEn: "Harbor" },
 };
 
 function normalizeVibeTag(tag: string): string {
-  return tag.trim().toLowerCase();
+  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function vibeIconName(tag: string): keyof typeof Ionicons.glyphMap {
+  const key = normalizeVibeTag(tag);
+  if (["centro", "centrale", "attrazioni", "turistico"].includes(key)) return "location-outline";
+  if (["vita notturna", "locali"].includes(key)) return "moon-outline";
+  if (["metro", "trasporti", "stazione"].includes(key)) return "train-outline";
+  if (["tranquillo", "famiglie", "sicuro"].includes(key)) return "shield-checkmark-outline";
+  if (["budget"].includes(key)) return "wallet-outline";
+  if (["lusso"].includes(key)) return "diamond-outline";
+  if (["culturale", "arte"].includes(key)) return "color-palette-outline";
+  if (["mare", "spiaggia", "porto"].includes(key)) return "water-outline";
+  if (["mercati", "gastronomia"].includes(key)) return "restaurant-outline";
+  if (["shopping"].includes(key)) return "bag-outline";
+  if (["universita"].includes(key)) return "school-outline";
+  if (["panoramica", "vista panoramica", "collina"].includes(key)) return "trail-sign-outline";
+  if (["romantico"].includes(key)) return "heart-outline";
+  if (["autentico"].includes(key)) return "sparkles-outline";
+  return "pricetag-outline";
 }
 
 function neighborhoodProsCons(tags: string[] | undefined, lang: string): { pros: string[]; cons: string[] } {
@@ -199,14 +223,14 @@ function neighborhoodProsCons(tags: string[] | undefined, lang: string): { pros:
   if (hasAny(["metro", "trasporti", "stazione"])) add(pros, copy.connected);
   if (hasAny(["centro", "centrale", "attrazioni", "culturale", "arte", "turistico"])) add(pros, copy.sights);
   if (hasAny(["mare", "spiaggia", "porto"])) add(pros, copy.sea);
-  if (hasAny(["vita notturna", "locali", "università"])) add(pros, copy.evening);
+  if (hasAny(["vita notturna", "locali", "universita"])) add(pros, copy.evening);
   if (hasAny(["tranquillo", "famiglie", "sicuro", "romantico"])) add(pros, copy.quiet);
   if (hasAny(["gastronomia", "mercati"])) add(pros, copy.food);
   if (hasAny(["budget"])) add(pros, copy.value);
   if (hasAny(["lusso"])) add(pros, copy.services);
 
   if (hasAny(["centro", "centrale", "attrazioni", "turistico", "lusso", "shopping"])) add(cons, copy.crowds);
-  if (hasAny(["vita notturna", "locali", "università"])) add(cons, copy.noisy);
+  if (hasAny(["vita notturna", "locali", "universita"])) add(cons, copy.noisy);
   if (hasAny(["mare", "spiaggia", "porto"])) add(cons, copy.farCenter);
   if (hasAny(["tranquillo", "famiglie", "sicuro"])) add(cons, copy.calm);
   if (hasAny(["budget"])) add(cons, copy.simple);
@@ -222,7 +246,7 @@ const MIN_MINUTES_PER_DAY = 300;
 const MAX_MINUTES_PER_DAY = 420;
 const MAX_MUSEUMS_PER_DAY = 1;
 
-// ── Geo helpers ───────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Geo helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -278,6 +302,15 @@ function displayRestaurantName(restaurant: { name: string; name_en?: string | nu
   return lang === "en" && restaurant.name_en ? restaurant.name_en : restaurant.name;
 }
 
+function normalizeFoodPlaceName(value: unknown): string {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 function displayNeighborhoodName(neighborhood: Neighborhood, lang: string): string {
   return lang === "en" && neighborhood.name_en ? neighborhood.name_en : neighborhood.name;
 }
@@ -287,7 +320,7 @@ function displayNeighborhoodDescription(neighborhood: Neighborhood, lang: string
 }
 
 function mapsSearchUrl(stop: Stop, _city: string): string {
-  // Use coordinates — always unambiguous regardless of city-name language
+  // Use coordinates Ã¢â‚¬â€ always unambiguous regardless of city-name language
   return `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
 }
 
@@ -363,7 +396,7 @@ function buildItineraryPdfHtml({
       <section class="day">
         <div class="day-head">
           <h2>${isEn ? "Day" : "Giorno"} ${day.day}</h2>
-          <span>${htmlEscape(km)} · ${minutes}h</span>
+          <span>${htmlEscape(km)} Ã‚Â· ${minutes}h</span>
         </div>
         ${routeLink ? `<a class="route-link" href="${htmlEscape(routeLink)}">${isEn ? "Open walking route" : "Apri percorso a piedi"}</a>` : ""}
         ${stops.map((stop, index) => `
@@ -372,7 +405,7 @@ function buildItineraryPdfHtml({
             <div>
               <h3>${htmlEscape(displayStopName(stop, lang))}</h3>
               <p>${htmlEscape(lang === "en" && stop.description_en ? stop.description_en : stop.description)}</p>
-              <small>${htmlEscape(stop.attraction_type ?? "")}${stop.estimated_visit_time ? ` · ${stop.estimated_visit_time} min` : ""}</small>
+              <small>${htmlEscape(stop.attraction_type ?? "")}${stop.estimated_visit_time ? ` Ã‚Â· ${stop.estimated_visit_time} min` : ""}</small>
               <a href="${htmlEscape(mapsSearchUrl(stop, itinerary.city))}">Maps</a>
               ${stop.ticket_url ? `<a href="${htmlEscape(stop.ticket_url)}">${isEn ? "Tickets" : "Biglietti"}</a>` : ""}
             </div>
@@ -384,8 +417,8 @@ function buildItineraryPdfHtml({
             ${restaurants.map((r) => `
               <p>
                 ${htmlEscape(displayRestaurantName(r, lang))}
-                ${r.food_type ? ` · ${htmlEscape(r.food_type)}` : ""}
-                ${r.rating != null ? ` · ${r.rating.toFixed(1)}/5` : ""}
+                ${r.food_type ? ` Ã‚Â· ${htmlEscape(r.food_type)}` : ""}
+                ${r.rating != null ? ` Ã‚Â· ${r.rating.toFixed(1)}/5` : ""}
                 ${r.description ? `<br/>${htmlEscape(isEn && r.description_en ? r.description_en : r.description)}` : ""}
                 ${r.maps_link ? `<br/><a href="${htmlEscape(r.maps_link)}">Maps</a>` : ""}
               </p>
@@ -416,7 +449,7 @@ function buildItineraryPdfHtml({
       <p>${htmlEscape(displayFoodDescription(food, lang))}</p>
       ${(lang === "en" && food.ingredients_en?.length ? food.ingredients_en : food.ingredients ?? [])
         .map((ingredient) => `<em>${htmlEscape(ingredient)}</em>`).join("")}
-      ${(food.places ?? []).map((place) => `<p class="tip">${htmlEscape(place.name)}${place.maps_link ? ` · <a href="${htmlEscape(place.maps_link)}">Maps</a>` : ""}</p>`).join("")}
+      ${(food.places ?? []).map((place) => `<p class="tip">${htmlEscape(place.name)}${place.maps_link ? ` Ã‚Â· <a href="${htmlEscape(place.maps_link)}">Maps</a>` : ""}</p>`).join("")}
     </article>
   `).join("");
 
@@ -432,9 +465,9 @@ function buildItineraryPdfHtml({
       <h2 class="pdf-section-title">${isEn ? "Practical Info" : "Info utili"}</h2>
       <div class="grid">${essentials.map(([label, value]) => `<div class="pill"><strong>${htmlEscape(label)}</strong><span>${htmlEscape(value)}</span></div>`).join("")}</div>
       ${(cityInfo.quick_tips ?? []).length ? `<h3>${isEn ? "Quick tips" : "Consigli rapidi"}</h3>${((isEn && cityInfo.quick_tips_en?.length) ? cityInfo.quick_tips_en : cityInfo.quick_tips ?? []).map((tip) => `<p class="tip">${htmlEscape(tip)}</p>`).join("")}` : ""}
-      ${cityInfo.emergency_numbers?.length ? `<h3>${isEn ? "Emergency numbers" : "Numeri di emergenza"}</h3>${cityInfo.emergency_numbers.map((item) => `<p class="tip"><strong>${htmlEscape(isEn && item.label_en ? item.label_en : item.label)}</strong> · ${htmlEscape(item.number)}</p>`).join("")}` : ""}
-      ${cityInfo.transport_apps?.length ? `<h3>${isEn ? "Transport apps" : "App trasporti"}</h3>${cityInfo.transport_apps.map((app) => `<p class="tip">${htmlEscape(app.name)}${app.description ? ` · ${htmlEscape(isEn && app.description_en ? app.description_en : app.description)}` : ""}</p>`).join("")}` : ""}
-      ${cityInfo.useful_apps?.length ? `<h3>${isEn ? "Useful apps" : "App utili"}</h3>${cityInfo.useful_apps.map((app) => `<p class="tip">${htmlEscape(app.name)}${app.description ? ` · ${htmlEscape(isEn && app.description_en ? app.description_en : app.description)}` : ""}</p>`).join("")}` : ""}
+      ${cityInfo.emergency_numbers?.length ? `<h3>${isEn ? "Emergency numbers" : "Numeri di emergenza"}</h3>${cityInfo.emergency_numbers.map((item) => `<p class="tip"><strong>${htmlEscape(isEn && item.label_en ? item.label_en : item.label)}</strong> Ã‚Â· ${htmlEscape(item.number)}</p>`).join("")}` : ""}
+      ${cityInfo.transport_apps?.length ? `<h3>${isEn ? "Transport apps" : "App trasporti"}</h3>${cityInfo.transport_apps.map((app) => `<p class="tip">${htmlEscape(app.name)}${app.description ? ` Ã‚Â· ${htmlEscape(isEn && app.description_en ? app.description_en : app.description)}` : ""}</p>`).join("")}` : ""}
+      ${cityInfo.useful_apps?.length ? `<h3>${isEn ? "Useful apps" : "App utili"}</h3>${cityInfo.useful_apps.map((app) => `<p class="tip">${htmlEscape(app.name)}${app.description ? ` Ã‚Â· ${htmlEscape(isEn && app.description_en ? app.description_en : app.description)}` : ""}</p>`).join("")}` : ""}
     </section>
   ` : "";
 
@@ -488,8 +521,8 @@ function buildItineraryPdfHtml({
         <main class="pdf-page">
         <div class="cover">
           <div class="brand">WAYRA</div>
-          <h1>${htmlEscape(itinerary.city.replace(/_/g, " ").toUpperCase())}</h1>
-          <div class="meta">${itinerary.num_days} ${isEn ? "days" : "giorni"} · ${htmlEscape(levelLabel)} · ${itinerary.max_walk_km ?? 5} km/${isEn ? "day" : "giorno"}</div>
+          <h1>${htmlEscape(cityLabel(itinerary.city, lang).toUpperCase())}</h1>
+          <div class="meta">${itinerary.num_days} ${isEn ? "days" : "giorni"} - ${htmlEscape(levelLabel)} - ${itinerary.max_walk_km ?? 5} km/${isEn ? "day" : "giorno"}</div>
         </div>
         ${daysHtml}
         <div class="page-break"></div>
@@ -806,6 +839,8 @@ function builderToStop(a: BuilderAttraction, city: string): Stop {
     is_food_spot: false,
     attraction_type: a.attraction_type,
     ticket_url: a.ticket_url,
+    must_see: a.must_see,
+    must_see_rank: a.must_see_rank,
   };
 }
 
@@ -850,53 +885,40 @@ function foodSpotToRestaurant(a: BuilderAttraction, mealType: MealType): Restaur
 }
 
 function mapsWaypoint(stop: Stop, _city: string): string {
-  // Use coordinates — unambiguous and language-independent
+  // Use coordinates Ã¢â‚¬â€ unambiguous and language-independent
   return encodeURIComponent(`${stop.latitude},${stop.longitude}`);
 }
 
 const ATTRACTION_EMOJI: Record<string, string> = {
-  museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
-  archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
-  panorama: "🌅", mercato: "🛒", palazzo: "🏰",
-  castello: "🏰", fortezza: "🏰", torre: "🗼",
-  giardino: "🌸", lago: "🏞️", spiaggia: "🏖️",
-  ponte: "🌉", fontana: "⛲", statua: "🗿",
-  teatro: "🎭", galleria: "🖼️", biblioteca: "📚",
-  tempio: "🛕", moschea: "🕌", sinagoga: "🕍",
-  anfiteatro: "🏟️", arco: "🏛️", basilica: "⛪",
-  abbazia: "⛪", cattedrale: "⛪", duomo: "⛪",
-  lungomare: "🌊", porto: "⚓", acquario: "🐠",
-  funicolare: "🚡", funivia: "🚠", belvedere: "🔭",
-  percorso: "🥾", area: "🗺️", borgo: "🏡",
-  strada: "🛤️", viale: "🛤️", canale: "🌊",
-  passeggiata: "🚶", spazio: "🏙️", molo: "⚓",
-  edificio: "🏢", villa: "🏡",
-  centro: "🏢",
+  museo: "Ã°Å¸Ââ€ºÃ¯Â¸Â", chiesa: "Ã¢â€ºÂª", parco: "Ã°Å¸Å’Â¿", piazza: "Ã°Å¸ÂÅ¸Ã¯Â¸Â",
+  archeologia: "Ã¢Å¡Â±Ã¯Â¸Â", monumento: "Ã°Å¸â€”Â¿", quartiere: "Ã°Å¸ÂËœÃ¯Â¸Â",
+  panorama: "Ã°Å¸Å’â€¦", mercato: "Ã°Å¸â€ºâ€™", palazzo: "Ã°Å¸ÂÂ°",
+  castello: "Ã°Å¸ÂÂ°", fortezza: "Ã°Å¸ÂÂ°", torre: "Ã°Å¸â€”Â¼",
+  giardino: "Ã°Å¸Å’Â¸", lago: "Ã°Å¸ÂÅ¾Ã¯Â¸Â", spiaggia: "Ã°Å¸Ââ€“Ã¯Â¸Â",
+  ponte: "Ã°Å¸Å’â€°", fontana: "Ã¢â€ºÂ²", statua: "Ã°Å¸â€”Â¿",
+  teatro: "Ã°Å¸Å½Â­", galleria: "Ã°Å¸â€“Â¼Ã¯Â¸Â", biblioteca: "Ã°Å¸â€œÅ¡",
+  tempio: "Ã°Å¸â€ºâ€¢", moschea: "Ã°Å¸â€¢Å’", sinagoga: "Ã°Å¸â€¢Â",
+  anfiteatro: "Ã°Å¸ÂÅ¸Ã¯Â¸Â", arco: "Ã°Å¸Ââ€ºÃ¯Â¸Â", basilica: "Ã¢â€ºÂª",
+  abbazia: "Ã¢â€ºÂª", cattedrale: "Ã¢â€ºÂª", duomo: "Ã¢â€ºÂª",
+  lungomare: "Ã°Å¸Å’Å ", porto: "Ã¢Å¡â€œ", acquario: "Ã°Å¸ÂÂ ",
+  funicolare: "Ã°Å¸Å¡Â¡", funivia: "Ã°Å¸Å¡Â ", belvedere: "Ã°Å¸â€Â­",
+  percorso: "Ã°Å¸Â¥Â¾", area: "Ã°Å¸â€”ÂºÃ¯Â¸Â", borgo: "Ã°Å¸ÂÂ¡",
+  strada: "Ã°Å¸â€ºÂ¤Ã¯Â¸Â", viale: "Ã°Å¸â€ºÂ¤Ã¯Â¸Â", canale: "Ã°Å¸Å’Å ",
+  passeggiata: "Ã°Å¸Å¡Â¶", spazio: "Ã°Å¸Ââ„¢Ã¯Â¸Â", molo: "Ã¢Å¡â€œ",
+  edificio: "Ã°Å¸ÂÂ¢", villa: "Ã°Å¸ÂÂ¡",
+  centro: "Ã°Å¸ÂÂ¢",
 };
 function stopEmoji(s: Stop): string {
   const key = (s.attraction_type ?? "").toLowerCase();
   if (ATTRACTION_EMOJI[key]) return ATTRACTION_EMOJI[key];
-  // Fallback substring per tipi composti (es. "parco storico" → 🌿)
+  // Fallback substring per tipi composti (es. "parco storico" Ã¢â€ â€™ Ã°Å¸Å’Â¿)
   const match = Object.keys(ATTRACTION_EMOJI).find((k) => k.length >= 4 && key.includes(k));
-  return match ? ATTRACTION_EMOJI[match] : "📍";
+  return match ? ATTRACTION_EMOJI[match] : "Ã°Å¸â€œÂ";
 }
 
-// ── Tipi per il modal opzioni ─────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Tipi per il modal opzioni Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-interface ReplaceOption {
-  stop: Stop;
-  distanceKm: number;
-}
-
-interface ReplaceState {
-  dayIndex: number;
-  stopId: number;
-  stopName: string;
-  kind: "attraction" | "food";
-  options: ReplaceOption[];
-}
-
-// ── Screen ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Screen Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 export default function ItineraryScreen() {
   const params = useLocalSearchParams();
@@ -979,8 +1001,78 @@ export default function ItineraryScreen() {
   const { foodSpots } = useFoodSpots(itinerary?.city ?? "");
   const { neighborhoods, loading: neighborhoodsLoading } = useNeighborhoods(itinerary?.city ?? "");
   const { cityInfo, loading: cityInfoLoading } = useCityInfo(itinerary?.city ?? "");
+  const enrichedFoodSpots = useMemo<BuilderAttraction[]>(() => {
+    if (!itinerary) return foodSpots;
 
-  // Mappa attractionId → dayNumber, usata dalla DayMap per classificare i layer
+    const dishesByPlace = new Map<string, { names: Set<string>; namesEn: Set<string>; curated: boolean }>();
+    for (const food of itinerary.food_recommendations ?? []) {
+      for (const place of food.places ?? []) {
+        const key = normalizeFoodPlaceName(place.name);
+        if (!key) continue;
+        const current = dishesByPlace.get(key) ?? {
+          names: new Set<string>(),
+          namesEn: new Set<string>(),
+          curated: false,
+        };
+        current.names.add(food.name);
+        if (food.name_en) current.namesEn.add(food.name_en);
+        current.curated = current.curated || Boolean(place.curated);
+        dishesByPlace.set(key, current);
+      }
+    }
+
+    return foodSpots.map((spot) => {
+      const match = dishesByPlace.get(normalizeFoodPlaceName(spot.name));
+      if (!match) return spot;
+      return {
+        ...spot,
+        recommended_dishes: Array.from(match.names),
+        recommended_dishes_en: Array.from(match.namesEn),
+        has_curated_dish_match: true,
+      };
+    });
+  }, [foodSpots, itinerary]);
+  const destinationGeo = useMemo(() => {
+    const coords = [...attractions, ...enrichedFoodSpots]
+      .filter((item) =>
+        Number.isFinite(item.latitude) &&
+        Number.isFinite(item.longitude),
+      )
+      .map((item) => ({ latitude: item.latitude, longitude: item.longitude }));
+
+    if (coords.length === 0) return null;
+
+    const center = coords.reduce(
+      (acc, point) => ({
+        latitude: acc.latitude + point.latitude,
+        longitude: acc.longitude + point.longitude,
+      }),
+      { latitude: 0, longitude: 0 },
+    );
+    center.latitude /= coords.length;
+    center.longitude /= coords.length;
+
+    const radiusKm = coords.reduce(
+      (max, point) => Math.max(max, haversineKm(center.latitude, center.longitude, point.latitude, point.longitude)),
+      0,
+    );
+
+    return { center, radiusKm };
+  }, [attractions, enrichedFoodSpots]);
+
+  const isOriginInDestination = useCallback((origin: FoodOrigin) => {
+    if (!destinationGeo) return true;
+    const distanceFromCity = haversineKm(
+      origin.latitude,
+      origin.longitude,
+      destinationGeo.center.latitude,
+      destinationGeo.center.longitude,
+    );
+    const allowedRadiusKm = Math.max(20, Math.min(50, destinationGeo.radiusKm + 12));
+    return distanceFromCity <= allowedRadiusKm;
+  }, [destinationGeo]);
+
+  // Mappa attractionId Ã¢â€ â€™ dayNumber, usata dalla DayMap per classificare i layer
   const assignedMap = useMemo(() => {
     const map = new Map<number, number>();
     itinerary?.days.forEach((d) => {
@@ -990,13 +1082,16 @@ export default function ItineraryScreen() {
     });
     return map;
   }, [itinerary]);
-  const [replaceState, setReplaceState] = useState<ReplaceState | null>(null);
   const [openFoodId, setOpenFoodId] = useState<number | null>(null);
   const [saveChoiceVisible, setSaveChoiceVisible] = useState(false);
   const [pdfPreviewHtml, setPdfPreviewHtml] = useState<string | null>(null);
   const [mapVisible, setMapVisible] = useState(false);
+  const [neighborhoodMapVisible, setNeighborhoodMapVisible] = useState(false);
+  const [mapMode, setMapMode] = useState<MapMode>("itinerary");
   const [mapDayNumber, setMapDayNumber] = useState(1);
   const [foodSelection, setFoodSelection] = useState<FoodSelection | null>(null);
+  const [mapInfoVisible, setMapInfoVisible] = useState(false);
+  const [dayCardDragging, setDayCardDragging] = useState(false);
 
   const savedId = itinerary ? findSavedId(itinerary) : null;
 
@@ -1015,84 +1110,6 @@ export default function ItineraryScreen() {
     await AsyncStorage.setItem(ITINERARY_GUIDE_KEY, "done");
     setShowGuide(false);
   }, []);
-
-  // ── Sostituisci una singola tappa ─────────────────────────────────────────
-
-  const handleReplaceStop = useCallback((dayIndex: number, stopId: number) => {
-    if (!itinerary || attractions.length === 0) return;
-
-    const day = itinerary.days[dayIndex];
-    const target = day.stops.find((s) => s.id === stopId && s.type === "attraction");
-    if (!target) return;
-
-    const usedIds = new Set(
-      itinerary.days.flatMap((d) =>
-        d.stops.filter((s) => s.type === "attraction" && s.id > 0).map((s) => s.id),
-      ),
-    );
-
-    const maxWalkKm = itinerary.max_walk_km ?? 4;
-    let candidatePool = attractions.filter((a) => !usedIds.has(a.id) && matchesItineraryLevel(a, itinerary.level));
-    if (!isExplorerLevel(itinerary.level)) {
-      candidatePool = uniqueAttractions([
-        ...candidatePool,
-        ...attractions.filter((a) => !usedIds.has(a.id) && a.category_level === 2),
-      ]);
-    }
-
-    const candidates = candidatePool
-      .map((a) => {
-        const stop = builderToStop(a, itinerary.city);
-        const nextStops = day.stops.map((s) => s.id === stopId ? stop : s);
-        return {
-          attraction: a,
-          distanceKm: walkingKm(target, a),
-          validDay: canUseDayStops(nextStops.filter((s) => s.type === "attraction"), maxWalkKm),
-        };
-      })
-      .sort((a, b) => {
-        if (a.validDay !== b.validDay) return a.validDay ? -1 : 1;
-        const aMatchesLevel = matchesItineraryLevel(a.attraction, itinerary.level) ? 1 : 0;
-        const bMatchesLevel = matchesItineraryLevel(b.attraction, itinerary.level) ? 1 : 0;
-        if (aMatchesLevel !== bMatchesLevel) return bMatchesLevel - aMatchesLevel;
-        return a.distanceKm - b.distanceKm;
-      })
-      .slice(0, 5);
-
-    if (candidates.length === 0) {
-      Alert.alert(
-        lang === "en" ? "No alternatives" : "Nessuna alternativa",
-        lang === "en" ? "No other attractions available nearby." : "Non ci sono altre attrazioni disponibili nelle vicinanze.",
-      );
-      return;
-    }
-
-    setReplaceState({
-      dayIndex,
-      stopId,
-      stopName: (lang === "en" && target.name_en) ? target.name_en : target.name,
-      kind: "attraction",
-      options: candidates.map((c) => ({
-        stop: builderToStop(c.attraction, itinerary.city),
-        distanceKm: c.distanceKm,
-      })),
-    });
-  }, [itinerary, attractions, lang]);
-
-  const fallbackFoodOrigin = useCallback((dayIndex: number): FoodOrigin | null => {
-    if (!itinerary) return null;
-    const day = itinerary.days[dayIndex];
-    if (!day) return null;
-    const attractionStops = day.stops.filter((s) => s.type === "attraction");
-    if (attractionStops.length === 0) return null;
-    const index = Math.max(0, Math.min(attractionStops.length - 1, Math.floor((attractionStops.length - 1) / 2)));
-    const stop = attractionStops[index];
-    return {
-      latitude: stop.latitude,
-      longitude: stop.longitude,
-      name: (lang === "en" && stop.name_en) ? stop.name_en : stop.name,
-    };
-  }, [itinerary, lang]);
 
   const handleFindFood = useCallback(async (dayIndex: number) => {
     if (!itinerary) return;
@@ -1128,25 +1145,25 @@ export default function ItineraryScreen() {
       origin = null;
     }
 
-    if (!origin) {
-      origin = fallbackFoodOrigin(dayIndex);
-      if (!origin) return;
+    if (origin && !isOriginInDestination(origin)) {
       Alert.alert(
-        lang === "en" ? "Using itinerary position" : "Uso la posizione dell'itinerario",
+        lang === "en" ? "Destination restaurants" : "Ristoranti della destinazione",
         lang === "en"
-          ? "Location is not available, so I will suggest food near the most useful stop for this meal."
-          : "La posizione non e disponibile, quindi ti mostro posti vicino alla tappa piu utile per questo pasto.",
+          ? "Your current position seems outside the trip city, so I will show restaurants in the destination without displaying your location."
+          : "La tua posizione sembra fuori dalla citta del viaggio, quindi ti mostro i ristoranti della destinazione senza mostrare la tua posizione.",
       );
+      origin = null;
     }
 
-    setFoodSelection({ dayIndex, mealType: "meal", origin });
+    setFoodSelection({ dayIndex, mealType: "meal", ...(origin ? { origin } : {}) });
+    setMapMode("food");
     setMapDayNumber(day.day);
     setMapVisible(true);
-  }, [itinerary, fallbackFoodOrigin, lang]);
+  }, [itinerary, isOriginInDestination, lang]);
 
   const handleSelectFoodFromMap = useCallback((foodSpotId: number) => {
     if (!itinerary || !foodSelection) return;
-    const spot = foodSpots.find((f) => f.id === foodSpotId);
+    const spot = enrichedFoodSpots.find((f) => f.id === foodSpotId);
     if (!spot) return;
 
     const { dayIndex, mealType } = foodSelection;
@@ -1158,39 +1175,34 @@ export default function ItineraryScreen() {
         days: prev.days.map((d, i) => {
           if (i !== dayIndex) return d;
           const currentRestaurants = d.restaurants ?? [];
+          const alreadySelected = currentRestaurants.some((r) => r.id === foodSpotId);
           return {
             ...d,
-            restaurants: [
-              ...currentRestaurants.filter((r) => r.meal_type !== mealType),
-              selectedRestaurant,
-            ],
+            restaurants: alreadySelected
+              ? currentRestaurants.filter((r) => r.id !== foodSpotId)
+              : [...currentRestaurants, selectedRestaurant],
             maps_link: buildMapsLink(d.stops, prev.city),
           };
         }),
       };
     });
-    setFoodSelection(null);
-    setMapVisible(false);
-  }, [itinerary, foodSelection, foodSpots]);
+  }, [itinerary, foodSelection, enrichedFoodSpots]);
 
-  const applyReplaceOption = useCallback((dayIndex: number, stopId: number, replacement: Stop) => {
+  const handleRemoveRestaurant = useCallback((dayIndex: number, restaurantId: number) => {
     setItinerary((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         days: prev.days.map((d, i) =>
-          i !== dayIndex ? d : {
-            ...d,
-            stops: d.stops.map((s) => s.id === stopId ? replacement : s),
-            maps_link: buildMapsLink(d.stops.map((s) => s.id === stopId ? replacement : s), prev.city),
-          },
+          i !== dayIndex
+            ? d
+            : { ...d, restaurants: (d.restaurants ?? []).filter((r) => r.id !== restaurantId) },
         ),
       };
     });
-    setReplaceState(null);
   }, []);
 
-  // ── Aggiungi attrazione non assegnata al giorno ───────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Aggiungi attrazione non assegnata al giorno Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleAddAttraction = useCallback((dayIndex: number, attractionId: number) => {
     const attraction = attractions.find((a) => a.id === attractionId);
@@ -1200,7 +1212,7 @@ export default function ItineraryScreen() {
       if (!prev) return prev;
       const day = prev.days[dayIndex];
       if (!day) return prev;
-      if (day.stops.some((s) => s.id === attractionId)) return prev; // già presente
+      if (day.stops.some((s) => s.id === attractionId)) return prev; // giÃƒÂ  presente
       const newStop = builderToStop(attraction, prev.city);
       const nextStops = insertAttractionInLightestSegment(day.stops, newStop);
       return {
@@ -1214,7 +1226,7 @@ export default function ItineraryScreen() {
     });
   }, [attractions]);
 
-  // ── Sposta attrazione da un altro giorno a questo ─────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Sposta attrazione da un altro giorno a questo Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleMoveAttraction = useCallback((dayIndex: number, attractionId: number, fromDayNumber: number) => {
     setItinerary((prev) => {
@@ -1254,7 +1266,7 @@ export default function ItineraryScreen() {
     });
   }, [attractions]);
 
-  // ── Rimuovi tappa dal giorno (dalla mappa) ────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Rimuovi tappa dal giorno (dalla mappa) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleRemoveAttraction = useCallback((dayIndex: number, attractionId: number) => {
     setItinerary((prev) => {
@@ -1275,7 +1287,7 @@ export default function ItineraryScreen() {
     });
   }, []);
 
-  // ── Aggiorna nota di una tappa ───────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Aggiorna nota di una tappa Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleNoteChange = useCallback((dayIndex: number, stopIndex: number, note: string) => {
     setItinerary((prev) => {
@@ -1294,7 +1306,7 @@ export default function ItineraryScreen() {
     });
   }, []);
 
-  // ── Riordina tappe di un giorno ─────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Riordina tappe di un giorno Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleReorderStops = useCallback((dayIndex: number, newStops: Stop[]) => {
     setItinerary((prev) => {
@@ -1364,7 +1376,7 @@ export default function ItineraryScreen() {
         lang === "en" ? "Popup blocked" : "Popup bloccato",
         lang === "en"
           ? "The preview is visible here. Use your browser print command to save it as PDF."
-          : "La preview è visibile qui. Usa il comando di stampa del browser per salvarla in PDF.",
+          : "La preview ÃƒÂ¨ visibile qui. Usa il comando di stampa del browser per salvarla in PDF.",
       );
       return;
     }
@@ -1426,11 +1438,11 @@ export default function ItineraryScreen() {
         <View style={styles.topInfo}>
           <View style={styles.topTitleRow}>
             <Text style={[styles.topBrand, { color: colors.accentGold }]}>WAYRA</Text>
-            <Text style={[styles.topDivider, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.topCity, { color: colors.text }]}>{itinerary.city.replace(/_/g, " ").toUpperCase()}</Text>
+            <Text style={[styles.topDivider, { color: colors.textMuted }]}>-</Text>
+            <Text style={[styles.topCity, { color: colors.text }]}>{cityLabel(itinerary.city, lang).toUpperCase()}</Text>
           </View>
           <Text style={[styles.topMeta, { color: colors.textMuted }]}>
-            {itinerary.num_days} {itinerary.num_days === 1 ? t.day : t.days} · {levelLabel}
+            {itinerary.num_days} {itinerary.num_days === 1 ? t.day : t.days} - {levelLabel}
           </Text>
         </View>
         <TouchableOpacity onPress={handleSavePress} activeOpacity={0.7} style={[styles.saveBtn, { backgroundColor: colors.card2 }]}>
@@ -1449,7 +1461,7 @@ export default function ItineraryScreen() {
           <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggle} activeOpacity={0.7} style={[styles.flagBtn, { backgroundColor: colors.card2 }]}>
-          <Text style={styles.flagEmoji}>{lang === "it" ? "🇮🇹" : "🇬🇧"}</Text>
+          <CountryFlag isoCode={lang === "it" ? "it" : "gb"} size={14} />
         </TouchableOpacity>
       </View>
 
@@ -1462,51 +1474,59 @@ export default function ItineraryScreen() {
         <TabButton label={t.tabPractical}     icon="information-circle-outline" active={tab === "practical"}  onPress={() => setTab("practical")} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!dayCardDragging}
+      >
         <View ref={(ref) => setGuideTarget("content", ref)}>
         {tab === "itinerary" && (
           <>
-            {attractions.length > 0 && (
-              <View style={styles.globalMapRow}>
-                <TouchableOpacity
-                  style={[styles.globalMapBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "44" }]}
-                  onPress={() => { setFoodSelection(null); setMapDayNumber(itinerary.days[0]?.day ?? 1); setMapVisible(true); }}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="map-outline" size={16} color={colors.accentGold} />
-                  <Text style={[styles.globalMapBtnText, { color: colors.accentGold }]}>
-                    {lang === "en" ? "Open Map" : "Apri Mappa"}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.mapInfoBtn, { backgroundColor: colors.card2, borderColor: colors.border }]}
-                  onPress={() => Alert.alert(
-                    lang === "en" ? "Itinerary map" : "Mappa itinerario",
-                    lang === "en"
-                      ? "Use this section to fine-tune the generated itinerary: view the day route, add nearby attractions, move stops from another day, remove places, measure walking distance and choose where to eat without changing the walking route."
-                      : "In questa sezione puoi modulare l'itinerario generato: vedere il percorso del giorno, aggiungere attrazioni vicine, spostare tappe da altri giorni, rimuovere luoghi, misurare le distanze a piedi e scegliere dove mangiare senza modificare il percorso.",
+            {(attractions.length > 0 || foodSpots.length > 0) && (
+              <View style={styles.globalToolsRow}>
+                <View style={styles.globalToolsStack}>
+                  {attractions.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.globalMapBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "44" }]}
+                      onPress={() => {
+                        setMapMode("itinerary");
+                        setFoodSelection(null);
+                        setMapDayNumber(itinerary.days[0]?.day ?? 1);
+                        setMapVisible(true);
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="map-outline" size={16} color={colors.accentGold} />
+                      <Text style={[styles.globalMapBtnText, { color: colors.accentGold }]}>
+                        {lang === "en" ? "Open Map" : "Apri Mappa"}
+                      </Text>
+                    </TouchableOpacity>
                   )}
+                  {foodSpots.length > 0 && (
+                    <TouchableOpacity
+                      style={[styles.globalFoodBtn, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "55" }]}
+                      onPress={() => {
+                        const activeDayIndex = Math.max(0, itinerary.days.findIndex((d) => d.day === (openDay ?? itinerary.days[0]?.day)));
+                        handleFindFood(activeDayIndex);
+                      }}
+                      activeOpacity={0.85}
+                    >
+                      <Ionicons name="restaurant-outline" size={17} color={colors.accentGreen} />
+                      <Text style={[styles.globalFoodBtnText, { color: colors.accentGreen }]}>
+                        {lang === "en" ? "Where should I eat?" : "Dove mangio?"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <TouchableOpacity
+                  style={[styles.mapInfoBtn, { backgroundColor: colors.accentBlue + "14", borderColor: colors.accentBlue + "55" }]}
+                  onPress={() => setMapInfoVisible(true)}
                   activeOpacity={0.8}
-                  accessibilityLabel={lang === "en" ? "Map info" : "Info mappa"}
+                  accessibilityLabel={lang === "en" ? "Map and food info" : "Info mappa e cibo"}
                 >
-                  <Ionicons name="information-circle-outline" size={20} color={colors.accentGold} />
+                  <Ionicons name="information-circle-outline" size={22} color={colors.accentBlue} />
                 </TouchableOpacity>
               </View>
-            )}
-            {foodSpots.length > 0 && (
-              <TouchableOpacity
-                style={[styles.globalFoodBtn, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "55" }]}
-                onPress={() => {
-                  const activeDayIndex = Math.max(0, itinerary.days.findIndex((d) => d.day === (openDay ?? itinerary.days[0]?.day)));
-                  handleFindFood(activeDayIndex);
-                }}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="restaurant-outline" size={17} color={colors.accentGreen} />
-                <Text style={[styles.globalFoodBtnText, { color: colors.accentGreen }]}>
-                  {lang === "en" ? "Where should I eat?" : "Dove mangio?"}
-                </Text>
-              </TouchableOpacity>
             )}
             {itinerary.days.map((day, i) => (
               <FadeInUp key={day.day} delay={staggerDelay(i, 70, 350)}>
@@ -1515,10 +1535,10 @@ export default function ItineraryScreen() {
                   open={openDay === day.day}
                   onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
                   onOptimizeDay={() => handleOptimizeDayOrder(i)}
-                  onReplaceStop={(stopId) => handleReplaceStop(i, stopId)}
                   onReorder={(newStops) => handleReorderStops(i, newStops)}
                   onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
-                  onFindFood={foodSpots.length > 0 ? () => handleFindFood(i) : undefined}
+                  onDragStateChange={setDayCardDragging}
+                  onRemoveRestaurant={(restaurantId) => handleRemoveRestaurant(i, restaurantId)}
                 />
               </FadeInUp>
             ))}
@@ -1534,13 +1554,25 @@ export default function ItineraryScreen() {
               <ActivityIndicator color={colors.accentGold} style={{ marginTop: 32 }} />
             ) : neighborhoods.length === 0 ? (
               <View style={styles.emptyNeighborhoods}>
-                <Text style={styles.emptyNeighborhoodsEmoji}>🏘️</Text>
+                <Text style={styles.emptyNeighborhoodsEmoji}>Ã°Å¸ÂËœÃ¯Â¸Â</Text>
                 <Text style={[styles.emptyNeighborhoodsText, { color: colors.textMuted }]}>{t.noNeighborhoodsData}</Text>
               </View>
             ) : (
-              neighborhoods.map((n) => (
-                <NeighborhoodCard key={n.id} neighborhood={n} lang={lang} city={itinerary.city} />
-              ))
+              <>
+                <TouchableOpacity
+                  onPress={() => setNeighborhoodMapVisible(true)}
+                  activeOpacity={0.82}
+                  style={[styles.neighborhoodMapBtn, { backgroundColor: colors.card2, borderColor: colors.accentGold + "66" }]}
+                >
+                  <Ionicons name="map-outline" size={18} color={colors.accentGold} />
+                  <Text style={[styles.neighborhoodMapBtnText, { color: colors.text }]}>
+                    {lang === "en" ? "Open lodging map" : "Apri mappa alloggi"}
+                  </Text>
+                </TouchableOpacity>
+                {neighborhoods.map((n) => (
+                  <NeighborhoodCard key={n.id} neighborhood={n} lang={lang} city={itinerary.city} />
+                ))}
+              </>
             )}
           </>
         )}
@@ -1639,6 +1671,102 @@ export default function ItineraryScreen() {
         </TouchableOpacity>
       </Modal>
 
+      {/* Info mappa e ristoranti */}
+      <Modal
+        visible={mapInfoVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMapInfoVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setMapInfoVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[styles.mapInfoSheet, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <View style={[styles.modalHandle, { backgroundColor: colors.border2 }]} />
+            <View style={styles.mapInfoHeader}>
+              <View style={styles.mapInfoTitleWrap}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {lang === "en" ? "Map tools" : "Strumenti mappa"}
+                </Text>
+                <Text style={[styles.modalSub, { color: colors.textMuted }]}>
+                  {lang === "en"
+                    ? "Use these two actions for different moments of the trip."
+                    : "Usa questi due comandi per momenti diversi del viaggio."}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.mapInfoCloseBtn, { backgroundColor: colors.card2, borderColor: colors.border2 }]}
+                onPress={() => setMapInfoVisible(false)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="close" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.mapInfoCards}>
+              <View style={[styles.mapInfoCard, { backgroundColor: colors.accentGold + "12", borderColor: colors.accentGold + "44" }]}>
+                <View style={styles.mapInfoCardHeader}>
+                  <View style={[styles.mapInfoIconBox, { backgroundColor: colors.accentGold + "22" }]}>
+                    <Ionicons name="map-outline" size={19} color={colors.accentGold} />
+                  </View>
+                  <View style={styles.mapInfoCardTitleWrap}>
+                    <Text style={[styles.mapInfoCardKicker, { color: colors.accentGold }]}>
+                      {lang === "en" ? "Daily itinerary" : "Itinerario giornaliero"}
+                    </Text>
+                    <Text style={[styles.mapInfoCardTitle, { color: colors.text }]}>
+                      {lang === "en" ? "Open Map" : "Apri Mappa"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.mapInfoCardBody, { color: colors.textSub }]}>
+                  {lang === "en"
+                    ? "Shows the route for the selected day. From here you can inspect stops, add nearby attractions, move places from another day, remove places, measure walking distance and reorder the route."
+                    : "Mostra il percorso del giorno selezionato. Da qui puoi controllare le tappe, aggiungere attrazioni vicine, spostare luoghi da altri giorni, rimuovere tappe, vedere la distanza a piedi e riordinare il percorso."}
+                </Text>
+              </View>
+
+              <View style={[styles.mapInfoDivider, { backgroundColor: colors.border2 }]} />
+
+              <View style={[styles.mapInfoCard, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "44" }]}>
+                <View style={styles.mapInfoCardHeader}>
+                  <View style={[styles.mapInfoIconBox, { backgroundColor: colors.accentGreen + "22" }]}>
+                    <Ionicons name="restaurant-outline" size={19} color={colors.accentGreen} />
+                  </View>
+                  <View style={styles.mapInfoCardTitleWrap}>
+                    <Text style={[styles.mapInfoCardKicker, { color: colors.accentGreen }]}>
+                      {lang === "en" ? "Restaurants" : "Ristoranti"}
+                    </Text>
+                    <Text style={[styles.mapInfoCardTitle, { color: colors.text }]}>
+                      {lang === "en" ? "Where should I eat?" : "Dove mangio?"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.mapInfoCardBody, { color: colors.textSub }]}>
+                  {lang === "en"
+                    ? "Opens the restaurant map. If you are in the destination city it can use your current position to suggest nearby places; if you are elsewhere it keeps your position hidden and shows destination restaurants only."
+                    : "Apre la mappa dei ristoranti. Se sei nella cittÃ  del viaggio puÃ² usare la tua posizione per suggerire posti vicini; se sei altrove non mostra la tua posizione e visualizza solo i ristoranti della destinazione."}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.mapInfoDoneBtn, { backgroundColor: colors.accentBlue, borderColor: colors.accentBlue }]}
+              onPress={() => setMapInfoVisible(false)}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.mapInfoDoneText, { color: colors.bg }]}>
+                {lang === "en" ? "Got it" : "Ho capito"}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Preview PDF web */}
       {(Platform.OS === "web" || Platform.OS === "ios" || Platform.OS === "android") && (
         <Modal
@@ -1698,63 +1826,6 @@ export default function ItineraryScreen() {
         </Modal>
       )}
 
-      {/* Modal sostituzione singola */}
-      <Modal
-        visible={replaceState !== null}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setReplaceState(null)}
-      >
-        <TouchableOpacity
-          style={styles.modalBackdrop}
-          activeOpacity={1}
-          onPress={() => setReplaceState(null)}
-        >
-          <TouchableOpacity activeOpacity={1} style={[styles.modalSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={[styles.modalHandle, { backgroundColor: colors.border2 }]} />
-
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              {replaceState?.kind === "food"
-                ? (lang === "en" ? "Food alternatives" : "Alternative cibo")
-                : (lang === "en" ? "Nearby alternatives" : "Alternative vicine")}
-            </Text>
-            <Text style={[styles.modalSub, { color: colors.textMuted }]}>
-              {lang === "en"
-                ? `Replace ${replaceState?.stopName ?? "stop"}`
-                : `Sostituisci ${replaceState?.stopName ?? "la tappa"}`}
-            </Text>
-
-            {replaceState?.options.map((option, oi) => (
-              <TouchableOpacity
-                key={option.stop.id}
-                style={[styles.replaceOptionCard, { backgroundColor: colors.card2, borderColor: colors.border }]}
-                activeOpacity={0.8}
-                onPress={() => applyReplaceOption(replaceState.dayIndex, replaceState.stopId, option.stop)}
-              >
-                <Text style={styles.optionStopNum}>{oi + 1}</Text>
-                <Text style={styles.optionStopEmoji}>{stopEmoji(option.stop)}</Text>
-                <View style={styles.replaceOptionInfo}>
-                  <Text style={styles.optionStopName} numberOfLines={1}>
-                    {(lang === "en" && option.stop.name_en) ? option.stop.name_en : option.stop.name}
-                  </Text>
-                  <Text style={[styles.replaceOptionMeta, { color: colors.accentGreen }]}>
-                    {option.stop.estimated_visit_time ?? 60} min · {formatDistance(option.distanceKm)}
-                  </Text>
-                </View>
-                <Ionicons
-                  name={replaceState?.kind === "food" ? "restaurant-outline" : "swap-horizontal-outline"}
-                  size={18}
-                  color={replaceState?.kind === "food" ? colors.accentGreen : colors.accentBlue}
-                />
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.border }]} onPress={() => setReplaceState(null)} activeOpacity={0.8}>
-              <Text style={[styles.cancelBtnText, { color: colors.textSub }]}>{lang === "en" ? "Cancel" : "Annulla"}</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
 
       {/* Mappa globale con selettore giorno */}
       {mapVisible && (() => {
@@ -1764,11 +1835,11 @@ export default function ItineraryScreen() {
         return mapDay ? (
           <DayMap
             visible={mapVisible}
-            onClose={() => { setMapVisible(false); setFoodSelection(null); }}
+            onClose={() => { setMapVisible(false); setMapMode("itinerary"); setFoodSelection(null); }}
             day={mapDay}
             allAttractions={attractions}
-            allFoodSpots={foodSpots}
-            foodSelection={foodSelection && foodSelection.dayIndex === safeIndex
+            allFoodSpots={enrichedFoodSpots}
+            foodSelection={mapMode === "food" && foodSelection
               ? { mealType: foodSelection.mealType, origin: foodSelection.origin }
               : null}
             assignedMap={assignedMap}
@@ -1779,13 +1850,33 @@ export default function ItineraryScreen() {
             onRemoveAttraction={(id) => handleRemoveAttraction(safeIndex, id)}
             onReorderStops={(newStops) => handleReorderStops(safeIndex, newStops)}
             onSelectFood={handleSelectFoodFromMap}
+            onRemoveFood={(id) => handleRemoveRestaurant(safeIndex, id)}
             allDays={itinerary.days}
             onDayChange={(dayNumber) => {
               setMapDayNumber(dayNumber);
+              if (mapMode === "food") {
+                const nextDayIndex = itinerary.days.findIndex((d) => d.day === dayNumber);
+                if (nextDayIndex >= 0) {
+                  setFoodSelection((current) => current ? { ...current, dayIndex: nextDayIndex } : current);
+                }
+              }
             }}
           />
         ) : null;
       })()}
+
+      {neighborhoodMapVisible && (
+        <NeighborhoodMap
+          visible={neighborhoodMapVisible}
+          onClose={() => setNeighborhoodMapVisible(false)}
+          neighborhoods={neighborhoods}
+          city={itinerary.city}
+          cityLabel={cityLabel(itinerary.city, lang)}
+          attractions={attractions}
+          foodSpots={enrichedFoodSpots}
+          lang={lang}
+        />
+      )}
 
       {showGuide && (
         <ItineraryGuideModal
@@ -1800,7 +1891,7 @@ export default function ItineraryScreen() {
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Sub-components Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function ItineraryGuideModal({
   lang, slides, targetRefs, onDone,
@@ -1875,7 +1966,9 @@ function ItineraryGuideModal({
         )}
         <View style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.tourEyebrow, { color: colors.accentGold }]}>{slide + 1} / {slides.length}</Text>
-          <Text style={styles.tourIcon}>{current.icon}</Text>
+          <View style={[styles.tourIconBox, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "44" }]}>
+            <Ionicons name={current.icon} size={28} color={colors.accentGold} />
+          </View>
           <Text style={[styles.tourTitle, { color: colors.text }]}>{current.title}</Text>
           <Text style={[styles.tourBody, { color: colors.textSub }]}>{current.body}</Text>
           <View style={styles.tourDots}>
@@ -1914,11 +2007,17 @@ function TabButton({ label, icon, active, onPress }: {
   const iconScale = useRef(new Animated.Value(active ? 1 : 1.08)).current;
 
   useEffect(() => {
+    labelOpacity.stopAnimation();
+    iconScale.stopAnimation();
+    if (!active) {
+      labelOpacity.setValue(0);
+    }
+
     Animated.parallel([
       Animated.timing(labelOpacity, {
         toValue: active ? 1 : 0,
-        duration: active ? 180 : 100,
-        delay: active ? 120 : 0,        // aspetta che il tab si sia allargato
+        duration: active ? 90 : 0,
+        delay: 0,
         useNativeDriver: true,
       }),
       Animated.spring(iconScale, {
@@ -1942,7 +2041,7 @@ function TabButton({ label, icon, active, onPress }: {
       haptic="selection"
       pressScale={0.94}
     >
-      {/* Icona — centrata orizzontalmente, larghezza esplicita per stabilità */}
+      {/* Icona Ã¢â‚¬â€ centrata orizzontalmente, larghezza esplicita per stabilitÃƒÂ  */}
       <Animated.View style={[styles.tabIconWrap, { transform: [{ scale: iconScale }] }]}>
         <Ionicons name={icon} size={18} color={iconColor} />
       </Animated.View>
@@ -1959,17 +2058,11 @@ function TabButton({ label, icon, active, onPress }: {
   );
 }
 
-function NeighborhoodCard({ neighborhood: n, lang, city }: { neighborhood: Neighborhood; lang: string; city: string }) {
+function NeighborhoodCard({ neighborhood: n, lang }: { neighborhood: Neighborhood; lang: string; city: string }) {
   const { colors } = useTheme();
   const name = (lang === "en" && n.name_en) ? n.name_en : n.name;
   const desc = (lang === "en" && n.description_en) ? n.description_en : n.description;
   const { pros, cons } = neighborhoodProsCons(n.vibe_tags, lang);
-
-  // URL Booking: usa quello specifico dal DB, altrimenti genera una ricerca per zona
-  const bookingUrl = n.booking_url
-    ?? `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(name + ", " + city)}&lang=${lang === "en" ? "en-gb" : "it"}`;
-
-  const openBooking = () => Linking.openURL(bookingUrl);
 
   return (
     <View style={[styles.neighborhoodCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -1983,14 +2076,14 @@ function NeighborhoodCard({ neighborhood: n, lang, city }: { neighborhood: Neigh
       {n.vibe_tags && n.vibe_tags.length > 0 && (
         <View style={styles.vibeRow}>
           {n.vibe_tags.map((tag) => {
-            const vibe = VIBE_MAP[normalizeVibeTag(tag)] ?? { emoji: "📍", color: "#888", labelIt: tag, labelEn: tag };
+            const vibe = VIBE_MAP[normalizeVibeTag(tag)] ?? { emoji: "??", color: "#888", labelIt: tag, labelEn: tag };
             const label = lang === "en" ? vibe.labelEn : vibe.labelIt;
             return (
               <View
                 key={tag}
                 style={[styles.vibeChip, { borderColor: vibe.color + "55", backgroundColor: vibe.color + "18" }]}
               >
-                <Text style={styles.vibeEmoji}>{vibe.emoji}</Text>
+                <Ionicons name={vibeIconName(tag)} size={13} color={vibe.color} />
                 <Text style={[styles.vibeLabel, { color: vibe.color }]}>{label}</Text>
               </View>
             );
@@ -2019,14 +2112,6 @@ function NeighborhoodCard({ neighborhood: n, lang, city }: { neighborhood: Neigh
         </View>
       </View>
 
-      {/* Bottone Booking */}
-      <TouchableOpacity style={styles.bookingBtn} onPress={openBooking} activeOpacity={0.8}>
-        <Text style={styles.bookingBtnIcon}>🏨</Text>
-        <Text style={styles.bookingBtnText}>
-          {lang === "en" ? "Find hotels on Booking.com" : "Trova hotel su Booking.com"}
-        </Text>
-        <Ionicons name="chevron-forward" size={13} color="#0071c2" style={{ marginLeft: "auto" }} />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -2048,7 +2133,7 @@ function CultureCard({ fact }: { fact: CultureFact }) {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Styles Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const styles = StyleSheet.create({
   safe:   { flex: 1 },
@@ -2059,8 +2144,17 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 12,
   },
-  globalMapBtn: {
+  globalToolsRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 9,
+    marginBottom: 14,
+  },
+  globalToolsStack: {
     flex: 1,
+    gap: 8,
+  },
+  globalMapBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2068,6 +2162,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 14,
     paddingVertical: 12,
+    minHeight: 46,
   },
   globalMapBtnText: {
     fontWeight: "700",
@@ -2075,10 +2170,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   mapInfoBtn: {
-    width: 44,
-    height: 44,
+    width: 50,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2091,7 +2185,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
-    marginBottom: 12,
   },
   globalFoodBtnText: {
     fontSize: 14,
@@ -2118,7 +2211,7 @@ const styles = StyleSheet.create({
   topCity:  { fontSize: 20, fontFamily: "BebasNeue_400Regular", letterSpacing: 2 },
   topMeta:  { fontSize: 12, marginTop: 2 },
   saveBtn:  { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  flagBtn:  { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  flagBtn:  { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   guideBtn: { borderWidth: 1 },
   flagEmoji: { fontSize: 20 },
 
@@ -2127,7 +2220,7 @@ const styles = StyleSheet.create({
     borderRadius: 14, padding: 4, gap: 2,
     alignItems: "stretch",
   },
-  // Layout verticale (icona sopra, testo sotto) — centrato sul cross axis
+  // Layout verticale (icona sopra, testo sotto) Ã¢â‚¬â€ centrato sul cross axis
   tabBtn: {
     flexDirection: "column",
     alignItems: "center",
@@ -2136,13 +2229,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderRadius: 10,
   },
-  // Tab attivo: occupa più spazio e mostra il testo
+  // Tab attivo: occupa piÃƒÂ¹ spazio e mostra il testo
   tabBtnActive: { flex: 2, paddingHorizontal: 10 },
   // Tab inattivi: stretti, solo icona
   tabBtnInactive: { flex: 1 },
   // Wrapper icona con larghezza fissa + alignSelf center:
-  // - width fissa → la transform: scale non disallinea l'icona
-  // - alignSelf: center → si centra orizzontalmente nel parent (necessario perché
+  // - width fissa Ã¢â€ â€™ la transform: scale non disallinea l'icona
+  // - alignSelf: center Ã¢â€ â€™ si centra orizzontalmente nel parent (necessario perchÃƒÂ©
   //   l'inner Animated.View di PressableCard usa alignItems: stretch di default,
   //   altrimenti l'icona resterebbe ancorata a sinistra del testo)
   tabIconWrap: {
@@ -2158,7 +2251,23 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 16, paddingBottom: 40 },
   sectionIntro: { fontSize: 13, fontStyle: "italic", marginBottom: 16, lineHeight: 20 },
 
-  // ── Neighborhoods ────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Neighborhoods Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  neighborhoodMapBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+  },
+  neighborhoodMapBtnText: {
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+  },
   neighborhoodCard: {
     borderRadius: 16,
     borderWidth: 1,
@@ -2219,25 +2328,6 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     fontWeight: "600",
   },
-  bookingBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 4,
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: "#0071c240",
-    backgroundColor: "#0071c210",
-  },
-  bookingBtnIcon: { fontSize: 15 },
-  bookingBtnText: {
-    color: "#4da6e8",
-    fontSize: 13,
-    fontWeight: "700",
-    flex: 1,
-  },
   emptyNeighborhoods: {
     alignItems: "center",
     paddingVertical: 48,
@@ -2293,6 +2383,15 @@ const styles = StyleSheet.create({
   },
   tourEyebrow: { fontSize: 11, fontWeight: "800" },
   tourIcon: { fontSize: 38, marginBottom: 2 },
+  tourIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
   tourTitle: { fontSize: 18, fontWeight: "800", textAlign: "center", lineHeight: 23 },
   tourBody: { fontSize: 13, textAlign: "center", lineHeight: 19, marginTop: 2, marginBottom: 6 },
   tourDots: { flexDirection: "row", gap: 5, marginVertical: 5 },
@@ -2309,7 +2408,7 @@ const styles = StyleSheet.create({
   tourSkip: { paddingVertical: 8 },
   tourSkipText: { fontSize: 13 },
 
-  // ── Modal ──────────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Modal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   modalBackdrop: {
     flex: 1,
     backgroundColor: "#000000aa",
@@ -2333,12 +2432,92 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     gap: 10,
   },
+  mapInfoSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 28,
+    paddingTop: 12,
+    gap: 14,
+  },
   modalHandle: {
     width: 40, height: 4, borderRadius: 2,
     alignSelf: "center", marginBottom: 8,
   },
   modalTitle: { fontSize: 16, fontWeight: "700" },
   modalSub:   { fontSize: 13, marginBottom: 4 },
+  mapInfoHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  mapInfoTitleWrap: {
+    flex: 1,
+  },
+  mapInfoCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapInfoCards: {
+    gap: 12,
+  },
+  mapInfoCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    gap: 10,
+  },
+  mapInfoCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+  },
+  mapInfoIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapInfoCardTitleWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  mapInfoCardKicker: {
+    fontSize: 10,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  mapInfoCardTitle: {
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  mapInfoCardBody: {
+    fontSize: 12.5,
+    lineHeight: 18,
+  },
+  mapInfoDivider: {
+    height: 1,
+    marginHorizontal: 8,
+    opacity: 0.8,
+  },
+  mapInfoDoneBtn: {
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingVertical: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapInfoDoneText: {
+    fontSize: 14,
+    fontWeight: "900",
+  },
   saveOptionBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -2430,21 +2609,6 @@ const styles = StyleSheet.create({
   },
   optionStopEmoji: { fontSize: 13 },
   optionStopName: { fontSize: 13, fontWeight: "500", flex: 1 },
-  replaceOptionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 12,
-  },
-  replaceOptionInfo: { flex: 1 },
-  replaceOptionMeta: {
-    fontSize: 11,
-    fontWeight: "700",
-    marginTop: 3,
-  },
-
   cancelBtn: {
     marginTop: 4,
     paddingVertical: 13,

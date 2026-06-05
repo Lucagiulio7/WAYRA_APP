@@ -31,6 +31,7 @@ interface Props {
   onRemoveAttraction?: (attractionId: number) => void;
   onReorderStops?: (newStops: Stop[]) => void;
   onSelectFood?: (foodSpotId: number) => void;
+  onRemoveFood?: (foodSpotId: number) => void;
   allDays?: ItineraryDay[];
   onDayChange?: (dayNumber: number) => void;
 }
@@ -137,8 +138,21 @@ function buildHtml(
   const usedFoodIds = new Set(
     (day.restaurants ?? []).map((r) => r.id),
   );
+  const selectedFoodSpots = (day.restaurants ?? [])
+    .filter((r) => validCoords(r.latitude, r.longitude))
+    .map((r) => ({
+      id: r.id,
+      lat: r.latitude,
+      lon: r.longitude,
+      name: esc(isEn && r.name_en ? r.name_en : r.name),
+      desc: esc((isEn && r.description_en ? r.description_en : r.description) ?? ""),
+      type: esc(r.food_type ?? ""),
+      mealType: esc(r.meal_type ?? ""),
+      rating: r.rating ?? null,
+      mapsLink: r.maps_link,
+    }));
   const targetMeal = foodSelection?.mealType;
-  const foodSpots = !foodMode ? [] : allFoodSpots
+  const foodSpots = allFoodSpots
     .filter((a) =>
       !usedFoodIds.has(a.id) &&
       validCoords(a.latitude, a.longitude) &&
@@ -153,10 +167,13 @@ function buildHtml(
       type: esc(a.food_type ?? a.attraction_type ?? ""),
       mins: a.estimated_visit_time ?? 60,
       rating: a.rating ?? null,
+      recommendedDishes: (isEn && a.recommended_dishes_en?.length ? a.recommended_dishes_en : a.recommended_dishes ?? []).map(esc),
+      hasDishMatch: Boolean(a.has_curated_dish_match || a.recommended_dishes?.length),
     }));
 
   const L = {
     dayLabel:       isEn ? "Day" : "Giorno",
+    plannedLabel:   isEn ? "Already planned" : "Gia in programma",
     minsLabel:      "min",
     explLabel:      isEn ? "Not in itinerary" : "Non nell'itinerario",
     mapsLabel:      isEn ? "Open in Maps ↗" : "Apri in Maps ↗",
@@ -167,15 +184,20 @@ function buildHtml(
     filterIconic:   isEn ? "Iconic" : "Iconico",
     filterCurated:  isEn ? "Curated" : "Ricercato",
     filterHidden:   isEn ? "Hidden" : "Nascosto",
+    filterFood:     isEn ? "Food" : "Cucina",
     distFromRoute:  isEn ? "from today's stops" : "dalle tappe di oggi",
     rulerLabel:     isEn ? "Measure distance" : "Misura distanza",
     foodLabel:      isEn ? "Food spot" : "Posto cibo",
+    selectedFoodLabel: isEn ? "Chosen food spot" : "Posto scelto",
+    typicalDishLabel: isEn ? "Typical dish" : "Piatto tipico",
     selectFood:     isEn ? "Choose this place" : "Scegli questo posto",
+    removeFood:     isEn ? "Remove this place" : "Rimuovi questo posto",
   };
 
   const stopsJson      = JSON.stringify(dayStops);
   const otherDayJson   = JSON.stringify(otherDay);
   const unassignedJson = JSON.stringify(unassigned);
+  const selectedFoodJson = JSON.stringify(selectedFoodSpots);
   const foodJson       = JSON.stringify(foodSpots);
   const originJson     = JSON.stringify(foodOrigin);
 
@@ -197,6 +219,7 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .leaflet-popup-close-button{color:${popupMeta}!important;top:8px!important;right:10px!important;font-size:18px!important}
 .pop-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px;margin-bottom:7px}
 .pop-badge-day{color:${accent};background:${accent}22;border:1px solid ${accent}55}
+.pop-badge-planned{color:#7eb8f7;background:#7eb8f722;border:1px solid #7eb8f766}
 .pop-badge-expl{color:#6ee7b7;background:#6ee7b722;border:1px solid #6ee7b755}
 .pop-name{font-size:13px;font-weight:700;color:${popupText};margin-bottom:3px;line-height:1.3}
 .pop-type{font-size:10px;color:${popupSub};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
@@ -207,11 +230,15 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .pop-move{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#e8c06a;background:#e8c06a14;border:1px solid #e8c06a50;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-remove{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#f97316;background:#f9731614;border:1px solid #f9731650;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-food{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#6ee7b7;background:#6ee7b714;border:1px solid #6ee7b750;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
+.pop-food.remove{color:#ef4444;background:#ef444414;border-color:#ef444455}
 .stop-circle{width:30px;height:30px;border-radius:50%;background:${accent};border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#0f0f1e;box-shadow:0 2px 10px rgba(0,0,0,.55);line-height:1}
-.other-circle{width:26px;height:26px;border-radius:50%;background:#7eb8f7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#0f0f1e;box-shadow:0 2px 8px rgba(0,0,0,.5);line-height:1;opacity:.9}
+.other-circle{width:32px;height:26px;border-radius:999px;background:#7eb8f7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#0f0f1e;box-shadow:0 0 0 3px rgba(126,184,247,.28),0 2px 8px rgba(0,0,0,.5);line-height:1;opacity:.9}
 .unass-dot{width:24px;height:24px;border-radius:50%;background:${mapBg};border:1.5px solid ${filterBdr};display:flex;align-items:center;justify-content:center;font-size:13px;opacity:.85;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
 .food-dot{width:30px;height:30px;border-radius:50%;background:#6ee7b7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 10px rgba(0,0,0,.45);line-height:1}
-.origin-dot{width:28px;height:28px;border-radius:50%;background:#7eb8f7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.45);line-height:1}
+.food-dot.typical{background:#f97316;box-shadow:0 2px 12px rgba(249,115,22,.55)}
+.food-dot.selected{width:34px;height:34px;background:#f97316;border:2.5px solid #fff;box-shadow:0 0 0 6px rgba(249,115,22,.34),0 0 0 12px rgba(249,115,22,.14),0 2px 14px rgba(0,0,0,.58)}
+.origin-dot{width:18px;height:18px;border-radius:50%;background:#2f8cff;border:3px solid #fff;box-shadow:0 0 0 7px rgba(47,140,255,.28),0 2px 12px rgba(0,0,0,.45);animation:originPulse 1.45s ease-in-out infinite}
+@keyframes originPulse{0%{box-shadow:0 0 0 4px rgba(47,140,255,.42),0 2px 12px rgba(0,0,0,.45)}55%{box-shadow:0 0 0 13px rgba(47,140,255,.08),0 2px 12px rgba(0,0,0,.45)}100%{box-shadow:0 0 0 4px rgba(47,140,255,.42),0 2px 12px rgba(0,0,0,.45)}}
 .pop-dist{font-size:10px;color:#7eb8f7;margin-top:3px;margin-bottom:2px}
 .leaflet-marker-icon.measure-selected > div{box-shadow:0 0 0 3px #7eb8f7,0 0 14px rgba(126,184,247,.85)!important;transform:scale(1.18);transition:transform .15s ease,box-shadow .15s ease}
 @keyframes measurePulse{0%{box-shadow:0 0 0 3px #7eb8f7,0 0 0 rgba(126,184,247,.85)}60%{box-shadow:0 0 0 6px rgba(126,184,247,.2),0 0 18px rgba(126,184,247,.95)}100%{box-shadow:0 0 0 3px #7eb8f7,0 0 0 rgba(126,184,247,.85)}}
@@ -244,12 +271,14 @@ try {
 const DAY_STOPS    = ${stopsJson};
 const OTHER_DAY    = ${otherDayJson};
 const UNASSIGNED   = ${unassignedJson};
+const SELECTED_FOOD = ${selectedFoodJson};
 const FOOD_SPOTS   = ${foodJson};
 const FOOD_ORIGIN  = ${originJson};
 const FOOD_MODE    = ${JSON.stringify(foodMode)};
 const ACCENT       = ${JSON.stringify(accent)};
 const DAY_NUM      = ${day.day};
 const DAY_LABEL    = ${JSON.stringify(L.dayLabel)};
+const PLANNED_LABEL = ${JSON.stringify(L.plannedLabel)};
 const MINS_LABEL   = ${JSON.stringify(L.minsLabel)};
 const EXPL_LABEL   = ${JSON.stringify(L.explLabel)};
 const MAPS_LABEL   = ${JSON.stringify(L.mapsLabel)};
@@ -260,11 +289,15 @@ const FILTER_ALL     = ${JSON.stringify(L.filterAll)};
 const FILTER_ICONIC  = ${JSON.stringify(L.filterIconic)};
 const FILTER_CURATED = ${JSON.stringify(L.filterCurated)};
 const FILTER_HIDDEN  = ${JSON.stringify(L.filterHidden)};
+const FILTER_FOOD    = ${JSON.stringify(L.filterFood)};
 const DIST_FROM_ROUTE = ${JSON.stringify(L.distFromRoute)};
 const RULER_LABEL    = ${JSON.stringify(L.rulerLabel)};
 const FOOD_LABEL       = ${JSON.stringify(L.foodLabel)};
+const SELECTED_FOOD_LABEL = ${JSON.stringify(L.selectedFoodLabel)};
+const TYPICAL_DISH_LABEL = ${JSON.stringify(L.typicalDishLabel)};
 const SELECT_FOOD_LABEL = ${JSON.stringify(L.selectFood)};
-const LEVEL_COLORS   = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa'};
+const REMOVE_FOOD_LABEL = ${JSON.stringify(L.removeFood)};
+const LEVEL_COLORS   = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa', 4:'#f97316'};
 
 function typeEmoji(t){
   t=(t||'').toLowerCase();
@@ -312,16 +345,25 @@ document.addEventListener('click', function(e){
   if (action === 'move')   sendMessage({type:'moveAttraction',  id: Number(btn.dataset.id), fromDay: Number(btn.dataset.from)});
   if (action === 'remove') sendMessage({type:'removeAttraction',id: Number(btn.dataset.id)});
   if (action === 'selectFood') sendMessage({type:'selectFood', id: Number(btn.dataset.id)});
+  if (action === 'removeFood') sendMessage({type:'removeFood', id: Number(btn.dataset.id)});
 });
 
 var unassLayers = {};
+var foodLayer = null;
 var currentFilter = 0;
 function setFilter(level) {
   currentFilter = level;
   [1,2,3].forEach(function(lv){
-    if (level === 0 || level === lv) { if (!map.hasLayer(unassLayers[lv])) unassLayers[lv].addTo(map); }
+    if (level !== 4 && (level === 0 || level === lv)) { if (!map.hasLayer(unassLayers[lv])) unassLayers[lv].addTo(map); }
     else { if (map.hasLayer(unassLayers[lv])) map.removeLayer(unassLayers[lv]); }
   });
+  if (foodLayer) {
+    if (level === 4) {
+      if (!map.hasLayer(foodLayer)) foodLayer.addTo(map);
+    } else if (!FOOD_MODE && map.hasLayer(foodLayer)) {
+      map.removeLayer(foodLayer);
+    }
+  }
   document.querySelectorAll('.filter-btn').forEach(function(b){
     var lv = parseInt(b.dataset.level || '0');
     var active = lv === level;
@@ -412,10 +454,12 @@ function addButton(id)  { return '<button type="button" class="pop-add"  data-ac
 function moveButton(id,from){ return '<button type="button" class="pop-move" data-action="move" data-id="'+id+'" data-from="'+from+'">'+MOVE_LABEL+'</button>'; }
 function removeButton(id){ return '<button type="button" class="pop-remove" data-action="remove" data-id="'+id+'">'+REMOVE_LABEL+'</button>'; }
 function selectFoodButton(id){ return '<button type="button" class="pop-food" data-action="selectFood" data-id="'+id+'">'+SELECT_FOOD_LABEL+'</button>'; }
+function removeFoodButton(id){ return '<button type="button" class="pop-food remove" data-action="removeFood" data-id="'+id+'">'+REMOVE_FOOD_LABEL+'</button>'; }
 
 var map = L.map('map',{zoomControl:false,attributionControl:false,minZoom:12,maxZoom:19});
 L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
 measureLayer = L.layerGroup().addTo(map);
+foodLayer = L.layerGroup();
 
 [1,2,3].forEach(function(lv){ unassLayers[lv] = L.layerGroup(); });
 UNASSIGNED.forEach(function(a){
@@ -435,21 +479,40 @@ UNASSIGNED.forEach(function(a){
 [1,2,3].forEach(function(lv){ unassLayers[lv].addTo(map); });
 
 FOOD_SPOTS.forEach(function(f){
-  var icon=L.divIcon({html:'<div class="food-dot">🍽</div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-17]});
+  var isTypical=!!f.hasDishMatch;
+  var icon=L.divIcon({html:'<div class="food-dot '+(isTypical?'typical':'')+'">🍽</div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-17]});
   var url=mapsUrl(f.lat,f.lon,f.name);
   var nd=nearestDayDist(f.lat,f.lon);
+  var dishes=(f.recommendedDishes||[]).join(', ');
   var popup='<div class="pop-badge pop-badge-expl">'+FOOD_LABEL+'</div>'+
+    '<div class="pop-name">'+f.name+'</div>'+
+    (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
+    (dishes?'<div class="pop-meta">🍝 '+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
+    (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
+    (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
+    (FOOD_MODE ? selectFoodButton(f.id) : '')+mapsButton(url);
+  foodLayer.addLayer(attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:900}), popup));
+});
+if (FOOD_MODE && foodLayer) foodLayer.addTo(map);
+
+SELECTED_FOOD.forEach(function(f){
+  var icon=L.divIcon({html:'<div class="food-dot selected">🍽</div>',className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-19]});
+  var url=f.mapsLink || mapsUrl(f.lat,f.lon,f.name);
+  var nd=nearestDayDist(f.lat,f.lon);
+  var popup='<div class="pop-badge pop-badge-expl">'+SELECTED_FOOD_LABEL+'</div>'+
     '<div class="pop-name">'+f.name+'</div>'+
     (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
     (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
     (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
     (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
-    selectFoodButton(f.id)+mapsButton(url);
-  attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:900}), popup).addTo(map);
+    (FOOD_MODE ? removeFoodButton(f.id) : '')+
+    mapsButton(url);
+  attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:950}), popup).addTo(map);
 });
 
 if(FOOD_ORIGIN){
-  var originIcon=L.divIcon({html:'<div class="origin-dot">⌖</div>',className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-16]});
+  var originIcon=L.divIcon({html:'<div class="origin-dot"></div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-16]});
   attachMarker(
     L.marker([FOOD_ORIGIN.lat,FOOD_ORIGIN.lon],{icon:originIcon,zIndexOffset:1100}),
     '<div class="pop-badge pop-badge-day">'+FOOD_ORIGIN.name+'</div>',
@@ -460,7 +523,7 @@ if(FOOD_ORIGIN){
 (function(){
   if (FOOD_MODE) return;
   var bar=document.createElement('div'); bar.id='filter-bar';
-  [{level:0,label:FILTER_ALL,color:'rgba(240,240,240,0.15)'},{level:1,label:FILTER_ICONIC,color:LEVEL_COLORS[1]},{level:2,label:FILTER_CURATED,color:LEVEL_COLORS[2]},{level:3,label:FILTER_HIDDEN,color:LEVEL_COLORS[3]}]
+  [{level:0,label:FILTER_ALL,color:'rgba(240,240,240,0.15)'},{level:1,label:FILTER_ICONIC,color:LEVEL_COLORS[1]},{level:2,label:FILTER_CURATED,color:LEVEL_COLORS[2]},{level:3,label:FILTER_HIDDEN,color:LEVEL_COLORS[3]},{level:4,label:FILTER_FOOD,color:LEVEL_COLORS[4]}]
   .forEach(function(f){
     var btn=document.createElement('button'); btn.className='filter-btn'; btn.textContent=f.label;
     btn.dataset.action='filter'; btn.dataset.level=f.level;
@@ -484,10 +547,10 @@ map.on('click', function(e){
 });
 
 OTHER_DAY.forEach(function(s){
-  var icon=L.divIcon({html:'<div class="other-circle">'+s.dayNum+'</div>',className:'',iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-15]});
+  var icon=L.divIcon({html:'<div class="other-circle">G'+s.dayNum+'</div>',className:'',iconSize:[32,26],iconAnchor:[16,13],popupAnchor:[0,-15]});
   var url=mapsUrl(s.lat,s.lon,s.name);
   var nd2=nearestDayDist(s.lat,s.lon);
-  var popup='<div class="pop-badge pop-badge-day">'+DAY_LABEL+' '+s.dayNum+'</div>'+
+  var popup='<div class="pop-badge pop-badge-planned">'+PLANNED_LABEL+' - '+DAY_LABEL+' '+s.dayNum+'</div>'+
     '<div class="pop-name">'+s.name+'</div>'+
     (s.type?'<div class="pop-type">'+s.type+'</div>':'')+
     (nd2!==null?'<div class="pop-dist">🚶 ~'+fDist(nd2)+' '+DIST_FROM_ROUTE+'</div>':'')+
@@ -515,11 +578,12 @@ setTimeout(function(){
   map.invalidateSize();
   if(DAY_STOPS.length>0){
     var bounds=L.latLngBounds(DAY_STOPS.map(function(s){return[s.lat,s.lon];}));
-    FOOD_SPOTS.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
+    if(FOOD_MODE) FOOD_SPOTS.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
+    SELECTED_FOOD.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
     if(FOOD_ORIGIN) bounds.extend([FOOD_ORIGIN.lat,FOOD_ORIGIN.lon]);
     map.fitBounds(bounds,{padding:[55,55],maxZoom:16});
   } else {
-    var all=[].concat(FOOD_SPOTS).concat(OTHER_DAY).concat(UNASSIGNED).filter(function(a){return a.lat&&a.lon;});
+    var all=[].concat(FOOD_MODE ? FOOD_SPOTS : []).concat(OTHER_DAY).concat(UNASSIGNED).filter(function(a){return a.lat&&a.lon;});
     if(all.length>0) map.fitBounds(L.latLngBounds(all.map(function(a){return[a.lat,a.lon];})),{padding:[40,40]});
     else map.setView([48,13],4);
   }
@@ -538,7 +602,7 @@ setTimeout(function(){
 
 export function DayMap({
   visible, onClose, day, allAttractions, allFoodSpots = [], foodSelection, assignedMap, lang, accent,
-  onAddAttraction, onMoveAttraction, onRemoveAttraction, onReorderStops, onSelectFood,
+  onAddAttraction, onMoveAttraction, onRemoveAttraction, onReorderStops, onSelectFood, onRemoveFood,
   allDays, onDayChange,
 }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -552,11 +616,15 @@ export function DayMap({
     () => day.stops.map((s) => `${s.type}:${s.id}:${s.latitude}:${s.longitude}`).join("|"),
     [day.stops],
   );
+  const restaurantSignature = useMemo(
+    () => (day.restaurants ?? []).map((r) => `${r.id}:${r.latitude}:${r.longitude}:${r.meal_type ?? ""}`).join("|"),
+    [day.restaurants],
+  );
 
   const html = useMemo(
     () => buildHtml(day, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day.day, stopOrderSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark],
+    [day.day, stopOrderSignature, restaurantSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark],
   );
 
   useEffect(() => {
@@ -575,12 +643,13 @@ export function DayMap({
         if (msg.type === "moveAttraction"   && onMoveAttraction)   onMoveAttraction(msg.id, msg.fromDay);
         if (msg.type === "removeAttraction" && onRemoveAttraction) onRemoveAttraction(msg.id);
         if (msg.type === "selectFood"       && onSelectFood)       onSelectFood(msg.id);
+        if (msg.type === "removeFood"       && onRemoveFood)       onRemoveFood(msg.id);
       } catch { /* ignore */ }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onAddAttraction, onMoveAttraction, onRemoveAttraction, onSelectFood]);
+  }, [onAddAttraction, onMoveAttraction, onRemoveAttraction, onSelectFood, onRemoveFood]);
 
   const isEn = lang === "en";
 
@@ -632,7 +701,7 @@ export function DayMap({
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: colors.accentBlue }]} />
-            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Other days" : "Altri giorni"}</Text>
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Planned in other days" : "Gia in altri giorni"}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: isDark ? "#3a3a5a" : "#b0b0c8", borderWidth: 1, borderColor: isDark ? "#5a5a7a" : "#9090a8" }]} />

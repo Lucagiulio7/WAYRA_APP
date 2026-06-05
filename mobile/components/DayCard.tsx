@@ -39,23 +39,6 @@ function getPriceRange(foodType?: string): string {
   }
 }
 
-// ── Classificazione spuntino vs pasto ─────────────────────────────────────
-
-function isSnack(foodType?: string): boolean {
-  const t = foodType?.toLowerCase();
-  return (
-    t === "street food" ||
-    t === "bar"         ||
-    t === "gelateria"   ||
-    t === "snack"       ||
-    t === "bakery"      ||
-    t === "pasticceria" ||
-    t === "caffe"       ||
-    t === "caffè"       ||
-    t === "dolci"
-  );
-}
-
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const f1 = (lat1 * Math.PI) / 180;
@@ -109,19 +92,15 @@ interface Props {
   open?: boolean;
   onToggleOpen?: () => void;
   onOptimizeDay?: () => void;
-  onReplaceStop?: (stopId: number) => void;
-  onReplaceFood?: (stopId: number) => void;
   onReorder?: (newStops: Stop[]) => void;
   onNoteChange?: (stopIndex: number, note: string) => void;
-  /** Apre la mappa in food-mode per scegliere ristoranti per questo giorno */
-  onFindFood?: () => void;
+  onDragStateChange?: (dragging: boolean) => void;
+  onRemoveRestaurant?: (restaurantId: number) => void;
 }
 
-export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay, onReplaceStop, onReplaceFood, onReorder, onNoteChange, onFindFood }: Props) {
+export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay, onReorder, onNoteChange, onDragStateChange, onRemoveRestaurant }: Props) {
   const [internalOpen, setInternalOpen] = useState(day.day === 1);
   const [foodOpen, setFoodOpen] = useState(false);
-  const [snackOpen, setSnackOpen] = useState(false);
-  const [mealOpen, setMealOpen]   = useState(false);
   const accent = DAY_ACCENTS[(day.day - 1) % DAY_ACCENTS.length];
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
@@ -136,32 +115,24 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay
   const mins  = totalMinutes % 60;
   const walkingKm = estimatedWalkingKm(day.stops);
 
-  // Dividi ristoranti in spuntini e pasti, ordinati per prezzo
   const allRestaurants = (day.restaurants ?? []).slice().sort(
     (a, b) => priceLevel(a.food_type) - priceLevel(b.food_type),
   );
-  const snacks = allRestaurants.filter((r) => isSnack(r.food_type));
-  const meals  = allRestaurants.filter((r) => !isSnack(r.food_type));
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (onToggleOpen) onToggleOpen();
     else setInternalOpen((v) => !v);
-    if (open) { setFoodOpen(false); setSnackOpen(false); setMealOpen(false); }
+    if (open) setFoodOpen(false);
   };
 
   useEffect(() => {
-    if (!open) {
-      setFoodOpen(false);
-      setSnackOpen(false);
-      setMealOpen(false);
-    }
+    if (!open) setFoodOpen(false);
   }, [open]);
 
   const toggleFood = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setFoodOpen((v) => !v);
-    if (foodOpen) { setSnackOpen(false); setMealOpen(false); }
   };
 
   const openMaps = async (url: string | null | undefined) => {
@@ -235,9 +206,8 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay
           <DraggableStopList
             stops={day.stops}
             onReorder={onReorder ?? (() => {})}
-            onReplaceStop={onReplaceStop}
-            onReplaceFood={onReplaceFood}
             onNoteChange={onNoteChange}
+            onDragStateChange={onDragStateChange}
             lang={lang}
             colors={colors}
           />
@@ -256,93 +226,35 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay
             </TouchableOpacity>
           )}
 
-          {/* Sezione cibo — visibile SEMPRE; mostra CTA se restaurants è vuoto */}
-          {(allRestaurants.length > 0 || !!onFindFood) && (
+          {/* Sezione cibo: mostra solo i ristoranti gia scelti dalla mappa */}
+          {allRestaurants.length > 0 && (
             <View style={[styles.foodSection, { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "08" }]}>
-              {allRestaurants.length === 0 ? (
-                // Stato vuoto: CTA per scegliere ristoranti dalla mappa
-                <TouchableOpacity
-                  style={styles.foodHeader}
-                  onPress={() => onFindFood?.()}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.foodHeaderEmoji}>🍴</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>
-                      {lang === "en" ? "Where should I eat?" : "Dove mangio?"}
-                    </Text>
-                    <Text style={[styles.foodEmptyHint, { color: colors.textMuted }]}>
-                      {lang === "en"
-                        ? "Tap to pick restaurants on the map"
-                        : "Tocca per scegliere ristoranti sulla mappa"}
-                    </Text>
-                  </View>
-                  <Ionicons name="restaurant-outline" size={18} color={colors.accentGreen} />
-                </TouchableOpacity>
-              ) : (
-                // Stato pieno: comportamento attuale
-                <TouchableOpacity
-                  style={styles.foodHeader}
-                  onPress={toggleFood}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.foodHeaderEmoji}>🍴</Text>
-                  <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>{t.wantToEat}</Text>
-                  <Ionicons
-                    name={foodOpen ? "chevron-up" : "chevron-down"}
-                    size={16}
-                    color={colors.accentGreen}
-                  />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.foodHeader}
+                onPress={toggleFood}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.foodHeaderEmoji}>🍴</Text>
+                <Text style={[styles.foodHeaderText, { color: colors.accentGreen }]}>{t.wantToEat}</Text>
+                <Ionicons
+                  name={foodOpen ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  color={colors.accentGreen}
+                />
+              </TouchableOpacity>
 
-              {foodOpen && allRestaurants.length > 0 && (
-                <View style={[styles.subSections, { borderTopColor: colors.accentGreen + "20" }]}>
-                  {/* ── Spuntino ── */}
-                  {snacks.length > 0 && (
-                    <SubSection
-                      emoji="🍦"
-                      label={lang === "en" ? "Quick bite" : "Spuntino"}
-                      open={snackOpen}
-                      onToggle={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        setSnackOpen((v) => !v);
-                      }}
-                    >
-                      {snacks.map((r) => (
-                        <RestaurantRow
-                          key={r.id}
-                          restaurant={r}
-                          lang={lang}
-                          colors={colors}
-                          onMaps={() => openMaps(r.maps_link)}
-                        />
-                      ))}
-                    </SubSection>
-                  )}
-
-                  {/* ── Pranzo / Cena ── */}
-                  {meals.length > 0 && (
-                    <SubSection
-                      emoji="🍽️"
-                      label={lang === "en" ? "Lunch & Dinner" : "Pranzo & Cena"}
-                      open={mealOpen}
-                      onToggle={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        setMealOpen((v) => !v);
-                      }}
-                    >
-                      {meals.map((r) => (
-                        <RestaurantRow
-                          key={r.id}
-                          restaurant={r}
-                          lang={lang}
-                          colors={colors}
-                          onMaps={() => openMaps(r.maps_link)}
-                        />
-                      ))}
-                    </SubSection>
-                  )}
+              {foodOpen && (
+                <View style={[styles.restaurantList, { borderTopColor: colors.accentGreen + "20" }]}>
+                  {allRestaurants.map((r) => (
+                    <RestaurantRow
+                      key={r.id}
+                      restaurant={r}
+                      lang={lang}
+                      colors={colors}
+                      onMaps={() => openMaps(r.maps_link)}
+                      onRemove={onRemoveRestaurant ? () => onRemoveRestaurant(r.id) : undefined}
+                    />
+                  ))}
                 </View>
               )}
             </View>
@@ -356,36 +268,6 @@ export function DayCard({ day, open: controlledOpen, onToggleOpen, onOptimizeDay
 
 // ── SubSection collapsibile ───────────────────────────────────────────────────
 
-function SubSection({
-  emoji,
-  label,
-  open,
-  onToggle,
-  children,
-}: {
-  emoji: string;
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  const { colors } = useTheme();
-  return (
-    <View style={[styles.subSection, { borderTopColor: colors.accentGreen + "15" }]}>
-      <TouchableOpacity
-        style={[styles.subHeader, { backgroundColor: colors.accentGreen + "06" }]}
-        onPress={onToggle}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.subEmoji}>{emoji}</Text>
-        <Text style={[styles.subLabel, { color: colors.accentGreen + "cc" }]}>{label}</Text>
-        <Ionicons name={open ? "chevron-up" : "chevron-down"} size={14} color={colors.accentGreen + "99"} />
-      </TouchableOpacity>
-      {open && <View style={styles.subBody}>{children}</View>}
-    </View>
-  );
-}
-
 // ── Restaurant row ────────────────────────────────────────────────────────────
 
 function RestaurantRow({
@@ -393,11 +275,13 @@ function RestaurantRow({
   lang,
   colors,
   onMaps,
+  onRemove,
 }: {
   restaurant: Restaurant;
   lang: string;
   colors: any;
   onMaps: () => void;
+  onRemove?: () => void;
 }) {
   const price       = getPriceRange(restaurant.food_type);
   const displayName = (lang === "en" && restaurant.name_en) ? restaurant.name_en : restaurant.name;
@@ -422,6 +306,11 @@ function RestaurantRow({
         <TouchableOpacity onPress={onMaps} activeOpacity={0.7} style={styles.mapsIcon}>
           <Ionicons name="location-outline" size={20} color={colors.accentGreen} />
         </TouchableOpacity>
+        {onRemove && (
+          <TouchableOpacity onPress={onRemove} activeOpacity={0.7} style={styles.removeRestaurantBtn}>
+            <Ionicons name="trash-outline" size={18} color="#ef4444" />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -539,33 +428,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
-  foodEmptyHint: {
-    fontSize: 11,
-    marginTop: 2,
-    fontWeight: "500",
-  },
-  subSections: {
+  restaurantList: {
     borderTopWidth: 1,
     gap: 0,
   },
   // ── Sub-sezione (spuntino / pasto) ───────────────────────────
-  subSection: {
-    borderTopWidth: 1,
-  },
-  subHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-  },
-  subEmoji: { fontSize: 16 },
-  subLabel: {
-    flex: 1,
-    fontWeight: "600",
-    fontSize: 13,
-  },
-  subBody: {},
   // ── Restaurant row ───────────────────────────────────────────
   restaurantRow: {
     flexDirection: "row",
@@ -595,4 +462,5 @@ const styles = StyleSheet.create({
   },
   ratingText: { fontWeight: "700", fontSize: 12 },
   mapsIcon:   { padding: 4 },
+  removeRestaurantBtn: { padding: 4 },
 });

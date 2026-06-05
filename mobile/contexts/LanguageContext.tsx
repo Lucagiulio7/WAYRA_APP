@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { cityLabel } from "@/utils/cityLabels";
 
 const LANG_KEY = "wayra_lang";
 
@@ -12,10 +13,10 @@ const translations = {
     numDays: "Numero di giorni",
     experienceType: "Tipo di esperienza",
     iconicLabel: "Iconico",
-    iconicSubtitle: "Le meraviglie imperdibili della città",
+    iconicSubtitle: "Le meraviglie imperdibili della citt\u00e0",
     explorerLabel: "Esploratore",
     explorerSubtitle: "Iconici + gemme autentiche e luoghi segreti",
-    generating: "Generando itinerario…",
+    generating: "Generando itinerario...",
     generate: "Genera Itinerario",
     chooseDestination: "Scegli destinazione",
     // Itinerary screen
@@ -29,11 +30,11 @@ const translations = {
     levelIconic: "Iconico",
     levelCurated: "Ricercato",
     levelHidden: "Nascosto",
-    foodIntro: (city: string) => `Piatti tipici da provare assolutamente a ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
-    cultureIntro: (city: string) => `Curiosità e pillole di storia su ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
-    neighborhoodsIntro: (city: string) => `Le zone migliori dove soggiornare a ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}, divise per stile`,
+    foodIntro: (city: string) => `Piatti tipici da provare assolutamente a ${cityLabel(city, "it")}`,
+    cultureIntro: (city: string) => `Curiosit\u00e0 e pillole di storia su ${cityLabel(city, "it")}`,
+    neighborhoodsIntro: (city: string) => `Le zone migliori dove soggiornare a ${cityLabel(city, "it")}, divise per stile`,
     viewOnMap: "Vedi su Maps",
-    noNeighborhoodsData: "Dati non ancora disponibili per questa città.",
+    noNeighborhoodsData: "Dati non ancora disponibili per questa citt\u00e0.",
     whereToEat: "Dove mangiarlo",
     itineraryUnavailable: "Itinerario non disponibile.",
     goBack: "Torna indietro",
@@ -49,7 +50,7 @@ const translations = {
     levelHiddenBadge: "Nascosto",
     // Practical info tab
     tabPractical: "Info",
-    practicalIntro: (city: string) => `Tutto quello che devi sapere per visitare ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    practicalIntro: (city: string) => `Tutto quello che devi sapere per visitare ${cityLabel(city, "it")}`,
     practicalEssentials: "Essenziali",
     practicalCurrency: "Moneta",
     practicalLanguage: "Lingua",
@@ -62,7 +63,7 @@ const translations = {
     practicalTransportApps: "App mezzi pubblici",
     practicalUsefulApps: "App utili",
     practicalTips: "Consigli pratici",
-    noPracticalData: "Informazioni pratiche non ancora disponibili per questa città.",
+    noPracticalData: "Informazioni pratiche non ancora disponibili per questa citt\u00e0.",
     // Alert errori di apertura link
     errTitle: "Errore",
     errOpenMaps: "Impossibile aprire Maps",
@@ -91,9 +92,9 @@ const translations = {
     levelIconic: "Iconic",
     levelCurated: "Curated",
     levelHidden: "Hidden",
-    foodIntro: (city: string) => `Must-try dishes in ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
-    cultureIntro: (city: string) => `Curiosities and history about ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
-    neighborhoodsIntro: (city: string) => `Best neighborhoods to stay in ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}, sorted by vibe`,
+    foodIntro: (city: string) => `Must-try dishes in ${cityLabel(city, "en")}`,
+    cultureIntro: (city: string) => `Curiosities and history about ${cityLabel(city, "en")}`,
+    neighborhoodsIntro: (city: string) => `Best neighborhoods to stay in ${cityLabel(city, "en")}, sorted by vibe`,
     viewOnMap: "View on Maps",
     noNeighborhoodsData: "No data available for this city yet.",
     whereToEat: "Where to eat it",
@@ -111,7 +112,7 @@ const translations = {
     levelHiddenBadge: "Hidden",
     // Practical info tab
     tabPractical: "Info",
-    practicalIntro: (city: string) => `Everything you need to know to visit ${city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
+    practicalIntro: (city: string) => `Everything you need to know to visit ${cityLabel(city, "en")}`,
     practicalEssentials: "Essentials",
     practicalCurrency: "Currency",
     practicalLanguage: "Language",

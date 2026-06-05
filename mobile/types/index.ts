@@ -18,6 +18,8 @@ export interface Stop {
   empty_meal_slot?: boolean;
   rating?: number | null;
   ticket_url?: string | null;
+  must_see?: boolean;
+  must_see_rank?: number | null;
   notes?: string;           // nota libera dell'utente
 }
 
@@ -33,6 +35,8 @@ export interface Attraction {
   longitude: number;
   estimated_visit_time?: number | null;
   tags: string[];
+  must_see?: boolean;
+  must_see_rank?: number | null;
 }
 
 export interface Restaurant {
@@ -58,7 +62,11 @@ export interface ItineraryDay {
 
 export interface FoodPlace {
   name: string;
+  name_en?: string | null;
   maps_link: string;
+  rating?: number | null;
+  food_type?: string | null;
+  curated?: boolean;
 }
 
 export interface Food {
@@ -100,7 +108,10 @@ export interface Neighborhood {
   description: string;
   description_en?: string | null;
   vibe_tags: string[];
-  booking_url?: string | null;
+  geojson?: {
+    type: "Polygon" | "MultiPolygon";
+    coordinates: number[][][] | number[][][][];
+  } | null;
 }
 
 export interface TransportApp {

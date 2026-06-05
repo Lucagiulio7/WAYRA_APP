@@ -50,12 +50,10 @@ function isMuseum(type?: string | null): boolean {
 interface Props {
   stop: Stop;
   index?: number;
-  onReplace?: () => void;
-  onReplaceFood?: () => void;
   onNoteChange?: (note: string) => void;
 }
 
-export function StopCard({ stop, index, onReplace, onReplaceFood, onNoteChange }: Props) {
+export function StopCard({ stop, index, onNoteChange }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { lang, t } = useLanguage();
   const { colors, isDark } = useTheme();
@@ -72,7 +70,7 @@ export function StopCard({ stop, index, onReplace, onReplaceFood, onNoteChange }
 
   // "food" = vecchio formato, "meal" = formato backend attuale
   if (stop.type === "food" || stop.type === "meal") {
-    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} labels={t} onReplaceFood={onReplaceFood} onNoteChange={onNoteChange} />;
+    return <FoodStop stop={stop} lang={lang} index={index ?? 1} colors={colors} isDark={isDark} labels={t} onNoteChange={onNoteChange} />;
   }
 
   return (
@@ -83,7 +81,6 @@ export function StopCard({ stop, index, onReplace, onReplaceFood, onNoteChange }
       setExpanded={setExpanded}
       lang={lang}
       levelLabels={LEVEL_LABELS}
-      onReplace={onReplace}
       onNoteChange={onNoteChange}
       colors={colors}
       isDark={isDark}
@@ -95,11 +92,10 @@ export function StopCard({ stop, index, onReplace, onReplaceFood, onNoteChange }
 // ── Food stop ─────────────────────────────────────────────────────────────────
 
 function FoodStop({
-  stop, lang, index, colors, isDark, labels, onReplaceFood, onNoteChange,
+  stop, lang, index, colors, isDark, labels, onNoteChange,
 }: {
   stop: Stop; lang: string; index: number; colors: any; isDark: boolean;
   labels: any;
-  onReplaceFood?: () => void;
   onNoteChange?: (note: string) => void;
 }) {
   const [expanded, setExpanded]   = useState(false);
@@ -129,10 +125,6 @@ function FoodStop({
     <TouchableOpacity
       style={[styles.foodStopCard, { backgroundColor: foodBg, borderColor: foodBorder }]}
       onPress={() => {
-        if (isEmptySlot && onReplaceFood) {
-          onReplaceFood();
-          return;
-        }
         toggle();
       }}
       activeOpacity={0.85}
@@ -176,18 +168,6 @@ function FoodStop({
           {!!displayDesc && (
             <Text style={[styles.description, { color: colors.textSub }]}>{displayDesc}</Text>
           )}
-          {!!onReplaceFood && (
-            <TouchableOpacity
-              onPress={onReplaceFood}
-              activeOpacity={0.8}
-              style={[styles.replaceBtn, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "40" }]}
-            >
-              <Ionicons name="restaurant-outline" size={14} color={colors.accentGreen} />
-              <Text style={[styles.replaceBtnText, { color: colors.accentGreen }]}>
-                {lang === "en" ? "Replace food stop" : "Sostituisci tappa cibo"}
-              </Text>
-            </TouchableOpacity>
-          )}
           <NoteInput
             value={noteText}
             onChange={setNoteText}
@@ -204,7 +184,7 @@ function FoodStop({
 // ── Attraction stop ───────────────────────────────────────────────────────────
 
 function AttractionStop({
-  stop, index, expanded, setExpanded, lang, levelLabels, onReplace, onNoteChange, colors, isDark, labels,
+  stop, index, expanded, setExpanded, lang, levelLabels, onNoteChange, colors, isDark, labels,
 }: {
   stop: Stop;
   index: number;
@@ -212,7 +192,6 @@ function AttractionStop({
   setExpanded: (v: boolean) => void;
   lang: string;
   levelLabels: Record<number, string>;
-  onReplace?: () => void;
   onNoteChange?: (note: string) => void;
   colors: any;
   isDark: boolean;
@@ -258,8 +237,13 @@ function AttractionStop({
     >
       <View style={styles.row}>
         {/* Numero indice */}
-        <View style={[styles.indexBadge, { backgroundColor: color + "28", borderColor: color }]}>
-          <Text style={[styles.indexText, { color }]}>{index}</Text>
+        <View style={styles.indexWrap}>
+          {stop.must_see && (
+            <Ionicons name="star" size={12} color="#f5c84b" style={styles.mustSeeIndexIcon} />
+          )}
+          <View style={[styles.indexBadge, { backgroundColor: color + "28", borderColor: color }]}>
+            <Text style={[styles.indexText, { color }]}>{index}</Text>
+          </View>
         </View>
 
         {/* Emoji tipo + nome */}
@@ -268,7 +252,7 @@ function AttractionStop({
             <Text style={styles.attractionEmoji}>{emoji}</Text>
             <Text style={[styles.attractionName, { color: colors.text }]} numberOfLines={2}>{displayName}</Text>
           </View>
-          <View style={styles.row}>
+          <View style={[styles.row, styles.metaWrap]}>
             <Ionicons name="time-outline" size={12} color={colors.textSub} />
             <Text style={[styles.metaText, { color: colors.textSub }]}>{stop.estimated_visit_time} min</Text>
             {stop.category_level !== undefined && (
@@ -322,18 +306,6 @@ function AttractionStop({
                 {lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
               </Text>
               <Ionicons name="open-outline" size={13} color={colors.accentPurple} />
-            </TouchableOpacity>
-          )}
-          {!!onReplace && (
-            <TouchableOpacity
-              onPress={onReplace}
-              activeOpacity={0.8}
-              style={[styles.replaceBtn, { backgroundColor: colors.accentBlue + "12", borderColor: colors.accentBlue + "40" }]}
-            >
-              <Ionicons name="shuffle-outline" size={14} color={colors.accentBlue} />
-              <Text style={[styles.replaceBtnText, { color: colors.accentBlue }]}>
-                {lang === "en" ? "Replace with nearby" : "Sostituisci con alternativa vicina"}
-              </Text>
             </TouchableOpacity>
           )}
           {(stop.tags ?? []).length > 0 && (
@@ -415,6 +387,7 @@ function FreeTimeStop({
 
 const styles = StyleSheet.create({
   row:     { flexDirection: "row", alignItems: "center", gap: 8 },
+  metaWrap: { flexWrap: "wrap", gap: 5 },
   nameRow: { flexDirection: "row", alignItems: "flex-start", gap: 5, flex: 1, marginBottom: 3 },
   flex1:   { flex: 1 },
   attractionCard: {
@@ -422,6 +395,14 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
+  },
+  indexWrap: {
+    width: 30,
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  mustSeeIndexIcon: {
+    marginBottom: 2,
   },
   indexBadge: {
     width: 30,
@@ -486,17 +467,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   ticketFullText: { fontWeight: "600", fontSize: 13 },
-  replaceBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    alignSelf: "flex-start",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  replaceBtnText: { fontSize: 12, fontWeight: "600" },
   tags:  { flexDirection: "row", flexWrap: "wrap", gap: 5 },
   tag:   { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   tagText: { fontSize: 11 },

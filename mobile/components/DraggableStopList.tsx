@@ -10,7 +10,7 @@
  *   - tutto il resto                              → 0
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, PanResponder, StyleSheet, View } from "react-native";
+import { Animated, PanResponder, Platform, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Stop } from "@/types";
@@ -26,8 +26,6 @@ const LONG_PRESS = 250;  // ms prima che il drag si attivi
 interface Props {
   stops: Stop[];
   onReorder: (newStops: Stop[]) => void;
-  onReplaceStop?: (stopId: number) => void;
-  onReplaceFood?: (stopId: number) => void;
   onNoteChange?: (stopIndex: number, note: string) => void;
   /** Notifica quando il drag inizia/finisce — utile per disabilitare ScrollView esterni */
   onDragStateChange?: (dragging: boolean) => void;
@@ -40,8 +38,6 @@ interface Props {
 export function DraggableStopList({
   stops,
   onReorder,
-  onReplaceStop,
-  onReplaceFood,
   onNoteChange,
   onDragStateChange,
   lang,
@@ -74,6 +70,24 @@ export function DraggableStopList({
     shiftAnims.current.push(new Animated.Value(0));
   }
 
+  const resetTransformsNow = useCallback(() => {
+    dragAnim.stopAnimation();
+    dragAnim.setValue(0);
+    shiftAnims.current.forEach((a) => {
+      a.stopAnimation();
+      a.setValue(0);
+    });
+  }, [dragAnim]);
+
+  useEffect(() => {
+    resetTransformsNow();
+    setDraggingIdx(null);
+    isDragging.current = false;
+    activeDragIdx.current = null;
+    currentSlot.current = 0;
+    onDragStateChange?.(false);
+  }, [displayed, resetTransformsNow, onDragStateChange]);
+
   // ── Aggiorna shift degli elementi non-dragged ─────────────────────────────
   const updateShifts = useCallback((d: number, slot: number) => {
     const ss   = displayedRef.current;
@@ -95,14 +109,6 @@ export function DraggableStopList({
     Animated.parallel(anims).start();
   }, []);
 
-  const resetShifts = useCallback(() => {
-    Animated.parallel(
-      shiftAnims.current.map((a) =>
-        Animated.spring(a, { toValue: 0, useNativeDriver: true, bounciness: 0 }),
-      ),
-    ).start();
-  }, []);
-
   // ── Factory PanResponder ──────────────────────────────────────────────────
   const makePanResponder = useCallback(
     (orderIdx: number) =>
@@ -111,8 +117,8 @@ export function DraggableStopList({
         // Capture: ruba il responder ANCHE alla ScrollView se siamo già in drag mode
         onMoveShouldSetPanResponderCapture:  () => isDragging.current,
         onMoveShouldSetPanResponder:         () => isDragging.current,
-        onPanResponderTerminationRequest:    () => !isDragging.current,
-        onShouldBlockNativeResponder:        () => isDragging.current,
+        onPanResponderTerminationRequest:    () => false,
+        onShouldBlockNativeResponder:        () => true,
 
         onPanResponderGrant: () => {
           longPressTimer.current = setTimeout(() => {
@@ -122,8 +128,7 @@ export function DraggableStopList({
             isDragging.current     = true;
             activeDragIdx.current  = orderIdx;
             currentSlot.current    = orderIdx;
-            dragAnim.setValue(0);
-            shiftAnims.current.forEach((a) => a.setValue(0));
+            resetTransformsNow();
             setDraggingIdx(orderIdx);
             onDragStateChange?.(true);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
@@ -160,8 +165,7 @@ export function DraggableStopList({
           const slot     = currentSlot.current;
           const newStops = reorderStops(displayedRef.current, orderIdx, slot);
 
-          dragAnim.setValue(0);
-          resetShifts();
+          resetTransformsNow();
           setDisplayed(newStops);
           setDraggingIdx(null);
           activeDragIdx.current = null;
@@ -175,13 +179,12 @@ export function DraggableStopList({
           const wasDragging = isDragging.current;
           isDragging.current    = false;
           activeDragIdx.current = null;
-          dragAnim.setValue(0);
-          resetShifts();
+          resetTransformsNow();
           setDraggingIdx(null);
           if (wasDragging) onDragStateChange?.(false);
         },
       }),
-    [dragAnim, updateShifts, resetShifts, onReorder, onDragStateChange],
+    [dragAnim, updateShifts, resetTransformsNow, onReorder, onDragStateChange],
   );
 
   // Ricostruisce i PanResponder quando la lista cambia
@@ -232,6 +235,7 @@ export function DraggableStopList({
                 {...panResponder.panHandlers}
                 style={[
                   styles.dragHandle,
+                  Platform.OS === "web" && styles.dragHandleWeb,
                   { borderColor: (colors?.border ?? "#3a3a4a") },
                   isDrag && { borderColor: (colors?.accentGold ?? "#e8c06a") },
                 ]}
@@ -252,16 +256,6 @@ export function DraggableStopList({
             <StopCard
               stop={stop}
               index={attrIdx}
-                onReplace={
-                  stop.type === "attraction" && stop.id > 0 && onReplaceStop
-                    ? () => onReplaceStop(stop.id)
-                    : undefined
-                }
-                onReplaceFood={
-                  (stop.type === "food" || stop.type === "meal") && onReplaceFood
-                    ? () => onReplaceFood(stop.id)
-                    : undefined
-                }
                 onNoteChange={
                   onNoteChange ? (note) => onNoteChange(orderIdx, note) : undefined
                 }
@@ -300,8 +294,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "stretch",
-    marginVertical: 4,
+    alignSelf: "center",
   },
+  dragHandleWeb: {
+    touchAction: "none",
+    userSelect: "none",
+  } as any,
   dragHandlePlaceholder: { width: 30 },
 });

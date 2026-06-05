@@ -1990,14 +1990,14 @@ function makeStyles(colors: any) {
     viewBtnDisabled: { backgroundColor: colors.border },
     viewBtnText: { color: colors.bg, fontWeight: "800", fontSize: 13 },
     flagBtn: {
-      width: 34, height: 34, borderRadius: 17, backgroundColor: colors.card,
+      width: 32, height: 32, borderRadius: 16, backgroundColor: colors.card,
       borderWidth: 1, borderColor: colors.border2, alignItems: "center", justifyContent: "center", flexShrink: 0,
     },
     guideBtn: {
       borderColor: colors.accentGold + "70",
       backgroundColor: colors.accentGold + "14",
     },
-    flagEmoji: { fontSize: 18 },
+    flagEmoji: { fontSize: 14 },
 
     // ── Tab bar ─────────────────────────────────────────────────────────────
     tabBar: {

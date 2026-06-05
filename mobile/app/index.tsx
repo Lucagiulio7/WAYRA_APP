@@ -10,10 +10,13 @@ import {
   Alert,
   Dimensions,
   Modal,
+  Animated,
+  Easing,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import Svg, { Circle, Line, Polyline } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useItinerary } from "@/hooks/useItinerary";
 import { useCityInfo } from "@/hooks/useCityInfo";
@@ -32,195 +35,227 @@ import { shadowLevel } from "@/utils/shadow";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
 const WALK_MODES = [
-  { id: "relaxed", km: 3, labelIt: "Rilassato", labelEn: "Relaxed", icon: "leaf-outline" },
-  { id: "balanced", km: 5, labelIt: "Bilanciato", labelEn: "Balanced", icon: "walk-outline" },
-  { id: "intense", km: 7, labelIt: "Intenso", labelEn: "Intense", icon: "flash-outline" },
+  {
+    id: "relaxed",
+    km: 3,
+    labelIt: "Rilassato",
+    labelEn: "Relaxed",
+    descIt: "Compatto, meno tappe extra",
+    descEn: "Compact, fewer extra stops",
+    icon: "leaf-outline",
+  },
+  {
+    id: "balanced",
+    km: 5,
+    labelIt: "Bilanciato",
+    labelEn: "Balanced",
+    descIt: "Pieno ma gestibile",
+    descEn: "Full but manageable",
+    icon: "walk-outline",
+  },
+  {
+    id: "intense",
+    km: 7,
+    labelIt: "Intenso",
+    labelEn: "Intense",
+    descIt: "Piu tappe e piu margine",
+    descEn: "More stops and more range",
+    icon: "flash-outline",
+  },
 ] as const;
 const ICONIC_MAX_DAYS = 5;
 const EXPLORER_MAX_DAYS = 7;
 const ONBOARDING_KEY = "wayra_generate_guide_v1";
-type GuideStep = { icon: string; title: string; body: string; target: string };
+const RECENT_CITIES_KEY = "wayra_recent_cities_v1";
+type GuideStep = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; target: string };
 type GuideRect = { x: number; y: number; width: number; height: number };
 
-// ── Dati città ────────────────────────────────────────────────────────────────
+// â”€â”€ Dati cittÃ  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const COUNTRIES = [
-  { id: "at", label: "Austria",         labelEn: "Austria",        cities: [{ id: "vienna",             label: "Vienna",           emoji: "🎵" }] },
-  { id: "be", label: "Belgio",          labelEn: "Belgium",        cities: [{ id: "bruges",             label: "Bruges",           emoji: "🚤" }] },
-  { id: "dk", label: "Danimarca",       labelEn: "Denmark",        cities: [{ id: "copenaghen",         label: "Copenaghen",       labelEn: "Copenhagen", emoji: "🚲" }] },
-  { id: "fr", label: "Francia",         labelEn: "France",         cities: [
-    { id: "parigi",    label: "Parigi",    labelEn: "Paris",     emoji: "🗼" },
-    { id: "marsiglia", label: "Marsiglia", labelEn: "Marseille", emoji: "⚓" },
-  ]},
-  { id: "de", label: "Germania",        labelEn: "Germany",        cities: [
-    { id: "berlino",           label: "Berlino",           labelEn: "Berlin",   emoji: "🐻" },
-    { id: "monaco_di_baviera", label: "Monaco di Baviera", labelEn: "Munich",   emoji: "🍺" },
-    { id: "francoforte",       label: "Francoforte",       labelEn: "Frankfurt",emoji: "🏦" },
-  ]},
-  { id: "gr", label: "Grecia",          labelEn: "Greece",         cities: [
-    { id: "atene",  label: "Atene",  labelEn: "Athens",    emoji: "🏛" },
-    { id: "candia", label: "Candia", labelEn: "Heraklion", emoji: "🏺" },
-  ]},
-  { id: "ie", label: "Irlanda",         labelEn: "Ireland",        cities: [{ id: "dublino",            label: "Dublino",          labelEn: "Dublin", emoji: "🍀" }] },
-  { id: "it", label: "Italia",          labelEn: "Italy",          cities: [
-    { id: "roma",    label: "Roma",    labelEn: "Rome",    emoji: "🏛️" },
-    { id: "milano",  label: "Milano",  labelEn: "Milan",   emoji: "💎" },
-    { id: "venezia", label: "Venezia", labelEn: "Venice",  emoji: "🚣" },
-    { id: "napoli",  label: "Napoli",  labelEn: "Naples",  emoji: "🍕" },
-    { id: "firenze", label: "Firenze", labelEn: "Florence",emoji: "🌸" },
-  ]},
-  { id: "ma", label: "Marocco",         labelEn: "Morocco",        cities: [{ id: "marrakech",          label: "Marrakech",        emoji: "🌴" }] },
-  { id: "nl", label: "Paesi Bassi",     labelEn: "Netherlands",    cities: [{ id: "amsterdam",          label: "Amsterdam",        emoji: "🚲" }] },
-  { id: "no", label: "Norvegia",         labelEn: "Norway",         cities: [
-    { id: "oslo",   label: "Oslo",   labelEn: "Oslo",   emoji: "🏔️" },
-    { id: "bergen", label: "Bergen", labelEn: "Bergen", emoji: "🎣" },
-  ]},
-  { id: "pl", label: "Polonia",         labelEn: "Poland",         cities: [
-    { id: "cracovia", label: "Cracovia", labelEn: "Krakow", emoji: "🦅" },
-    { id: "varsavia", label: "Varsavia", labelEn: "Warsaw", emoji: "⚔️" },
-  ]},
-  { id: "pt", label: "Portogallo",      labelEn: "Portugal",       cities: [
-    { id: "lisbona", label: "Lisbona", labelEn: "Lisbon", emoji: "🚋" },
-    { id: "porto",   label: "Porto",   labelEn: "Porto",  emoji: "🍷" },
-  ]},
-  { id: "gb", label: "Regno Unito",     labelEn: "United Kingdom", cities: [
-    { id: "londra",    label: "Londra",    labelEn: "London",    emoji: "🎡" },
-    { id: "edimburgo", label: "Edimburgo", labelEn: "Edinburgh", emoji: "🏰" },
-  ]},
-  { id: "cz", label: "Repubblica Ceca", labelEn: "Czech Republic", cities: [{ id: "praga",              label: "Praga",            labelEn: "Prague",   emoji: "🏰" }] },
-  { id: "ro", label: "Romania",         labelEn: "Romania",        cities: [{ id: "bucarest",           label: "Bucarest",         labelEn: "Bucharest",emoji: "🌹" }] },
-  { id: "sk", label: "Slovacchia",      labelEn: "Slovakia",       cities: [{ id: "bratislava",         label: "Bratislava",       emoji: "🏯" }] },
-  { id: "es", label: "Spagna",          labelEn: "Spain",          cities: [
-    { id: "barcellona", label: "Barcellona", labelEn: "Barcelona", emoji: "🌊" },
-    { id: "madrid",     label: "Madrid",     labelEn: "Madrid",    emoji: "🎨" },
-    { id: "siviglia",   label: "Siviglia",   labelEn: "Seville",   emoji: "💃" },
-    { id: "valencia",   label: "Valencia",   labelEn: "Valencia",  emoji: "🍊" },
-  ]},
-  { id: "se", label: "Svezia",          labelEn: "Sweden",         cities: [{ id: "stoccolma",          label: "Stoccolma",        labelEn: "Stockholm",emoji: "🌊" }] },
-  { id: "tr", label: "Turchia",         labelEn: "Turkey",         cities: [
-    { id: "istanbul", label: "Istanbul", emoji: "🕌" },
-    { id: "antalya",  label: "Antalya",  emoji: "🏖️" },
-    { id: "muğla",    label: "Muğla",    emoji: "🛥️" },
-  ]},
-  { id: "hu", label: "Ungheria",        labelEn: "Hungary",        cities: [{ id: "budapest",           label: "Budapest",         emoji: "♨️" }] },
+  { id: "at", label: "Austria", labelEn: "Austria", cities: [{ id: "vienna", label: "Vienna", emoji: "??" }] },
+  { id: "be", label: "Belgio", labelEn: "Belgium", cities: [{ id: "bruges", label: "Bruges", emoji: "??" }] },
+  { id: "dk", label: "Danimarca", labelEn: "Denmark", cities: [{ id: "copenaghen", label: "Copenaghen", labelEn: "Copenhagen", emoji: "??" }] },
+  { id: "fr", label: "Francia", labelEn: "France", cities: [{ id: "parigi", label: "Parigi", labelEn: "Paris", emoji: "??" }, { id: "marsiglia", label: "Marsiglia", labelEn: "Marseille", emoji: "?" }] },
+  { id: "de", label: "Germania", labelEn: "Germany", cities: [{ id: "berlino", label: "Berlino", labelEn: "Berlin", emoji: "??" }, { id: "monaco_di_baviera", label: "Monaco di Baviera", labelEn: "Munich", emoji: "??" }, { id: "francoforte", label: "Francoforte", labelEn: "Frankfurt", emoji: "??" }] },
+  { id: "gr", label: "Grecia", labelEn: "Greece", cities: [{ id: "atene", label: "Atene", labelEn: "Athens", emoji: "??" }, { id: "candia", label: "Candia", labelEn: "Heraklion", emoji: "??" }] },
+  { id: "ie", label: "Irlanda", labelEn: "Ireland", cities: [{ id: "dublino", label: "Dublino", labelEn: "Dublin", emoji: "??" }] },
+  { id: "it", label: "Italia", labelEn: "Italy", cities: [{ id: "roma", label: "Roma", labelEn: "Rome", emoji: "???" }, { id: "milano", label: "Milano", labelEn: "Milan", emoji: "??" }, { id: "venezia", label: "Venezia", labelEn: "Venice", emoji: "??" }, { id: "napoli", label: "Napoli", labelEn: "Naples", emoji: "??" }, { id: "firenze", label: "Firenze", labelEn: "Florence", emoji: "??" }] },
+  { id: "ma", label: "Marocco", labelEn: "Morocco", cities: [{ id: "marrakech", label: "Marrakech", emoji: "??" }] },
+  { id: "nl", label: "Paesi Bassi", labelEn: "Netherlands", cities: [{ id: "amsterdam", label: "Amsterdam", emoji: "??" }] },
+  { id: "no", label: "Norvegia", labelEn: "Norway", cities: [{ id: "oslo", label: "Oslo", labelEn: "Oslo", emoji: "???" }, { id: "bergen", label: "Bergen", labelEn: "Bergen", emoji: "??" }] },
+  { id: "pl", label: "Polonia", labelEn: "Poland", cities: [{ id: "cracovia", label: "Cracovia", labelEn: "Krakow", emoji: "??" }, { id: "varsavia", label: "Varsavia", labelEn: "Warsaw", emoji: "??" }] },
+  { id: "pt", label: "Portogallo", labelEn: "Portugal", cities: [{ id: "lisbona", label: "Lisbona", labelEn: "Lisbon", emoji: "??" }, { id: "porto", label: "Porto", labelEn: "Porto", emoji: "??" }] },
+  { id: "gb", label: "Regno Unito", labelEn: "United Kingdom", cities: [{ id: "londra", label: "Londra", labelEn: "London", emoji: "??" }, { id: "edimburgo", label: "Edimburgo", labelEn: "Edinburgh", emoji: "??" }] },
+  { id: "cz", label: "Repubblica Ceca", labelEn: "Czech Republic", cities: [{ id: "praga", label: "Praga", labelEn: "Prague", emoji: "??" }] },
+  { id: "ro", label: "Romania", labelEn: "Romania", cities: [{ id: "bucarest", label: "Bucarest", labelEn: "Bucharest", emoji: "??" }] },
+  { id: "sk", label: "Slovacchia", labelEn: "Slovakia", cities: [{ id: "bratislava", label: "Bratislava", emoji: "??" }] },
+  { id: "es", label: "Spagna", labelEn: "Spain", cities: [{ id: "barcellona", label: "Barcellona", labelEn: "Barcelona", emoji: "??" }, { id: "madrid", label: "Madrid", labelEn: "Madrid", emoji: "??" }, { id: "siviglia", label: "Siviglia", labelEn: "Seville", emoji: "??" }, { id: "valencia", label: "Valencia", labelEn: "Valencia", emoji: "??" }] },
+  { id: "se", label: "Svezia", labelEn: "Sweden", cities: [{ id: "stoccolma", label: "Stoccolma", labelEn: "Stockholm", emoji: "??" }] },
+  { id: "tr", label: "Turchia", labelEn: "Turkey", cities: [{ id: "istanbul", label: "Istanbul", emoji: "??" }, { id: "antalya", label: "Antalya", emoji: "???" }, { id: "mu\u011fla", label: "Mu\u011fla", emoji: "???" }] },
+  { id: "hu", label: "Ungheria", labelEn: "Hungary", cities: [{ id: "budapest", label: "Budapest", emoji: "??" }] }
 ];
 
 const CITIES = COUNTRIES.flatMap((c) => c.cities);
+type CityItem = (typeof CITIES)[number];
+
+const emoji = (...points: number[]) => String.fromCodePoint(...points);
+const CITY_EMOJI_MAP: Record<string, string> = {
+  vienna: emoji(0x1F3B5),
+  bruges: emoji(0x1F6A4),
+  copenaghen: emoji(0x1F6B2),
+  parigi: emoji(0x1F5FC),
+  marsiglia: emoji(0x2693),
+  berlino: emoji(0x1F43B),
+  monaco_di_baviera: emoji(0x1F37A),
+  francoforte: emoji(0x1F3E6),
+  atene: emoji(0x1F3DB),
+  candia: emoji(0x1F3FA),
+  dublino: emoji(0x1F340),
+  roma: emoji(0x1F3DB, 0xFE0F),
+  milano: emoji(0x1F48E),
+  venezia: emoji(0x1F6A3),
+  napoli: emoji(0x1F355),
+  firenze: emoji(0x1F338),
+  marrakech: emoji(0x1F334),
+  amsterdam: emoji(0x1F6B2),
+  oslo: emoji(0x1F3D4, 0xFE0F),
+  bergen: emoji(0x1F3A3),
+  cracovia: emoji(0x1F985),
+  varsavia: emoji(0x2694, 0xFE0F),
+  lisbona: emoji(0x1F68B),
+  porto: emoji(0x1F377),
+  londra: emoji(0x1F3A1),
+  edimburgo: emoji(0x1F3F0),
+  praga: emoji(0x1F3F0),
+  bucarest: emoji(0x1F339),
+  bratislava: emoji(0x1F3EF),
+  barcellona: emoji(0x1F30A),
+  madrid: emoji(0x1F3A8),
+  siviglia: emoji(0x1F483),
+  valencia: emoji(0x1F34A),
+  stoccolma: emoji(0x1F30A),
+  istanbul: emoji(0x1F54C),
+  antalya: emoji(0x1F3D6, 0xFE0F),
+  "mu?la": emoji(0x1F6E5, 0xFE0F),
+  "mu??la": emoji(0x1F6E5, 0xFE0F),
+  budapest: emoji(0x267E, 0xFE0F),
+};
 
 const POPULAR_IDS = ["roma", "parigi", "barcellona", "londra", "amsterdam", "istanbul", "praga", "lisbona"];
 const POPULAR_CITIES = POPULAR_IDS.map((id) => CITIES.find((c) => c.id === id)!).filter(Boolean);
 
-// ── Onboarding slides ─────────────────────────────────────────────────────────
+// â”€â”€ Onboarding slides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const ONBOARDING_SLIDES_IT = [
+const ONBOARDING_SLIDES_IT: GuideStep[] = [
   {
-    icon: "🧭",
+    icon: "compass-outline",
     target: "header",
     title: "Barra superiore",
     body: "In alto trovi i comandi rapidi: il segnalibro apre gli itinerari salvati, il nome WAYRA cambia tema, il libro riapre questa guida e la bandiera cambia lingua.",
   },
   {
-    icon: "📍",
+    icon: "location-outline",
     target: "destination",
     title: "Destinazione",
     body: "La prima sezione sceglie la città. Puoi aprire la lista testuale con la ricerca oppure usare la mappa. Senza destinazione non puoi generare o creare un itinerario.",
   },
   {
-    icon: "📅",
+    icon: "calendar-outline",
     target: "days",
     title: "Numero di giorni",
     body: "La sezione dei giorni mostra solo le durate consentite per la città e l'esperienza selezionata. Se cambi esperienza, il numero massimo può cambiare automaticamente.",
   },
   {
-    icon: "✨",
+    icon: "sparkles-outline",
     target: "experience",
     title: "Tipo esperienza",
-    body: "Iconico crea un viaggio essenziale con le tappe più rappresentative. Esploratore usa un database più ampio e può arrivare a itinerari più lunghi e ricchi.",
+    body: "Iconico crea un viaggio essenziale con le tappe piu rappresentative. Esploratore usa un database piu ampio e puo arrivare a itinerari piu lunghi e ricchi.",
   },
   {
-    icon: "🚶",
+    icon: "walk-outline",
     target: "walk",
     title: "Camminata max",
-    body: "Qui scegli una modalità di camminata: Rilassato limita a 3 km al giorno, Bilanciato a 5 km, Intenso a 7 km. Più km danno all'AI più libertà di raggiungere attrazioni migliori ma più distanti.",
+    body: "Qui scegli il ritmo del viaggio: Rilassato resta piu compatto, Bilanciato riempie meglio la giornata, Intenso aggiunge piu tappe quando restano entro tempo e distanza.",
   },
   {
-    icon: "🍽️",
+    icon: "restaurant-outline",
     target: "actions",
     title: "Pulsanti finali",
-    body: "Genera costruisce automaticamente giornate, tappe, ristoranti e link Maps. Crea itinerario apre invece la modalità manuale, dove scegli tu ogni tappa.",
+    body: "Genera costruisce automaticamente giornate, tappe e link Maps. Crea itinerario apre invece la modalità manuale, dove scegli tu ogni tappa.",
   },
   {
-    icon: "🚦",
+    icon: "hourglass-outline",
     target: "none",
     title: "Durante la generazione",
     body: "Quando parte il calcolo, il pannello centrale ti mostra lo stato. L'app prova a rispettare limiti di tempo, musei e distanza, poi apre direttamente il riepilogo dell'itinerario.",
   },
 ];
 
-const ONBOARDING_SLIDES_EN = [
+const ONBOARDING_SLIDES_EN: GuideStep[] = [
   {
-    icon: "🧭",
+    icon: "compass-outline",
     target: "header",
     title: "Top bar",
     body: "At the top you find quick controls: the bookmark opens saved itineraries, WAYRA changes theme, the book reopens this guide and the flag changes language.",
   },
   {
-    icon: "📍",
+    icon: "location-outline",
     target: "destination",
     title: "Destination",
     body: "The first section chooses the city. You can open the searchable list or use the map. Without a destination you cannot generate or manually create an itinerary.",
   },
   {
-    icon: "📅",
+    icon: "calendar-outline",
     target: "days",
     title: "Number of days",
     body: "The days section only shows durations allowed for the selected city and experience. If you change experience, the maximum number can update automatically.",
   },
   {
-    icon: "✨",
+    icon: "sparkles-outline",
     target: "experience",
     title: "Experience type",
     body: "Iconic creates an essential trip with the most representative stops. Explorer uses a wider database and can produce longer, richer itineraries.",
   },
   {
-    icon: "🚶",
+    icon: "walk-outline",
     target: "walk",
     title: "Max walking",
-    body: "Here you choose a walking mode: Relaxed limits the day to 3 km, Balanced to 5 km and Intense to 7 km. More km gives the AI more freedom to include better attractions that are farther away.",
+    body: "Here you choose the trip rhythm: Relaxed stays more compact, Balanced fills the day more evenly, Intense adds more stops when they fit time and distance.",
   },
   {
-    icon: "🍽️",
+    icon: "restaurant-outline",
     target: "actions",
     title: "Final buttons",
-    body: "Generate automatically builds days, stops, restaurants and Maps links. Build itinerary opens manual mode, where you choose each stop yourself.",
+    body: "Generate automatically builds days, stops and Maps links. Create itinerary opens the manual mode, where you choose every stop yourself.",
   },
   {
-    icon: "🚦",
+    icon: "hourglass-outline",
     target: "none",
     title: "While generating",
-    body: "When calculation starts, the central panel shows progress. The app tries to respect time, museum and distance limits, then opens the itinerary summary directly.",
+    body: "When calculation starts, the central panel shows the status. The app tries to respect time, museum and distance limits, then opens the itinerary summary directly.",
   },
 ];
 
-// ── Messaggi generazione ──────────────────────────────────────────────────────
+// â”€â”€ Messaggi generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const GENERATING_MESSAGES_IT = [
-  "Ricerca attrazioni in corso…",
-  "Ottimizziamo il percorso…",
-  "Selezioniamo i ristoranti…",
-  "Aggiunta curiosità locali…",
-  "Quasi pronto…",
+  "Ricerca attrazioni in corso...",
+  "Ottimizziamo il percorso...",
+  "Selezioniamo i ristoranti...",
+  "Aggiunta curiosit\u00e0 locali...",
+  "Quasi pronto...",
 ];
 
 const GENERATING_MESSAGES_EN = [
-  "Searching for attractions…",
-  "Optimizing the route…",
-  "Selecting restaurants…",
-  "Adding local insights…",
-  "Almost ready…",
+  "Searching for attractions...",
+  "Optimizing the route...",
+  "Selecting restaurants...",
+  "Adding local insights...",
+  "Almost ready...",
 ];
 
-// ── Screen principale ─────────────────────────────────────────────────────────
+// â”€â”€ Screen principale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -239,15 +274,27 @@ export default function HomeScreen() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
+  const [recentCityIds, setRecentCityIds]   = useState<string[]>([]);
   const guideTargets = useRef<Map<string, View>>(new Map());
 
   const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : GENERATING_MESSAGES_IT;
 
-  // ── Controlla se mostrare onboarding ───────────────────────────────────────
+  // â”€â”€ Controlla se mostrare onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
       if (!val) setShowOnboarding(true);
     });
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.getItem(RECENT_CITIES_KEY)
+      .then((value) => {
+        if (!value) return;
+        const parsed = JSON.parse(value);
+        if (!Array.isArray(parsed)) return;
+        setRecentCityIds(parsed.filter((id) => typeof id === "string" && CITIES.some((c) => c.id === id)).slice(0, 3));
+      })
+      .catch((e) => { if (__DEV__) console.warn("[Home] recent cities read failed:", e); });
   }, []);
 
   const dismissOnboarding = async () => {
@@ -260,7 +307,7 @@ export default function HomeScreen() {
     else guideTargets.current.delete(key);
   }, []);
 
-  // ── Cicla i messaggi durante la generazione ─────────────────────────────────
+  // â”€â”€ Cicla i messaggi durante la generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!loading) { setGenMsgIndex(0); return; }
     setGenMsgIndex(0);
@@ -270,7 +317,7 @@ export default function HomeScreen() {
     return () => clearInterval(id);
   }, [loading]);
 
-  // ── Contatore secondi durante la generazione ────────────────────────────────
+  // â”€â”€ Contatore secondi durante la generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (!loading) { setGenSeconds(0); return; }
     setGenSeconds(0);
@@ -278,13 +325,13 @@ export default function HomeScreen() {
     return () => clearInterval(id);
   }, [loading]);
 
-  const LEVELS: { id: ExperienceLevel; label: string; subtitle: string; color: string }[] = [
-    { id: 1,     label: t.iconicLabel,   subtitle: t.iconicSubtitle,   color: "#e8c06a" },
-    { id: "mix", label: t.explorerLabel, subtitle: t.explorerSubtitle, color: "#6ee7b7" },
+  const LEVELS: { id: ExperienceLevel; label: string; subtitle: string; color: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+    { id: 1,     label: t.iconicLabel,   subtitle: t.iconicSubtitle,   color: "#e8c06a", icon: "star-outline" },
+    { id: "mix", label: t.explorerLabel, subtitle: t.explorerSubtitle, color: "#6ee7b7", icon: "compass-outline" },
   ];
 
   const { loading: cityInfoLoading } = useCityInfo(city);
-  // useCityInfo già applica fallback (5 per iconico, 7 per esploratore) anche senza città
+  // useCityInfo giÃ  applica fallback (5 per iconico, 7 per esploratore) anche senza cittÃ 
   const maxDays = level === 1 ? ICONIC_MAX_DAYS : EXPLORER_MAX_DAYS;
   const availableDays = Array.from({ length: maxDays }, (_, i) => i + 1);
 
@@ -298,8 +345,8 @@ export default function HomeScreen() {
     if (numDays > maxDays) setNumDays(maxDays);
   }, [maxDays]);
 
-  // Quando l'utente cambia città in modalità esploratore, porta i giorni
-  // selezionati al massimo disponibile per la nuova città — ma solo dopo
+  // Quando l'utente cambia cittÃ  in modalitÃ  esploratore, porta i giorni
+  // selezionati al massimo disponibile per la nuova cittÃ  â€” ma solo dopo
   // che useCityInfo ha caricato i dati reali (evita stale read).
   const prevCityRef = useRef(city);
   useEffect(() => {
@@ -313,9 +360,24 @@ export default function HomeScreen() {
 
   const selectedCity = CITIES.find((c) => c.id === city) ?? null;
 
+  const rememberCity = useCallback((id: string) => {
+    if (!CITIES.some((c) => c.id === id)) return;
+    setRecentCityIds((prev) => {
+      const next = [id, ...prev.filter((item) => item !== id)].slice(0, 3);
+      AsyncStorage.setItem(RECENT_CITIES_KEY, JSON.stringify(next))
+        .catch((e) => { if (__DEV__) console.warn("[Home] recent cities write failed:", e); });
+      return next;
+    });
+  }, []);
+
+  const selectCity = useCallback((id: string) => {
+    setCity(id);
+    rememberCity(id);
+  }, [rememberCity]);
+
   function alertNoCitySelected() {
     Alert.alert(
-      lang === "it" ? "Nessuna città selezionata" : "No city selected",
+      lang === "it" ? "Nessuna citt\u00e0 selezionata" : "No city selected",
       lang === "it"
         ? "Seleziona una destinazione prima di continuare."
         : "Please select a destination before continuing.",
@@ -326,8 +388,8 @@ export default function HomeScreen() {
   function handleLevelSelect(nextLevel: ExperienceLevel) {
     if (nextLevel === level) return;
     // Quando si passa a iconico e i giorni selezionati superano il massimo, riduci subito.
-    // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha più giorni);
-    // l'utente può scegliere più giorni autonomamente dalla griglia aggiornata.
+    // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha piÃ¹ giorni);
+    // l'utente puÃ² scegliere piÃ¹ giorni autonomamente dalla griglia aggiornata.
     if (nextLevel === "mix") {
       setLevel(nextLevel);
       setNumDays(EXPLORER_MAX_DAYS);
@@ -365,14 +427,14 @@ export default function HomeScreen() {
       params: {
         city,
         numDays: "1",
-        cityLabel: cityObj ? `${cityObj.emoji} ${cityObj.label}` : city,
+        cityLabel: cityObj ? `${CITY_EMOJI_MAP[cityObj.id] ?? emoji(0x1F4CD)} ${cityObj.label}` : city,
       },
     });
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <View ref={(ref) => setGuideTarget("header", ref)} style={styles.header}>
         {/* Sinistra */}
         <TouchableOpacity
@@ -401,11 +463,11 @@ export default function HomeScreen() {
             activeOpacity={0.7}
             style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
           >
-            <Text style={styles.flagEmoji}>{lang === "it" ? "🇮🇹" : "🇬🇧"}</Text>
+            <CountryFlag isoCode={lang === "it" ? "it" : "gb"} size={18} />
           </TouchableOpacity>
         </View>
 
-        {/* WAYRA centrato in assoluto — box-none: la View non cattura tocchi
+        {/* WAYRA centrato in assoluto â€” box-none: la View non cattura tocchi
             ma TouchableOpacity interno (cambio tema) rimane tappabile */}
         <View style={styles.headerCenter} pointerEvents="box-none">
           <TouchableOpacity onPress={toggleTheme} activeOpacity={0.7}>
@@ -421,7 +483,7 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* ── Selezione città ── */}
+        {/* â”€â”€ Selezione cittÃ  â”€â”€ */}
         <FadeInUp delay={staggerDelay(0)}>
         <View ref={(ref) => setGuideTarget("destination", ref)}>
         <Section title={t.destination} colors={colors}>
@@ -434,12 +496,15 @@ export default function HomeScreen() {
             >
               <Ionicons name="search-outline" size={16} color={colors.textMuted} />
               {selectedCity ? (
-                <Text style={[styles.cityPickerLabel, { color: colors.text }]}>
-                  {selectedCity.emoji}{"  "}{lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label}
-                </Text>
+                <View style={styles.cityPickerSelected}>
+                  <CityIcon cityId={selectedCity.id} colors={colors} selected size="sm" />
+                  <Text style={[styles.cityPickerLabel, { color: colors.text }]}>
+                    {lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label}
+                  </Text>
+                </View>
               ) : (
                 <Text style={[styles.cityPickerLabel, { color: colors.textSub }]}>
-                  {lang === "it" ? "Seleziona una città…" : "Select a city…"}
+                  {lang === "it" ? "Seleziona una citt\u00e0..." : "Select a city..."}
                 </Text>
               )}
               <Ionicons name="chevron-down" size={16} color={colors.textMuted} style={{ marginLeft: "auto" }} />
@@ -458,7 +523,7 @@ export default function HomeScreen() {
         </View>
         </FadeInUp>
 
-        {/* ── Giorni ── */}
+        {/* â”€â”€ Giorni â”€â”€ */}
         <FadeInUp delay={staggerDelay(1)}>
         <View ref={(ref) => setGuideTarget("days", ref)}>
         <Section title={t.numDays} colors={colors}>
@@ -491,7 +556,7 @@ export default function HomeScreen() {
         </View>
         </FadeInUp>
 
-        {/* ── Tipo esperienza ── */}
+        {/* â”€â”€ Tipo esperienza â”€â”€ */}
         <FadeInUp delay={staggerDelay(2)}>
         <View ref={(ref) => setGuideTarget("experience", ref)}>
         <Section title={t.experienceType} colors={colors}>
@@ -518,7 +583,7 @@ export default function HomeScreen() {
         </View>
         </FadeInUp>
 
-        {/* ── Banner offline ── */}
+        {/* â”€â”€ Banner offline â”€â”€ */}
         {!isOnline && (
           <View style={[styles.errorBox, { backgroundColor: colors.textMuted + "22", borderColor: colors.textMuted + "44" }]}>
             <Ionicons name="cloud-offline-outline" size={16} color={colors.textMuted} />
@@ -528,7 +593,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Errore ── */}
+        {/* â”€â”€ Errore â”€â”€ */}
         {!!error && (
           <View style={[styles.errorBox, { backgroundColor: colors.danger + "22", borderColor: colors.danger + "44" }]}>
             <Ionicons name="warning-outline" size={16} color={colors.danger} />
@@ -536,7 +601,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── CTA ── */}
+        {/* â”€â”€ CTA â”€â”€ */}
         <FadeInUp delay={staggerDelay(4)}>
         <View ref={(ref) => setGuideTarget("actions", ref)}>
           {/* Wrapper relativo per posizionare PulseGlow dietro al bottone */}
@@ -592,35 +657,36 @@ export default function HomeScreen() {
         </FadeInUp>
       </ScrollView>
 
-      {/* ── Modal selezione città (lista) ── */}
+      {/* â”€â”€ Modal selezione cittÃ  (lista) â”€â”€ */}
       <CityPickerModal
         visible={showCityPicker}
         selectedId={city}
         lang={lang}
         colors={colors}
+        recentCityIds={recentCityIds}
         onSelect={(id) => {
-          setCity(id);
+          selectCity(id);
           setShowCityPicker(false);
         }}
         onClose={() => setShowCityPicker(false)}
       />
 
-      {/* ── Modal mappa del mondo ── */}
+      {/* â”€â”€ Modal mappa del mondo â”€â”€ */}
       <WorldMapModal
         visible={showWorldMap}
         lang={lang}
         onSelect={(id) => {
-          setCity(id);
+          selectCity(id);
           setShowWorldMap(false);
         }}
         onClose={() => setShowWorldMap(false)}
       />
 
-      {/* ── Overlay generazione AI ── */}
+      {/* â”€â”€ Overlay generazione AI â”€â”€ */}
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.genOverlay}>
           <View style={[styles.genCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={styles.genEmoji}>✨</Text>
+            <Text style={styles.genEmoji}>{emoji(0x2728)}</Text>
             <ActivityIndicator color={colors.accentGold} size="large" style={{ marginVertical: 16 }} />
             <Text style={[styles.genCity, { color: colors.accentGold }]}>
               {selectedCity ? (lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label) : ""}
@@ -640,7 +706,7 @@ export default function HomeScreen() {
 
             {/* Contatore secondi */}
             <Text style={[styles.genTimer, { color: genSeconds >= 20 ? colors.danger : colors.textMuted }]}>
-              {genSeconds}s{genSeconds >= 20 ? (lang === "it" ? " · quasi…" : " · almost…") : ""}
+              {genSeconds}s{genSeconds >= 20 ? (lang === "it" ? " \u00b7 quasi..." : " \u00b7 almost...") : ""}
             </Text>
             <TouchableOpacity onPress={cancel} style={[styles.genCancel, { borderColor: colors.border }]} activeOpacity={0.7}>
               <Text style={[styles.genCancelText, { color: colors.textMuted }]}>
@@ -651,7 +717,7 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      {/* ── Onboarding ── */}
+      {/* â”€â”€ Onboarding â”€â”€ */}
       {showOnboarding && (
         <OnboardingModal lang={lang} targetRefs={guideTargets.current} onDone={dismissOnboarding} />
       )}
@@ -659,15 +725,16 @@ export default function HomeScreen() {
   );
 }
 
-// ── CityPickerModal ───────────────────────────────────────────────────────────
+// â”€â”€ CityPickerModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CityPickerModal({
-  visible, selectedId, lang, colors, onSelect, onClose,
+  visible, selectedId, lang, colors, recentCityIds, onSelect, onClose,
 }: {
   visible: boolean;
   selectedId: string;
   lang: string;
   colors: any;
+  recentCityIds: string[];
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
@@ -679,7 +746,7 @@ function CityPickerModal({
   useEffect(() => {
     if (visible) {
       setSearch("");
-      // Auto-espande il paese della città selezionata
+      // Auto-espande il paese della cittÃ  selezionata
       if (selectedId) {
         const country = COUNTRIES.find((co) => co.cities.some((ci) => ci.id === selectedId));
         setExpandedCountry(country?.id ?? null);
@@ -702,6 +769,9 @@ function CityPickerModal({
     : COUNTRIES;
 
   const isSearching = search.trim().length > 0;
+  const recentCities = recentCityIds
+    .map((id) => CITIES.find((c) => c.id === id))
+    .filter(Boolean) as CityItem[];
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -709,7 +779,7 @@ function CityPickerModal({
         {/* Header */}
         <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
           <Text style={[styles.pickerTitle, { color: colors.text }]}>
-            {lang === "it" ? "Scegli la città" : "Choose a city"}
+            {lang === "it" ? "Scegli la citt\u00e0" : "Choose a city"}
           </Text>
           <TouchableOpacity onPress={onClose} style={styles.pickerClose} activeOpacity={0.7}>
             <Ionicons name="close" size={22} color={colors.textMuted} />
@@ -724,7 +794,7 @@ function CityPickerModal({
             style={[styles.pickerSearchInput, { color: colors.text }]}
             value={search}
             onChangeText={setSearch}
-            placeholder={lang === "it" ? "Cerca una città…" : "Search a city…"}
+            placeholder={lang === "it" ? "Cerca una citt\u00e0..." : "Search a city..."}
             placeholderTextColor={colors.textSub}
             selectionColor={colors.accentGold}
             returnKeyType="search"
@@ -733,11 +803,51 @@ function CityPickerModal({
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-          {/* Città popolari (solo senza ricerca) */}
+          {!isSearching && recentCities.length > 0 && (
+            <View style={styles.popularSection}>
+              <Text style={[styles.popularTitle, { color: colors.textMuted }]}>
+                {lang === "it" ? "Ultime cercate" : "Recent searches"}
+              </Text>
+              <View style={styles.popularGrid}>
+                {recentCities.map((c) => {
+                  const isSelected = c.id === selectedId;
+                  const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
+                  const dlDone = getStatus(c.id) === "done";
+                  return (
+                    <TouchableOpacity
+                      key={c.id}
+                      style={[
+                        styles.popularChip,
+                        { backgroundColor: colors.card, borderColor: colors.border },
+                        isSelected && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "18" },
+                        dlDone && !isSelected && { borderColor: colors.accentGreen + "60" },
+                      ]}
+                      onPress={() => onSelect(c.id)}
+                      activeOpacity={0.8}
+                    >
+                      <CityIcon cityId={c.id} colors={colors} selected={isSelected} size="sm" />
+                      <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
+                        {label}
+                      </Text>
+                      {dlDone && (
+                        <Ionicons
+                          name="cloud-done-outline"
+                          size={12}
+                          color={colors.accentGreen}
+                          style={{ position: "absolute", top: 5, right: 6 }}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+          {/* CittÃ  popolari (solo senza ricerca) */}
           {!isSearching && (
             <View style={styles.popularSection}>
               <Text style={[styles.popularTitle, { color: colors.textMuted }]}>
-                {lang === "it" ? "🔥 Più cercate" : "🔥 Most popular"}
+                {lang === "it" ? "Pi\u00f9 cercate" : "Most popular"}
               </Text>
               <View style={styles.popularGrid}>
                 {POPULAR_CITIES.map((c) => {
@@ -756,7 +866,7 @@ function CityPickerModal({
                       onPress={() => onSelect(c.id)}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.popularChipEmoji}>{c.emoji}</Text>
+                      <CityIcon cityId={c.id} colors={colors} selected={isSelected} size="sm" />
                       <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                         {label}
                       </Text>
@@ -785,7 +895,7 @@ function CityPickerModal({
           {/* Lista per paese */}
           {filteredCountries.length === 0 ? (
             <Text style={[styles.pickerEmpty, { color: colors.textMuted }]}>
-              {lang === "it" ? "Nessuna città trovata" : "No city found"}
+              {lang === "it" ? "Nessuna citt\u00e0 trovata" : "No city found"}
             </Text>
           ) : (
             filteredCountries.map((co) => {
@@ -799,7 +909,7 @@ function CityPickerModal({
                       onPress={() => setExpandedCountry(isOpen ? null : co.id)}
                       activeOpacity={0.8}
                     >
-                      <CountryFlag isoCode={co.id.toUpperCase()} size={18} />
+                      <CountryFlag isoCode={co.id} size={18} />
                       <Text style={[styles.countryName, { color: colors.textSub }]}>{countryLabel}</Text>
                       <Ionicons
                         name={isOpen ? "chevron-up" : "chevron-down"}
@@ -826,7 +936,7 @@ function CityPickerModal({
                         onPress={() => onSelect(c.id)}
                         activeOpacity={0.8}
                       >
-                        <Text style={styles.cityRowEmoji}>{c.emoji}</Text>
+                        <CityIcon cityId={c.id} colors={colors} selected={isSelected} />
                         <Text style={[styles.cityRowLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                           {label}
                         </Text>
@@ -878,7 +988,7 @@ function CityPickerModal({
   );
 }
 
-// ── OnboardingModal ───────────────────────────────────────────────────────────
+// â”€â”€ OnboardingModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRefs: Map<string, View>; onDone: () => void }) {
   const [slide, setSlide] = useState(0);
@@ -898,7 +1008,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   const cutoutLeft   = rect ? Math.max(0,            rect.x - PAD)               : 0;
   const cutoutRight  = rect ? Math.min(SCREEN_WIDTH,  rect.x + rect.width + PAD)  : SCREEN_WIDTH;
 
-  // Posizione card: sotto l'elemento se c'è spazio, altrimenti sopra
+  // Posizione card: sotto l'elemento se c'Ã¨ spazio, altrimenti sopra
   // SAFE_BOTTOM: 48px tengono conto della safe area + home indicator + respiro visivo
   const SAFE_BOTTOM = 48;
   const fitsBelow = rect
@@ -909,7 +1019,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
         ? rect.y + rect.height + PAD + 16
         : rect.y - cardHeight - PAD - 16)
     : (SCREEN_HEIGHT - cardHeight) / 2;
-  // Clamp: mai sopra il bordo superiore (16px) né sotto il bordo inferiore (SAFE_BOTTOM)
+  // Clamp: mai sopra il bordo superiore (16px) nÃ© sotto il bordo inferiore (SAFE_BOTTOM)
   const tooltipTop = Math.max(16, Math.min(SCREEN_HEIGHT - cardHeight - SAFE_BOTTOM, rawTooltipTop));
   const tooltipLeft = Math.max(16, Math.min(
     SCREEN_WIDTH - tooltipWidth - 16,
@@ -934,7 +1044,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
     <Modal visible transparent animationType="fade">
       <View style={styles.tourOverlay}>
 
-        {/* ── Overlay con cutout reale ── */}
+        {/* â”€â”€ Overlay con cutout reale â”€â”€ */}
         {rect ? (
           // 4 pannelli scuri che circondano l'elemento, lasciandolo visibile
           <>
@@ -946,11 +1056,11 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
             <View pointerEvents="none" style={[styles.tourHighlight, { top: cutoutTop, left: cutoutLeft, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop, borderColor: colors.accentGold, backgroundColor: colors.accentGold + "14", shadowColor: colors.accentGold }]} />
           </>
         ) : (
-          // Nessun target trovato → overlay pieno
+          // Nessun target trovato â†’ overlay pieno
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: OV }]} />
         )}
 
-        {/* ── Freccia verso l'elemento ── */}
+        {/* â”€â”€ Freccia verso l'elemento â”€â”€ */}
         {rect && (
           <View
             pointerEvents="none"
@@ -958,7 +1068,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
               styles.tourArrow,
               {
                 left: Math.max(22, Math.min(SCREEN_WIDTH - 22, rect.x + rect.width / 2 - 7)),
-                // freccia tra highlight e card: sopra la card se card è sotto, sotto la card se è sopra
+                // freccia tra highlight e card: sopra la card se card Ã¨ sotto, sotto la card se Ã¨ sopra
                 top: fitsBelow ? tooltipTop - 13 : tooltipTop + cardHeight - 8,
                 transform: [{ rotate: fitsBelow ? "180deg" : "0deg" }],
                 borderBottomColor: colors.accentGold,
@@ -967,13 +1077,15 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
           />
         )}
 
-        {/* ── Card tooltip ── */}
+        {/* â”€â”€ Card tooltip â”€â”€ */}
         <View
           style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}
           onLayout={(e) => setCardHeight(e.nativeEvent.layout.height)}
         >
           <Text style={[styles.tourEyebrow, { color: colors.accentGold }]}>{slide + 1} / {slides.length}</Text>
-          <Text style={styles.onboardingIcon}>{current.icon}</Text>
+          <View style={[styles.onboardingIconBox, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "44" }]}>
+            <Ionicons name={current.icon} size={28} color={colors.accentGold} />
+          </View>
           <Text style={[styles.onboardingTitle, { color: colors.text }]}>{current.title}</Text>
           <Text style={[styles.onboardingBody, { color: colors.textSub }]}>{current.body}</Text>
           <View style={styles.onboardingDots}>
@@ -1004,13 +1116,77 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Section({ title, children, colors }: { title: string; children: React.ReactNode; colors: any }) {
   return (
     <View style={[styles.section, { borderColor: colors.border }]}>
       <Text style={[styles.sectionTitle, { color: colors.accentGold }]}>{title}</Text>
       {children}
+    </View>
+  );
+}
+
+function WalkerPose({ color, pose }: { color: string; pose: 0 | 1 | 2 }) {
+  const poses = [
+    {
+      frontArm: "14,10 10.5,13.5 8.5,17.5",
+      backArm: "14,10 17,12.8 19,15.8",
+      frontLeg: "14.5,16 11,20 9,25",
+      backLeg: "14.5,16 16.8,20 20,23.8",
+    },
+    {
+      frontArm: "14,10 11.8,13.5 11.5,17.5",
+      backArm: "14,10 16.2,13.5 17,17.3",
+      frontLeg: "14.5,16 13,20 11.8,25",
+      backLeg: "14.5,16 15.8,19.8 16.7,25",
+    },
+    {
+      frontArm: "14,10 17.5,13.5 19.5,17.5",
+      backArm: "14,10 11,12.8 9,15.8",
+      frontLeg: "14.5,16 18,20 20,25",
+      backLeg: "14.5,16 12.2,20 9,23.8",
+    },
+  ] as const;
+  const p = poses[pose];
+
+  return (
+    <Svg width={30} height={30} viewBox="0 0 28 28">
+      <Polyline points={p.backArm} fill="none" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
+      <Polyline points={p.backLeg} fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
+      <Line x1={14} y1={8.3} x2={14.5} y2={16} stroke={color} strokeWidth={2.6} strokeLinecap="round" />
+      <Polyline points={p.frontArm} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <Polyline points={p.frontLeg} fill="none" stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={14} cy={5} r={3.2} fill={color} />
+    </Svg>
+  );
+}
+
+function CityIcon({
+  cityId,
+  colors,
+  selected = false,
+  size = "md",
+}: {
+  cityId: string;
+  colors: any;
+  selected?: boolean;
+  size?: "sm" | "md";
+}) {
+  const cityEmoji = CITY_EMOJI_MAP[cityId] ?? emoji(0x1F4CD);
+  const isSmall = size === "sm";
+
+  return (
+    <View
+      style={[
+        isSmall ? styles.cityIconBoxSm : styles.cityIconBox,
+        {
+          backgroundColor: selected ? colors.accentGold + "18" : colors.card,
+          borderColor: selected ? colors.accentGold + "55" : colors.border2,
+        },
+      ]}
+    >
+      <Text style={isSmall ? styles.cityEmojiSm : styles.cityEmoji}>{cityEmoji}</Text>
     </View>
   );
 }
@@ -1035,8 +1211,8 @@ function Option({ label, selected, onPress, color, colors }: {
   );
 }
 
-function LevelOption({ id, label, subtitle, color, selected, onPress, colors }: {
-  id: ExperienceLevel; label: string; subtitle: string;
+function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colors }: {
+  id: ExperienceLevel; label: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap;
   color: string; selected: boolean; onPress: () => void; colors: any;
 }) {
   return (
@@ -1051,9 +1227,17 @@ function LevelOption({ id, label, subtitle, color, selected, onPress, colors }: 
       haptic="light"
       pressScale={0.97}
     >
-      <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
-        {label}
-      </Text>
+      <View style={styles.levelContentRow}>
+        <View style={[
+          styles.levelIconBox,
+          { borderColor: selected ? color + "88" : colors.border2, backgroundColor: selected ? color + "18" : colors.inputBg },
+        ]}>
+          <Ionicons name={icon} size={17} color={selected ? color : colors.textMuted} />
+        </View>
+        <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
     </PressableCard>
   );
 }
@@ -1066,6 +1250,42 @@ function WalkModeSelector({
   lang: string;
   colors: any;
 }) {
+  const activeMode = WALK_MODES.find((mode) => mode.km === value) ?? WALK_MODES[1];
+  const motion = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    motion.setValue(0);
+    const duration = activeMode.id === "relaxed" ? 2600 : activeMode.id === "balanced" ? 1800 : 1150;
+    const animation = Animated.loop(
+      Animated.timing(motion, {
+        toValue: 1,
+        duration,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [activeMode.id, motion]);
+
+  const iconMotionStyle = {
+    opacity: motion.interpolate({
+      inputRange: [0, 0.12, 0.86, 1],
+      outputRange: [0, 1, 1, 0],
+    }),
+    transform: [
+      { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [-10, 12] }) },
+      {
+        translateY: activeMode.id === "relaxed"
+          ? motion.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, -1, 1] })
+          : motion.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [1, -2, 1, -2, 1] }),
+      },
+      { scale: activeMode.id === "intense" ? 1.08 : 1 },
+    ],
+  };
+  const poseOneOpacity = motion.interpolate({ inputRange: [0, 0.18, 0.36, 0.82, 1], outputRange: [1, 1, 0, 0, 1] });
+  const poseTwoOpacity = motion.interpolate({ inputRange: [0, 0.18, 0.36, 0.52, 0.7, 1], outputRange: [0, 0, 1, 1, 0, 0] });
+  const poseThreeOpacity = motion.interpolate({ inputRange: [0, 0.5, 0.7, 0.86, 1], outputRange: [0, 0, 1, 1, 0] });
   return (
     <View style={styles.walkCard}>
       <View style={styles.walkTopRow}>
@@ -1073,11 +1293,26 @@ function WalkModeSelector({
           <Text style={[styles.walkValue, { color: colors.accentGold }]}>
             {value} km / {lang === "it" ? "giorno" : "day"}
           </Text>
-          <Text style={[styles.walkMood, { color: colors.textMuted }]}>
-            {lang === "it" ? "Modalità camminata" : "Walking mode"}
-          </Text>
         </View>
-        <Ionicons name="walk-outline" size={24} color={colors.accentGold} />
+        <View style={styles.walkMotionStage}>
+          <View style={[styles.walkRoad, { backgroundColor: colors.border }]} />
+          <View style={styles.walkRoadDashes}>
+            <View style={[styles.walkRoadDash, { backgroundColor: colors.accentGold + "80" }]} />
+            <View style={[styles.walkRoadDash, { backgroundColor: colors.accentGold + "80" }]} />
+            <View style={[styles.walkRoadDash, { backgroundColor: colors.accentGold + "80" }]} />
+          </View>
+          <Animated.View style={[styles.walkIconWrap, iconMotionStyle]}>
+            <Animated.View style={[styles.walkerPose, { opacity: poseOneOpacity }]}>
+              <WalkerPose color={colors.accentGold} pose={0} />
+            </Animated.View>
+            <Animated.View style={[styles.walkerPose, { opacity: poseTwoOpacity }]}>
+              <WalkerPose color={colors.accentGold} pose={1} />
+            </Animated.View>
+            <Animated.View style={[styles.walkerPose, { opacity: poseThreeOpacity }]}>
+              <WalkerPose color={colors.accentGold} pose={2} />
+            </Animated.View>
+          </Animated.View>
+        </View>
       </View>
       <View style={styles.walkModeRow}>
         {WALK_MODES.map((mode) => {
@@ -1106,7 +1341,7 @@ function WalkModeSelector({
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// â”€â”€ Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
@@ -1178,6 +1413,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
+  cityPickerSelected: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minWidth: 0,
+  },
+  cityIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cityIconBoxSm: {
+    width: 24,
+    height: 24,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cityEmoji: {
+    fontSize: 17,
+    lineHeight: 22,
+  },
+  cityEmojiSm: {
+    fontSize: 15,
+    lineHeight: 20,
+  },
   mapBtn: {
     width: 44,
     height: 44,
@@ -1188,16 +1454,17 @@ const styles = StyleSheet.create({
   },
 
   // Days
-  daysGrid: { gap: 6 },
-  daysRow: { flexDirection: "row", gap: DAYS_GAP },
+  daysGrid: { gap: 6, height: 92 },
+  daysRow: { flex: 1, minHeight: 40, flexDirection: "row", gap: DAYS_GAP },
   option: {
     flex: 1,
     borderWidth: 1.5,
     borderRadius: 10,
-    paddingVertical: 11,
+    paddingVertical: 0,
     alignItems: "center",
+    justifyContent: "center",
   },
-  optionText: { fontWeight: "700", fontSize: 14 },
+  optionText: { fontWeight: "700", fontSize: 14, lineHeight: 18 },
   daysLoading: { gap: 6 },
 
   // Level
@@ -1214,6 +1481,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 16,
   },
+  levelContentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    minWidth: 0,
+  },
+  levelIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
   levelDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
   levelTextWrap: { flex: 1, gap: 3 },
   levelLabel: { fontWeight: "800", fontSize: 17 },
@@ -1225,6 +1508,51 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  walkMotionStage: {
+    width: 54,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  walkRoad: {
+    position: "absolute",
+    left: 5,
+    right: 5,
+    bottom: 2,
+    height: 8,
+    borderRadius: 8,
+    opacity: 0.65,
+    transform: [{ scaleX: 0.92 }],
+  },
+  walkRoadDashes: {
+    position: "absolute",
+    left: 18,
+    right: 18,
+    bottom: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  walkRoadDash: {
+    width: 5,
+    height: 1.5,
+    borderRadius: 2,
+  },
+  walkIconWrap: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+  },
+  walkerPose: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
   walkModeRow: {
     flexDirection: "row",
@@ -1292,7 +1620,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // ── City Picker Modal ──────────────────────────────────────────────────────
+  // â”€â”€ City Picker Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pickerSafe: { flex: 1 },
   pickerHeader: {
     flexDirection: "row",
@@ -1368,7 +1696,7 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
-  // ── Generating overlay ─────────────────────────────────────────────────────
+  // â”€â”€ Generating overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   genOverlay: {
     flex: 1,
     backgroundColor: "#000000cc",
@@ -1418,7 +1746,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ── Onboarding ─────────────────────────────────────────────────────────────
+  // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   tourOverlay: {
     flex: 1,
     // backgroundColor assente: gestiamo l'overlay con 4 pannelli cutout
@@ -1455,6 +1783,15 @@ const styles = StyleSheet.create({
   },
   tourEyebrow: { fontSize: 11, fontWeight: "800" },
   onboardingIcon: { fontSize: 38, marginBottom: 2 },
+  onboardingIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
   onboardingTitle: {
     fontSize: 18,
     fontWeight: "800",

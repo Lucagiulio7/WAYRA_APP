@@ -8,13 +8,9 @@ Pipeline:
   → generate_maps_link
 """
 import math
-import re
-import unicodedata
 from urllib.parse import quote
 from collections import defaultdict
 from typing import Optional
-
-from services.must_see import annotate_must_see_many
 
 MAX_DAILY_MINUTES     = 420   # 7 hours max of attraction time per day
 MIN_DAILY_MINUTES     = 300   # 5 hours min of attraction time per day
@@ -27,71 +23,13 @@ CLUSTER_RADIUS_KM     = 1.5   # proximity radius for the isolation check
 MIN_CLUSTER_NEIGHBORS = 2     # minimum other attractions within CLUSTER_RADIUS_KM to be included
 
 
-def _effort_profile(max_walk_km: float) -> dict:
-    """Travel rhythm inferred from the user's walking preference."""
-    if max_walk_km <= 3:
-        return {
-            "mode": "relaxed",
-            "min_minutes": 300,
-            "target_minutes": 315,
-            "max_minutes": 360,
-            "min_attractions": 4,
-            "max_attractions": 5,
-            "stop_after_min_extra": 1,
-        }
-    if max_walk_km <= 5:
-        return {
-            "mode": "balanced",
-            "min_minutes": 300,
-            "target_minutes": 360,
-            "max_minutes": 390,
-            "min_attractions": 4,
-            "max_attractions": 7,
-            "stop_after_min_extra": 2,
-        }
-    return {
-        "mode": "intense",
-            "min_minutes": 300,
-            "target_minutes": 390,
-            "max_minutes": MAX_DAILY_MINUTES,
-            "min_attractions": 4,
-            "max_attractions": 10,
-            "stop_after_min_extra": 3,
-    }
-
-
 def _day_limits(max_walk_km: float) -> tuple[int, int]:
     """Return min/max attraction count for the selected walking mode."""
-    profile = _effort_profile(max_walk_km)
-    return profile["min_attractions"], profile["max_attractions"]
-
-
-def _min_daily_minutes(max_walk_km: float) -> int:
-    return _effort_profile(max_walk_km)["min_minutes"]
-
-
-def _target_daily_minutes(max_walk_km: float) -> int:
-    return _effort_profile(max_walk_km)["target_minutes"]
-
-
-def _max_daily_minutes(max_walk_km: float) -> int:
-    return _effort_profile(max_walk_km)["max_minutes"]
-
-
-def _is_must_see(attraction: dict) -> bool:
-    return bool(attraction.get("must_see"))
-
-
-def _must_see_rank(attraction: dict) -> int:
-    rank = attraction.get("must_see_rank")
-    return rank if isinstance(rank, int) else 999
-
-
-def _name_key(attraction: dict) -> str:
-    text = attraction.get("name") or attraction.get("name_en") or ""
-    text = unicodedata.normalize("NFKD", text)
-    text = "".join(ch for ch in text if not unicodedata.combining(ch))
-    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    if max_walk_km <= 3:
+        return 4, 5
+    if max_walk_km <= 5:
+        return 4, 8
+    return 4, 10
 
 
 # ── Geo utilities ─────────────────────────────────────────────────────────────
@@ -105,26 +43,9 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def walking_distance_factor(straight_km: float) -> float:
-    if straight_km > 2:
-        return 1.1
-    if straight_km > 1:
-        return 1.15
-    if straight_km > 0.5:
-        return 1.3
-    if straight_km > 0.3:
-        return 1.4
-    return 1.5
-
-
-def walking_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    straight_km = haversine_km(lat1, lon1, lat2, lon2)
-    return straight_km * walking_distance_factor(straight_km)
-
-
 def _route_distance(route: list[dict]) -> float:
     return sum(
-        walking_km(
+        haversine_km(
             route[i]["latitude"], route[i]["longitude"],
             route[i + 1]["latitude"], route[i + 1]["longitude"],
         )
@@ -216,23 +137,16 @@ def _optimized_distance(attractions: list[dict]) -> float:
 
 def _can_add_to_day(day: list[dict], candidate: dict, max_walk_km: float = MAX_DAILY_WALK_KM) -> bool:
     min_attractions, max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    max_minutes = _max_daily_minutes(max_walk_km)
     if any(a["id"] == candidate["id"] for a in day):
         return False
     nxt = [*day, candidate]
     has_minimum_activity = (
         len(day) >= min_attractions
-        and _day_minutes(day) >= min_minutes
+        and _day_minutes(day) >= MIN_DAILY_MINUTES
     )
     if has_minimum_activity and len(nxt) > max_attractions:
         return False
-    allowed_minutes = (
-        MAX_DAILY_MINUTES
-        if len(nxt) <= min_attractions or _day_minutes(day) < min_minutes
-        else max_minutes
-    )
-    if _day_minutes(nxt) > allowed_minutes:
+    if _day_minutes(nxt) > MAX_DAILY_MINUTES:
         return False
     if _museum_count(nxt) > MAX_MUSEUMS_PER_DAY:
         return False
@@ -256,8 +170,6 @@ def _pick_removal_index(day: list[dict]) -> int:
             else 0
         )
         score = museum_penalty + distance_gain * 100 + minutes_gain / 10
-        if _is_must_see(attraction):
-            score -= 5000 + max(0, 120 - _must_see_rank(attraction) * 10)
         if score > best_score:
             best_score = score
             best_index = i
@@ -380,32 +292,17 @@ def _cap_days_by_limits(days: list[list[dict]], max_walk_km: float = MAX_DAILY_W
     result = []
     overflow: list[dict] = []
     min_attractions, max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    max_minutes = _max_daily_minutes(max_walk_km)
     for day in days:
         kept = list(day)
-        while True:
-            over_time = _day_minutes(kept) > max_minutes
-            over_museums = _museum_count(kept) > MAX_MUSEUMS_PER_DAY
-            over_distance = _optimized_distance(kept) > max_walk_km
-            over_soft_count = len(kept) > max_attractions and len(kept) > min_attractions
-            if not (over_time or over_museums or over_distance or over_soft_count):
-                break
+        while (
+            (len(kept) > max_attractions and _day_minutes(kept) >= MIN_DAILY_MINUTES and len(kept) > min_attractions)
+            or _day_minutes(kept) > MAX_DAILY_MINUTES
+            or _museum_count(kept) > MAX_MUSEUMS_PER_DAY
+            or _optimized_distance(kept) > max_walk_km
+        ):
             if len(kept) <= 1:
                 break
-            removal_index = _pick_removal_index(kept)
-            candidate_day = [a for idx, a in enumerate(kept) if idx != removal_index]
-            if over_time and not (over_museums or over_distance) and len(candidate_day) < min_attractions:
-                break
-            if over_time and not (over_museums or over_distance) and _day_minutes(candidate_day) < min_minutes:
-                break
-            if (
-                over_soft_count
-                and not (over_time or over_museums or over_distance)
-                and _day_minutes(candidate_day) < min_minutes
-            ):
-                break
-            removed = kept.pop(removal_index)
+            removed = kept.pop(_pick_removal_index(kept))
             overflow.append(removed)
         result.append(_two_opt(kept))
     return result, overflow
@@ -439,8 +336,6 @@ def _rebalance_museums(days: list[list[dict]], max_walk_km: float = MAX_DAILY_WA
     result = [list(day) for day in days]
     overflow: list[dict] = []
     min_attractions, max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    max_minutes = _max_daily_minutes(max_walk_km)
 
     # Pass 1: collect excess museums
     for day in result:
@@ -451,20 +346,6 @@ def _rebalance_museums(days: list[list[dict]], max_walk_km: float = MAX_DAILY_WA
                 if count < MAX_MUSEUMS_PER_DAY:
                     keep.append(a)
                     count += 1
-                elif _is_must_see(a):
-                    replace_index = next(
-                        (
-                            i for i, kept in enumerate(keep)
-                            if "muse" in (kept.get("attraction_type") or "").lower()
-                            and not _is_must_see(kept)
-                        ),
-                        None,
-                    )
-                    if replace_index is not None:
-                        overflow.append(keep[replace_index])
-                        keep[replace_index] = a
-                    else:
-                        overflow.append(a)
                 else:
                     overflow.append(a)
             else:
@@ -481,9 +362,9 @@ def _rebalance_museums(days: list[list[dict]], max_walk_km: float = MAX_DAILY_WA
                 and (
                     len(day) < max_attractions
                     or len(day) < min_attractions
-                    or _day_minutes(day) < min_minutes
+                    or _day_minutes(day) < MIN_DAILY_MINUTES
                 )
-                and _day_minutes(day) + (museum.get("estimated_visit_time") or 60) <= max_minutes
+                and _day_minutes(day) + (museum.get("estimated_visit_time") or 60) <= MAX_DAILY_MINUTES
             ):
                 day.append(museum)
                 placed = True
@@ -516,15 +397,12 @@ def _fill_thin_days(
     """
     result = [list(day) for day in days]
     used_ids: set[int] = set()
-    min_attractions, max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    target_minutes = _target_daily_minutes(max_walk_km)
-    profile = _effort_profile(max_walk_km)
+    min_attractions, _max_attractions = _day_limits(max_walk_km)
 
     def _needs_more(d: list[dict]) -> bool:
         if not d:
             return False  # giorno vuoto: skip (centroide non calcolabile)
-        return len(d) < min_attractions or _day_minutes(d) < min_minutes
+        return len(d) < min_attractions or _day_minutes(d) < MIN_DAILY_MINUTES
 
     # PASS A — round robin: aggiungi 1 tappa per giorno magro a ogni giro,
     # finché tutti i giorni raggiungono almeno `min_attractions`.
@@ -540,11 +418,7 @@ def _fill_thin_days(
             c_lon = sum(a["longitude"] for a in day) / len(day)
             available = sorted(
                 [a for a in backup if a["id"] not in used_ids and not a.get("is_food_spot")],
-                key=lambda a: (
-                    0 if _is_must_see(a) else 1,
-                    _must_see_rank(a),
-                    haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
-                ),
+                key=lambda a: haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
             )
             for candidate in available:
                 if _can_add_to_day(day, candidate, max_walk_km):
@@ -558,93 +432,31 @@ def _fill_thin_days(
     # PASS B — i giorni che hanno il count minimo ma sono ancora corti di minuti
     # possono pescare attrazioni aggiuntive (più gradualmente di prima per non
     # sbilanciare). Limite: massimo 2 tappe extra oltre min_attractions.
+    extra_cap = 2
     for day in result:
-        if not day or _day_minutes(day) >= target_minutes:
+        if not day or _day_minutes(day) >= MIN_DAILY_MINUTES:
             continue
+        extras = 0
         c_lat = sum(a["latitude"] for a in day) / len(day)
         c_lon = sum(a["longitude"] for a in day) / len(day)
         available = sorted(
             [a for a in backup if a["id"] not in used_ids and not a.get("is_food_spot")],
-            key=lambda a: (
-                0 if _is_must_see(a) else 1,
-                _must_see_rank(a),
-                haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
-            ),
+            key=lambda a: haversine_km(c_lat, c_lon, a["latitude"], a["longitude"]),
         )
         for candidate in available:
-            if _day_minutes(day) >= target_minutes:
-                break
-            if len(day) >= max_attractions:
-                break
-            if (
-                _day_minutes(day) >= min_minutes
-                and len(day) >= min_attractions + profile["stop_after_min_extra"]
-            ):
+            if extras >= extra_cap or _day_minutes(day) >= MIN_DAILY_MINUTES:
                 break
             if not _can_add_to_day(day, candidate, max_walk_km):
                 continue
             day.append(candidate)
             used_ids.add(candidate["id"])
+            extras += 1
 
     remaining = [a for a in backup if a["id"] not in used_ids]
     return result, remaining
 
 
 # ── Step 3: 2-opt refinement within each day ─────────────────────────────────
-def _day_satisfies_hard_limits(day: list[dict], max_walk_km: float) -> bool:
-    min_attractions, _max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    max_minutes = _max_daily_minutes(max_walk_km)
-    return (
-        len(day) >= min_attractions
-        and _day_minutes(day) >= min_minutes
-        and _day_minutes(day) <= max_minutes
-        and _museum_count(day) <= MAX_MUSEUMS_PER_DAY
-        and _optimized_distance(day) <= max_walk_km
-    )
-
-
-def _repair_underfilled_days_by_moving(
-    days: list[list[dict]],
-    max_walk_km: float = MAX_DAILY_WALK_KM,
-) -> list[list[dict]]:
-    """Move compatible stops from healthy days into underfilled days."""
-    result = [list(day) for day in days]
-
-    for target_index, target_day in enumerate(result):
-        if not target_day:
-            continue
-        while _day_minutes(target_day) < _min_daily_minutes(max_walk_km):
-            options: list[tuple[float, int, int, dict]] = []
-            for donor_index, donor_day in enumerate(result):
-                if donor_index == target_index:
-                    continue
-                for attraction_index, attraction in enumerate(donor_day):
-                    if not _can_add_to_day(target_day, attraction, max_walk_km):
-                        continue
-                    donor_after = [
-                        item for index, item in enumerate(donor_day)
-                        if index != attraction_index
-                    ]
-                    if not _day_satisfies_hard_limits(donor_after, max_walk_km):
-                        continue
-                    target_after = [*target_day, attraction]
-                    score = (
-                        (0 if not _is_must_see(attraction) else 1) * 10000
-                        - (attraction.get("estimated_visit_time") or 0) * 10
-                        + _optimized_distance(target_after) * 100
-                    )
-                    options.append((score, donor_index, attraction_index, attraction))
-
-            if not options:
-                break
-
-            _score, donor_index, attraction_index, attraction = min(options, key=lambda item: item[0])
-            result[donor_index].pop(attraction_index)
-            target_day.append(attraction)
-
-    return [_two_opt(day) for day in result]
-
 
 def order_day(attractions: list[dict]) -> list[dict]:
     """2-opt pass to minimise walking distance within the day's attractions."""
@@ -846,314 +658,6 @@ def generate_maps_link(stops: list[dict]) -> str:
 
 # ── Main entry point ──────────────────────────────────────────────────────────
 
-def _level_values(level: int | list[int]) -> list[int]:
-    return level if isinstance(level, list) else [level]
-
-
-def _quality_score(attraction: dict, requested_level: int | list[int]) -> float:
-    """Higher is better: requested-level fit first, then intrinsic category."""
-    levels = _level_values(requested_level)
-    level = attraction.get("category_level") or 3
-    minutes = attraction.get("estimated_visit_time") or 60
-    type_name = (attraction.get("attraction_type") or "").lower()
-
-    if 1 in levels and len(levels) == 1:
-        level_score = {1: 120, 2: 55, 3: 25}.get(level, 0)
-    elif any(l >= 2 for l in levels):
-        level_score = {2: 115, 3: 95, 1: 70}.get(level, 0)
-    else:
-        level_score = 80
-
-    type_bonus = 0
-    if "muse" in type_name:
-        type_bonus += 10
-    if any(word in type_name for word in ("piazza", "monumento", "chiesa", "basilica", "castello", "palazzo")):
-        type_bonus += 6
-    must_see_bonus = 0
-    if _is_must_see(attraction):
-        must_see_bonus = 300 - min(_must_see_rank(attraction), 30) * 6
-    return level_score + type_bonus + must_see_bonus + min(minutes, 120) / 20
-
-
-def _center(attractions: list[dict]) -> dict:
-    return {
-        "latitude": sum(a["latitude"] for a in attractions) / max(1, len(attractions)),
-        "longitude": sum(a["longitude"] for a in attractions) / max(1, len(attractions)),
-    }
-
-
-def _group_key(attraction: dict) -> str:
-    if attraction.get("zone"):
-        return f"zone:{attraction['zone']}"
-    if attraction.get("block_id") is not None:
-        return f"block:{attraction['block_id']}"
-    return f"geo:{round(attraction['latitude'], 2)}:{round(attraction['longitude'], 2)}"
-
-
-def _geo_groups(attractions: list[dict], requested_level: int | list[int]) -> list[dict]:
-    by_key: dict[str, list[dict]] = defaultdict(list)
-    for attraction in attractions:
-        by_key[_group_key(attraction)].append(attraction)
-
-    groups = []
-    for key, items in by_key.items():
-        items_sorted = sorted(items, key=lambda a: _quality_score(a, requested_level), reverse=True)
-        center = _center(items_sorted)
-        groups.append({
-            "key": key,
-            "items": items_sorted,
-            "center": center,
-            "score": (
-                _quality_score(items_sorted[0], requested_level) * 2
-                + sum(_quality_score(a, requested_level) for a in items_sorted[1:3])
-            ),
-        })
-    return sorted(groups, key=lambda g: g["score"], reverse=True)
-
-
-def _select_seed_groups(groups: list[dict], num_days: int, max_walk_km: float) -> list[dict]:
-    """Pick strong but geographically separated zone anchors."""
-    selected: list[dict] = []
-    min_separation = max(0.75, min(2.2, max_walk_km * 0.35))
-
-    for group in groups:
-        if len(selected) >= num_days:
-            break
-        if not selected:
-            selected.append(group)
-            continue
-        nearest_selected = min(
-            haversine_km(
-                group["center"]["latitude"], group["center"]["longitude"],
-                s["center"]["latitude"], s["center"]["longitude"],
-            )
-            for s in selected
-        )
-        if nearest_selected >= min_separation:
-            selected.append(group)
-
-    for group in groups:
-        if len(selected) >= num_days:
-            break
-        if group not in selected:
-            selected.append(group)
-    return selected[:num_days]
-
-
-def _candidate_rank(
-    day: list[dict],
-    candidate: dict,
-    seed_center: dict,
-    requested_level: int | list[int],
-) -> float:
-    if day:
-        center = _center(day)
-        centroid_km = haversine_km(center["latitude"], center["longitude"], candidate["latitude"], candidate["longitude"])
-        nearest_km = min(
-            haversine_km(candidate["latitude"], candidate["longitude"], a["latitude"], a["longitude"])
-            for a in day
-        )
-    else:
-        centroid_km = haversine_km(seed_center["latitude"], seed_center["longitude"], candidate["latitude"], candidate["longitude"])
-        nearest_km = centroid_km
-    must_see_pull = 2.0 if _is_must_see(candidate) else 0
-    return nearest_km * 4.5 + centroid_km * 1.7 - _quality_score(candidate, requested_level) / 16 - must_see_pull
-
-
-def _candidate_pool(attractions: list[dict], requested_level: int | list[int]) -> list[dict]:
-    levels = _level_values(requested_level)
-    primary = filter_attractions(attractions, levels) or [
-        a for a in attractions
-        if not a.get("is_food_spot") and a.get("category_level") in levels
-    ]
-    must_sees = sorted(
-        [
-            a for a in attractions
-            if not a.get("is_food_spot") and _is_must_see(a)
-        ],
-        key=lambda a: (_must_see_rank(a), -_quality_score(a, requested_level)),
-    )
-    pool = []
-    seen_ids: set[int] = set()
-    seen_names: set[str] = set()
-    for attraction in [*must_sees, *primary]:
-        name_key = _name_key(attraction)
-        if attraction["id"] in seen_ids or name_key in seen_names:
-            continue
-        pool.append(attraction)
-        seen_ids.add(attraction["id"])
-        seen_names.add(name_key)
-
-    fallback_order = [2, 3] if levels == [1] else [1, 2, 3]
-    for fallback_level in fallback_order:
-        for attraction in attractions:
-            if (
-                not attraction.get("is_food_spot")
-                and attraction.get("category_level") == fallback_level
-                and attraction["id"] not in seen_ids
-                and _name_key(attraction) not in seen_names
-            ):
-                pool.append(attraction)
-                seen_ids.add(attraction["id"])
-                seen_names.add(_name_key(attraction))
-    return pool
-
-
-def _place_must_see_anchors(
-    days: list[list[dict]],
-    pool: list[dict],
-    used_ids: set[int],
-    max_walk_km: float,
-    requested_level: int | list[int],
-) -> None:
-    must_sees = [
-        a for a in sorted(
-            pool,
-            key=lambda item: (_must_see_rank(item), -_quality_score(item, requested_level)),
-        )
-        if _is_must_see(a) and a["id"] not in used_ids
-    ]
-
-    def can_add_group(day: list[dict], group: list[dict]) -> bool:
-        test_day = list(day)
-        for candidate in group:
-            if candidate["id"] in used_ids:
-                continue
-            if not _can_add_to_day(test_day, candidate, max_walk_km):
-                return False
-            test_day.append(candidate)
-        return True
-
-    by_group: dict[str, list[dict]] = defaultdict(list)
-    for candidate in must_sees:
-        by_group[_group_key(candidate)].append(candidate)
-
-    must_see_groups = sorted(
-        by_group.values(),
-        key=lambda group: min(_must_see_rank(item) for item in group),
-    )
-
-    # First pass: keep must-see landmarks from the same area together when
-    # the route still respects time, museum and walking constraints.
-    for group in must_see_groups:
-        group = [item for item in group if item["id"] not in used_ids]
-        if not group:
-            continue
-        best_index = None
-        best_score = float("inf")
-        for index, day in enumerate(days):
-            if not can_add_group(day, group):
-                continue
-            projected = [*day, *group]
-            score = (
-                len(day) * 1000
-                + _optimized_distance(projected) * 100
-                + _day_minutes(projected) / 10
-            )
-            if score < best_score:
-                best_score = score
-                best_index = index
-        if best_index is not None:
-            days[best_index].extend(group)
-            used_ids.update(item["id"] for item in group)
-
-    # Second pass: add remaining must-sees when they fit a coherent route.
-    for candidate in must_sees:
-        if candidate["id"] in used_ids:
-            continue
-        best_index = None
-        best_score = float("inf")
-        for index, day in enumerate(days):
-            if not _can_add_to_day(day, candidate, max_walk_km):
-                continue
-            center = _center(day) if day else {"latitude": candidate["latitude"], "longitude": candidate["longitude"]}
-            score = _candidate_rank(day, candidate, center, requested_level)
-            if score < best_score:
-                best_score = score
-                best_index = index
-        if best_index is not None:
-            days[best_index].append(candidate)
-            used_ids.add(candidate["id"])
-
-
-def _build_zone_days(
-    attractions: list[dict],
-    num_days: int,
-    requested_level: int | list[int],
-    max_walk_km: float,
-) -> list[list[dict]]:
-    pool = _candidate_pool(attractions, requested_level)
-    if not pool:
-        return []
-
-    min_attractions, max_attractions = _day_limits(max_walk_km)
-    min_minutes = _min_daily_minutes(max_walk_km)
-    target_minutes = _target_daily_minutes(max_walk_km)
-    profile = _effort_profile(max_walk_km)
-    groups = _geo_groups(pool, requested_level)
-    seed_groups = _select_seed_groups(groups, num_days, max_walk_km)
-    if not seed_groups:
-        return []
-
-    days: list[list[dict]] = [[] for _ in range(num_days)]
-    seed_centers: list[dict] = []
-    used_ids: set[int] = set()
-
-    _place_must_see_anchors(days, pool, used_ids, max_walk_km, requested_level)
-
-    for index in range(num_days):
-        group = seed_groups[index % len(seed_groups)]
-        seed_centers.append(group["center"])
-        if days[index]:
-            continue
-        for candidate in group["items"]:
-            if candidate["id"] in used_ids:
-                continue
-            if _can_add_to_day(days[index], candidate, max_walk_km):
-                days[index].append(candidate)
-                used_ids.add(candidate["id"])
-                break
-
-    def available_for(day: list[dict], center: dict) -> list[dict]:
-        return sorted(
-            [a for a in pool if a["id"] not in used_ids],
-            key=lambda a: _candidate_rank(day, a, center, requested_level),
-        )
-
-    max_rounds = max_attractions + 3
-    for _ in range(max_rounds):
-        changed = False
-        for index, day in enumerate(days):
-            if not day:
-                continue
-            if len(day) >= min_attractions and _day_minutes(day) >= min_minutes:
-                continue
-            for candidate in available_for(day, seed_centers[index]):
-                if _can_add_to_day(day, candidate, max_walk_km):
-                    day.append(candidate)
-                    used_ids.add(candidate["id"])
-                    changed = True
-                    break
-        if not changed:
-            break
-
-    for index, day in enumerate(days):
-        if not day:
-            continue
-        for candidate in available_for(day, seed_centers[index]):
-            if len(day) >= max_attractions:
-                break
-            if _day_minutes(day) >= target_minutes:
-                break
-            if _day_minutes(day) >= min_minutes and len(day) >= min_attractions + profile["stop_after_min_extra"]:
-                break
-            if _can_add_to_day(day, candidate, max_walk_km):
-                day.append(candidate)
-                used_ids.add(candidate["id"])
-
-    return [order_day(day) for day in days if day]
-
-
 def build_itinerary(
     attractions: list[dict],
     food_spots: list[dict],
@@ -1161,57 +665,6 @@ def build_itinerary(
     level: int | list[int],
     max_walk_km: float = MAX_DAILY_WALK_KM,
 ) -> list[dict]:
-    attractions = annotate_must_see_many(attractions)
-    days_ordered = _build_zone_days(attractions, num_days, level, max_walk_km)
-    if not days_ordered:
-        return []
-
-    days_limited, overflow = _cap_days_by_limits(days_ordered, max_walk_km)
-    days_museum_capped, freed = _rebalance_museums(days_limited, max_walk_km)
-    days_capped, post_museum_overflow = _cap_days_by_limits(days_museum_capped, max_walk_km)
-
-    assigned_ids = {a["id"] for day in days_capped for a in day}
-    backup: list[dict] = []
-    seen_ids: set[int] = set()
-
-    def _add_to_backup_zone(items: list[dict]) -> None:
-        for item in items:
-            aid = item.get("id")
-            if aid is None or aid in seen_ids or aid in assigned_ids:
-                continue
-            seen_ids.add(aid)
-            backup.append(item)
-
-    _add_to_backup_zone(overflow)
-    _add_to_backup_zone(freed)
-    _add_to_backup_zone(post_museum_overflow)
-    _add_to_backup_zone(_candidate_pool(attractions, level))
-    if level == 1:
-        _add_to_backup_zone(filter_attractions(attractions, 2) or [
-            a for a in attractions
-            if not a.get("is_food_spot") and a.get("category_level") == 2
-        ])
-        _add_to_backup_zone(filter_attractions(attractions, 3) or [
-            a for a in attractions
-            if not a.get("is_food_spot") and a.get("category_level") == 3
-        ])
-
-    days_filled, _backup = _fill_thin_days(days_capped, backup, max_walk_km)
-    days_final, _final_overflow = _cap_days_by_limits(days_filled, max_walk_km)
-    days_repaired = _repair_underfilled_days_by_moving(days_final, max_walk_km)
-    days_final, _repair_overflow = _cap_days_by_limits(days_repaired, max_walk_km)
-    days_ordered = [order_day(day) for day in days_final]
-
-    days_with_stops = [
-        [{**attraction, "type": "attraction"} for attraction in day]
-        for day in days_ordered
-    ]
-
-    return [
-        {"day": i, "stops": stops, "maps_link": generate_maps_link(stops)}
-        for i, stops in enumerate(days_with_stops, start=1)
-    ]
-
     filtered = filter_attractions(attractions, level)
     if not filtered:
         # Fallback: ignora il controllo di isolamento (città piccole o blocchi sparsi)

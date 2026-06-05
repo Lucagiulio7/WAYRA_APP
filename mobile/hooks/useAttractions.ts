@@ -20,6 +20,11 @@ export interface BuilderAttraction {
   food_type?: string | null;
   meal_type?: string | null;
   rating?: number | null;
+  recommended_dishes?: string[];
+  recommended_dishes_en?: string[];
+  has_curated_dish_match?: boolean;
+  must_see?: boolean;
+  must_see_rank?: number | null;
 }
 
 export function useAttractions(city: string) {

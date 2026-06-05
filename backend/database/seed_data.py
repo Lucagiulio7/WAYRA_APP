@@ -24,6 +24,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from sqlalchemy import text
 from database.db import engine, SessionLocal
 from database.models import Base, Attraction, Food
+
+def _console_safe(value: str | None) -> str:
+    return (value or "").encode("ascii", "backslashreplace").decode("ascii")
 from database.cities import ALL_CITIES
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -103,7 +106,7 @@ def seed():
         for row in db.query(Attraction).filter(Attraction.city == city).all():
             if row.name not in expected_names:
                 db.delete(row)
-                print(f"  [{city}] Rimossa attrazione obsoleta: {row.name}")
+                print(f"  [{city}] Rimossa attrazione obsoleta: {_console_safe(row.name)}")
 
         existing = {
             row.name: row
@@ -114,9 +117,14 @@ def seed():
         for data in by_city_attr[city]:
             if data["name"] in existing:
                 row = existing[data["name"]]
+                row.description       = data["description"]
                 row.category_level    = data["category_level"]
                 row.block_id          = data["block_id"]
                 row.zone              = data["zone"]
+                row.latitude          = data["latitude"]
+                row.longitude         = data["longitude"]
+                row.estimated_visit_time = data["estimated_visit_time"]
+                row.tags              = json.dumps(data["tags"], ensure_ascii=False)
                 row.attraction_type   = data.get("attraction_type")
                 row.name_en           = data.get("name_en")
                 row.description_en    = data.get("description_en")
@@ -144,8 +152,18 @@ def seed():
         for data in by_city_food[city]:
             if data["name"] in existing:
                 row = existing[data["name"]]
+                row.name_en = data.get("name_en")
+                row.description = data["description"]
+                row.description_en = data.get("description_en")
                 row.category_level = data["category_level"]
                 row.zone = data.get("zone")
+                row.latitude = data["latitude"]
+                row.longitude = data["longitude"]
+                row.estimated_visit_time = data["estimated_visit_time"]
+                row.tags = json.dumps(data.get("tags", []), ensure_ascii=False)
+                row.food_type = data["food_type"]
+                row.meal_type = data["meal_type"]
+                row.rating = data["rating"]
             else:
                 db.add(Attraction(
                     name=data["name"],
@@ -167,8 +185,27 @@ def seed():
         if added:
             print(f"  [{city}] Seed: {added} record aggiunti.")
 
-        if db.query(Food).filter(Food.city == city).count() == 0:
-            for data in FOODS_BY_CITY.get(city, []):
+        foods_for_city = FOODS_BY_CITY.get(city, [])
+        expected_food_names = {food["name"] for food in foods_for_city}
+        for row in db.query(Food).filter(Food.city == city).all():
+            if row.name not in expected_food_names:
+                db.delete(row)
+                print(f"  [{city}] Rimosso piatto tipico obsoleto: {_console_safe(row.name)}")
+
+        existing_foods = {
+            row.name: row
+            for row in db.query(Food).filter(Food.city == city).all()
+        }
+        added_foods = 0
+        for data in foods_for_city:
+            row = existing_foods.get(data["name"])
+            if row:
+                row.name_en = data.get("name_en")
+                row.description = data["description"]
+                row.description_en = data.get("description_en")
+                row.ingredients = json.dumps(data.get("ingredients", []), ensure_ascii=False)
+                row.ingredients_en = json.dumps(data.get("ingredients_en", []), ensure_ascii=False)
+            else:
                 db.add(Food(
                     name=data["name"],
                     name_en=data.get("name_en"),
@@ -178,9 +215,9 @@ def seed():
                     ingredients_en=json.dumps(data.get("ingredients_en", []), ensure_ascii=False),
                     city=city,
                 ))
-            n = len(FOODS_BY_CITY.get(city, []))
-            if n:
-                print(f"  [{city}] Seed: {n} piatti tipici aggiunti.")
+                added_foods += 1
+        if added_foods:
+            print(f"  [{city}] Seed: {added_foods} piatti tipici aggiunti.")
 
     db.commit()
     db.close()
