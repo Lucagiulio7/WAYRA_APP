@@ -12,6 +12,8 @@ import {
   Modal,
   Animated,
   Easing,
+  Linking,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,6 +33,8 @@ import { WorldMapModal } from "@/components/WorldMap";
 import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
 import { PressableCard, FadeInUp, staggerDelay, PulseGlow } from "@/components/ui";
 import { shadowLevel } from "@/utils/shadow";
+import { getAnalyticsConsent, setAnalyticsConsent, track } from "@/services/AnalyticsService";
+import { LANGUAGE_OPTIONS, languageOption } from "@/i18n";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
@@ -255,12 +259,20 @@ const GENERATING_MESSAGES_EN = [
   "Almost ready...",
 ];
 
+const GENERATING_MESSAGES_FR = [
+  "Recherche des attractions...",
+  "Optimisation du parcours...",
+  "Sélection des restaurants...",
+  "Ajout de conseils locaux...",
+  "Presque prêt...",
+];
+
 // â”€â”€ Screen principale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function HomeScreen() {
   const router = useRouter();
   const { generate, cancel, loading, error } = useItinerary();
-  const { lang, t, toggle } = useLanguage();
+  const { lang, t, toggle, setLang } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
   const { isOnline } = useNetworkStatus();
@@ -272,12 +284,15 @@ export default function HomeScreen() {
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [showWorldMap, setShowWorldMap]     = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSettings, setShowSettings]     = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
   const [recentCityIds, setRecentCityIds]   = useState<string[]>([]);
   const guideTargets = useRef<Map<string, View>>(new Map());
 
-  const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : GENERATING_MESSAGES_IT;
+  const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : lang === "fr" ? GENERATING_MESSAGES_FR : GENERATING_MESSAGES_IT;
+  const currentLanguage = languageOption(lang);
 
   // â”€â”€ Controlla se mostrare onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
@@ -297,10 +312,28 @@ export default function HomeScreen() {
       .catch((e) => { if (__DEV__) console.warn("[Home] recent cities read failed:", e); });
   }, []);
 
+  useEffect(() => {
+    getAnalyticsConsent()
+      .then(setAnalyticsEnabled)
+      .catch((e) => { if (__DEV__) console.warn("[Home] analytics consent read failed:", e); });
+  }, []);
+
   const dismissOnboarding = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "done");
     setShowOnboarding(false);
+    track("onboarding_completed", { screen: "generate_itinerary" });
   };
+
+  const openSettingsPanel = useCallback(() => {
+    setShowSettings(true);
+    track("settings_opened", { screen: "home" });
+  }, []);
+
+  const handleAnalyticsConsentChange = useCallback(async (enabled: boolean) => {
+    setAnalyticsEnabled(enabled);
+    await setAnalyticsConsent(enabled);
+    if (enabled) track("analytics_consent_updated", { enabled: true });
+  }, []);
 
   const setGuideTarget = useCallback((key: string, ref: View | null) => {
     if (ref) guideTargets.current.set(key, ref);
@@ -373,6 +406,7 @@ export default function HomeScreen() {
   const selectCity = useCallback((id: string) => {
     setCity(id);
     rememberCity(id);
+    track("destination_viewed", { city: id });
   }, [rememberCity]);
 
   function alertNoCitySelected() {
@@ -422,6 +456,7 @@ export default function HomeScreen() {
   function handleCreate() {
     if (!city) { alertNoCitySelected(); return; }
     const cityObj = CITIES.find((c) => c.id === city);
+    track("manual_builder_opened", { city, num_days: 1 });
     router.push({
       pathname: "/create-itinerary",
       params: {
@@ -459,11 +494,19 @@ export default function HomeScreen() {
             <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={openSettingsPanel}
+            activeOpacity={0.7}
+            style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            accessibilityLabel={lang === "en" ? "Settings" : "Impostazioni"}
+          >
+            <Ionicons name="settings-outline" size={19} color={colors.textSub} />
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={toggle}
             activeOpacity={0.7}
             style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
           >
-            <CountryFlag isoCode={lang === "it" ? "it" : "gb"} size={18} />
+            <CountryFlag isoCode={currentLanguage.flagIso} size={18} />
           </TouchableOpacity>
         </View>
 
@@ -718,6 +761,139 @@ export default function HomeScreen() {
       </Modal>
 
       {/* â”€â”€ Onboarding â”€â”€ */}
+      <Modal
+        visible={showSettings}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSettings(false)}
+      >
+        <TouchableOpacity
+          style={styles.privacyBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowSettings(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[styles.privacySheet, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <View style={styles.privacyHeader}>
+              <View style={[styles.privacyIconBox, { backgroundColor: colors.accentBlue + "18", borderColor: colors.accentBlue + "55" }]}>
+                <Ionicons name="shield-checkmark-outline" size={22} color={colors.accentBlue} />
+              </View>
+              <View style={styles.privacyTitleWrap}>
+                <Text style={[styles.privacyTitle, { color: colors.text }]}>
+                  {lang === "en" ? "Settings" : lang === "fr" ? "Paramètres" : "Impostazioni"}
+                </Text>
+                <Text style={[styles.privacySubtitle, { color: colors.textMuted }]}>
+                  {lang === "en"
+                    ? "Language, theme and privacy controls."
+                    : lang === "fr"
+                      ? "Langue, thème et contrôles de confidentialité."
+                      : "Lingua, tema e controlli privacy."}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.settingsGrid}>
+              <View style={[styles.settingsLanguageCard, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
+                <View style={styles.settingsLanguageHeader}>
+                  <Ionicons name="language-outline" size={18} color={colors.accentGold} />
+                  <View style={styles.settingsActionText}>
+                    <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
+                      {lang === "en" ? "Language" : lang === "fr" ? "Langue" : "Lingua"}
+                    </Text>
+                    <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
+                      {currentLanguage.label}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.languageChoiceRow}>
+                  {LANGUAGE_OPTIONS.map((option) => {
+                    const active = option.code === lang;
+                    return (
+                      <TouchableOpacity
+                        key={option.code}
+                        onPress={() => setLang(option.code)}
+                        activeOpacity={0.82}
+                        style={[
+                          styles.languageChoice,
+                          { backgroundColor: colors.inputBg, borderColor: colors.border },
+                          active && { backgroundColor: colors.accentGold + "1f", borderColor: colors.accentGold },
+                        ]}
+                      >
+                        <CountryFlag isoCode={option.flagIso} size={13} />
+                        <Text style={[styles.languageChoiceText, { color: active ? colors.accentGold : colors.textSub }]}>
+                          {option.shortLabel}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.settingsAction, { backgroundColor: colors.card2, borderColor: colors.border2 }]}
+                onPress={toggleTheme}
+                activeOpacity={0.82}
+              >
+                <Ionicons name="contrast-outline" size={18} color={colors.accentPurple} />
+                <View style={styles.settingsActionText}>
+                  <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
+                    {lang === "en" ? "Theme" : lang === "fr" ? "Thème" : "Tema"}
+                  </Text>
+                  <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
+                    {lang === "en" ? "Switch app look" : lang === "fr" ? "Changer l'apparence" : "Cambia aspetto"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.privacyConsentRow, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
+              <View style={styles.privacyConsentText}>
+                <Text style={[styles.privacyConsentTitle, { color: colors.text }]}>
+                  {lang === "en" ? "Anonymous analytics" : lang === "fr" ? "Analytics anonymes" : "Analytics anonimi"}
+                </Text>
+                <Text style={[styles.privacyConsentBody, { color: colors.textSub }]}>
+                  {lang === "en"
+                    ? "Helps us understand searches, generated trips, maps, PDF exports and saved itineraries. We do not store your exact position or personal notes."
+                    : lang === "fr"
+                      ? "Nous aide à comprendre les recherches, itinéraires générés, cartes, PDF et sauvegardes. Nous ne stockons pas votre position exacte ni vos notes personnelles."
+                    : "Ci aiuta a capire ricerche, itinerari generati, mappe, PDF e salvataggi. Non salviamo posizione precisa o note personali."}
+                </Text>
+              </View>
+              <Switch
+                value={analyticsEnabled}
+                onValueChange={handleAnalyticsConsentChange}
+                trackColor={{ false: colors.border, true: colors.accentBlue + "88" }}
+                thumbColor={analyticsEnabled ? colors.accentBlue : colors.textMuted}
+              />
+            </View>
+
+            <View style={styles.privacyLinksRow}>
+              <TouchableOpacity onPress={() => Linking.openURL("https://wayra.app/privacy")} activeOpacity={0.75}>
+                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>Privacy Policy</Text>
+              </TouchableOpacity>
+              <Text style={[styles.privacyDot, { color: colors.textMuted }]}>-</Text>
+              <TouchableOpacity onPress={() => Linking.openURL("https://wayra.app/terms")} activeOpacity={0.75}>
+                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
+                  {lang === "en" ? "Terms" : lang === "fr" ? "Conditions" : "Termini"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.privacyDoneBtn, { backgroundColor: colors.accentBlue }]}
+              onPress={() => setShowSettings(false)}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.privacyDoneText, { color: colors.bg }]}>
+                {lang === "en" ? "Done" : lang === "fr" ? "Terminé" : "Fatto"}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       {showOnboarding && (
         <OnboardingModal lang={lang} targetRefs={guideTargets.current} onDone={dismissOnboarding} />
       )}
@@ -772,6 +948,12 @@ function CityPickerModal({
   const recentCities = recentCityIds
     .map((id) => CITIES.find((c) => c.id === id))
     .filter(Boolean) as CityItem[];
+  const trackSearch = useCallback(() => {
+    const query = search.trim();
+    if (!query) return;
+    const resultsCount = filteredCountries.reduce((sum, country) => sum + country.cities.length, 0);
+    track("search_performed", { query, results_count: resultsCount });
+  }, [filteredCountries, search]);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -798,6 +980,7 @@ function CityPickerModal({
             placeholderTextColor={colors.textSub}
             selectionColor={colors.accentGold}
             returnKeyType="search"
+            onSubmitEditing={trackSearch}
             clearButtonMode="while-editing"
           />
         </View>
@@ -1747,6 +1930,145 @@ const styles = StyleSheet.create({
   },
 
   // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  privacyBackdrop: {
+    flex: 1,
+    backgroundColor: "#000000b8",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 18,
+  },
+  privacySheet: {
+    width: "100%",
+    maxWidth: 430,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 18,
+    gap: 16,
+  },
+  privacyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  privacyIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  privacyTitleWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  privacyTitle: {
+    fontSize: 19,
+    fontWeight: "900",
+  },
+  privacySubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  privacyConsentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+  },
+  settingsGrid: {
+    gap: 10,
+  },
+  settingsAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  settingsLanguageCard: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  settingsLanguageHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  languageChoiceRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  languageChoice: {
+    flex: 1,
+    minHeight: 34,
+    borderWidth: 1,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  languageChoiceText: {
+    fontSize: 12,
+    fontWeight: "900",
+  },
+  settingsActionText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  settingsActionTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  settingsActionSub: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  privacyConsentText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  privacyConsentTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    marginBottom: 5,
+  },
+  privacyConsentBody: {
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  privacyLinksRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+  },
+  privacyLink: {
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  privacyDot: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  privacyDoneBtn: {
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: "center",
+  },
+  privacyDoneText: {
+    fontSize: 15,
+    fontWeight: "900",
+  },
   tourOverlay: {
     flex: 1,
     // backgroundColor assente: gestiamo l'overlay con 4 pannelli cutout

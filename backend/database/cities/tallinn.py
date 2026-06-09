@@ -134,16 +134,91 @@ FOOD_SPOTS = [
  {'city': 'tallinn', 'zone': 'lennusadam_linnahall', 'category_level': 3, 'name': 'Gourmet Harbour Tallinn', 'name_en': 'Gourmet Harbour Tallinn', 'description': 'Fine dining sul porto con cucina nordica d\'autore, ingredienti di pesca locale e abbinamenti di vini baltici.', 'description_en': 'Fine dining at the harbour with signature Nordic cuisine, local catch ingredients and Baltic wine pairings.', 'latitude': 59.4479, 'longitude': 24.7428, 'estimated_visit_time': 110, 'tags': ['fine dining', 'nordico', 'vini baltici'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.5},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Mulgipuder', 'name_en': 'Mulgipuder (Barley and Potato Porridge)', 'description': 'Il piatto contadino tradizionale dell\'Estonia del sud, una densa poltiglia di orzo perlato e patate condita con lardo fritto e cipolle caramellate.', 'description_en': 'The traditional peasant dish from southern Estonia, a thick porridge of pearl barley and potatoes dressed with fried lard and caramelised onions.', 'ingredients': ['orzo perlato', 'patate', 'lardo', 'cipolle', 'sale'], 'ingredients_en': ['pearl barley', 'potatoes', 'lard', 'onions', 'salt'], 'places': ['Olde Hansa Tallinn', 'Kuldse Notsu Korts Tallinn', 'Farm Restaurant Tallinn']},
- {'name': 'Verivorst', 'name_en': 'Verivorst (Blood Sausage with Barley)', 'description': 'Sanguinaccio estone speziato con orzo e sangue, arrostito e servito con crauti e confettura di mirtilli rossi.', 'description_en': 'Estonian blood sausage spiced with barley and blood, roasted and served with sauerkraut and lingonberry jam.', 'ingredients': ['sangue di maiale', 'orzo', 'cipolle', 'maggiorana', 'budello di maiale'], 'ingredients_en': ['pig blood', 'barley', 'onions', 'marjoram', 'pork casing'], 'places': ['Kuldse Notsu Korts Tallinn', 'Olde Hansa Tallinn', 'Vanaema Juures Tallinn']},
- {'name': 'Sült', 'name_en': 'Sült (Head Cheese / Cold Cut Jelly)', 'description': 'La gelatina di carne estone preparata con la testa e le zampe del maiale, speziata con alloro e pepe e servita fredda con senape e pane di segale.', 'description_en': 'The Estonian meat jelly made from pig head and trotters, spiced with bay leaf and pepper and served cold with mustard and rye bread.', 'ingredients': ['testa di maiale', 'zampe di maiale', 'alloro', 'pepe nero', 'cipolla', 'gelatina naturale'], 'ingredients_en': ['pig head', 'pig trotters', 'bay leaf', 'black pepper', 'onion', 'natural gelatin'], 'places': ['Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn', 'Farm Restaurant Tallinn']},
- {'name': 'Kiluvõileib', 'name_en': 'Kiluvõileib (Sprat Open Sandwich)', 'description': 'Il panino aperto estone per eccellenza: pane di segale scuro con burro, sprat affumicati, cipolla e uovo sodo, uno dei simboli della cucina tallinnese.', 'description_en': 'The quintessential Estonian open sandwich: dark rye bread with butter, smoked sprats, onion and hard-boiled egg, one of the symbols of Tallinn cuisine.', 'ingredients': ['pane di segale', 'burro', 'sprat affumicati', 'cipolla', 'uovo sodo', 'erba cipollina'], 'ingredients_en': ['rye bread', 'butter', 'smoked sprats', 'onion', 'hard-boiled egg', 'chives'], 'places': ['Komeet Cafe Tallinn', 'Rataskaevu 16 Tallinn', 'Leib Resto ja Aed Tallinn']},
- {'name': 'Kama', 'name_en': 'Kama (Roasted Grain Flour Dessert)', 'description': 'La farina tostata estone di orzo, segale, avena e piselli mescolata con latte cagliato o yogurt, un alimento tradizionale consumato come dessert o colazione.', 'description_en': 'The Estonian toasted flour of barley, rye, oats and peas mixed with curdled milk or yoghurt, a traditional food eaten as dessert or breakfast.', 'ingredients': ['farina di orzo tostato', 'farina di segale tostata', 'farina di avena tostata', 'farina di piselli tostati', 'latte cagliato', 'zucchero'], 'ingredients_en': ['toasted barley flour', 'toasted rye flour', 'toasted oat flour', 'toasted pea flour', 'curdled milk', 'sugar'], 'places': ['Farm Restaurant Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
- {'name': 'Hapukapsas', 'name_en': 'Hapukapsas (Sauerkraut)', 'description': 'I crauti estoni fermentati naturalmente con sale, carvi e mirtilli rossi, serviti come contorno ai piatti di carne o come insalata invernale.', 'description_en': 'Naturally fermented Estonian sauerkraut with salt, caraway and lingonberries, served as a side to meat dishes or as a winter salad.', 'ingredients': ['cavolo bianco', 'sale', 'semi di carvi', 'mirtilli rossi'], 'ingredients_en': ['white cabbage', 'salt', 'caraway seeds', 'lingonberries'], 'places': ['Olde Hansa Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
- {'name': 'Vastlakukkel', 'name_en': 'Vastlakukkel (Shrove Tuesday Cream Bun)', 'description': 'Il panino dolce del Martedì Grasso estone, una brioche soffice tagliata a metà e farcita con panna montata e marmellata, consumata nella settimana prima della Quaresima.', 'description_en': 'The Estonian Shrove Tuesday sweet bun, a soft brioche cut in half and filled with whipped cream and jam, eaten in the week before Lent.', 'ingredients': ['farina di frumento', 'latte', 'burro', 'uova', 'zucchero', 'panna montata', 'marmellata di mirtilli rossi', 'cardamomo'], 'ingredients_en': ['wheat flour', 'milk', 'butter', 'eggs', 'sugar', 'whipped cream', 'lingonberry jam', 'cardamom'], 'places': ['ROST Bakery Tallinn', 'Pagaripoisid Tallinn', 'Cafe Maiasmokk Tallinn']},
- {'name': 'Kohuke', 'name_en': 'Kohuke (Glazed Curd Snack)', 'description': 'Il dolcetto estone di formaggio fresco rivestito di glassa al cioccolato o vaniglia, uno snack iconico consumato da bambini e adulti in tutta l\'Estonia.', 'description_en': 'The Estonian fresh cheese sweet coated in chocolate or vanilla glaze, an iconic snack eaten by children and adults throughout Estonia.', 'ingredients': ['formaggio fresco di ricotta', 'zucchero', 'glassa al cioccolato', 'vaniglia', 'uova'], 'ingredients_en': ['fresh curd cheese', 'sugar', 'chocolate glaze', 'vanilla', 'eggs'], 'places': ['Balti Jaama Turg Tallinn', 'Kaubamaja Toidumaailm Tallinn', 'Rimi Tallinn Old Town']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Mulgipuder',
+  'name_en': 'Mulgipuder Barley and Potato Mash',
+  'description': 'Piatto estone di patate e orzo schiacciati insieme, spesso servito con pancetta, cipolle o salsa. ? cucina rurale molto '
+                 'concreta: cremosa, sostanziosa, leggermente rustica, migliore quando l?orzo resta percepibile e non diventa poltiglia. '
+                 'La qualit? dipende da burro, sale e rapporto corretto tra patata e cereale.',
+  'description_en': 'An Estonian dish of potatoes and barley mashed together, often served with bacon, onions or sauce. It is very '
+                    'concrete rural cooking: creamy, substantial and slightly rustic, best when the barley remains perceptible and does '
+                    'not turn mushy.',
+  'ingredients': ['patate', 'orzo', 'pancetta', 'cipolla', 'burro'],
+  'ingredients_en': ['potatoes', 'barley', 'bacon', 'onion', 'butter'],
+  'places': ['Olde Hansa Tallinn', 'Kuldse Notsu Korts Tallinn', 'Farm Restaurant Tallinn']},
+ {'name': 'Verivorst',
+  'name_en': 'Estonian Blood Sausage',
+  'description': 'Salsiccia di sangue e orzo, tipica soprattutto del periodo natalizio, servita con crauti, patate e confettura di '
+                 'mirtilli rossi. ? intensa ma tradizionale: speziata, scura, morbida, da bilanciare con acidit? e dolcezza dei contorni. '
+                 'La qualit? migliore mantiene grana morbida e spezie presenti ma non aggressive.',
+  'description_en': 'A blood and barley sausage, especially typical of Christmas, served with sauerkraut, potatoes and lingonberry jam. It '
+                    'is intense but traditional: spiced, dark and soft, to be balanced by acidity and sweetness from the sides.',
+  'ingredients': ['sangue', 'orzo', 'maiale', 'spezie', 'crauti'],
+  'ingredients_en': ['blood', 'barley', 'pork', 'spices', 'sauerkraut'],
+  'places': ['Kuldse Notsu Korts Tallinn', 'Olde Hansa Tallinn', 'Vanaema Juures Tallinn']},
+ {'name': 'S?lt',
+  'name_en': 'Jellied Meat',
+  'description': 'Carne cotta e servita in gelatina naturale, spesso maiale, con spezie e verdure, piatto freddo della tradizione estone. '
+                 'Pu? sembrare austero, ma la qualit? sta in limpidezza, taglio pulito e sapore delicato ma riconoscibile. La qualit? '
+                 'dipende da gelatina leggera e carne tagliata con ordine.',
+  'description_en': 'Meat cooked and served in natural jelly, often pork, with spices and vegetables, a cold dish of Estonian tradition. '
+                    'It may seem austere, but quality lies in clarity, clean cutting and flavour that is delicate yet recognisable.',
+  'ingredients': ['maiale', 'gelatina naturale', 'verdure', 'spezie', 'sale'],
+  'ingredients_en': ['pork', 'natural jelly', 'vegetables', 'spices', 'salt'],
+  'places': ['Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn', 'Farm Restaurant Tallinn']},
+ {'name': 'Kiluv?ileib',
+  'name_en': 'Sprat Sandwich',
+  'description': 'Sandwich aperto con pane nero, spratti speziati, uovo, cipolla o erbe, molto legato alla cucina quotidiana estone. ? '
+                 'piccolo ma identitario: pane scuro, pesce sapido, grasso delicato e freschezza degli aromi devono equilibrarsi. La '
+                 'qualit? sta nel pane compatto e nel pesce ben scolato.',
+  'description_en': 'An open sandwich with black bread, spiced sprats, egg, onion or herbs, strongly tied to everyday Estonian cooking. It '
+                    'is small but identity-rich: dark bread, savoury fish, delicate fat and fresh aromatics should balance. Quality lies '
+                    'in compact bread and fish that is properly drained.',
+  'ingredients': ['pane nero', 'spratti', 'uovo', 'cipolla', 'erbe'],
+  'ingredients_en': ['black bread', 'sprats', 'egg', 'onion', 'herbs'],
+  'places': ['Komeet Cafe Tallinn', 'Rataskaevu 16 Tallinn', 'Leib Resto ja Aed Tallinn']},
+ {'name': 'Kama',
+  'name_en': 'Kama Flour Dessert',
+  'description': 'Miscela tradizionale di farine tostate di cereali e legumi, spesso mescolata con kefir, yogurt o panna acida. ? semplice '
+                 'e molto estone: leggermente nocciolata, acidula, fresca, pi? legata alla memoria domestica che alla pasticceria. La '
+                 'qualit? migliore evita polverosit? e mantiene una piacevole freschezza lattica.',
+  'description_en': 'A traditional mix of toasted grain and legume flours, often mixed with kefir, yoghurt or sour cream. It is simple and '
+                    'very Estonian: slightly nutty, tangy and fresh, tied more to home memory than to pastry.',
+  'ingredients': ['farine tostate', 'kefir', 'yogurt', 'zucchero', 'frutti di bosco'],
+  'ingredients_en': ['toasted flours', 'kefir', 'yoghurt', 'sugar', 'berries'],
+  'places': ['Farm Restaurant Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
+ {'name': 'Hapukapsas',
+  'name_en': 'Estonian Sauerkraut',
+  'description': 'Crauti estoni cotti o marinati, serviti con maiale, salsicce, patate o piatti invernali. La qualit? sta nell?acidit? '
+                 'viva ma non aggressiva, nella consistenza ancora presente e nella capacit? di alleggerire cibi robusti. La qualit? '
+                 'migliore mantiene profumo pulito e accompagna senza coprire.',
+  'description_en': 'Estonian sauerkraut, cooked or marinated, served with pork, sausages, potatoes or winter dishes. Quality lies in '
+                    'lively but not aggressive acidity, texture that remains present and the ability to lighten hearty food. The best '
+                    'quality keeps a clean aroma and supports the dish without dominating.',
+  'ingredients': ['cavolo fermentato', 'sale', 'maiale', 'spezie', 'patate'],
+  'ingredients_en': ['fermented cabbage', 'salt', 'pork', 'spices', 'potatoes'],
+  'places': ['Olde Hansa Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
+ {'name': 'Vastlakukkel',
+  'name_en': 'Estonian Cream Bun',
+  'description': 'Panino dolce soffice, tagliato e riempito con panna montata e spesso confettura, tipico del periodo di Vastlap?ev. Deve '
+                 'essere leggero, profumato e generoso, con panna fresca e mollica capace di restare morbida. La qualit? sta nel contrasto '
+                 'tra pane soffice e panna stabile.',
+  'description_en': 'A soft sweet bun, split and filled with whipped cream and often jam, typical of the Vastlap?ev season. It should be '
+                    'light, fragrant and generous, with fresh cream and crumb able to stay soft. Quality lies in the contrast between soft '
+                    'bun and stable cream.',
+  'ingredients': ['farina', 'panna', 'zucchero', 'confettura', 'lievito'],
+  'ingredients_en': ['flour', 'cream', 'sugar', 'jam', 'yeast'],
+  'places': ['ROST Bakery Tallinn', 'Pagaripoisid Tallinn', 'Cafe Maiasmokk Tallinn']},
+ {'name': 'Kohuke',
+  'name_en': 'Kohuke Curd Snack',
+  'description': 'Snack dolce di cagliata o formaggio fresco ricoperto di cioccolato, amatissimo nei paesi baltici come merenda '
+                 'quotidiana. ? piccolo ma nostalgico: lattico, fresco, dolce il giusto, migliore quando il ripieno resta compatto e '
+                 'cremoso. La copertura deve spezzarsi bene senza rendere il morso stucchevole.',
+  'description_en': 'A sweet snack of curd or fresh cheese covered in chocolate, loved across the Baltics as an everyday treat. It is '
+                    'small but nostalgic: milky, fresh and moderately sweet, best when the filling stays compact and creamy.',
+  'ingredients': ['cagliata', 'cioccolato', 'zucchero', 'vaniglia'],
+  'ingredients_en': ['curd', 'chocolate', 'sugar', 'vanilla'],
+  'places': ['Balti Jaama Turg Tallinn', 'Kaubamaja Toidumaailm Tallinn', 'Rimi Tallinn Old Town']}]
 
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'Città medievale UNESCO', 'title_en': 'UNESCO Medieval City', 'body': 'Il centro storico di Tallinn è uno dei centri medievali meglio conservati dell\'Europa settentrionale, iscritto nel Patrimonio dell\'Umanità UNESCO nel 1997. Le mura, le torri e i vicoli acciottolati del XIII-XV secolo sono rimasti quasi intatti.', 'body_en': 'Tallinn\'s historic old town is one of the best-preserved medieval centres in Northern Europe, inscribed on the UNESCO World Heritage List in 1997. The walls, towers and cobbled lanes from the 13th to 15th centuries have remained almost intact.'},

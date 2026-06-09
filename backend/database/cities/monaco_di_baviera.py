@@ -132,16 +132,88 @@ FOOD_SPOTS = [
  {'city': 'monaco_di_baviera', 'zone': 'theresienwiese_glockenbach', 'category_level': 3, 'name': 'Festival Hall Dinner', 'name_en': 'Festival Hall Dinner', 'description': 'Cena più ordinata nella fascia di Theresienwiese.', 'description_en': 'A more composed dinner in the Theresienwiese belt.', 'latitude': 48.1308, 'longitude': 11.5490, 'estimated_visit_time': 95, 'tags': ['cena', 'eventi', 'elegante'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.1},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Weißwurst', 'name_en': 'White Sausage', 'description': 'Salsicce sbiancate di vitello e maiale aromatizzate al prezzemolo, scaldate in acqua calda e servite a colazione con senape dolce e brezel.', 'description_en': 'Pale veal-and-pork sausages flavoured with parsley, warmed in hot water and served at breakfast with sweet mustard and a pretzel.', 'ingredients': ['vitello', 'maiale', 'prezzemolo', 'senape dolce', 'brezel'], 'ingredients_en': ['veal', 'pork back fat', 'parsley', 'sweet mustard', 'pretzel'], 'places': ['Gaststaette Grossmarkthalle Munich', 'Schneider Braeuhaus Munich', 'Hofbraeuhaus Munich']},
- {'name': 'Brezel', 'name_en': 'Pretzel', 'description': 'Pane intrecciato dalla crosta scura lucida e dalla mollica morbida, immerso in acqua e soda caustica prima della cottura, classico dei biergarten.', 'description_en': 'A twisted bread with a dark glossy crust and soft inside, dipped in lye water before baking, a classic of the beer gardens.', 'ingredients': ['farina', 'acqua', 'lievito', 'sale', 'malto'], 'ingredients_en': ['flour', 'water', 'yeast', 'salt', 'malt'], 'places': ['Rischart Munich', 'Hofbraeuhaus Munich', 'Viktualienmarkt Munich']},
- {'name': 'Schweinshaxe', 'name_en': 'Pork Knuckle', 'description': 'Stinco di maiale arrostito a lungo nel forno fino a crosta croccante e cuore morbidissimo, servito con knödel di patate e crauti.', 'description_en': 'Pork knuckle slow-roasted until the skin is crackling crisp and the meat falls apart, served with potato knödel and sauerkraut.', 'ingredients': ['stinco di maiale', 'sale', 'cumino', 'birra', 'patate'], 'ingredients_en': ['pork knuckle', 'salt', 'caraway seeds', 'beer', 'potatoes'], 'places': ['Haxnbauer Munich', 'Augustiner-Keller Munich', 'Hofbraeuhaus Munich']},
- {'name': 'Leberkäse', 'name_en': 'Leberkäse', 'description': 'Pagnotta cotta di carne fine di manzo e maiale, servita a fette spesse in un panino caldo con senape, classico snack di mezzogiorno.', 'description_en': 'A baked loaf of finely ground beef and pork, served in thick slices on a warm roll with mustard, a classic Munich midday snack.', 'ingredients': ['manzo', 'maiale', 'cipolla', 'spezie', 'pane'], 'ingredients_en': ['beef', 'pork', 'onion', 'spices', 'bread roll'], 'places': ['Leberkas-Pepi Munich', 'Viktualienmarkt Munich', 'Vinzenzmurr Munich']},
- {'name': 'Obatzda', 'name_en': 'Obatzda Cheese Spread', 'description': 'Crema arancione di Camembert maturo e burro montata con paprika, cipolla e cumino, classica spalmabile da biergarten servita sul pane.', 'description_en': 'An orange spread of ripe Camembert whipped with butter, paprika, onion and caraway, a beer garden classic served on bread.', 'ingredients': ['camembert', 'burro', 'paprika', 'cipolla', 'cumino'], 'ingredients_en': ['Camembert', 'butter', 'paprika', 'onion', 'caraway seeds'], 'places': ['Augustiner-Keller Munich', 'Schneider Braeuhaus Munich', 'Hofbraeuhaus Munich']},
- {'name': 'Käsespätzle', 'name_en': 'Cheese Spätzle', 'description': 'Gnocchetti irregolari di pasta fresca a strati con Emmental fuso e cipolle dorate, comfort food alpino delle Wirtshaus bavaresi.', 'description_en': 'Irregular fresh pasta dumplings layered with melted Emmental and golden onions, an alpine comfort food of Bavarian taverns.', 'ingredients': ['spätzle', 'formaggio', 'cipolla fritta', 'burro'], 'ingredients_en': ['spätzle', 'cheese', 'fried onion', 'butter'], 'places': ['Wirtshaus in der Au Munich', 'Augustiner-Keller Munich', "Andy's Krablergarten Munich"]},
- {'name': 'Apfelstrudel', 'name_en': 'Apple Strudel', 'description': 'Pasta sottilissima arrotolata attorno a mele a fette, uvetta, cannella e pangrattato dorato nel burro, servito caldo con panna o vaniglia.', 'description_en': 'Paper-thin pastry rolled around sliced apples, raisins, cinnamon and butter-toasted breadcrumbs, served warm with cream or vanilla.', 'ingredients': ['mele', 'pasta sottile', 'uvetta', 'cannella', 'zucchero'], 'ingredients_en': ['apples', 'thin pastry', 'raisins', 'cinnamon', 'sugar'], 'places': ['Cafe Luitpold Munich', 'Cafe Frischhut Munich', 'Dallmayr Munich']},
- {'name': 'Helles', 'name_en': 'Munich Helles Beer', 'description': 'Lager chiara dorata dal carattere maltato e dal finale pulito, birra quotidiana di Monaco servita in capienti boccali di vetro da litro.', 'description_en': 'A golden pale lager with a malty character and clean finish, the everyday Munich beer served in generous one-litre Maß glasses.', 'ingredients': ["acqua", "malto d'orzo", 'luppolo', 'lievito'], 'ingredients_en': ['water', 'barley malt', 'hops', 'yeast'], 'places': ['Augustiner-Keller Munich', 'Hofbraeuhaus Munich', 'Paulaner Braeuhaus Munich']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Wei?wurst',
+  'name_en': 'Wei?wurst White Sausage',
+  'description': 'Salsiccia bianca bavarese di vitello e maiale, profumata con prezzemolo, limone e spezie, tradizionalmente mangiata al '
+                 'mattino. Si serve con senape dolce e brezel: deve essere delicata, succosa e tolta dalla pelle con gesto corretto.',
+  'description_en': 'A Bavarian white sausage of veal and pork, scented with parsley, lemon and spices, traditionally eaten in the '
+                    'morning. It is served with sweet mustard and pretzel: it should be delicate, juicy and removed from its casing '
+                    'properly.',
+  'ingredients': ['vitello', 'maiale', 'prezzemolo', 'limone', 'senape dolce'],
+  'ingredients_en': ['veal', 'pork', 'parsley', 'lemon', 'sweet mustard'],
+  'places': ['Gaststaette Grossmarkthalle Munich', 'Schneider Braeuhaus Munich', 'Hofbraeuhaus Munich']},
+ {'name': 'Brezel',
+  'name_en': 'Bavarian Pretzel',
+  'description': 'Pane intrecciato bavarese con crosta scura, lucida e salata, interno morbido e profumo di malto. A Monaco accompagna '
+                 'birra, salsicce e formaggi: la qualit? sta nel contrasto tra superficie sapida e mollica ancora elastica. Deve arrivare '
+                 'fresco, non secco, con sale ben distribuito.',
+  'description_en': 'A Bavarian twisted bread with dark glossy salty crust, soft interior and malt aroma. In Munich it accompanies beer, '
+                    'sausages and cheeses: quality lies in the contrast between savoury surface and crumb that remains elastic.',
+  'ingredients': ['farina', 'malto', 'lievito', 'sale grosso', 'burro'],
+  'ingredients_en': ['flour', 'malt', 'yeast', 'coarse salt', 'butter'],
+  'places': ['Rischart Munich', 'Hofbraeuhaus Munich', 'Viktualienmarkt Munich']},
+ {'name': 'Schweinshaxe',
+  'name_en': 'Roast Pork Knuckle',
+  'description': 'Stinco di maiale arrosto con cotenna croccante, carne morbida e spesso contorno di crauti, canederli o patate. ? cucina '
+                 'bavarese scenografica: ricca, carnosa, da birreria, migliore quando la pelle scrocchia e l?interno resta succoso. La '
+                 'qualit? si misura nella separazione netta tra cotenna e carne.',
+  'description_en': 'Roast pork knuckle with crisp crackling, tender meat and often sauerkraut, dumplings or potatoes on the side. It is '
+                    'theatrical Bavarian cooking: rich, meaty and beer-hall friendly, best when the skin crackles and the inside stays '
+                    'juicy.',
+  'ingredients': ['stinco di maiale', 'crauti', 'spezie', 'birra', 'patate'],
+  'ingredients_en': ['pork knuckle', 'sauerkraut', 'spices', 'beer', 'potatoes'],
+  'places': ['Haxnbauer Munich', 'Augustiner-Keller Munich', 'Hofbraeuhaus Munich']},
+ {'name': 'Leberk?se',
+  'name_en': 'Leberk?se Meat Loaf',
+  'description': 'Sformato caldo di carne finemente macinata, cotto in stampo e servito a fette nel pane o con uovo e patate. Nonostante '
+                 'il nome, spesso non contiene fegato: deve essere morbido, sapido e leggermente rosolato ai bordi.',
+  'description_en': 'A hot loaf of finely minced meat, baked in a mould and served sliced in bread or with egg and potatoes. Despite the '
+                    'name, it often contains no liver: it should be soft, savoury and slightly browned at the edges.',
+  'ingredients': ['maiale', 'manzo', 'spezie', 'pane', 'senape'],
+  'ingredients_en': ['pork', 'beef', 'spices', 'bread', 'mustard'],
+  'places': ['Leberkas-Pepi Munich', 'Viktualienmarkt Munich', 'Vinzenzmurr Munich']},
+ {'name': 'Obatzda',
+  'name_en': 'Obatzda Cheese Spread',
+  'description': 'Crema bavarese di formaggi maturi, burro, paprika, cipolla e birra, servita con brezel nei Biergarten. ? intensa ma '
+                 'conviviale: cremosa, speziata, leggermente pungente, perfetta per accompagnare una Helles senza diventare troppo '
+                 'pesante. La qualit? dipende dal formaggio maturo ma non eccessivamente aggressivo.',
+  'description_en': 'A Bavarian spread of ripe cheeses, butter, paprika, onion and beer, served with pretzels in beer gardens. It is '
+                    'intense but convivial: creamy, spiced and slightly pungent, perfect with a Helles without becoming too heavy.',
+  'ingredients': ['Camembert', 'burro', 'paprika', 'cipolla', 'birra'],
+  'ingredients_en': ['Camembert', 'butter', 'paprika', 'onion', 'beer'],
+  'places': ['Augustiner-Keller Munich', 'Schneider Braeuhaus Munich', 'Hofbraeuhaus Munich']},
+ {'name': 'K?sesp?tzle',
+  'name_en': 'Cheese Sp?tzle',
+  'description': 'Piccoli gnocchetti di farina e uova con formaggio fuso e cipolle croccanti, diffusi nell?area alpina e amatissimi anche '
+                 'a Monaco. Sono comfort food puro: filanti, morbidi, saporiti, migliori quando il formaggio resta ricco ma non gommoso.',
+  'description_en': 'Small flour-and-egg dumplings with melted cheese and crisp onions, widespread in the Alpine area and loved in Munich '
+                    'too. They are pure comfort food: stretchy, soft and savoury, best when the cheese stays rich but not rubbery.',
+  'ingredients': ['farina', 'uova', 'formaggio', 'cipolle', 'burro'],
+  'ingredients_en': ['flour', 'eggs', 'cheese', 'onions', 'butter'],
+  'places': ['Wirtshaus in der Au Munich', 'Augustiner-Keller Munich', "Andy's Krablergarten Munich"]},
+ {'name': 'Apfelstrudel',
+  'name_en': 'Apple Strudel',
+  'description': 'Dolce di pasta sottile ripiena di mele, uvetta, cannella e pangrattato, servito con panna, gelato o salsa alla vaniglia. '
+                 'A Monaco richiama la tradizione austro-bavarese: sfoglia elastica, frutta morbida, spezie misurate e profumo domestico. '
+                 'La qualit? sta nel taglio pulito e nella frutta non acquosa.',
+  'description_en': 'A dessert of thin pastry filled with apples, raisins, cinnamon and breadcrumbs, served with cream, ice cream or '
+                    'vanilla sauce. In Munich it evokes Austro-Bavarian tradition: elastic pastry, soft fruit, measured spices and '
+                    'home-style aroma.',
+  'ingredients': ['mele', 'pasta sottile', 'uvetta', 'cannella', 'pangrattato'],
+  'ingredients_en': ['apples', 'thin pastry', 'raisins', 'cinnamon', 'breadcrumbs'],
+  'places': ['Cafe Luitpold Munich', 'Cafe Frischhut Munich', 'Dallmayr Munich']},
+ {'name': 'Helles',
+  'name_en': 'Helles Lager',
+  'description': 'Birra chiara bavarese a bassa fermentazione, morbida, maltata e molto beverina, pilastro dei Biergarten di Monaco. La '
+                 'qualit? sta nell?equilibrio: fresca e pulita, con amaro discreto e corpo sufficiente per accompagnare piatti robusti. '
+                 'Deve essere bevuta fresca, con finale secco e mai metallico.',
+  'description_en': 'A pale Bavarian bottom-fermented beer, soft, malty and highly drinkable, a pillar of Munich beer gardens. Quality '
+                    'lies in balance: fresh and clean, with discreet bitterness and enough body to accompany hearty dishes. It should be '
+                    'drunk fresh, with a dry finish and never metallic notes.',
+  'ingredients': ['acqua', 'malto d?orzo', 'luppolo', 'lievito'],
+  'ingredients_en': ['water', 'barley malt', 'hops', 'yeast'],
+  'places': ['Augustiner-Keller Munich', 'Hofbraeuhaus Munich', 'Paulaner Braeuhaus Munich']}]
 
 CULTURE_FACTS = [
  {'icon': '🍺', 'title': 'La birra qui è una parte strutturale della vita urbana', 'title_en': 'Beer is a structural part of urban life here', 'body': 'A Monaco di Baviera la cultura della birra non è solo turistica ma profondamente quotidiana, soprattutto tra birrerie storiche e biergarten.', 'body_en': 'In Munich, beer culture is not just touristic but deeply everyday, especially among historic beer halls and biergartens.'},

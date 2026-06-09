@@ -154,16 +154,90 @@ FOOD_SPOTS = [
  {'city': 'praga', 'zone': 'stare_mesto', 'category_level': 2, 'name': 'U Tří Růží', 'name_en': 'U Tří Růží', 'description': 'Birreria praghese in Husova 10 nel cuore della Città Vecchia, produzione di birra artigianale e ottimi snack da pub: utopenci marinati e formaggio fritto.', 'description_en': 'Prague brewpub on Husova 10 in the heart of the Old Town, craft beer production and excellent pub snacks: marinated utopenci and fried cheese.', 'latitude': 50.0855, 'longitude': 14.4190, 'estimated_visit_time': 70, 'tags': ['birreria', 'pub', 'centro'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Svickova na smetane', 'name_en': 'Svickova with Cream Sauce', 'description': 'Manzo con salsa cremosa di radici e canederli, uno dei grandi classici della cucina boema.', 'description_en': 'Beef with a creamy root vegetable sauce and dumplings, one of the great classics of Bohemian cuisine.', 'ingredients': ['manzo', 'sedano rapa', 'carote', 'panna', 'canederli'], 'ingredients_en': ['beef sirloin', 'celeriac', 'carrots', 'cream sauce', 'bread dumplings'], 'places': [{'name': 'U Modré Kachničky'}, {'name': 'Kuchyň Prague'}, {'name': 'Vinohradský Parlament'}]},
- {'name': 'Vepro knedlo zelo', 'name_en': 'Roast Pork with Dumplings and Cabbage', 'description': 'Piatto molto sostanzioso con maiale, crauti e canederli, fortemente legato alla tradizione ceca.', 'description_en': 'A hearty dish of pork, cabbage and dumplings, deeply tied to Czech tradition.', 'ingredients': ['maiale', 'crauti', 'canederli', 'aglio', 'cumino'], 'ingredients_en': ['pork', 'sauerkraut', 'bread dumplings', 'garlic', 'caraway seeds'], 'places': [{'name': 'U Parlamentu'}, {'name': 'U Medvídků'}, {'name': 'Lokál Dlouhá'}]},
- {'name': 'Pilsner Urquell', 'name_en': 'Pilsner Urquell', 'description': 'La lager chiara ceca per eccellenza, identitaria per tutta la cultura brassicola del paese.', 'description_en': "The quintessential Czech pale lager, distinctive for the country's whole brewing culture.", 'ingredients': ['malto', 'luppolo', 'lievito', 'acqua'], 'ingredients_en': ['malt', 'hops', 'yeast', 'water'], 'places': [{'name': 'U Pinkasů'}, {'name': 'U Fleků'}, {'name': 'Lokál Dlouhá'}]},
- {'name': 'Trdelnik', 'name_en': 'Trdelnik', 'description': 'Dolce cilindrico di pasta arrotolata, cotta sul fuoco e ricoperta di zucchero e cannella, molto diffuso nelle vie turistiche.', 'description_en': 'A cylindrical sweet of rolled dough, cooked over fire and coated with sugar and cinnamon, very common in tourist streets.', 'ingredients': ['farina', 'burro', 'zucchero', 'cannella', 'noci'], 'ingredients_en': ['flour', 'butter', 'sugar', 'cinnamon', 'walnuts'], 'places': [{'name': 'Good Food Coffee Bakery Karlova'}, {'name': 'Original Trdelnik Praha'}, {'name': 'Trdlokafe'}]},
- {'name': 'Gulas ceco', 'name_en': 'Czech Goulash', 'description': 'Versione boema del gulash, ricca e pensata per essere accompagnata dai canederli.', 'description_en': 'A Bohemian version of goulash, rich and meant to be paired with dumplings.', 'ingredients': ['maiale', 'cipolla', 'paprika', 'cumino', 'canederli'], 'ingredients_en': ['pork', 'onion', 'paprika', 'caraway seeds', 'bread dumplings'], 'places': [{'name': 'Lokál Dlouhá'}, {'name': 'U Pinkasů'}, {'name': 'Mlýnec'}]},
- {'name': 'Smazeny syr', 'name_en': 'Fried Cheese', 'description': 'Formaggio impanato e fritto, spesso servito con salsa tartara, tipico comfort food locale.', 'description_en': 'Breaded fried cheese, often served with tartar sauce, a typical local comfort food.', 'ingredients': ['formaggio', 'uovo', 'pangrattato', 'patate', 'salsa tartara'], 'ingredients_en': ['Edam or Hermelín cheese', 'egg', 'breadcrumbs', 'potatoes', 'tartar sauce'], 'places': [{'name': 'Sisters Bistro Prague'}, {'name': 'Lokál Dlouhá'}, {'name': 'Café Imperial Prague'}]},
- {'name': 'Bramborove knedliky', 'name_en': 'Potato Dumplings', 'description': 'Canederli di patate usati come contorno in moltissimi piatti della tradizione ceca.', 'description_en': 'Potato dumplings used as a side dish in many Czech traditional meals.', 'ingredients': ['patate', 'farina', 'uovo', 'sale'], 'ingredients_en': ['potatoes', 'flour', 'egg', 'salt'], 'places': [{'name': 'Café Savoy Praha'}, {'name': 'U Kalicha'}, {'name': 'Vinohradský Parlament'}]},
- {'name': 'Utopenci', 'name_en': 'Pickled Sausages', 'description': 'Salsicce ceche marinate in aceto con cipolla, spezie e peperoncino, servite fredde nei pub insieme alla birra.', 'description_en': 'Czech sausages pickled in vinegar with onion, spices and chili, served cold in pubs with beer.', 'ingredients': ['salsicce', 'aceto', 'cipolla', 'pepe', 'alloro'], 'ingredients_en': ['sausages', 'vinegar', 'onion', 'black pepper', 'bay leaf'], 'places': [{'name': 'U Černého Vola'}, {'name': 'U Medvídků'}, {'name': 'U Tří Růží'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Sv??kov? na smetan?',
+  'name_en': 'Sv??kov? Cream Sauce Beef',
+  'description': 'Manzo arrosto servito con salsa cremosa di verdure, panna, spezie, mirtilli rossi e knedl?ky, uno dei piatti cechi pi? '
+                 'rappresentativi. ? ricco e dolce-sapido: la qualit? sta nella salsa liscia, nella carne tenera e nell?equilibrio con '
+                 'l?acidit?.',
+  'description_en': 'Roast beef served with a creamy sauce of vegetables, cream, spices, cranberries and dumplings, one of the most '
+                    'representative Czech dishes. It is rich and sweet-savoury: quality lies in smooth sauce, tender meat and balance with '
+                    'acidity.',
+  'ingredients': ['manzo', 'panna', 'verdure', 'knedl?ky', 'mirtilli rossi'],
+  'ingredients_en': ['beef', 'cream', 'vegetables', 'dumplings', 'cranberries'],
+  'places': [{'name': 'U Modr? Kachni?ky'}, {'name': 'Kuchy? Prague'}, {'name': 'Vinohradsk? Parlament'}]},
+ {'name': 'Vep?o knedlo zelo',
+  'name_en': 'Roast Pork with Dumplings and Cabbage',
+  'description': 'Arrosto di maiale con knedl?ky e cavolo, spesso crauti o cavolo rosso, considerato un classico ceco assoluto. ? cucina '
+                 'da birreria: carne saporita, salsa, pane al vapore e acidit? del cavolo devono funzionare insieme. La qualit? migliore '
+                 'evita pesantezza inutile e mantiene il cavolo brillante.',
+  'description_en': 'Roast pork with dumplings and cabbage, often sauerkraut or red cabbage, considered an absolute Czech classic. It is '
+                    'beer-hall cooking: savoury meat, sauce, steamed bread and cabbage acidity must work together. The best version avoids '
+                    'unnecessary heaviness and keeps the cabbage bright and expressive.',
+  'ingredients': ['maiale', 'knedl?ky', 'cavolo', 'crauti', 'salsa'],
+  'ingredients_en': ['pork', 'dumplings', 'cabbage', 'sauerkraut', 'sauce'],
+  'places': [{'name': 'U Parlamentu'}, {'name': 'U Medv?dk?'}, {'name': 'Lok?l Dlouh?'}]},
+ {'name': 'Pilsner Urquell',
+  'name_en': 'Pilsner Urquell',
+  'description': 'Lager chiara nata a Plze? ma fondamentale anche a Praga, con schiuma cremosa, amaro elegante e grande bevibilit?. Non ? '
+                 'solo birra: ? cultura da pub, servizio al banco, bicchieri ben spillati e ritmo sociale ceco.',
+  'description_en': 'A pale lager born in Plze? but fundamental in Prague too, with creamy foam, elegant bitterness and great '
+                    'drinkability. It is not just beer: it is pub culture, bar service, well-poured glasses and Czech social rhythm.',
+  'ingredients': ['acqua', 'malto d?orzo', 'luppolo Saaz', 'lievito'],
+  'ingredients_en': ['water', 'barley malt', 'Saaz hops', 'yeast'],
+  'places': [{'name': 'U Pinkas?'}, {'name': 'U Flek?'}, {'name': 'Lok?l Dlouh?'}]},
+ {'name': 'Trdeln?k',
+  'name_en': 'Trdeln?k Chimney Pastry',
+  'description': 'Dolce cilindrico cotto su rullo e ricoperto di zucchero e cannella, molto visibile nelle zone turistiche di Praga. Non ? '
+                 'il piatto pi? antico della citt?, ma funziona come snack caldo, profumato e scenografico. La qualit? dipende dalla '
+                 'cottura uniforme e dallo zucchero non bruciato.',
+  'description_en': 'A cylindrical pastry cooked on a roller and coated with sugar and cinnamon, highly visible in Prague?s tourist areas. '
+                    'It is not the city?s most ancient dish, but works as a warm, fragrant and theatrical snack.',
+  'ingredients': ['farina', 'zucchero', 'cannella', 'lievito', 'burro'],
+  'ingredients_en': ['flour', 'sugar', 'cinnamon', 'yeast', 'butter'],
+  'places': [{'name': 'Good Food Coffee Bakery Karlova'}, {'name': 'Original Trdelnik Praha'}, {'name': 'Trdlokafe'}]},
+ {'name': 'Gul?? ceco',
+  'name_en': 'Czech Goulash',
+  'description': 'Stufato ceco di manzo, cipolla, paprika e spezie, servito con knedl?ky per raccogliere la salsa. Rispetto ad altre '
+                 'versioni centroeuropee ? denso e da pub: saporito, caldo, perfetto con birra e cottura lenta. La qualit? sta nella carne '
+                 'tenera e nella salsa lucida ma non grassa.',
+  'description_en': 'A Czech stew of beef, onion, paprika and spices, served with dumplings to collect the sauce. Compared with other '
+                    'Central European versions it is dense and pub-friendly: savoury, warm, perfect with beer and slow cooking.',
+  'ingredients': ['manzo', 'cipolla', 'paprika', 'knedl?ky', 'spezie'],
+  'ingredients_en': ['beef', 'onion', 'paprika', 'dumplings', 'spices'],
+  'places': [{'name': 'Lok?l Dlouh?'}, {'name': 'U Pinkas?'}, {'name': 'Ml?nec'}]},
+ {'name': 'Sma?en? s?r',
+  'name_en': 'Fried Cheese',
+  'description': 'Formaggio impanato e fritto, spesso servito con patatine e salsa tartara, amatissimo come comfort food ceco. ? semplice '
+                 'e diretto: crosta asciutta, interno filante, sapore lattico e una certa nostalgia da mensa e birreria. La qualit? sta '
+                 'nella frittura asciutta e nel formaggio filante ma stabile.',
+  'description_en': 'Breaded and fried cheese, often served with chips and tartar sauce, much loved as Czech comfort food. It is simple '
+                    'and direct: dry crust, melting interior, milky flavour and a certain cafeteria-and-beer-hall nostalgia. Quality lies '
+                    'in dry frying and cheese that melts while still holding together.',
+  'ingredients': ['formaggio', 'uova', 'pangrattato', 'patate', 'salsa tartara'],
+  'ingredients_en': ['cheese', 'eggs', 'breadcrumbs', 'potatoes', 'tartar sauce'],
+  'places': [{'name': 'Sisters Bistro Prague'}, {'name': 'Lok?l Dlouh?'}, {'name': 'Caf? Imperial Prague'}]},
+ {'name': 'Bramborov? knedl?ky',
+  'name_en': 'Potato Dumplings',
+  'description': 'Gnocchi cechi di patate, farina e uova, tagliati a fette e serviti come contorno a carni e salse. Sembrano neutri, ma '
+                 'sono essenziali: devono essere compatti, morbidi e capaci di assorbire il sugo. La qualit? dipende da cottura precisa e '
+                 'sapore pulito di patata.',
+  'description_en': 'Czech potato dumplings made with potatoes, flour and eggs, sliced and served as a side to meats and sauces. They seem '
+                    'neutral, but are essential: they should be compact, soft and able to absorb the sauce.',
+  'ingredients': ['patate', 'farina', 'uova', 'sale'],
+  'ingredients_en': ['potatoes', 'flour', 'eggs', 'salt'],
+  'places': [{'name': 'Caf? Savoy Praha'}, {'name': 'U Kalicha'}, {'name': 'Vinohradsk? Parlament'}]},
+ {'name': 'Utopenci',
+  'name_en': 'Pickled Sausages',
+  'description': 'Salsicce ceche marinate in aceto con cipolle, spezie e peperoni, servite fredde come snack da pub. Il nome significa '
+                 '?annegati?: il gusto ? acidulo, sapido, pungente, perfetto per accompagnare birra e conversazioni lunghe. Devono essere '
+                 'marinati abbastanza da risultare vivaci ma non aggressivi.',
+  'description_en': 'Czech sausages marinated in vinegar with onions, spices and peppers, served cold as a pub snack. The name means '
+                    '?drowned men?: the taste is tangy, savoury and pungent, perfect with beer and long conversations. They should be '
+                    'marinated enough to feel lively but not aggressive.',
+  'ingredients': ['salsicce', 'aceto', 'cipolle', 'spezie', 'peperoni'],
+  'ingredients_en': ['sausages', 'vinegar', 'onions', 'spices', 'peppers'],
+  'places': [{'name': 'U ?ern?ho Vola'}, {'name': 'U Medv?dk?'}, {'name': 'U T?? R???'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'Il Castello di Praga è uno dei complessi storici più grandi al mondo', 'title_en': 'Prague Castle is one of the largest historic complexes in the world', 'body': 'Non è un solo edificio ma un insieme di corti, chiese, palazzi e strade che raccontano secoli di potere boemo.', 'body_en': 'It is not a single building but a whole set of courtyards, churches, palaces and streets telling centuries of Bohemian power.'},

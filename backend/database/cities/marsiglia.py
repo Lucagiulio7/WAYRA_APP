@@ -133,16 +133,90 @@ FOOD_SPOTS = [
  {'city': 'marsiglia', 'zone': 'estaque', 'category_level': 3, 'name': 'Harbour Edge Fine Table', 'name_en': 'Harbour Edge Fine Table', 'description': 'Scelta piu elegante nel bordo marittimo periferico di Marsiglia.', 'description_en': 'A more elegant choice on Marseille\'s peripheral maritime edge.', 'latitude': 43.3636, 'longitude': 5.3148, 'estimated_visit_time': 95, 'tags': ['elegante', 'porto', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.2},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Bouillabaisse', 'name_en': 'Bouillabaisse', 'description': 'Zuppa simbolo del porto di Marsiglia, ricca di pesci di scoglio e accompagnata da rouille e crostini.', 'description_en': "The symbolic soup of Marseille's port, rich in rockfish and served with rouille sauce and toasted bread.", 'ingredients': ['pesce di scoglio', 'patate', 'zafferano', 'pomodoro', 'rouille'], 'ingredients_en': ['rockfish', 'potatoes', 'saffron', 'tomato', 'rouille sauce'], 'places': ['Chez Fonfon Marseille', 'Le Miramar Marseille', 'Restaurant Michel Marseille']},
- {'name': 'Panisse', 'name_en': 'Panisse', 'description': 'Frittelle di farina di ceci croccanti fuori e morbide dentro, street food popolare dei quartieri marsigliesi.', 'description_en': "Chickpea-flour fritters, crisp outside and tender inside, a popular street food of Marseille's neighbourhoods.", 'ingredients': ['farina di ceci', 'acqua', 'sale', 'olio'], 'ingredients_en': ['chickpea flour', 'water', 'salt', 'olive oil'], 'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'La Boite a Sardine Marseille']},
- {'name': 'Aïoli', 'name_en': 'Aioli Platter', 'description': "Piatto provenzale di merluzzo e verdure lessate accompagnato da una salsa cremosa di aglio e olio d'oliva.", 'description_en': 'A Provençal platter of salt cod and boiled vegetables served with a creamy garlic and olive oil sauce.', 'ingredients': ['aglio', 'olio', 'merluzzo', 'verdure', 'uova'], 'ingredients_en': ['garlic', 'olive oil', 'salt cod', 'vegetables', 'eggs'], 'places': ['Chez Etienne Marseille', 'La Boite a Sardine Marseille', 'Le Bouchon Provencal Marseille']},
- {'name': 'Pieds et paquets', 'name_en': 'Pieds et Paquets', 'description': 'Zampetti e involtini di trippa cotti a fuoco lento in salsa di pomodoro e vino, piatto contadino provenzale.', 'description_en': 'Trotters and tripe parcels slowly simmered in tomato and wine sauce, a hearty Provençal country dish.', 'ingredients': ['trippa', 'zampetti', 'pomodoro', 'aglio', 'erbe'], 'ingredients_en': ['tripe', 'trotters', 'tomato', 'garlic', 'herbs'], 'places': ['Le Lauracee Marseille', 'Chez Etienne Marseille', 'Le Bouchon Provencal Marseille']},
- {'name': 'Navettes', 'name_en': 'Navettes Biscuits', 'description': "Biscotti a forma di barchetta profumati ai fiori d'arancio, dolce simbolico della tradizione marsigliese.", 'description_en': 'Boat-shaped biscuits scented with orange blossom, a symbolic sweet of Marseille tradition.', 'ingredients': ['farina', 'zucchero', 'uova', 'acqua di fiori d\'arancio'], 'ingredients_en': ['flour', 'sugar', 'eggs', 'orange blossom water'], 'places': ['Four des Navettes Marseille', 'Navettes des Accoules Marseille', 'Maison Saint Honore Marseille']},
- {'name': 'Chichi frégi', 'name_en': 'Chichi Fregi', 'description': "Lunghe ciambelline fritte allo zucchero, dolce di strada tipico delle spiagge dell'Estaque.", 'description_en': "Long sugared fried doughnut sticks, a street sweet typical of the beaches of L'Estaque.", 'ingredients': ['farina', 'acqua', 'zucchero', 'olio'], 'ingredients_en': ['flour', 'water', 'sugar', 'oil'], 'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'Chez Freddy Marseille']},
- {'name': 'Tapenade', 'name_en': 'Tapenade', 'description': 'Crema provenzale di olive, capperi e acciughe pestati con olio, servita su pane tostato come aperitivo sapido di Marsiglia.', 'description_en': 'A Provençal spread of olives, capers and anchovies crushed with oil, served on toasted bread as a savory Marseille aperitif.', 'ingredients': ['olive', 'capperi', 'acciughe', 'olio'], 'ingredients_en': ['olives', 'capers', 'anchovies', 'olive oil'], 'places': ['La Boite a Sardine Marseille', 'Les Halles de la Major Marseille', 'Maison Empereur Marseille']},
- {'name': 'Pastis', 'name_en': 'Pastis', 'description': "Liquore all'anice servito allungato con acqua fredda che lo fa diventare lattiginoso, rito d'aperitivo marsigliese.", 'description_en': 'Anise liqueur served diluted with cold water until milky, the iconic apéritif ritual of Marseille.', 'ingredients': ['anice', 'alcool', 'erbe aromatiche'], 'ingredients_en': ['anise', 'alcohol', 'aromatic herbs'], 'places': ['La Caravelle Marseille', 'Bar de la Marine Marseille', 'Maison Ferroni Marseille']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Bouillabaisse',
+  'name_en': 'Bouillabaisse',
+  'description': 'Zuppa di pesci di roccia, crostacei, zafferano, finocchio e rouille, nata come cucina marinara e diventata piatto '
+                 'simbolo di Marsiglia. La qualit? sta nel brodo: intenso, iodato, speziato, servito con pesce riconoscibile e pane '
+                 'tostato.',
+  'description_en': 'A soup of rock fish, shellfish, saffron, fennel and rouille, born from fishermen?s cooking and turned into '
+                    'Marseille?s symbolic dish. Quality lies in the broth: intense, briny and spiced, served with recognisable fish and '
+                    'toasted bread.',
+  'ingredients': ['pesci di roccia', 'zafferano', 'finocchio', 'rouille', 'pane'],
+  'ingredients_en': ['rock fish', 'saffron', 'fennel', 'rouille', 'bread'],
+  'places': ['Chez Fonfon Marseille', 'Le Miramar Marseille', 'Restaurant Michel Marseille']},
+ {'name': 'Panisse',
+  'name_en': 'Panisse Chickpea Fries',
+  'description': 'Preparazione di farina di ceci cotta, raffreddata, tagliata e fritta, tipica dell?area marsigliese e dell?Estaque. Deve '
+                 'essere croccante fuori e cremosa dentro, con sapore delicato di ceci e una semplicit? perfetta da aperitivo. La qualit? '
+                 'si riconosce quando non assorbe troppo olio e resta pulita.',
+  'description_en': 'A preparation of chickpea flour cooked, cooled, cut and fried, typical of the Marseille area and L?Estaque. It should '
+                    'be crisp outside and creamy inside, with a delicate chickpea flavour and aperitif-friendly simplicity. Quality is '
+                    'recognised when it does not absorb too much oil and stays clean.',
+  'ingredients': ['farina di ceci', 'acqua', 'olio', 'sale'],
+  'ingredients_en': ['chickpea flour', 'water', 'oil', 'salt'],
+  'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'La Boite a Sardine Marseille']},
+ {'name': 'A?oli',
+  'name_en': 'A?oli',
+  'description': 'Salsa provenzale di aglio, olio e tuorlo, servita anche come piatto completo con verdure, pesce, uova e patate. A '
+                 'Marsiglia ? mediterranea e conviviale: pungente, cremosa, solare, da bilanciare con ingredienti semplici e ben cotti.',
+  'description_en': 'A Proven?al sauce of garlic, oil and egg yolk, also served as a complete dish with vegetables, fish, eggs and '
+                    'potatoes. In Marseille it is Mediterranean and convivial: pungent, creamy and sunny, to be balanced with simple '
+                    'well-cooked ingredients.',
+  'ingredients': ['aglio', 'olio', 'tuorlo', 'verdure', 'pesce'],
+  'ingredients_en': ['garlic', 'oil', 'egg yolk', 'vegetables', 'fish'],
+  'places': ['Chez Etienne Marseille', 'La Boite a Sardine Marseille', 'Le Bouchon Provencal Marseille']},
+ {'name': 'Pieds et paquets',
+  'name_en': 'Pieds et Paquets',
+  'description': 'Piatto tradizionale di piedini di agnello e piccoli involtini di trippa ripieni, cotti lentamente in salsa di pomodoro, '
+                 'vino bianco ed erbe. ? rustico e profondamente provenzale: gelatinoso, saporito, adatto a chi ama cucina di carattere.',
+  'description_en': 'A traditional dish of lamb feet and small stuffed tripe parcels, slowly cooked in tomato sauce, white wine and herbs. '
+                    'It is rustic and deeply Proven?al: gelatinous, savoury and suited to those who enjoy cooking with strong character.',
+  'ingredients': ['piedini di agnello', 'trippa', 'pomodoro', 'vino bianco', 'erbe'],
+  'ingredients_en': ['lamb feet', 'tripe', 'tomato', 'white wine', 'herbs'],
+  'places': ['Le Lauracee Marseille', 'Chez Etienne Marseille', 'Le Bouchon Provencal Marseille']},
+ {'name': 'Navettes',
+  'name_en': 'Navettes Biscuits',
+  'description': 'Biscotti secchi a forma di piccola barca, profumati tradizionalmente con acqua di fiori d?arancio e legati alla '
+                 'Candelora. Sono semplici ma identitari: croccanti, aromatici, poco burrosi, pensati pi? per il rito che per l?opulenza. '
+                 'La qualit? migliore mantiene profumo netto e friabilit? senza diventare dura.',
+  'description_en': 'Dry biscuits shaped like small boats, traditionally scented with orange blossom water and linked to Candlemas. They '
+                    'are simple but identity-rich: crisp, aromatic and lightly buttery, made more for ritual than opulence. The best '
+                    'quality keeps a clean aroma and crumbly texture without becoming hard.',
+  'ingredients': ['farina', 'zucchero', 'uova', 'olio', 'acqua di fiori d?arancio'],
+  'ingredients_en': ['flour', 'sugar', 'eggs', 'oil', 'orange blossom water'],
+  'places': ['Four des Navettes Marseille', 'Navettes des Accoules Marseille', 'Maison Saint Honore Marseille']},
+ {'name': 'Chichi fr?gi',
+  'name_en': 'Chichi Fr?gi Doughnut',
+  'description': 'Lungo dolce fritto simile a una ciambella allungata, venduto soprattutto all?Estaque e nei chioschi popolari. Deve '
+                 'arrivare caldo, zuccherato e leggermente croccante fuori, con interno morbido: semplice, nostalgico, perfetto da '
+                 'passeggio. La qualit? sta nella frittura asciutta e nella dolcezza non invadente.',
+  'description_en': 'A long fried sweet similar to an elongated doughnut, sold especially in L?Estaque and popular stalls. It should '
+                    'arrive hot, sugared and slightly crisp outside, with a soft centre: simple, nostalgic and perfect for eating while '
+                    'walking.',
+  'ingredients': ['farina', 'lievito', 'zucchero', 'olio', 'acqua'],
+  'ingredients_en': ['flour', 'yeast', 'sugar', 'oil', 'water'],
+  'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'Chez Freddy Marseille']},
+ {'name': 'Tapenade',
+  'name_en': 'Tapenade',
+  'description': 'Crema provenzale di olive, capperi, acciughe e olio d?oliva, servita su pane o come condimento. A Marsiglia porta subito '
+                 'mare e Mediterraneo: salina, intensa, brillante, migliore quando l?oliva resta protagonista e non viene coperta. La '
+                 'qualit? dipende dal sale controllato e da una texture ancora viva.',
+  'description_en': 'A Proven?al spread of olives, capers, anchovies and olive oil, served on bread or as a condiment. In Marseille it '
+                    'immediately brings sea and Mediterranean character: salty, intense and bright, best when the olive remains the '
+                    'protagonist.',
+  'ingredients': ['olive', 'capperi', 'acciughe', 'olio d?oliva', 'aglio'],
+  'ingredients_en': ['olives', 'capers', 'anchovies', 'olive oil', 'garlic'],
+  'places': ['La Boite a Sardine Marseille', 'Les Halles de la Major Marseille', 'Maison Empereur Marseille']},
+ {'name': 'Pastis',
+  'name_en': 'Pastis',
+  'description': 'Aperitivo all?anice diluito con acqua fredda, simbolo assoluto delle pause marsigliesi e provenzali. Non ? solo una '
+                 'bevanda alcolica: ? ritmo lento, terrazza, sole, profumo erbaceo e modo di aprire la conversazione prima del pasto.',
+  'description_en': 'An anise-flavoured aperitif diluted with cold water, an absolute symbol of Marseille and Proven?al pauses. It is not '
+                    'just an alcoholic drink: it is slow rhythm, terrace, sun, herbal aroma and a way to open conversation before eating.',
+  'ingredients': ['anice', 'liquirizia', 'alcool', 'acqua', 'erbe'],
+  'ingredients_en': ['anise', 'liquorice', 'alcohol', 'water', 'herbs'],
+  'places': ['La Caravelle Marseille', 'Bar de la Marine Marseille', 'Maison Ferroni Marseille']}]
 
 CULTURE_FACTS = [
  {'icon': '⚓', 'title': "Il porto è il vero codice di lettura della città", 'title_en': "The harbour is the city's real key to understanding it", 'body': 'Marsiglia si legge prima di tutto come porto: commercio, arrivi, partenze e mescolanza sono parte della sua struttura profonda.', 'body_en': 'Marseille is read first of all as a harbour: trade, arrivals, departures and mixture are part of its deep structure.'},

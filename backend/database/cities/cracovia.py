@@ -133,16 +133,89 @@ FOOD_SPOTS = [
  {'city': 'cracovia', 'zone': 'zwierzyniec_kosciuszko', 'category_level': 3, 'name': 'Zwierzyniec Fine Table', 'name_en': 'Zwierzyniec Fine Table', 'description': 'Scelta piu elegante nel lato verde e residenziale di Cracovia.', 'description_en': 'A more elegant choice in Krakow\'s green residential side.', 'latitude': 50.0564, 'longitude': 19.9191, 'estimated_visit_time': 95, 'tags': ['elegante', 'quartiere', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.1},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Pierogi', 'name_en': 'Pierogi Dumplings', 'description': 'Ravioli polacchi a mezzaluna ripieni di patate e formaggio fresco, carne o crauti e funghi, conditi con cipolla rosolata nel burro.', 'description_en': 'Polish half-moon dumplings filled with potato and cheese, meat or sauerkraut and mushrooms, topped with butter-fried onion.', 'ingredients': ['farina', 'patate', 'formaggio', 'carne o cavolo', 'cipolla'], 'ingredients_en': ['flour', 'potatoes', 'cheese', 'meat or sauerkraut', 'onion'], 'places': ['Przystanek Pierogarnia Krakow', 'Pierogi Mr Vincent Krakow', 'Starka Krakow']},
- {'name': 'Obwarzanek krakowski', 'name_en': 'Krakow Pretzel', 'description': 'Pane intrecciato ad anello cosparso di semi di papavero o sesamo, venduto dai carretti azzurri lungo le strade del centro di Cracovia.', 'description_en': 'A braided ring bread sprinkled with poppy or sesame seeds, sold from blue carts along the streets of central Krakow.', 'ingredients': ['farina', 'acqua', 'lievito', 'sale', 'semi'], 'ingredients_en': ['flour', 'water', 'yeast', 'salt', 'seeds'], 'places': ['Obwarzanek Krakowski Main Square Krakow', 'Obwarzanek Museum Krakow', 'Stary Kleparz Krakow']},
- {'name': 'Żurek', 'name_en': 'Sour Rye Soup', 'description': 'Zuppa acidula a base di farina di segale fermentata con salsiccia bianca e mezzo uovo sodo, classica della Pasqua polacca.', 'description_en': 'A tangy soup of fermented rye flour with white sausage and half a boiled egg, a Polish Easter classic.', 'ingredients': ['segale fermentata', 'salsiccia', 'uovo', 'patate', 'aglio'], 'ingredients_en': ['fermented rye', 'sausage', 'egg', 'potatoes', 'garlic'], 'places': ['Pod Aniolami Krakow', 'Starka Krakow', 'Kuchnia u Babci Maliny Krakow']},
- {'name': 'Zapiekanka', 'name_en': 'Polish Open Sandwich', 'description': 'Mezza baguette gratinata con funghi, formaggio fuso e ketchup, street food iconico delle bancarelle di Plac Nowy a Kazimierz.', 'description_en': 'A half baguette grilled with mushrooms, melted cheese and ketchup, the iconic street food of the Plac Nowy stalls in Kazimierz.', 'ingredients': ['baguette', 'funghi', 'formaggio', 'ketchup'], 'ingredients_en': ['baguette', 'mushrooms', 'cheese', 'ketchup'], 'places': ['Zapiekanki u Endziora Krakow', 'Okraglak Plac Nowy Krakow', 'Piecyk Zapiekanki Krakow']},
- {'name': 'Bigos', 'name_en': "Hunter's Stew", 'description': 'Stufato denso di crauti e cavolo fresco cotto a lungo con carni miste, salsiccia e funghi secchi, piatto invernale dei cacciatori polacchi.', 'description_en': 'A thick stew of sauerkraut and fresh cabbage long-simmered with mixed meats, sausage and dried mushrooms, a Polish hunter winter dish.', 'ingredients': ['crauti', 'carne', 'salsiccia', 'funghi', 'spezie'], 'ingredients_en': ['sauerkraut', 'meat', 'sausage', 'mushrooms', 'spices'], 'places': ['Kuchnia u Babci Maliny Krakow', 'Pod Baranem Krakow', 'Morskie Oko Krakow']},
- {'name': 'Kiełbasa', 'name_en': 'Polish Sausage', 'description': 'Salsiccia di maiale affumicata profumata di aglio e maggiorana, grigliata e servita con senape o pane di segale come street food popolare.', 'description_en': 'A smoked pork sausage scented with garlic and marjoram, grilled and served with mustard or rye bread as popular street food.', 'ingredients': ['maiale', 'aglio', 'maggiorana', 'sale'], 'ingredients_en': ['pork', 'garlic', 'marjoram', 'salt'], 'places': ['Kielbaski z Nyski Krakow', 'Hala Targowa Krakow', 'Pod Wawelem Krakow']},
- {'name': 'Sernik', 'name_en': 'Polish Cheesecake', 'description': 'Cheesecake denso e cremoso fatto con il twaróg, formaggio fresco polacco, profumato di vaniglia o scorza di limone.', 'description_en': "A dense, creamy cheesecake made with twaróg, Polish fresh cheese, scented with vanilla or lemon zest.", 'ingredients': ['formaggio fresco', 'uova', 'zucchero', 'burro'], 'ingredients_en': ['fresh cheese', 'eggs', 'sugar', 'butter'], 'places': ['Cukiernia Cichowscy Krakow', 'Cukiernia Michalek Krakow', 'Massolit Bakery Krakow']},
- {'name': 'Kompot', 'name_en': 'Fruit Compote', 'description': 'Bevanda casalinga di frutta fresca o secca cotta a lungo nell\'acqua zuccherata, servita calda d\'inverno e fredda d\'estate.', 'description_en': 'A homemade drink of fresh or dried fruit long-simmered in sweetened water, served hot in winter and cold in summer.', 'ingredients': ['frutta', 'acqua', 'zucchero'], 'ingredients_en': ['fruit', 'water', 'sugar'], 'places': ['Kuchnia u Babci Maliny Krakow', 'Milkbar Tomasza Krakow', 'Gospoda Koko Krakow']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Pierogi',
+  'name_en': 'Pierogi Dumplings',
+  'description': 'Ravioli polacchi ripieni di patate e formaggio, carne, funghi, cavolo o frutta, bolliti e spesso ripassati con burro e '
+                 'cipolla. A Cracovia sono un piatto essenziale: morbidi, versatili, popolari e capaci di raccontare sia cucina domestica '
+                 'sia tavole tradizionali.',
+  'description_en': 'Polish dumplings filled with potatoes and cheese, meat, mushrooms, cabbage or fruit, boiled and often finished with '
+                    'butter and onion. In Krakow they are essential: soft, versatile, popular and able to express both home cooking and '
+                    'traditional tables.',
+  'ingredients': ['farina', 'patate', 'formaggio', 'cipolla', 'burro'],
+  'ingredients_en': ['flour', 'potatoes', 'cheese', 'onion', 'butter'],
+  'places': ['Przystanek Pierogarnia Krakow', 'Pierogi Mr Vincent Krakow', 'Starka Krakow']},
+ {'name': 'Obwarzanek krakowski',
+  'name_en': 'Krakow Obwarzanek',
+  'description': 'Anello di pane intrecciato, prima bollito e poi cotto al forno, cosparso di sale, semi di papavero o sesamo. ? lo street '
+                 'food simbolo di Cracovia: crosta sottile, interno elastico, profumo tostato e una presenza quotidiana nei chioschi del '
+                 'centro.',
+  'description_en': 'A braided bread ring, first boiled and then baked, sprinkled with salt, poppy seeds or sesame. It is Krakow?s '
+                    'symbolic street food: thin crust, elastic interior, toasted aroma and a daily presence at city-centre stalls.',
+  'ingredients': ['farina', 'lievito', 'sale', 'semi di papavero', 'sesamo'],
+  'ingredients_en': ['flour', 'yeast', 'salt', 'poppy seeds', 'sesame'],
+  'places': ['Obwarzanek Krakowski Main Square Krakow', 'Obwarzanek Museum Krakow', 'Stary Kleparz Krakow']},
+ {'name': '?urek',
+  'name_en': '?urek Sour Rye Soup',
+  'description': 'Zuppa acidula a base di farina di segale fermentata, servita con salsiccia, uovo, patate e maggiorana. ? rustica e '
+                 'profondissima: il sapore aspro non deve essere aggressivo, ma bilanciare grasso, affumicato e calore da cucina '
+                 'tradizionale polacca.',
+  'description_en': 'A sour soup based on fermented rye flour, served with sausage, egg, potatoes and marjoram. It is rustic and deeply '
+                    'flavoured: the tang should not be harsh, but should balance fat, smoke and the warmth of traditional Polish cooking.',
+  'ingredients': ['segale fermentata', 'salsiccia', 'uovo', 'patate', 'maggiorana'],
+  'ingredients_en': ['fermented rye', 'sausage', 'egg', 'potatoes', 'marjoram'],
+  'places': ['Pod Aniolami Krakow', 'Starka Krakow', 'Kuchnia u Babci Maliny Krakow']},
+ {'name': 'Zapiekanka',
+  'name_en': 'Zapiekanka Open Baguette',
+  'description': 'Mezza baguette gratinata con funghi, formaggio e salse, nata come cibo veloce popolare e diventata icona di Kazimierz. '
+                 'La migliore ? croccante sotto, filante sopra e generosa senza essere caotica, perfetta da mangiare camminando. La '
+                 'qualit? si sente quando il pane resta asciutto anche sotto il condimento.',
+  'description_en': 'A half baguette baked with mushrooms, cheese and sauces, born as popular fast food and now an icon of Kazimierz. The '
+                    'best version is crisp underneath, melting on top and generous without becoming chaotic, perfect to eat while walking.',
+  'ingredients': ['baguette', 'funghi', 'formaggio', 'ketchup', 'erba cipollina'],
+  'ingredients_en': ['baguette', 'mushrooms', 'cheese', 'ketchup', 'chives'],
+  'places': ['Zapiekanki u Endziora Krakow', 'Okraglak Plac Nowy Krakow', 'Piecyk Zapiekanki Krakow']},
+ {'name': 'Bigos',
+  'name_en': 'Bigos Hunter?s Stew',
+  'description': 'Stufato di crauti, cavolo fresco, carni miste, salsiccia, funghi e spezie, cotto lentamente e spesso ancora migliore il '
+                 'giorno dopo. ? un piatto robusto e invernale: acidit?, affumicato e dolcezza del cavolo devono fondersi bene.',
+  'description_en': 'A stew of sauerkraut, fresh cabbage, mixed meats, sausage, mushrooms and spices, slowly cooked and often even better '
+                    'the next day. It is hearty winter food: acidity, smoke and cabbage sweetness should merge smoothly. Its best versions '
+                    'taste layered, not merely heavy, after long patient cooking.',
+  'ingredients': ['crauti', 'cavolo', 'salsiccia', 'carne', 'funghi'],
+  'ingredients_en': ['sauerkraut', 'cabbage', 'sausage', 'meat', 'mushrooms'],
+  'places': ['Kuchnia u Babci Maliny Krakow', 'Pod Baranem Krakow', 'Morskie Oko Krakow']},
+ {'name': 'Kie?basa',
+  'name_en': 'Polish Sausage',
+  'description': 'Salsiccia polacca affumicata o grigliata, servita con pane, senape, cetrioli o crauti, amatissima nei mercati e nei '
+                 'locali informali. A Cracovia conta la semplicit?: carne succosa, pelle ben rosolata, profumo di fumo e condimenti netti.',
+  'description_en': 'Polish sausage, smoked or grilled, served with bread, mustard, pickles or sauerkraut, loved in markets and informal '
+                    'places. In Krakow simplicity matters: juicy meat, well-browned casing, smoky aroma and clean condiments. The best '
+                    'versions feel rustic but clean, with smoke supporting rather than dominating.',
+  'ingredients': ['maiale', 'spezie', 'aglio', 'pane', 'senape'],
+  'ingredients_en': ['pork', 'spices', 'garlic', 'bread', 'mustard'],
+  'places': ['Kielbaski z Nyski Krakow', 'Hala Targowa Krakow', 'Pod Wawelem Krakow']},
+ {'name': 'Sernik',
+  'name_en': 'Polish Cheesecake',
+  'description': 'Cheesecake polacca a base di twar?g, formaggio fresco compatto e leggermente acidulo, spesso con uvetta, vaniglia o '
+                 'cioccolato. ? meno cremosa di molte versioni americane: pi? densa, profumata, elegante, con una dolcezza controllata. La '
+                 'qualit? si misura nella compattezza del formaggio e nel taglio pulito della fetta.',
+  'description_en': 'Polish cheesecake made with twar?g, a compact and gently tangy fresh cheese, often with raisins, vanilla or '
+                    'chocolate. It is less creamy than many American versions: denser, fragrant, elegant and controlled in sweetness. '
+                    'Quality is measured by the cheese?s compactness and the clean cut of each slice.',
+  'ingredients': ['twar?g', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
+  'ingredients_en': ['twar?g cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
+  'places': ['Cukiernia Cichowscy Krakow', 'Cukiernia Michalek Krakow', 'Massolit Bakery Krakow']},
+ {'name': 'Kompot',
+  'name_en': 'Kompot Fruit Drink',
+  'description': 'Bevanda casalinga di frutta cotta in acqua con zucchero e spezie leggere, servita calda o fredda a seconda della '
+                 'stagione. Sembra semplice, ma accompagna bene la cucina polacca perch? rinfresca piatti robusti senza diventare troppo '
+                 'dolce.',
+  'description_en': 'A home-style drink made by simmering fruit in water with sugar and light spices, served warm or cold depending on the '
+                    'season. It seems simple, but suits Polish cooking well because it refreshes hearty dishes without becoming too sweet.',
+  'ingredients': ['frutta', 'acqua', 'zucchero', 'cannella', 'chiodi di garofano'],
+  'ingredients_en': ['fruit', 'water', 'sugar', 'cinnamon', 'cloves'],
+  'places': ['Kuchnia u Babci Maliny Krakow', 'Milkbar Tomasza Krakow', 'Gospoda Koko Krakow']}]
 
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'Cracovia conserva un forte ruolo simbolico nazionale', 'title_en': 'Krakow keeps a strong national symbolic role', 'body': 'Anche senza essere capitale politica, la città resta centrale nell\'immaginario storico e culturale polacco.', 'body_en': 'Even without being the political capital, the city remains central in Polish historical and cultural imagination.'},

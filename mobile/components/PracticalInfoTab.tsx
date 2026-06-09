@@ -116,17 +116,18 @@ function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: "it
 export function PracticalInfoTab({ info }: Props) {
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
+  const contentLang: "it" | "en" = lang === "it" ? "it" : "en";
 
-  const currency = (lang === "en" && info.currency_en)  ? info.currency_en  : info.currency;
-  const language = (lang === "en" && info.language_en)  ? info.language_en  : info.language;
-  const water    = (lang === "en" && info.water_en)     ? info.water_en     : info.water;
-  const tipping  = (lang === "en" && info.tipping_en)   ? info.tipping_en   : info.tipping;
-  const engNote  = (lang === "en" && info.english_note_en) ? info.english_note_en : info.english_note;
-  const engLevel = lang === "en"
+  const currency = (contentLang === "en" && info.currency_en)  ? info.currency_en  : info.currency;
+  const language = (contentLang === "en" && info.language_en)  ? info.language_en  : info.language;
+  const water    = (contentLang === "en" && info.water_en)     ? info.water_en     : info.water;
+  const tipping  = (contentLang === "en" && info.tipping_en)   ? info.tipping_en   : info.tipping;
+  const engNote  = (contentLang === "en" && info.english_note_en) ? info.english_note_en : info.english_note;
+  const engLevel = contentLang === "en"
     ? ENGLISH_LEVEL_EN[info.english_level] ?? info.english_level
     : ENGLISH_LEVEL_IT[info.english_level] ?? info.english_level;
   const engColor = ENGLISH_LEVEL_COLOR[info.english_level] ?? "#facc15";
-  const tips     = (lang === "en" && info.quick_tips_en?.length)
+  const tips     = (contentLang === "en" && info.quick_tips_en?.length)
     ? info.quick_tips_en
     : info.quick_tips ?? [];
 
@@ -163,7 +164,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.emergency_numbers.length > 0 && (
         <Section title={t.practicalEmergency} icon="alert-circle-outline" colors={colors}>
           {info.emergency_numbers.map((e, i) => (
-            <EmergencyRow key={i} item={e} lang={lang} colors={colors} />
+            <EmergencyRow key={i} item={e} lang={contentLang} colors={colors} />
           ))}
         </Section>
       )}
@@ -172,7 +173,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.transport_apps.length > 0 && (
         <Section title={t.practicalTransportApps} icon="subway-outline" colors={colors}>
           {info.transport_apps.map((app, i) => (
-            <AppCard key={i} app={app} lang={lang} colors={colors} />
+            <AppCard key={i} app={app} lang={contentLang} colors={colors} />
           ))}
         </Section>
       )}
@@ -181,7 +182,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.useful_apps.length > 0 && (
         <Section title={t.practicalUsefulApps} icon="apps-outline" colors={colors}>
           {info.useful_apps.map((app, i) => (
-            <AppCard key={i} app={app} lang={lang} colors={colors} />
+            <AppCard key={i} app={app} lang={contentLang} colors={colors} />
           ))}
         </Section>
       )}

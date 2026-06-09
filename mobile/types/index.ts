@@ -3,8 +3,10 @@ export interface Stop {
   id: number;
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
   description?: string;
   description_en?: string | null;
+  description_fr?: string | null;
   latitude: number;
   longitude: number;
   category_level?: number;
@@ -27,8 +29,10 @@ export interface Attraction {
   id: number;
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
   description?: string | null;
   description_en?: string | null;
+  description_fr?: string | null;
   wiki_snippet?: string | null;
   category_level: number;
   latitude: number;
@@ -43,14 +47,20 @@ export interface Restaurant {
   id: number;
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
   description?: string;
   description_en?: string | null;
+  description_fr?: string | null;
   food_type?: string;
   meal_type?: "lunch" | "dinner" | "both" | string | null;
   rating?: number;
   latitude: number;
   longitude: number;
   maps_link: string;
+  recommended_dishes?: string[];
+  recommended_dishes_en?: string[];
+  recommended_dishes_fr?: string[];
+  has_curated_dish_match?: boolean;
 }
 
 export interface ItineraryDay {
@@ -63,6 +73,7 @@ export interface ItineraryDay {
 export interface FoodPlace {
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
   maps_link: string;
   rating?: number | null;
   food_type?: string | null;
@@ -73,10 +84,13 @@ export interface Food {
   id: number;
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
   description: string;
   description_en?: string | null;
+  description_fr?: string | null;
   ingredients: string[];
   ingredients_en?: string[] | null;
+  ingredients_fr?: string[] | null;
   city: string;
   places?: FoodPlace[] | null;
 }

@@ -140,16 +140,91 @@ FOOD_SPOTS = [
  {'city': 'salisburgo', 'zone': 'hellbrunn', 'category_level': 3, 'name': 'Gasthof Gmachl Elixhausen', 'name_en': 'Gasthof Gmachl Elixhausen', 'description': 'Ristorante pluristellato in una locanda storica fuori Salisburgo, con cucina austriaca d\'autore e cantina eccellente.', 'description_en': 'Multi-awarded restaurant in a historic inn outside Salzburg, with signature Austrian cuisine and an excellent cellar.', 'latitude': 47.7640, 'longitude': 13.0590, 'estimated_visit_time': 140, 'tags': ['pluristellato', 'storico', 'cantina'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.8},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Mozartkugel', 'name_en': 'Mozartkugel', 'description': 'Praline di cioccolato fondente ripieno di marzapane e pistacchio, inventate nel 1890 da Paul Fürst. L\'originale è prodotto a mano ed è avvolto in carta stagnola dorata e rossa.', 'description_en': 'Dark chocolate praline filled with marzipan and pistachio, invented in 1890 by Paul Fürst. The original is handmade and wrapped in gold and red foil.', 'ingredients': ['cioccolato fondente', 'marzapane', 'pistacchio', 'pasta di noci', 'zucchero'], 'ingredients_en': ['dark chocolate', 'marzipan', 'pistachio', 'nougat paste', 'sugar'], 'places': ['Cafe Konditorei Furst Salzburg', 'Konditorei Schatz Salzburg', 'Cafe Tomaselli Salzburg']},
- {'name': 'Salzburger Nockerl', 'name_en': 'Salzburger Nockerl', 'description': 'Soufflé dolce a tre o cinque montagnole dorate che simboleggiano le colline di Salisburgo, servito caldo e spolverato di zucchero a velo. Delicato, leggero e iconico.', 'description_en': 'Sweet soufflé in three or five golden mounds symbolising the hills of Salzburg, served hot and dusted with powdered sugar. Delicate, light and iconic.', 'ingredients': ['uova', 'zucchero', 'farina', 'vaniglia', 'burro', 'zucchero a velo'], 'ingredients_en': ['eggs', 'sugar', 'flour', 'vanilla', 'butter', 'powdered sugar'], 'places': ['St Peter Stiftskulinarium Salzburg', 'Restaurant SNockerl im Elefant Salzburg', 'Cafe Mozart Salzburg']},
- {'name': 'Tafelspitz', 'name_en': 'Tafelspitz', 'description': 'Bollito di manzo viennese con verdure di radice, brodo aromatico e salse di accompagnamento come il rafano e la mela verde. Piatto imperiale per eccellenza.', 'description_en': 'Viennese boiled beef with root vegetables, aromatic broth and side sauces such as horseradish and green apple. The imperial dish par excellence.', 'ingredients': ['manzo', 'osso di midollo', 'carota', 'sedano', 'porro', 'rafano', 'mela verde', 'sale'], 'ingredients_en': ['beef', 'marrow bone', 'carrot', 'celery', 'leek', 'horseradish', 'green apple', 'salt'], 'places': ['St Peter Stiftskulinarium Salzburg', 'Zum Fidelen Affen Salzburg', 'Gasthof Goldgasse Salzburg']},
- {'name': 'Weißwurst', 'name_en': 'Weißwurst', 'description': 'Salsiccia bianca bavarese di vitello e lardo aromatizzata con prezzemolo e noce moscata, bollita e servita con senape dolce e pretzel. Tradizionalmente consumata prima di mezzogiorno.', 'description_en': 'Bavarian white sausage of veal and lard flavoured with parsley and nutmeg, boiled and served with sweet mustard and pretzel. Traditionally eaten before noon.', 'ingredients': ['vitello', 'lardo', 'prezzemolo', 'noce moscata', 'buccia di limone', 'cipolla', 'budello naturale'], 'ingredients_en': ['veal', 'lard', 'parsley', 'nutmeg', 'lemon zest', 'onion', 'natural casing'], 'places': ['Augustiner Braustubl Salzburg', 'Sternbrau Salzburg', 'Die Weisse Salzburg']},
- {'name': 'Kasnocken', 'name_en': 'Kasnocken', 'description': 'Gnocchetti di pasta all\'uovo cotti e conditi con formaggio alpino fuso e cipolla caramellata, simili agli Spätzle tirolesi ma più ricchi e filanti. Piatto montano di grande soddisfazione.', 'description_en': 'Small egg pasta dumplings cooked and dressed with melted Alpine cheese and caramelised onion, similar to Tyrolean Spätzle but richer and stringier. A supremely satisfying mountain dish.', 'ingredients': ['farina', 'uova', 'formaggio alpino', 'cipolla', 'burro', 'erba cipollina', 'sale'], 'ingredients_en': ['flour', 'eggs', 'Alpine cheese', 'onion', 'butter', 'chives', 'salt'], 'places': ['Zum Fidelen Affen Salzburg', 'Barenwirt Salzburg', 'Sternbrau Salzburg']},
- {'name': 'Tiroler Gröstl', 'name_en': 'Tiroler Gröstl', 'description': 'Piatto rustico di patate lesse a fette, carne avanzata o pancetta, cipolla e spezie rosolati in padella. Servito con un uovo fritto sopra, è un classico della cucina alpina di recupero.', 'description_en': 'Rustic dish of sliced boiled potatoes, leftover meat or bacon, onion and spices pan-fried together. Served with a fried egg on top, it is a classic of Alpine cucina di recupero.', 'ingredients': ['patate', 'carne o pancetta', 'cipolla', 'maggiorana', 'cumino', 'burro', 'uovo', 'sale', 'pepe'], 'ingredients_en': ['potatoes', 'meat or bacon', 'onion', 'marjoram', 'caraway', 'butter', 'egg', 'salt', 'pepper'], 'places': ['Barenwirt Salzburg', 'Zum Fidelen Affen Salzburg', 'Gasthof Goldgasse Salzburg']},
- {'name': 'Strudel di mele', 'name_en': 'Apple Strudel', 'description': 'Rotolo di pasta sfoglia sottilissima ripiena di mele affettate, uvetta, cannella, zucchero e pangrattato. Servito caldo con panna montata o salsa alla vaniglia, è il dolce più amato della tradizione asburgica.', 'description_en': 'Roll of very thin flaky pastry filled with sliced apples, raisins, cinnamon, sugar and breadcrumbs. Served warm with whipped cream or vanilla sauce, it is the most beloved dessert of the Habsburg tradition.', 'ingredients': ['pasta strudel', 'mele', 'uvetta', 'cannella', 'zucchero', 'pangrattato', 'burro', 'panna'], 'ingredients_en': ['strudel pastry', 'apples', 'raisins', 'cinnamon', 'sugar', 'breadcrumbs', 'butter', 'cream'], 'places': ['Cafe Tomaselli Salzburg', 'Cafe Bazar Salzburg', 'Konditorei Schatz Salzburg']},
- {'name': 'Brettljause', 'name_en': 'Brettljause', 'description': 'Tagliere rustico su asse di legno con salumi misti, formaggi alpini, lardo speziato, cetrioli in aceto e pane di segale. Tipico dell\'aperitivo austriaco da montagna, è un pasto completo e conviviale.', 'description_en': 'Rustic wooden board with mixed cured meats, Alpine cheeses, spiced lard, pickled gherkins and rye bread. Typical of the Austrian mountain aperitif, it is a complete and convivial meal.', 'ingredients': ['salame', 'speck', 'lardo', 'formaggio alpino', 'cetrioli sott\'aceto', 'senape', 'pane di segale', 'burro'], 'ingredients_en': ['salami', 'speck', 'lard', 'Alpine cheese', 'pickled gherkins', 'mustard', 'rye bread', 'butter'], 'places': ['Augustiner Braustubl Salzburg', 'Die Weisse Salzburg', 'Barenwirt Salzburg']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Mozartkugel',
+  'name_en': 'Mozartkugel',
+  'description': 'Cioccolatino simbolo di Salisburgo con cuore di pistacchio, marzapane, nougat e copertura di cioccolato fondente. ? '
+                 'turistico ma anche identitario: la qualit? sta negli strati netti, nel gusto di mandorla e pistacchio e nella dolcezza '
+                 'controllata.',
+  'description_en': 'A Salzburg symbolic chocolate with a core of pistachio, marzipan, nougat and dark chocolate coating. It is touristy '
+                    'but identity-rich: quality lies in distinct layers, almond and pistachio flavour and controlled sweetness. The best '
+                    'pieces feel balanced, not just decorative or sugary.',
+  'ingredients': ['cioccolato', 'marzapane', 'pistacchio', 'nougat', 'zucchero'],
+  'ingredients_en': ['chocolate', 'marzipan', 'pistachio', 'nougat', 'sugar'],
+  'places': ['Cafe Konditorei Furst Salzburg', 'Konditorei Schatz Salzburg', 'Cafe Tomaselli Salzburg']},
+ {'name': 'Salzburger Nockerl',
+  'name_en': 'Salzburg Nockerl Souffl?',
+  'description': 'Souffl? dolce a forma di tre monti, preparato con albumi montati, zucchero, tuorli e vaniglia, servito appena uscito dal '
+                 'forno. Deve essere alto, leggerissimo e fragile: pi? esperienza scenografica che dessert da trasporto. La qualit? sta '
+                 'nella cottura precisa, che sostiene volume e morbidezza.',
+  'description_en': 'A sweet souffl? shaped like three mountains, made with whipped egg whites, sugar, yolks and vanilla, served straight '
+                    'from the oven. It should be tall, very light and fragile: more a theatrical experience than a transportable dessert.',
+  'ingredients': ['albumi', 'tuorli', 'zucchero', 'vaniglia', 'burro'],
+  'ingredients_en': ['egg whites', 'egg yolks', 'sugar', 'vanilla', 'butter'],
+  'places': ['St Peter Stiftskulinarium Salzburg', 'Restaurant SNockerl im Elefant Salzburg', 'Cafe Mozart Salzburg']},
+ {'name': 'Tafelspitz',
+  'name_en': 'Tafelspitz Boiled Beef',
+  'description': 'Manzo bollito lentamente in brodo con verdure e spezie, servito con patate, salsa al rafano o erba cipollina. ? cucina '
+                 'austro-borghese: sobria, elegante, basata su carne tenera, brodo pulito e accompagnamenti precisi. La qualit? dipende '
+                 'dalla carne tagliata bene e dal brodo limpido.',
+  'description_en': 'Beef slowly boiled in broth with vegetables and spices, served with potatoes, horseradish or chive sauce. It is '
+                    'Austro-bourgeois cooking: sober, elegant and based on tender meat, clean broth and precise accompaniments. Quality '
+                    'depends on properly sliced meat and clear, aromatic broth.',
+  'ingredients': ['manzo', 'verdure', 'rafano', 'patate', 'brodo'],
+  'ingredients_en': ['beef', 'vegetables', 'horseradish', 'potatoes', 'broth'],
+  'places': ['St Peter Stiftskulinarium Salzburg', 'Zum Fidelen Affen Salzburg', 'Gasthof Goldgasse Salzburg']},
+ {'name': 'Wei?wurst',
+  'name_en': 'White Sausage',
+  'description': 'Salsiccia bianca di vitello e maiale, delicata e speziata, servita con senape dolce e brezel, molto presente nell?area '
+                 'austro-bavarese. Deve restare morbida, profumata e non troppo salata, ideale con birra chiara. La qualit? si riconosce '
+                 'nella grana fine e nella speziatura misurata.',
+  'description_en': 'A white sausage of veal and pork, delicate and spiced, served with sweet mustard and pretzel, common in the '
+                    'Austro-Bavarian area. It should stay soft, fragrant and not too salty, ideal with pale beer. Quality is recognised in '
+                    'fine texture and measured spicing.',
+  'ingredients': ['vitello', 'maiale', 'prezzemolo', 'senape dolce', 'spezie'],
+  'ingredients_en': ['veal', 'pork', 'parsley', 'sweet mustard', 'spices'],
+  'places': ['Augustiner Braustubl Salzburg', 'Sternbrau Salzburg', 'Die Weisse Salzburg']},
+ {'name': 'Kasnocken',
+  'name_en': 'Cheese Nocken',
+  'description': 'Piccoli gnocchetti alpini con formaggio fuso e cipolle croccanti, simili agli sp?tzle ma molto legati alle malghe e alle '
+                 'tavole salisburghesi. Sono comfort food puro: filanti, sapidi, caldi, migliori quando il formaggio non diventa gommoso.',
+  'description_en': 'Small Alpine dumplings with melted cheese and crisp onions, similar to sp?tzle but strongly tied to mountain huts and '
+                    'Salzburg tables. They are pure comfort food: stretchy, savoury and hot, best when the cheese does not become rubbery.',
+  'ingredients': ['farina', 'uova', 'formaggio', 'cipolle', 'burro'],
+  'ingredients_en': ['flour', 'eggs', 'cheese', 'onions', 'butter'],
+  'places': ['Zum Fidelen Affen Salzburg', 'Barenwirt Salzburg', 'Sternbrau Salzburg']},
+ {'name': 'Tiroler Gr?stl',
+  'name_en': 'Tyrolean Gr?stl',
+  'description': 'Piatto di patate saltate, carne arrosto avanzata, cipolla e spesso uovo, nato come cucina di recupero alpina. ? rustico '
+                 'e sostanzioso: patate dorate, carne saporita, cipolla dolce e padella ben calda fanno la differenza. La qualit? sta '
+                 'nella rosolatura uniforme e nell?uovo cotto al punto giusto.',
+  'description_en': 'A dish of fried potatoes, leftover roast meat, onion and often egg, born as Alpine leftover cooking. It is rustic and '
+                    'substantial: golden potatoes, savoury meat, sweet onion and a very hot pan make the difference.',
+  'ingredients': ['patate', 'carne arrosto', 'cipolla', 'uovo', 'burro'],
+  'ingredients_en': ['potatoes', 'roast meat', 'onion', 'egg', 'butter'],
+  'places': ['Barenwirt Salzburg', 'Zum Fidelen Affen Salzburg', 'Gasthof Goldgasse Salzburg']},
+ {'name': 'Strudel di mele',
+  'name_en': 'Apple Strudel',
+  'description': 'Dolce di pasta sottile ripiena di mele, uvetta, cannella e pangrattato, servito con panna o salsa alla vaniglia. A '
+                 'Salisburgo ? un classico da caff?: sfoglia elastica, frutta morbida, spezie misurate e profumo caldo. La qualit? '
+                 'migliore evita ripieni acquosi e pasta molle.',
+  'description_en': 'A dessert of thin pastry filled with apples, raisins, cinnamon and breadcrumbs, served with cream or vanilla sauce. '
+                    'In Salzburg it is a caf? classic: elastic pastry, soft fruit, measured spices and warm aroma. The best version avoids '
+                    'watery filling and limp pastry.',
+  'ingredients': ['mele', 'pasta sottile', 'uvetta', 'cannella', 'pangrattato'],
+  'ingredients_en': ['apples', 'thin pastry', 'raisins', 'cinnamon', 'breadcrumbs'],
+  'places': ['Cafe Tomaselli Salzburg', 'Cafe Bazar Salzburg', 'Konditorei Schatz Salzburg']},
+ {'name': 'Brettljause',
+  'name_en': 'Austrian Cold Board',
+  'description': 'Tagliere rustico di salumi, formaggi, pane, cetrioli, rafano e creme, tipico di locande e birrerie. ? pi? cultura della '
+                 'pausa che piatto complesso: condivisione, prodotti locali, sapori netti e abbinamento naturale con birra. La qualit? '
+                 'dipende da pane fresco, tagli curati e formaggi ben scelti.',
+  'description_en': 'A rustic board of cured meats, cheeses, bread, pickles, horseradish and spreads, typical of inns and beer halls. It '
+                    'is more a culture of pausing than a complex dish: sharing, local products, clear flavours and natural pairing with '
+                    'beer.',
+  'ingredients': ['salumi', 'formaggi', 'pane', 'cetrioli', 'rafano'],
+  'ingredients_en': ['cured meats', 'cheeses', 'bread', 'pickles', 'horseradish'],
+  'places': ['Augustiner Braustubl Salzburg', 'Die Weisse Salzburg', 'Barenwirt Salzburg']}]
 
 CULTURE_FACTS = [
  {'icon': '🎵', 'title': 'Patria di Mozart', 'title_en': 'Mozart\'s Birthplace', 'body': 'Wolfgang Amadeus Mozart nacque il 27 gennaio 1756 al numero 9 della Getreidegasse. Salisburgo ha dato al mondo il compositore più produttivo della storia, morto a soli 35 anni dopo aver scritto oltre 600 opere.', 'body_en': 'Wolfgang Amadeus Mozart was born on 27 January 1756 at number 9 Getreidegasse. Salzburg gave the world the most prolific composer in history, who died at just 35 after writing over 600 works.'},

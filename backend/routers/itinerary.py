@@ -185,6 +185,11 @@ def _foods_with_recommended_places(city: str, foods: list[Food], food_spots: lis
         for item in FOODS_BY_CITY.get(city, [])
         if item.get("name_en")
     })
+    city_foods_by_name.update({
+        _normalise_text(item.get("name_fr")): item
+        for item in FOODS_BY_CITY.get(city, [])
+        if item.get("name_fr")
+    })
 
     enriched_foods: list[dict] = []
     for food in foods:
@@ -192,9 +197,13 @@ def _foods_with_recommended_places(city: str, foods: list[Food], food_spots: lis
         city_food = city_foods_by_name.get(_normalise_text(food.name))
         if city_food:
             food_data["name_en"] = food_data.get("name_en") or city_food.get("name_en")
+            food_data["name_fr"] = food_data.get("name_fr") or city_food.get("name_fr")
             food_data["description_en"] = food_data.get("description_en") or city_food.get("description_en")
+            food_data["description_fr"] = food_data.get("description_fr") or city_food.get("description_fr")
             if not food_data.get("ingredients_en"):
                 food_data["ingredients_en"] = city_food.get("ingredients_en") or []
+            if not food_data.get("ingredients_fr"):
+                food_data["ingredients_fr"] = city_food.get("ingredients_fr") or []
         food_data["places"] = (
             _curated_places_for_food(city, food, food_spots)
             or _recommended_places_for_food(food, food_spots, city)

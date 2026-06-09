@@ -58,6 +58,7 @@ ATTRACTIONS = [
  {'city': 'budapest', 'block_id': 88, 'zone': 'margit_sziget', 'category_level': 2, 'name': 'Rovine del Convento Domenicano', 'name_en': 'Dominican Convent Ruins', 'description': 'Resti medievali molto utili per ricordare che l\'isola ha anche una forte stratificazione storica oltre alla funzione di parco.', 'description_en': 'Medieval remains very useful for remembering that the island also has strong historical layering beyond its park function.', 'latitude': 47.5281, 'longitude': 19.0454, 'estimated_visit_time': 25, 'tags': ['rovine', 'storia', 'medievale'], 'attraction_type': 'rovine', 'ticket_url': None},
 ]
 
+
 FOOD_SPOTS = [
  {'city': 'budapest', 'zone': 'castello_buda', 'category_level': 1, 'name': 'Buda Castle Kitchen', 'name_en': 'Buda Castle Kitchen', 'description': 'Ristorante comodo sulla collina per restare nella zona monumentale senza allontanarsi.', 'description_en': 'A convenient restaurant on the hill for staying within the monument district.', 'latitude': 47.4965, 'longitude': 19.0391, 'estimated_visit_time': 85, 'tags': ['ristorante', 'castello', 'centrale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'budapest', 'zone': 'castello_buda', 'category_level': 1, 'name': 'Fisherman Terrace Table', 'name_en': 'Fisherman Terrace Table', 'description': 'Buon indirizzo vicino al Bastione con cucina ungherese accessibile.', 'description_en': 'A good address near the Bastion with accessible Hungarian cooking.', 'latitude': 47.5013, 'longitude': 19.0344, 'estimated_visit_time': 85, 'tags': ['ristorante', 'panorama', 'ungherese'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
@@ -132,17 +133,6 @@ FOOD_SPOTS = [
  {'city': 'budapest', 'zone': 'margit_sziget', 'category_level': 3, 'name': 'Hot Dog Island', 'name_en': 'Island Hot Dog Stand', 'description': 'Spuntino salato veloce durante una pausa relax.', 'description_en': 'A quick savoury snack during a relaxation break.', 'latitude': 47.5258, 'longitude': 19.0463, 'estimated_visit_time': 10, 'tags': ['street food', 'snack', 'parco'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Gulyás', 'name_en': 'Goulash', 'description': 'Stufato o zuppa di manzo alla paprika, il piatto ungherese più riconoscibile a livello internazionale.', 'description_en': 'A beef stew or soup with paprika, the most internationally recognisable Hungarian dish.', 'ingredients': ['manzo', 'cipolla', 'paprika', 'pomodoro', 'peperone'], 'ingredients_en': ['beef', 'onion', 'paprika', 'tomato', 'bell pepper'], 'places': ['Getto Gulyas Budapest', 'Stand25 Bisztro Budapest', 'Rosenstein Vendeglo Budapest']},
- {'name': 'Langos', 'name_en': 'Langos', 'description': 'Disco fritto di pasta lievitata servito con panna acida, formaggio o altri condimenti salati.', 'description_en': 'A deep-fried flatbread served with sour cream, cheese or other savoury toppings.', 'ingredients': ['farina', 'lievito', 'patate', 'panna acida', 'formaggio'], 'ingredients_en': ['flour', 'yeast', 'potatoes', 'sour cream', 'cheese'], 'places': ['Retro Langos Budapest', 'Langosom Budapest', 'Great Market Hall Langos Budapest']},
- {'name': 'Halaszle', 'name_en': "Fisherman's Soup", 'description': 'Zuppa di pesce al Danubio e paprika, intensa e molto legata alla cucina fluviale ungherese.', 'description_en': 'A Danube fish soup with paprika, intense and closely tied to Hungarian river cuisine.', 'ingredients': ['pesce', 'paprika', 'cipolla', 'pomodoro', 'peperone'], 'ingredients_en': ['fish', 'paprika', 'onion', 'tomato', 'bell pepper'], 'places': ['Horgasztanya Vendeglo Budapest', 'Szegedi Halaszcsarda Budapest', 'Rosenstein Vendeglo Budapest']},
- {'name': 'Töltött káposzta', 'name_en': 'Stuffed Cabbage', 'description': 'Involtini di cavolo ripieni di carne e riso, piatto tradizionale molto presente nella cucina domestica.', 'description_en': 'Cabbage rolls stuffed with meat and rice, a traditional dish common in home cooking.', 'ingredients': ['cavolo', 'carne macinata', 'riso', 'paprika', 'panna acida'], 'ingredients_en': ['cabbage', 'minced meat', 'rice', 'paprika', 'sour cream'], 'places': ['Getto Gulyas Budapest', 'Hungarikum Bisztro Budapest', 'Rosenstein Vendeglo Budapest']},
- {'name': 'Gundel palacsinta', 'name_en': 'Gundel Pancake', 'description': 'Crêpe dolce con noci, rum e salsa al cioccolato, grande classico della pasticceria ungherese.', 'description_en': 'A sweet crêpe with walnuts, rum and chocolate sauce, a classic of Hungarian pastry.', 'ingredients': ['farina', 'uova', 'latte', 'noci', 'rum', 'cioccolato'], 'ingredients_en': ['flour', 'eggs', 'milk', 'walnuts', 'rum', 'chocolate'], 'places': ['Gundel Budapest', 'Gerloczy Cafe Budapest', 'Central Grand Cafe Budapest']},
- {'name': 'Tokaji Aszú', 'name_en': 'Tokaji Aszú', 'description': "Vino dolce nobile tra i più celebri dell'Europa centrale, spesso associato alla grande cucina ungherese.", 'description_en': 'A noble sweet wine among the most famous in Central Europe, often paired with high Hungarian cuisine.', 'ingredients': ['uve furmint', 'botrytis', 'zuccheri naturali'], 'ingredients_en': ['furmint grapes', 'botrytis', 'natural sugars'], 'places': ['Doblo Wine Bar Budapest', 'Kadarka Wine Bar Budapest', 'DiVino Bazilika Budapest']},
- {'name': 'Kürtőskalács', 'name_en': 'Chimney Cake', 'description': 'Dolce cilindrico arrostito e caramellato, molto diffuso nelle strade e nei mercatini.', 'description_en': 'A roasted caramelised cylindrical cake, widely found on streets and in markets.', 'ingredients': ['pasta lievitata', 'zucchero', 'burro', 'cannella', 'noci'], 'ingredients_en': ['leavened dough', 'sugar', 'butter', 'cinnamon', 'walnuts'], 'places': ["Molnar's Kurtoskalacs Budapest", 'Vitez Kurtos Budapest', 'Edes Macko Budapest']},
- {'name': 'Foie gras ungherese', 'name_en': 'Hungarian Foie Gras', 'description': 'Fegato d’oca ungherese servito scottato o in terrina, ricco e vellutato, spesso accompagnato da pane tostato e vino dolce.', 'description_en': 'Hungarian goose liver served seared or as a terrine, rich and velvety, often accompanied by toasted bread and sweet wine.', 'ingredients': ["fegato d'oca", 'sale', 'pepe', 'vino dolce'], 'ingredients_en': ['goose liver', 'salt', 'pepper', 'sweet wine'], 'places': ['Rosenstein Vendeglo Budapest', 'Stand25 Bisztro Budapest', 'Mak Bistro Budapest']},
-]
-
 CULTURE_FACTS = [
  {'icon': '♨️', 'title': 'Budapest è una capitale termale unica', 'title_en': 'Budapest is a uniquely thermal capital', 'body': 'Le acque termali naturali rendono il bagno pubblico una pratica quotidiana, sociale e profondamente identitaria.', 'body_en': 'Its natural thermal waters make public bathing a daily, social and deeply identity-shaping practice.'},
  {'icon': '🌉', 'title': "La città nasce dall'unione di Buda, Pest e Óbuda", 'title_en': 'The city was formed by uniting Buda, Pest and Óbuda', 'body': 'Anche oggi la differenza tra la collina di Buda e la pianura di Pest resta evidente nel modo in cui la città si percepisce.', 'body_en': 'Even today the difference between hilly Buda and flat Pest remains obvious in how the city is perceived.'},
@@ -158,3 +148,89 @@ CULTURE_FACTS = [
  {'icon': '🌙', 'title': 'Budapest cambia volto tra giorno e notte', 'title_en': 'Budapest changes character between day and night', 'body': 'Monumenti imperiali, terme, ruin bar e lungofiume creano una città che di sera appare diversa ma coerente con la sua identità.', 'body_en': 'Imperial monuments, baths, ruin bars and the riverfront create a city that feels different by night yet consistent with its identity.'},
 ]
 
+
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Gulyás',
+  'name_en': 'Goulash Soup',
+  'description': 'Zuppa ungherese di manzo, paprika, patate, carote e cipolle, più brodosa di molti gulasch internazionali. A Budapest va '
+                 'letta come piatto nazionale quotidiano: caldo, speziato, profondo, con la paprika che dà colore, dolcezza e identità.',
+  'description_en': 'A Hungarian soup of beef, paprika, potatoes, carrots and onions, more brothy than many international goulash '
+                    'versions. In Budapest it should be read as an everyday national dish: warm, spiced and deep, with paprika giving '
+                    'colour, sweetness and identity.',
+  'ingredients': ['manzo', 'paprika', 'patate', 'carote', 'cipolla'],
+  'ingredients_en': ['beef', 'paprika', 'potatoes', 'carrots', 'onion'],
+  'places': ['Gettó Gulyás Budapest', 'Kéhli Vendéglő Budapest', 'Rosenstein Vendéglő Budapest']},
+ {'name': 'Lángos',
+  'name_en': 'Lángos Fried Flatbread',
+  'description': 'Disco di pasta fritta servito caldo, di solito con panna acida, aglio e formaggio grattugiato. È street food semplice ma '
+                 'memorabile: croccante ai bordi, morbido al centro, ricco senza essere complicato, perfetto nei mercati cittadini.',
+  'description_en': 'A disc of fried dough served hot, usually with sour cream, garlic and grated cheese. It is simple but memorable '
+                    'street food: crisp at the edges, soft in the centre, rich without being complicated, perfect in city markets.',
+  'ingredients': ['farina', 'lievito', 'panna acida', 'aglio', 'formaggio'],
+  'ingredients_en': ['flour', 'yeast', 'sour cream', 'garlic', 'cheese'],
+  'places': ['Retro Lángos Budapest', 'Central Market Hall Budapest', 'Lángos Papa Budapest']},
+ {'name': 'Halászlé',
+  'name_en': 'Fisherman’s Soup',
+  'description': 'Zuppa di pesce d’acqua dolce, spesso carpa, preparata con abbondante paprika e brodo intenso. È più diretta che '
+                 'raffinata: rossa, piccante, profumata di fiume, legata alla tradizione del Danubio e delle tavole popolari. La qualità '
+                 'sta in un brodo netto, non fangoso, con piccantezza controllata.',
+  'description_en': 'A freshwater fish soup, often made with carp, prepared with plenty of paprika and an intense broth. It is direct '
+                    'rather than refined: red, spicy, river-scented and tied to the Danube tradition and popular tables.',
+  'ingredients': ['carpa', 'paprika', 'cipolla', 'pomodoro', 'peperoni'],
+  'ingredients_en': ['carp', 'paprika', 'onion', 'tomato', 'peppers'],
+  'places': ['Szegedi Halászcsárda Budapest', 'Rosenstein Vendéglő Budapest', 'Kéhli Vendéglő Budapest']},
+ {'name': 'Töltött káposzta',
+  'name_en': 'Stuffed Cabbage',
+  'description': 'Foglie di cavolo ripiene di carne, riso e spezie, cotte lentamente con crauti, paprika e panna acida. È un piatto '
+                 'invernale e familiare: robusto, profumato, leggermente acidulo, capace di riassumere la cucina domestica ungherese. La '
+                 'lunga cottura deve fondere cavolo, carne e spezie senza perdere struttura.',
+  'description_en': 'Cabbage leaves stuffed with meat, rice and spices, slowly cooked with sauerkraut, paprika and sour cream. It is a '
+                    'wintery family dish: hearty, aromatic, gently tangy and able to summarise Hungarian home cooking. Long cooking should '
+                    'blend cabbage, meat and spices without losing structure.',
+  'ingredients': ['cavolo', 'carne macinata', 'riso', 'paprika', 'panna acida'],
+  'ingredients_en': ['cabbage', 'minced meat', 'rice', 'paprika', 'sour cream'],
+  'places': ['Gettó Gulyás Budapest', 'Rosenstein Vendéglő Budapest', 'Kéhli Vendéglő Budapest']},
+ {'name': 'Gundel palacsinta',
+  'name_en': 'Gundel Pancake',
+  'description': 'Crêpe ungherese farcita con noci, uvetta, scorza d’arancia e rum, servita con salsa al cioccolato calda. È un dolce '
+                 'elegante da ristorante storico: ricco, aromatico, scenografico, con una dolcezza complessa ma non infantile. La salsa '
+                 'deve avvolgere la crêpe senza coprire il profumo di noci e rum.',
+  'description_en': 'A Hungarian crêpe filled with walnuts, raisins, orange zest and rum, served with warm chocolate sauce. It is an '
+                    'elegant dessert from historic restaurant culture: rich, aromatic and theatrical, with complex rather than childish '
+                    'sweetness.',
+  'ingredients': ['crêpe', 'noci', 'uvetta', 'rum', 'cioccolato'],
+  'ingredients_en': ['crêpe', 'walnuts', 'raisins', 'rum', 'chocolate'],
+  'places': ['Gundel Budapest', 'Café Gerbeaud Budapest', 'New York Café Budapest']},
+ {'name': 'Tokaji Aszú',
+  'name_en': 'Tokaji Aszú Wine',
+  'description': 'Vino dolce ungherese prodotto da uve botritizzate, famoso per equilibrio tra miele, albicocca, acidità e lunghissima '
+                 'persistenza. Anche a Budapest è una chiave culturale: non solo dessert wine, ma simbolo storico dell’eccellenza '
+                 'enologica nazionale. È ideale da assaggiare lentamente, più come esperienza aromatica che come semplice calice dolce.',
+  'description_en': 'A Hungarian sweet wine made from botrytised grapes, famous for its balance of honey, apricot, acidity and very long '
+                    'finish. Even in Budapest it is a cultural key: not just dessert wine, but a historic symbol of national wine '
+                    'excellence.',
+  'ingredients': ['uva furmint', 'uva hárslevelű', 'botrite nobile'],
+  'ingredients_en': ['furmint grapes', 'hárslevelű grapes', 'noble rot'],
+  'places': ['Doblo Wine Bar Budapest', 'Kadarka Wine Bar Budapest', 'Bortársaság Budapest']},
+ {'name': 'Kürtőskalács',
+  'name_en': 'Chimney Cake',
+  'description': 'Dolce cilindrico cotto su rullo, caramellato all’esterno e morbido all’interno, ricoperto con zucchero, cannella, noci o '
+                 'cacao. È profumatissimo e visivo: più buono appena fatto, quando il vapore incontra la crosta croccante. La qualità si '
+                 'misura nella crosta sottile e nella pasta ancora elastica.',
+  'description_en': 'A cylindrical pastry baked on a roller, caramelised outside and soft inside, coated with sugar, cinnamon, walnuts or '
+                    'cocoa. It is fragrant and visual: best freshly made, when steam meets the crisp crust. Quality is measured by the '
+                    'thin crust and dough that remains elastic.',
+  'ingredients': ['farina', 'zucchero', 'burro', 'cannella', 'lievito'],
+  'ingredients_en': ['flour', 'sugar', 'butter', 'cinnamon', 'yeast'],
+  'places': ['Molnár’s Kürtőskalács Budapest', 'Vitéz Kürtős Budapest', 'Central Market Hall Budapest']},
+ {'name': 'Foie gras ungherese',
+  'name_en': 'Hungarian Foie Gras',
+  'description': 'Fegato d’oca o anatra servito caldo, freddo o in terrina, parte importante della tradizione gastronomica ungherese. A '
+                 'Budapest appare nei ristoranti classici: burroso, intenso, spesso bilanciato da frutta, vini dolci o pane tostato. La '
+                 'porzione migliore è intensa ma pulita, elegante più che semplicemente opulenta.',
+  'description_en': 'Goose or duck liver served hot, cold or as a terrine, an important part of Hungarian gastronomic tradition. In '
+                    'Budapest it appears in classic restaurants: buttery and intense, often balanced by fruit, sweet wines or toasted '
+                    'bread.',
+  'ingredients': ['fegato d’oca', 'burro', 'sale', 'pepe', 'pane tostato'],
+  'ingredients_en': ['goose liver', 'butter', 'salt', 'pepper', 'toasted bread'],
+  'places': ['Rosenstein Vendéglő Budapest', 'Mák Restaurant Budapest', 'Gundel Budapest']}]

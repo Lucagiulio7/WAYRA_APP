@@ -79,8 +79,11 @@ def migrate_db():
         existing_food = existing_columns("foods")
         for col_name, col_def in [
             ("name_en",        "TEXT"),
+            ("name_fr",        "TEXT"),
             ("description_en", "TEXT"),
+            ("description_fr", "TEXT"),
             ("ingredients_en", "TEXT DEFAULT '[]'"),
+            ("ingredients_fr", "TEXT DEFAULT '[]'"),
         ]:
             if col_name not in existing_food:
                 conn.execute(text(f"ALTER TABLE foods ADD COLUMN {col_name} {col_def}"))
@@ -212,18 +215,24 @@ def seed():
             row = existing_foods.get(data["name"])
             if row:
                 row.name_en = data.get("name_en")
+                row.name_fr = data.get("name_fr")
                 row.description = data["description"]
                 row.description_en = data.get("description_en")
+                row.description_fr = data.get("description_fr")
                 row.ingredients = json.dumps(data.get("ingredients", []), ensure_ascii=False)
                 row.ingredients_en = json.dumps(data.get("ingredients_en", []), ensure_ascii=False)
+                row.ingredients_fr = json.dumps(data.get("ingredients_fr", []), ensure_ascii=False)
             else:
                 db.add(Food(
                     name=data["name"],
                     name_en=data.get("name_en"),
+                    name_fr=data.get("name_fr"),
                     description=data["description"],
                     description_en=data.get("description_en"),
+                    description_fr=data.get("description_fr"),
                     ingredients=json.dumps(data.get("ingredients", []), ensure_ascii=False),
                     ingredients_en=json.dumps(data.get("ingredients_en", []), ensure_ascii=False),
+                    ingredients_fr=json.dumps(data.get("ingredients_fr", []), ensure_ascii=False),
                     city=city,
                 ))
                 added_foods += 1

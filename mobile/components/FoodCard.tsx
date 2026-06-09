@@ -78,6 +78,30 @@ function getFoodEmoji(name: string, description?: string | null, ingredients?: s
   return FOOD_EMOJI_RULES.find((rule) => rule.pattern.test(text))?.icon ?? emoji(0x1F37D, 0xFE0F);
 }
 
+function localizedFoodName(food: Food, lang: string): string {
+  if (lang === "fr") return food.name_fr ?? food.name_en ?? food.name;
+  if (lang === "en") return food.name_en ?? food.name;
+  return food.name;
+}
+
+function localizedFoodDescription(food: Food, lang: string): string {
+  if (lang === "fr") return food.description_fr ?? food.description_en ?? food.description;
+  if (lang === "en") return food.description_en ?? food.description;
+  return food.description;
+}
+
+function localizedFoodIngredients(food: Food, lang: string): string[] {
+  if (lang === "fr") return food.ingredients_fr?.length ? food.ingredients_fr : food.ingredients_en?.length ? food.ingredients_en : food.ingredients;
+  if (lang === "en") return food.ingredients_en?.length ? food.ingredients_en : food.ingredients;
+  return food.ingredients;
+}
+
+function localizedFoodPlaceName(place: NonNullable<Food["places"]>[number], lang: string): string {
+  if (lang === "fr") return place.name_fr ?? place.name_en ?? place.name;
+  if (lang === "en") return place.name_en ?? place.name;
+  return place.name;
+}
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -92,9 +116,9 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
   const { colors } = useTheme();
   const expanded = controlledExpanded ?? internalExpanded;
 
-  const displayName        = (lang === "en" && food.name_en)         ? food.name_en         : food.name;
-  const displayDesc        = (lang === "en" && food.description_en)  ? food.description_en  : food.description;
-  const displayIngredients = (lang === "en" && food.ingredients_en?.length) ? food.ingredients_en : food.ingredients;
+  const displayName = localizedFoodName(food, lang);
+  const displayDesc = localizedFoodDescription(food, lang);
+  const displayIngredients = localizedFoodIngredients(food, lang);
 
   const places = food.places ?? [];
   const foodIcon = getFoodEmoji(displayName, displayDesc, displayIngredients);
@@ -148,7 +172,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
                   activeOpacity={0.75}
                 >
                   <Ionicons name="restaurant-outline" size={14} color={colors.accentGold} style={styles.placeIcon} />
-                  <Text style={[styles.placeName, { color: colors.text }]}>{lang === "en" && place.name_en ? place.name_en : place.name}</Text>
+                  <Text style={[styles.placeName, { color: colors.text }]}>{localizedFoodPlaceName(place, lang)}</Text>
                   <Ionicons name="open-outline" size={13} color={colors.textMuted} />
                 </TouchableOpacity>
               ))}

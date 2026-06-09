@@ -134,16 +134,88 @@ FOOD_SPOTS = [
  {'city': 'porto', 'zone': 'matosinhos', 'category_level': 3, 'name': 'Casa de Chá da Boa Nova area dining', 'name_en': 'Boa Nova Tea House area dining', 'description': 'Voce elegante e simbolica per rappresentare il lato più scenografico della costa.', 'description_en': "An elegant symbolic entry representing the coast's most scenic side.", 'latitude': 41.2038, 'longitude': -8.7063, 'estimated_visit_time': 110, 'tags': ['costa', 'elegante', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.7},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Francesinha', 'name_en': 'Francesinha', 'description': 'Panino imponente con carni, salsiccia e prosciutto coperto da formaggio fuso e immerso in una salsa piccante a base di birra e pomodoro.', 'description_en': 'A towering sandwich of meats, sausage and ham draped in melted cheese and bathed in a spicy beer-and-tomato sauce.', 'ingredients': ['pane', 'carne', 'salsiccia', 'formaggio', 'salsa alla birra', 'uovo facoltativo'], 'ingredients_en': ['bread', 'meat', 'sausage', 'melted cheese', 'beer tomato sauce', 'optional fried egg'], 'places': ['Cafe Santiago Porto', 'Brasao Aliados Porto', 'Lado B Porto']},
- {'name': 'Tripas à moda do Porto', 'name_en': 'Porto-style Tripe', 'description': 'Stufato di trippa, fagioli bianchi, vitello e salsicce affumicate, piatto storico che valse ai portoensi il soprannome di "tripeiros".', 'description_en': 'A stew of tripe, white beans, veal and smoked sausages, the historic dish that earned the people of Porto the nickname "tripeiros".', 'ingredients': ['trippa', 'fagioli', 'salsiccia', 'vitello', 'spezie'], 'ingredients_en': ['tripe', 'beans', 'sausage', 'veal', 'spices'], 'places': ['Abadia do Porto', 'Restaurante O Buraco Porto', 'Adega Sao Nicolau Porto']},
- {'name': 'Bacalhau à Gomes de Sá', 'name_en': 'Salt Cod Gomes de Sá Style', 'description': 'Sfoglia di baccalà alla griglia stratificata in forno con patate, cipolle dolci, olive nere e uova sode, classico portoghese inventato a Porto.', 'description_en': 'Flaked salt cod layered in the oven with potatoes, sweet onions, black olives and boiled eggs, a Portuguese classic invented in Porto.', 'ingredients': ['baccalà', 'patate', 'cipolle', 'olive', 'uova', 'prezzemolo'], 'ingredients_en': ['salt cod', 'potatoes', 'onions', 'olives', 'eggs', 'parsley'], 'places': ['O Gaveto Porto', 'Adega Sao Nicolau Porto', 'Abadia do Porto']},
- {'name': 'Pastel de nata', 'name_en': 'Custard Tart', 'description': 'Cestino di sfoglia croccante riempito di crema d\'uovo dorata e leggermente bruciacchiata in superficie, accompagnato da cannella e zucchero a velo.', 'description_en': 'A crisp puff pastry shell filled with golden egg custard slightly scorched on top, dusted with cinnamon and icing sugar.', 'ingredients': ["sfoglia", "crema all'uovo", 'zucchero', 'cannella'], 'ingredients_en': ['puff pastry', 'egg custard cream', 'sugar', 'cinnamon'], 'places': ['Manteigaria Porto', 'Nata Lisboa Porto', 'Castro Atelier de Pasteis de Nata Porto']},
- {'name': 'Bolinho de bacalhau', 'name_en': 'Codfish Cake', 'description': 'Crocchetta ovale di baccalà, patate schiacciate, uova e prezzemolo, fritta dorata e servita come tapa o aperitivo nei bar portoensi.', 'description_en': 'An oval croquette of salt cod, mashed potatoes, eggs and parsley, fried golden and served as a tapa or starter in Porto bars.', 'ingredients': ['baccalà', 'patate', 'uova', 'prezzemolo', 'olio'], 'ingredients_en': ['salt cod', 'potatoes', 'eggs', 'parsley', 'olive oil'], 'places': ['Casa Portuguesa do Pastel de Bacalhau Porto', 'Bolinhos do Jorge Porto', 'Adega Sao Nicolau Porto']},
- {'name': 'Caldo verde', 'name_en': 'Green Cabbage Soup', 'description': 'Zuppa cremosa di patate frullate con sottili strisce di cavolo riccio galego e fette di chorizo affumicato, comfort food identitario del Nord.', 'description_en': 'A creamy soup of blended potatoes with thin strips of Galician kale and slices of smoked chouriço, a Northern Portuguese comfort food.', 'ingredients': ['patate', 'cavolo galego', 'cipolla', 'olio', 'chouriço'], 'ingredients_en': ['potatoes', 'Galician cabbage', 'onion', 'olive oil', 'chouriço'], 'places': ['Abadia do Porto', 'Restaurante O Buraco Porto', 'Casa Guedes Porto']},
- {'name': 'Polvo à lagareiro', 'name_en': 'Octopus Lagareiro Style', 'description': 'Polpo intero arrostito al forno con patate schiacciate al pugno, abbondante olio d\'oliva e aglio, classico delle taverne marinare lusitane.', 'description_en': 'Whole roasted octopus served with smashed potatoes, generous olive oil and garlic, a classic of Portuguese seafood taverns.', 'ingredients': ['polpo', 'patate', 'olio', 'aglio', 'prezzemolo'], 'ingredients_en': ['octopus', 'potatoes', 'olive oil', 'garlic', 'parsley'], 'places': ['O Gaveto Porto', 'Restaurante O Valentim Matosinhos', 'Marisqueira Antiga Porto']},
- {'name': 'Rabanadas', 'name_en': 'Portuguese Sweet Toasts', 'description': 'Fette di pane raffermo inzuppate in latte zuccherato, fritte fino a dorarsi e cosparse di cannella, dolce tipico delle feste natalizie portoghesi.', 'description_en': 'Slices of stale bread soaked in sweetened milk, fried until golden and dusted with cinnamon, a typical Portuguese Christmas sweet.', 'ingredients': ['pane', 'latte', 'uova', 'zucchero', 'cannella'], 'ingredients_en': ['bread', 'milk', 'eggs', 'sugar', 'cinnamon'], 'places': ['Confeitaria do Bolhao Porto', 'Leitaria da Quinta do Paco Porto', 'Padaria Ribeiro Porto']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Francesinha',
+  'name_en': 'Francesinha Sandwich',
+  'description': 'Sandwich portuense molto ricco con pane, carne, salsiccia, prosciutto, formaggio fuso e salsa calda alla birra e '
+                 'pomodoro. ? eccessiva per definizione ma deve restare equilibrata: salsa intensa, formaggio filante, carne succosa e '
+                 'piccantezza controllata.',
+  'description_en': 'A very rich Porto sandwich with bread, meat, sausage, ham, melted cheese and a hot beer-and-tomato sauce. It is '
+                    'excessive by definition but should remain balanced: intense sauce, melting cheese, juicy meat and controlled heat.',
+  'ingredients': ['pane', 'manzo', 'salsiccia', 'formaggio', 'salsa alla birra'],
+  'ingredients_en': ['bread', 'beef', 'sausage', 'cheese', 'beer sauce'],
+  'places': ['Cafe Santiago Porto', 'Brasao Aliados Porto', 'Lado B Porto']},
+ {'name': 'Tripas ? moda do Porto',
+  'name_en': 'Porto-Style Tripe',
+  'description': 'Stufato storico di trippa, fagioli bianchi, carni e spezie, cos? legato alla citt? da dare ai portuensi il soprannome di '
+                 'tripeiros. ? robusto e identitario: deve essere profondo, gelatinoso, ben condito, mai slegato o acquoso.',
+  'description_en': 'A historic stew of tripe, white beans, meats and spices, so tied to the city that Porto residents are nicknamed '
+                    'tripeiros. It is hearty and identity-rich: it should be deep, gelatinous, well seasoned and never thin or watery.',
+  'ingredients': ['trippa', 'fagioli bianchi', 'maiale', 'carote', 'spezie'],
+  'ingredients_en': ['tripe', 'white beans', 'pork', 'carrots', 'spices'],
+  'places': ['Abadia do Porto', 'Restaurante O Buraco Porto', 'Adega Sao Nicolau Porto']},
+ {'name': 'Bacalhau ? Gomes de S?',
+  'name_en': 'Bacalhau ? Gomes de S?',
+  'description': 'Piatto di baccal?, patate, cipolle, uova sode, olive e olio d?oliva, nato a Porto e diventato classico portoghese. La '
+                 'qualit? sta nella sapidit? misurata del pesce, nella dolcezza della cipolla e nell?olio generoso ma pulito.',
+  'description_en': 'A dish of salt cod, potatoes, onions, boiled eggs, olives and olive oil, born in Porto and now a Portuguese classic. '
+                    'Quality lies in the measured saltiness of the fish, onion sweetness and oil that is generous but clean.',
+  'ingredients': ['baccal?', 'patate', 'cipolle', 'uova', 'olive'],
+  'ingredients_en': ['salt cod', 'potatoes', 'onions', 'eggs', 'olives'],
+  'places': ['O Gaveto Porto', 'Adega Sao Nicolau Porto', 'Abadia do Porto']},
+ {'name': 'Pastel de nata',
+  'name_en': 'Pastel de Nata',
+  'description': 'Tartelletta di sfoglia croccante con crema all?uovo caramellata in superficie, servita tiepida con cannella o zucchero a '
+                 'velo. A Porto ? una pausa quotidiana: guscio friabile, crema setosa, dolcezza breve e profumo tostato. La qualit? '
+                 'dipende dal contrasto netto tra crema calda e sfoglia asciutta.',
+  'description_en': 'A crisp puff-pastry tartlet with egg custard caramelised on top, served warm with cinnamon or icing sugar. In Porto '
+                    'it is an everyday pause: flaky shell, silky custard, short sweetness and toasted aroma. Quality depends on the clear '
+                    'contrast between warm custard and dry pastry.',
+  'ingredients': ['pasta sfoglia', 'uova', 'latte', 'zucchero', 'cannella'],
+  'ingredients_en': ['puff pastry', 'eggs', 'milk', 'sugar', 'cinnamon'],
+  'places': ['Manteigaria Porto', 'Nata Lisboa Porto', 'Castro Atelier de Pasteis de Nata Porto']},
+ {'name': 'Bolinho de bacalhau',
+  'name_en': 'Salt Cod Fritter',
+  'description': 'Crocchetta portoghese di baccal?, patate, uova e prezzemolo, fritta fino a diventare dorata e compatta. Deve essere '
+                 'saporita ma non salata, asciutta fuori e morbida dentro, perfetta come snack o antipasto con vino bianco. La qualit? si '
+                 'riconosce nella fibra del pesce ancora percepibile.',
+  'description_en': 'A Portuguese fritter of salt cod, potatoes, eggs and parsley, fried until golden and compact. It should be savoury '
+                    'but not salty, dry outside and soft inside, perfect as a snack or starter with white wine.',
+  'ingredients': ['baccal?', 'patate', 'uova', 'prezzemolo', 'olio'],
+  'ingredients_en': ['salt cod', 'potatoes', 'eggs', 'parsley', 'oil'],
+  'places': ['Casa Portuguesa do Pastel de Bacalhau Porto', 'Bolinhos do Jorge Porto', 'Adega Sao Nicolau Porto']},
+ {'name': 'Caldo verde',
+  'name_en': 'Caldo Verde Soup',
+  'description': 'Zuppa portoghese di cavolo verde tagliato sottile, patate, cipolla, olio e spesso chouri?o, semplice ma profondamente '
+                 'rassicurante. La qualit? sta nella texture vellutata della base e nella freschezza vegetale del cavolo. Deve restare '
+                 'caldo, semplice e armonico, mai acquoso o piatto.',
+  'description_en': 'A Portuguese soup of thinly sliced greens, potatoes, onion, oil and often chouri?o, simple but deeply comforting. '
+                    'Quality lies in the velvety texture of the base and the fresh vegetal character of the greens. It should remain warm, '
+                    'simple and harmonious, never watery or flat.',
+  'ingredients': ['cavolo verde', 'patate', 'cipolla', 'chouri?o', 'olio d?oliva'],
+  'ingredients_en': ['greens', 'potatoes', 'onion', 'chouri?o', 'olive oil'],
+  'places': ['Abadia do Porto', 'Restaurante O Buraco Porto', 'Casa Guedes Porto']},
+ {'name': 'Polvo ? lagareiro',
+  'name_en': 'Octopus ? Lagareiro',
+  'description': 'Polpo cotto e poi arrostito con molto olio d?oliva, aglio e patate schiacciate, piatto generoso della cucina portoghese. '
+                 'Deve essere tenero ma non molle, profumato d?aglio, con olio buono e patate ben dorate. La qualit? dipende dalla cottura '
+                 'precisa, che evita gommosit? e secchezza.',
+  'description_en': 'Octopus cooked and then roasted with plenty of olive oil, garlic and smashed potatoes, a generous dish of Portuguese '
+                    'cooking. It should be tender but not mushy, garlic-scented, with good oil and properly browned potatoes.',
+  'ingredients': ['polpo', 'olio d?oliva', 'aglio', 'patate', 'prezzemolo'],
+  'ingredients_en': ['octopus', 'olive oil', 'garlic', 'potatoes', 'parsley'],
+  'places': ['O Gaveto Porto', 'Restaurante O Valentim Matosinhos', 'Marisqueira Antiga Porto']},
+ {'name': 'Rabanadas',
+  'name_en': 'Portuguese Rabanadas',
+  'description': 'Fette di pane immerse in latte o vino, passate nell?uovo, fritte e cosparse di zucchero e cannella, tipiche del periodo '
+                 'natalizio. Sono simili al French toast ma pi? festive: morbide, aromatiche, dorate e molto legate alla memoria '
+                 'familiare.',
+  'description_en': 'Slices of bread soaked in milk or wine, dipped in egg, fried and sprinkled with sugar and cinnamon, typical of the '
+                    'Christmas season. They resemble French toast but feel more festive: soft, aromatic, golden and strongly tied to '
+                    'family memory.',
+  'ingredients': ['pane', 'latte', 'uova', 'zucchero', 'cannella'],
+  'ingredients_en': ['bread', 'milk', 'eggs', 'sugar', 'cinnamon'],
+  'places': ['Confeitaria do Bolhao Porto', 'Leitaria da Quinta do Paco Porto', 'Padaria Ribeiro Porto']}]
 
 CULTURE_FACTS = [
  {'icon': '🍷', 'title': "Il vino di Porto definisce una parte enorme dell'immagine cittadina", 'title_en': "Port wine defines a huge part of the city's image", 'body': 'La relazione con Gaia, le cantine e il Douro rende il vino una chiave culturale costante di Porto.', 'body_en': 'The relationship with Gaia, the lodges and the Douro makes wine a constant cultural key to Porto.'},

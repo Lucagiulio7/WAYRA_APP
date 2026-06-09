@@ -119,16 +119,91 @@ FOOD_SPOTS = [
  {'city': 'varsavia', 'zone': 'wilanów', 'category_level': 3, 'name': 'Palace Garden Dining', 'name_en': 'Palace Garden Dining', 'description': 'Cena più curata nell\'orbita del palazzo, con atmosfera tranquilla e residenziale.', 'description_en': 'A more polished dinner option in the palace orbit, with a calm residential atmosphere.', 'latitude': 52.1659, 'longitude': 21.0908, 'estimated_visit_time': 95, 'tags': ['gastronomia', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'rating': 4.5, 'price_range': '€€€'},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Pierogi', 'name_en': 'Pierogi', 'description': 'Ravioli polacchi ripieni, serviti bolliti o rosolati, in versioni salate o dolci.', 'description_en': 'Polish dumplings served boiled or pan-fried, with savoury or sweet fillings.', 'ingredients': ['farina', 'uova', 'patate', 'formaggio', 'carne'], 'ingredients_en': ['flour', 'eggs', 'potatoes', 'quark cheese', 'meat or sauerkraut'], 'places': ['Zapiecek Warsaw', 'Syrena Irena Warsaw', 'Pierogarnia na Bednarskiej Warsaw']},
- {'name': 'Żurek', 'name_en': 'Żurek', 'description': 'Zuppa acidula a base di segale fermentata, spesso servita con salsiccia e uovo.', 'description_en': 'A sour soup based on fermented rye, often served with sausage and egg.', 'ingredients': ['segale fermentata', 'salsiccia', 'uovo', 'brodo'], 'ingredients_en': ['fermented rye', 'sausage', 'hard-boiled egg', 'broth'], 'places': ['Specjaly Regionalne Warsaw', 'Zapiecek Warsaw', 'Stary Dom Warsaw']},
- {'name': 'Bigos', 'name_en': 'Bigos', 'description': 'Stufato ricco di crauti, carne e spezie, molto legato alla cucina polacca tradizionale.', 'description_en': 'A rich stew of sauerkraut, meat and spices, strongly tied to traditional Polish cuisine.', 'ingredients': ['crauti', 'carne', 'cipolla', 'spezie'], 'ingredients_en': ['sauerkraut', 'pork and sausage', 'onion', 'spices'], 'places': ['Stary Dom Warsaw', 'Specjaly Regionalne Warsaw', 'U Szwejka Warsaw']},
- {'name': 'Kotlet Schabowy', 'name_en': 'Breaded Pork Cutlet', 'description': 'Cotoletta polacca di maiale impanata e fritta, servita con patate e cavolo, parente locale della schnitzel.', 'description_en': 'A Polish breaded and fried pork cutlet, served with potatoes and cabbage, the local relative of schnitzel.', 'ingredients': ['maiale', 'pangrattato', 'uovo', 'patate'], 'ingredients_en': ['pork loin', 'breadcrumbs', 'egg', 'potatoes'], 'places': ['Stary Dom Warsaw', 'Bar Mleczny Prasowy Warsaw', 'Gosciniec Polskie Pierogi Warsaw']},
- {'name': 'Zapiekanka', 'name_en': 'Zapiekanka', 'description': 'Street food semplice e amatissimo, a base di baguette aperta con formaggio e condimenti.', 'description_en': 'A much-loved simple street food made from an open baguette with cheese and toppings.', 'ingredients': ['baguette', 'formaggio', 'funghi', 'ketchup'], 'ingredients_en': ['baguette', 'cheese', 'mushrooms', 'ketchup'], 'places': ['Zapiekanki Warszawskie Warsaw', 'Zapiexy Luxusowe Warsaw', 'Okienko Warsaw']},
- {'name': 'Pączki', 'name_en': 'Pączki', 'description': 'Soffici bomboloni polacchi fritti e ripieni di confettura o crema, ricoperti di glassa o zucchero a velo.', 'description_en': 'Soft Polish fried doughnuts filled with jam or cream, covered with glaze or powdered sugar.', 'ingredients': ['farina', 'uova', 'zucchero', 'marmellata'], 'ingredients_en': ['flour', 'eggs', 'sugar', 'rose jam'], 'places': ['Cukiernia Zagozdzinski Warsaw', 'A Blikle Warsaw', 'Cukiernia Pawlowicz Warsaw']},
- {'name': 'Barszcz', 'name_en': 'Barszcz', 'description': 'Zuppa di barbabietola dal gusto netto, servita da sola o con piccoli ripieni.', 'description_en': 'A beetroot soup with a distinctive flavour, served plain or with small dumplings.', 'ingredients': ['barbabietole', 'brodo', 'aglio', 'spezie'], 'ingredients_en': ['beetroot', 'broth', 'garlic', 'spices'], 'places': ['Polka Warsaw', 'Specjaly Regionalne Warsaw', 'Stary Dom Warsaw']},
- {'name': 'Sernik', 'name_en': 'Polish Cheesecake', 'description': 'Dolce molto diffuso in Polonia, più compatto e profumato rispetto a molte versioni internazionali.', 'description_en': 'A widely loved Polish cheesecake, denser and more aromatic than many international versions.', 'ingredients': ['formaggio fresco', 'uova', 'zucchero', 'burro'], 'ingredients_en': ['quark cheese', 'eggs', 'sugar', 'butter'], 'places': ['Lukullus Warsaw', 'A Blikle Warsaw', 'Odette Tea Room Warsaw']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Pierogi',
+  'name_en': 'Pierogi Dumplings',
+  'description': 'Ravioli polacchi ripieni di patate e formaggio, carne, cavolo, funghi o frutta, bolliti e spesso serviti con burro, '
+                 'cipolla o panna acida. A Varsavia sono comfort food nazionale: versatili, morbidi, familiari, migliori quando la pasta '
+                 'resta sottile ma resistente.',
+  'description_en': 'Polish dumplings filled with potatoes and cheese, meat, cabbage, mushrooms or fruit, boiled and often served with '
+                    'butter, onion or sour cream. In Warsaw they are national comfort food: versatile, soft and familiar, best when the '
+                    'dough stays thin but resilient.',
+  'ingredients': ['farina', 'patate', 'formaggio', 'cipolla', 'burro'],
+  'ingredients_en': ['flour', 'potatoes', 'cheese', 'onion', 'butter'],
+  'places': ['Zapiecek Warsaw', 'Syrena Irena Warsaw', 'Pierogarnia na Bednarskiej Warsaw']},
+ {'name': '?urek',
+  'name_en': '?urek Sour Rye Soup',
+  'description': 'Zuppa acidula di segale fermentata con salsiccia, uovo, patate e maggiorana, servita spesso in pane o ciotola profonda. '
+                 '? rustica ma equilibrata: l?acidit? deve rinfrescare, non dominare, mentre affumicato e spezie danno profondit?. La '
+                 'qualit? migliore mantiene il profumo della segale fermentata pulito.',
+  'description_en': 'A sour rye soup with fermented rye starter, sausage, egg, potatoes and marjoram, often served in bread or a deep '
+                    'bowl. It is rustic but balanced: acidity should refresh, not dominate, while smoke and spices add depth.',
+  'ingredients': ['segale fermentata', 'salsiccia', 'uovo', 'patate', 'maggiorana'],
+  'ingredients_en': ['fermented rye', 'sausage', 'egg', 'potatoes', 'marjoram'],
+  'places': ['Specjaly Regionalne Warsaw', 'Zapiecek Warsaw', 'Stary Dom Warsaw']},
+ {'name': 'Bigos',
+  'name_en': 'Bigos Hunter?s Stew',
+  'description': 'Stufato polacco di crauti, cavolo, carni miste, salsiccia, funghi e spezie, cotto a lungo e spesso migliore riscaldato. '
+                 '? un piatto invernale e profondo: acidit?, fumo, dolcezza del cavolo e carne devono fondersi lentamente. La qualit? si '
+                 'misura nella profondit? della cottura, non nella pesantezza.',
+  'description_en': 'A Polish stew of sauerkraut, cabbage, mixed meats, sausage, mushrooms and spices, cooked for a long time and often '
+                    'better reheated. It is wintery and deep: acidity, smoke, cabbage sweetness and meat should slowly merge.',
+  'ingredients': ['crauti', 'cavolo', 'salsiccia', 'carne', 'funghi'],
+  'ingredients_en': ['sauerkraut', 'cabbage', 'sausage', 'meat', 'mushrooms'],
+  'places': ['Stary Dom Warsaw', 'Specjaly Regionalne Warsaw', 'U Szwejka Warsaw']},
+ {'name': 'Kotlet Schabowy',
+  'name_en': 'Polish Pork Cutlet',
+  'description': 'Cotoletta polacca di maiale impanata e fritta, simile alla schnitzel ma inserita nella tradizione domestica locale. Si '
+                 'serve con patate e insalata di cavolo: deve essere croccante, sottile, asciutta e con carne ancora succosa. La qualit? '
+                 'dipende dalla panatura uniforme e dalla frittura asciutta.',
+  'description_en': 'A Polish breaded and fried pork cutlet, similar to schnitzel but rooted in local home cooking. It is served with '
+                    'potatoes and cabbage salad: it should be crisp, thin, dry-fried and still juicy inside. Quality depends on even '
+                    'breading and frying that stays dry and clean.',
+  'ingredients': ['maiale', 'uova', 'pangrattato', 'patate', 'cavolo'],
+  'ingredients_en': ['pork', 'eggs', 'breadcrumbs', 'potatoes', 'cabbage'],
+  'places': ['Stary Dom Warsaw', 'Bar Mleczny Prasowy Warsaw', 'Gosciniec Polskie Pierogi Warsaw']},
+ {'name': 'Zapiekanka',
+  'name_en': 'Zapiekanka Open Baguette',
+  'description': 'Mezza baguette gratinata con funghi, formaggio e salse, nata come street food urbano e ancora molto presente nelle pause '
+                 'veloci. La qualit? sta nel pane croccante, nel formaggio filante e nel condimento generoso ma non confuso.',
+  'description_en': 'A half baguette baked with mushrooms, cheese and sauces, born as urban street food and still common for quick breaks. '
+                    'Quality lies in crisp bread, melting cheese and toppings that are generous but not chaotic.',
+  'ingredients': ['baguette', 'funghi', 'formaggio', 'ketchup', 'erba cipollina'],
+  'ingredients_en': ['baguette', 'mushrooms', 'cheese', 'ketchup', 'chives'],
+  'places': ['Zapiekanki Warszawskie Warsaw', 'Zapiexy Luxusowe Warsaw', 'Okienko Warsaw']},
+ {'name': 'P?czki',
+  'name_en': 'Polish Doughnuts',
+  'description': 'Bomboloni polacchi fritti, farciti con confettura di rosa, crema o altri ripieni, glassati o spolverati di zucchero. A '
+                 'Varsavia sono legati alla pasticceria quotidiana e al Gioved? Grasso: soffici, profumati, ricchi ma non unti. La qualit? '
+                 'si riconosce nella pasta elastica e nel ripieno ben distribuito.',
+  'description_en': 'Polish fried doughnuts filled with rose jam, cream or other fillings, glazed or dusted with sugar. In Warsaw they are '
+                    'tied to everyday pastry and Fat Thursday: soft, fragrant and rich but not greasy. Quality is recognised in elastic '
+                    'dough and filling that is evenly distributed.',
+  'ingredients': ['farina', 'uova', 'confettura di rosa', 'zucchero', 'olio'],
+  'ingredients_en': ['flour', 'eggs', 'rose jam', 'sugar', 'oil'],
+  'places': ['Cukiernia Zagozdzinski Warsaw', 'A Blikle Warsaw', 'Cukiernia Pawlowicz Warsaw']},
+ {'name': 'Barszcz',
+  'name_en': 'Barszcz Beet Soup',
+  'description': 'Zuppa limpida di barbabietola, acidula e profumata, servita da sola, con raviolini uszka o come parte delle feste. Deve '
+                 'avere colore intenso, acidit? viva e dolcezza terrosa, senza diventare pesante o troppo zuccherina. La qualit? sta nella '
+                 'limpidezza del brodo e nel profumo vegetale.',
+  'description_en': 'A clear beetroot soup, tangy and fragrant, served alone, with small uszka dumplings or as part of celebrations. It '
+                    'should have intense colour, lively acidity and earthy sweetness, without becoming heavy or overly sweet. Quality lies '
+                    'in broth clarity and a clean vegetal aroma.',
+  'ingredients': ['barbabietola', 'brodo', 'aceto', 'aglio', 'uszka'],
+  'ingredients_en': ['beetroot', 'broth', 'vinegar', 'garlic', 'uszka dumplings'],
+  'places': ['Polka Warsaw', 'Specjaly Regionalne Warsaw', 'Stary Dom Warsaw']},
+ {'name': 'Sernik',
+  'name_en': 'Polish Cheesecake',
+  'description': 'Cheesecake polacca a base di twar?g, formaggio fresco compatto e leggermente acidulo, spesso con vaniglia, uvetta o '
+                 'cioccolato. ? pi? densa che cremosa: elegante, profumata, con dolcezza controllata e taglio netto della fetta. La '
+                 'qualit? migliore lascia il formaggio protagonista, senza eccesso di zucchero.',
+  'description_en': 'Polish cheesecake made with twar?g, a compact and gently tangy fresh cheese, often with vanilla, raisins or '
+                    'chocolate. It is denser than creamy: elegant, fragrant, with controlled sweetness and a clean slice. The best version '
+                    'leaves cheese as the protagonist, without excess sugar.',
+  'ingredients': ['twar?g', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
+  'ingredients_en': ['twar?g cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
+  'places': ['Lukullus Warsaw', 'A Blikle Warsaw', 'Odette Tea Room Warsaw']}]
 
 CULTURE_FACTS = [
  {'icon': '🏗️', 'title': 'Varsavia si legge anche come città ricostruita', 'title_en': 'Warsaw can also be read as a rebuilt city', 'body': 'Dopo la distruzione della seconda guerra mondiale, una parte enorme della città è stata ricostruita con grande precisione storica.', 'body_en': 'After the destruction of the Second World War, a huge part of the city was rebuilt with remarkable historical precision.'},

@@ -64,10 +64,13 @@ class Food(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
     name_en = Column(String(200))
+    name_fr = Column(String(200))
     description = Column(Text)
     description_en = Column(Text)
+    description_fr = Column(Text)
     ingredients = Column(Text, default="[]")      # JSON array (IT)
     ingredients_en = Column(Text, default="[]")   # JSON array (EN)
+    ingredients_fr = Column(Text, default="[]")   # JSON array (FR)
     city = Column(String(100), default="roma")
 
     def ingredients_list(self) -> list:
@@ -84,14 +87,24 @@ class Food(Base):
             return self.ingredients_en
         return json.loads(self.ingredients_en)
 
+    def ingredients_fr_list(self) -> list:
+        if not self.ingredients_fr:
+            return []
+        if isinstance(self.ingredients_fr, list):
+            return self.ingredients_fr
+        return json.loads(self.ingredients_fr)
+
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
             "name_en": getattr(self, "name_en", None),
+            "name_fr": getattr(self, "name_fr", None),
             "description": self.description,
             "description_en": getattr(self, "description_en", None),
+            "description_fr": getattr(self, "description_fr", None),
             "ingredients": self.ingredients_list(),
             "ingredients_en": self.ingredients_en_list(),
+            "ingredients_fr": self.ingredients_fr_list(),
             "city": self.city,
         }

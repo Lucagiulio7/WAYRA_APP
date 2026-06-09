@@ -132,16 +132,91 @@ FOOD_SPOTS = [
  {'city': 'dublino', 'zone': 'kilmainham', 'category_level': 3, 'name': 'The Old Royal Oak Dining', 'name_en': 'The Old Royal Oak Dining', 'description': 'Proposta più classica e seduta nella cintura storica ovest di Dublino.', 'description_en': "A more classic seated option in Dublin's historic western belt.", 'latitude': 53.3448, 'longitude': -6.3028, 'estimated_visit_time': 95, 'tags': ['irish dining', 'classico', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.2},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Irish Stew', 'name_en': 'Irish Stew', 'description': 'Stufato molto classico di carne, patate e verdure, profondamente legato all\'immaginario domestico irlandese.', 'description_en': 'A classic stew of meat, potatoes and vegetables, deeply tied to Irish domestic imagery.', 'ingredients': ['agnello o manzo', 'patate', 'cipolle', 'carote', 'brodo'], 'ingredients_en': ['lamb or beef', 'potatoes', 'onions', 'carrots', 'broth'], 'places': ['The Brazen Head Dublin', 'The Hairy Lemon Dublin', 'ONeills Pub Dublin']},
- {'name': 'Boxty', 'name_en': 'Boxty', 'description': 'Preparazione di patate in forma di pancake o pane di piastra, tipica della tradizione irlandese.', 'description_en': 'A potato preparation in pancake or griddled bread form, typical of Irish tradition.', 'ingredients': ['patate', 'farina', 'latte', 'burro', 'sale'], 'ingredients_en': ['potatoes', 'flour', 'milk', 'butter', 'salt'], 'places': ['Gallaghers Boxty House Dublin', 'The Boxty House Dublin', 'The Woollen Mills Dublin']},
- {'name': 'Coddle', 'name_en': 'Dublin Coddle', 'description': 'Piatto identitario di Dublino con salsicce, bacon e patate cotti lentamente insieme.', 'description_en': 'A Dublin signature dish with sausages, bacon and potatoes slowly cooked together.', 'ingredients': ['salsicce', 'bacon', 'patate', 'cipolle', 'brodo'], 'ingredients_en': ['sausages', 'bacon', 'potatoes', 'onions', 'broth'], 'places': ['The Hairy Lemon Dublin', 'The Woollen Mills Dublin', 'The Celt Dublin']},
- {'name': 'Fish and Chips', 'name_en': 'Fish and Chips', 'description': 'Versione molto presente anche a Dublino, rapida e popolare soprattutto in chiave takeaway.', 'description_en': 'A version very common in Dublin too, quick and popular especially as takeaway food.', 'ingredients': ['pesce bianco', 'pastella', 'patate', 'sale', 'aceto'], 'ingredients_en': ['white fish', 'batter', 'potatoes', 'salt', 'vinegar'], 'places': ['Leo Burdocks Dublin', 'Fish Shop Dublin', 'Beshoffs Dublin']},
- {'name': 'Full Irish Breakfast', 'name_en': 'Full Irish Breakfast', 'description': 'Colazione irlandese completa con uova, salsicce, bacon, black pudding, pomodori, funghi e pane, pensata come pasto robusto di inizio giornata.', 'description_en': 'A full Irish breakfast with eggs, sausages, bacon, black pudding, tomatoes, mushrooms and bread, intended as a hearty start-of-day meal.', 'ingredients': ['uova', 'salsicce', 'bacon', 'black pudding', 'fagioli', 'toast'], 'ingredients_en': ['eggs', 'sausages', 'bacon', 'black pudding', 'baked beans', 'toast'], 'places': ['The Woollen Mills Dublin', 'Beanhive Dublin', 'The Bakehouse Dublin']},
- {'name': 'Seafood Chowder', 'name_en': 'Seafood Chowder', 'description': 'Zuppa cremosa di pesce e molluschi molto diffusa nei pub e nei ristoranti irlandesi.', 'description_en': 'A creamy fish and shellfish chowder common in Irish pubs and restaurants.', 'ingredients': ['pesce', 'molluschi', 'patate', 'panna', 'cipolla', 'brodo'], 'ingredients_en': ['fish', 'shellfish', 'potatoes', 'cream', 'onion', 'broth'], 'places': ['Fish Shop Dublin', 'ONeills Pub Dublin', 'The Winding Stair Dublin']},
- {'name': 'Soda Bread', 'name_en': 'Irish Soda Bread', 'description': 'Pane irlandese rustico senza lievito di birra, preparato con bicarbonato e latticello, dalla crosta compatta e dal sapore leggermente acidulo.', 'description_en': 'Rustic Irish bread made without baker’s yeast, prepared with baking soda and buttermilk, with a firm crust and a slightly tangy flavor.', 'ingredients': ['farina', 'bicarbonato', 'latticello', 'sale'], 'ingredients_en': ['flour', 'baking soda', 'buttermilk', 'salt'], 'places': ['The Bakehouse Dublin', 'Queen of Tarts Dublin', 'Avoca Dublin']},
- {'name': 'Barmbrack', 'name_en': 'Barmbrack', 'description': 'Pane dolce ricco di uvetta e frutta secca, legato anche a rituali stagionali e familiari.', 'description_en': 'A sweet loaf rich in raisins and dried fruit, also tied to seasonal and family rituals.', 'ingredients': ['farina', 'uvetta', 'frutta secca', 'zucchero', 'tè', 'spezie'], 'ingredients_en': ['flour', 'raisins', 'dried fruit', 'sugar', 'tea', 'spices'], 'places': ['The Bretzel Bakery Dublin', 'The Bakery Temple Bar Dublin', 'Mannings Bakery Dublin']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Irish Stew',
+  'name_en': 'Irish Stew',
+  'description': 'Stufato tradizionale di agnello o montone con patate, cipolle e carote, cotto lentamente fino a diventare morbido e '
+                 'profondo. A Dublino ? comfort food da pub: semplice, caldo, sostanzioso, pi? legato alla qualit? del brodo che alla '
+                 'complessit?.',
+  'description_en': 'A traditional stew of lamb or mutton with potatoes, onions and carrots, slowly cooked until soft and deep. In Dublin '
+                    'it is pub comfort food: simple, warm, substantial and more tied to broth quality than complexity.',
+  'ingredients': ['agnello', 'patate', 'cipolle', 'carote', 'brodo'],
+  'ingredients_en': ['lamb', 'potatoes', 'onions', 'carrots', 'broth'],
+  'places': ['The Brazen Head Dublin', 'The Hairy Lemon Dublin', 'ONeills Pub Dublin']},
+ {'name': 'Boxty',
+  'name_en': 'Boxty Potato Pancake',
+  'description': 'Frittella irlandese di patate crude e cotte, farina e latticello, servita semplice o farcita con ingredienti salati. ? '
+                 'un piatto contadino molto intelligente: croccante ai bordi, morbido dentro, capace di trasformare la patata in base '
+                 'completa.',
+  'description_en': 'An Irish potato pancake made from raw and cooked potatoes, flour and buttermilk, served plain or filled with savoury '
+                    'ingredients. It is clever rural cooking: crisp at the edges, soft inside and able to turn potato into a complete '
+                    'base.',
+  'ingredients': ['patate', 'farina', 'latticello', 'burro', 'sale'],
+  'ingredients_en': ['potatoes', 'flour', 'buttermilk', 'butter', 'salt'],
+  'places': ['Gallaghers Boxty House Dublin', 'The Boxty House Dublin', 'The Woollen Mills Dublin']},
+ {'name': 'Coddle',
+  'name_en': 'Dublin Coddle',
+  'description': 'Stufato cittadino di salsicce, bacon, patate e cipolle, cotto lentamente in brodo fino a diventare tenero e '
+                 'rassicurante. ? una specialit? dublinese senza fronzoli: domestica, economica, sapida, nata per riempire e scaldare. La '
+                 'qualit? sta in un brodo saporito, non acquoso, e in patate ancora integre.',
+  'description_en': 'A city stew of sausages, bacon, potatoes and onions, slowly cooked in broth until tender and reassuring. It is a '
+                    'no-frills Dublin speciality: domestic, economical, savoury, created to fill and warm. Quality lies in savoury, not '
+                    'watery broth, and potatoes that remain intact.',
+  'ingredients': ['salsicce', 'bacon', 'patate', 'cipolle', 'brodo'],
+  'ingredients_en': ['sausages', 'bacon', 'potatoes', 'onions', 'broth'],
+  'places': ['The Hairy Lemon Dublin', 'The Woollen Mills Dublin', 'The Celt Dublin']},
+ {'name': 'Fish and Chips',
+  'name_en': 'Fish and Chips',
+  'description': 'Filetto di pesce bianco fritto in pastella, servito con patatine spesse, sale e aceto, presenza storica della vita '
+                 'informale dublinese. La qualit? sta nella frittura asciutta, nel pesce ancora succoso e nelle patate ben dorate.',
+  'description_en': 'White fish fried in batter, served with thick chips, salt and vinegar, a historic part of informal Dublin life. '
+                    'Quality lies in dry frying, fish that remains juicy and chips that are properly golden. The vinegar should brighten '
+                    'the plate without turning the crust soggy.',
+  'ingredients': ['merluzzo', 'farina', 'birra', 'patate', 'aceto'],
+  'ingredients_en': ['cod', 'flour', 'beer', 'potatoes', 'vinegar'],
+  'places': ['Leo Burdocks Dublin', 'Fish Shop Dublin', 'Beshoffs Dublin']},
+ {'name': 'Full Irish Breakfast',
+  'name_en': 'Full Irish Breakfast',
+  'description': 'Colazione sostanziosa con uova, bacon, salsicce, black pudding, white pudding, pomodori, funghi e pane. ? quasi un pasto '
+                 'completo: salata, energetica, rituale, ideale per capire il lato pi? robusto della cultura da pub e pensione.',
+  'description_en': 'A substantial breakfast with eggs, bacon, sausages, black pudding, white pudding, tomatoes, mushrooms and bread. It '
+                    'is almost a full meal: savoury, energetic and ritualistic, ideal for understanding the heartier pub-and-guesthouse '
+                    'culture. The best plates feel generous but controlled, with each element cooked distinctly.',
+  'ingredients': ['uova', 'bacon', 'salsicce', 'black pudding', 'pane'],
+  'ingredients_en': ['eggs', 'bacon', 'sausages', 'black pudding', 'bread'],
+  'places': ['The Woollen Mills Dublin', 'Beanhive Dublin', 'The Bakehouse Dublin']},
+ {'name': 'Seafood Chowder',
+  'name_en': 'Seafood Chowder',
+  'description': 'Zuppa cremosa di pesce, molluschi, patate, porri e panna, molto adatta al clima e alla costa irlandese. Deve essere '
+                 'ricca ma non pesante: profumata di mare, vellutata, con pezzi riconoscibili e brodo ben equilibrato. La qualit? emerge '
+                 'quando panna e pesce restano in equilibrio senza coprirsi.',
+  'description_en': 'A creamy soup of fish, shellfish, potatoes, leeks and cream, very suited to Ireland?s coast and climate. It should be '
+                    'rich but not heavy: sea-scented, velvety, with recognisable pieces and a well-balanced broth. Quality appears when '
+                    'cream and seafood remain balanced without covering each other.',
+  'ingredients': ['pesce', 'molluschi', 'patate', 'porri', 'panna'],
+  'ingredients_en': ['fish', 'shellfish', 'potatoes', 'leeks', 'cream'],
+  'places': ['Fish Shop Dublin', 'ONeills Pub Dublin', 'The Winding Stair Dublin']},
+ {'name': 'Soda Bread',
+  'name_en': 'Soda Bread',
+  'description': 'Pane irlandese lievitato con bicarbonato invece che lievito, spesso preparato con latticello e farina integrale. ? '
+                 'rustico e immediato: crosta asciutta, mollica compatta, sapore leggermente acidulo, perfetto con burro, zuppe o salmone. '
+                 'La qualit? si riconosce nella fetta che resta compatta ma non secca.',
+  'description_en': 'Irish bread leavened with baking soda rather than yeast, often made with buttermilk and wholemeal flour. It is rustic '
+                    'and immediate: dry crust, compact crumb, gently tangy flavour, perfect with butter, soups or salmon. Quality is '
+                    'recognised in a slice that stays compact but never dry.',
+  'ingredients': ['farina', 'bicarbonato', 'latticello', 'sale', 'burro'],
+  'ingredients_en': ['flour', 'baking soda', 'buttermilk', 'salt', 'butter'],
+  'places': ['The Bakehouse Dublin', 'Queen of Tarts Dublin', 'Avoca Dublin']},
+ {'name': 'Barmbrack',
+  'name_en': 'Barmbrack Fruit Loaf',
+  'description': 'Pane dolce irlandese con uvetta e frutta secca, legato soprattutto ad Halloween ma presente anche nelle bakery '
+                 'tradizionali. ? profumato di t? e spezie, morbido a fette, spesso servito con burro come merenda semplice. La qualit? '
+                 'migliore mantiene frutta morbida, spezie leggere e mollica elastica.',
+  'description_en': 'An Irish sweet loaf with raisins and dried fruit, especially linked to Halloween but also found in traditional '
+                    'bakeries. It is scented with tea and spices, soft when sliced and often served with butter as a simple snack.',
+  'ingredients': ['farina', 'uvetta', 't?', 'spezie', 'zucchero'],
+  'ingredients_en': ['flour', 'raisins', 'tea', 'spices', 'sugar'],
+  'places': ['The Bretzel Bakery Dublin', 'The Bakery Temple Bar Dublin', 'Mannings Bakery Dublin']}]
 
 CULTURE_FACTS = [
  {'icon': '📚', 'title': 'Dublino ha un peso letterario enorme rispetto alle sue dimensioni', 'title_en': 'Dublin has enormous literary weight for its size', 'body': 'Joyce, Beckett, Wilde e Yeats rendono la città un riferimento costante della letteratura in lingua inglese.', 'body_en': 'Joyce, Beckett, Wilde and Yeats make the city a constant reference point in English language literature.'},

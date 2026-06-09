@@ -156,16 +156,92 @@ FOOD_SPOTS = [
  {'city': 'firenze', 'zone': 'santa_croce', 'category_level': 2, 'name': 'Ristorante Boccanegra', 'name_en': 'Ristorante Boccanegra', 'description': 'Ristorante fiorentino vicino a Santa Croce dove i cantucci alle mandorle sono serviti col Vin Santo come tradizione vuole, a fine pasto in piccole tazze.', 'description_en': 'Florentine restaurant near Santa Croce where almond cantucci are served with Vin Santo as tradition dictates, in small cups at meal\'s end.', 'latitude': 43.7691, 'longitude': 11.2607, 'estimated_visit_time': 90, 'tags': ['ristorante', 'tradizione', 'cantucci'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€€', 'rating': 4.4},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Bistecca alla Fiorentina', 'name_en': 'Florentine Steak', 'description': 'Imponente costata di vitello di Chianina alta tre dita, grigliata al sangue sulla brace e condita solo con sale, pepe e olio extravergine.', 'description_en': 'A towering three-fingers-tall T-bone of Chianina beef, grilled rare over coals and seasoned with only salt, pepper and extra-virgin olive oil.', 'ingredients': ['manzo', 'sale', 'pepe', 'olio extravergine'], 'ingredients_en': ['Chianina beef', 'salt', 'black pepper', 'extra virgin olive oil'], 'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria Sostanza'}, {'name': 'Trattoria Mario'}]},
- {'name': 'Lampredotto', 'name_en': 'Lampredotto Sandwich', 'description': 'Quarto stomaco di bovino cotto a lungo nel brodo aromatico, servito a fette dentro un panino inzuppato di sugo con salsa verde piccante.', 'description_en': 'The fourth bovine stomach long-simmered in aromatic broth, served sliced in a roll dunked in the cooking juices with spicy green sauce.', 'ingredients': ['lampredotto', 'panino', 'salsa verde', 'brodo'], 'ingredients_en': ['abomasum', 'bread roll', 'green sauce', 'broth'], 'places': [{'name': 'Nerbone Mercato Centrale'}, {'name': 'Tripperia Pollini'}, {'name': 'Trippaio Nencioni'}]},
- {'name': 'Pappa al Pomodoro', 'name_en': 'Tomato and Bread Soup', 'description': 'Zuppa contadina di pane toscano raffermo ammollato in pomodoro fresco, aglio, basilico e abbondante olio nuovo, comfort food rustico estivo.', 'description_en': 'A peasant soup of stale Tuscan bread softened in fresh tomato, garlic, basil and plenty of new olive oil, a rustic summer comfort food.', 'ingredients': ['pane toscano', 'pomodoro', 'aglio', 'basilico', 'olio extravergine'], 'ingredients_en': ['Tuscan bread', 'tomato', 'garlic', 'basil', 'extra virgin olive oil'], 'places': [{'name': 'Trattoria 4 Leoni'}, {'name': 'Trattoria Zà Zà'}, {'name': 'Trattoria Coco Lezzone'}]},
- {'name': 'Ribollita', 'name_en': 'Ribollita', 'description': 'Zuppa invernale di pane raffermo, cavolo nero, fagioli cannellini e verdure cotte due volte, ribollita appunto, piatto identitario della cucina povera.', 'description_en': 'A winter soup of stale bread, black kale, cannellini beans and vegetables cooked twice ("ri-bollita"), the identity dish of cucina povera.', 'ingredients': ['pane toscano', 'cavolo nero', 'fagioli cannellini', 'carote', 'cipolla'], 'ingredients_en': ['Tuscan bread', 'black cabbage', 'cannellini beans', 'carrots', 'onion'], 'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria La Casalinga'}, {'name': 'Trattoria Da Ruggero'}]},
- {'name': 'Crostini Neri', 'name_en': 'Tuscan Liver Crostini', 'description': 'Fette di pane toscano spalmate di un denso paté di fegatini di pollo cotti con capperi, acciughe e Vin Santo, classico antipasto delle trattorie.', 'description_en': 'Slices of Tuscan bread spread with a dense pâté of chicken livers cooked with capers, anchovies and Vin Santo, a trattoria starter classic.', 'ingredients': ['pane', 'fegatini di pollo', 'capperi', 'acciughe', 'burro'], 'ingredients_en': ['bread', 'chicken livers', 'capers', 'anchovies', 'butter'], 'places': [{'name': 'Buca Mario'}, {'name': 'Cibrèo Trattoria'}, {'name': 'Antico Ristoro di Cambi'}]},
- {'name': 'Panzanella', 'name_en': 'Panzanella', 'description': 'Insalata fresca di pane raffermo bagnato e strizzato, pomodori maturi, cipolla rossa, cetriolo e basilico, classico di luglio nelle case toscane.', 'description_en': 'A fresh salad of stale bread soaked and squeezed dry, ripe tomatoes, red onion, cucumber and basil, a July classic in Tuscan homes.', 'ingredients': ['pane toscano', 'pomodoro', 'cipolla rossa', 'basilico', 'olio extravergine'], 'ingredients_en': ['Tuscan bread', 'tomato', 'red onion', 'basil', 'extra virgin olive oil'], 'places': [{'name': "Osteria del Porcellino"}, {'name': 'Trattoria Borgo Antico'}, {'name': 'Trattoria Sostanza'}]},
- {'name': 'Schiacciata Fiorentina', 'name_en': 'Florentine Schiacciata', 'description': 'Soffice torta bassa profumata di arancia e ricoperta di zucchero a velo con il giglio fiorentino stampato sopra, dolce di Carnevale.', 'description_en': 'A soft low-rise cake scented with orange and topped with icing sugar bearing the Florentine lily, the Carnival sweet of the city.', 'ingredients': ['farina', 'zucchero', 'uova', 'latte', 'arancia'], 'ingredients_en': ['flour', 'sugar', 'eggs', 'milk', 'orange zest'], 'places': [{'name': 'Pasticceria Giorgio'}, {'name': 'Pasticceria Stefania Firenze'}, {'name': 'Pasticceria Marisa'}]},
- {'name': 'Cantucci con Vin Santo', 'name_en': 'Almond Biscotti with Vin Santo', 'description': 'Biscotti croccanti alle mandorle intere cotti due volte, da inzuppare lentamente nel Vin Santo dolce di Toscana a fine pasto.', 'description_en': 'Crisp twice-baked biscuits studded with whole almonds, slowly dipped in sweet Tuscan Vin Santo at the end of the meal.', 'ingredients': ['farina', 'mandorle', 'zucchero', 'uova', 'vin santo'], 'ingredients_en': ['flour', 'almonds', 'sugar', 'eggs', 'Vin Santo'], 'places': [{'name': 'Il Cantuccio di San Lorenzo'}, {'name': 'Caffè Gilli'}, {'name': 'Ristorante Boccanegra'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Bistecca alla Fiorentina',
+  'name_en': 'Florentine Steak',
+  'description': 'Taglio alto di chianina o vitellone, cotto alla brace e servito al sangue, con crosta esterna intensa e interno succoso. '
+                 '? il piatto pi? iconico di Firenze: essenziale, carnivoro, tecnico, da condividere e giudicare soprattutto su materia '
+                 'prima e cottura.',
+  'description_en': 'A thick cut of Chianina or young beef, grilled over embers and served rare, with an intense outer crust and juicy '
+                    'centre. It is Florence?s most iconic dish: essential, carnivorous, technical, meant to be shared and judged mainly by '
+                    'meat quality and cooking.',
+  'ingredients': ['bistecca di manzo', 'sale', 'pepe', 'olio extravergine', 'brace'],
+  'ingredients_en': ['beef steak', 'salt', 'pepper', 'extra virgin olive oil', 'embers'],
+  'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria Sostanza'}, {'name': 'Trattoria Mario'}]},
+ {'name': 'Lampredotto',
+  'name_en': 'Lampredotto Sandwich',
+  'description': 'Quarto stomaco del bovino bollito lentamente in brodo aromatico, servito nel panino con salsa verde e piccante. ? lo '
+                 'street food fiorentino per eccellenza: umile, succoso, saporito, molto pi? delicato di quanto possa sembrare. La qualit? '
+                 'dipende molto dal brodo e dal pane, che deve assorbire senza rompersi.',
+  'description_en': 'The fourth stomach of cattle, slowly boiled in aromatic broth and served in a roll with green and spicy sauces. It is '
+                    'Florence?s street food par excellence: humble, juicy, savoury and far more delicate than it may sound.',
+  'ingredients': ['lampredotto', 'pane', 'salsa verde', 'peperoncino', 'brodo'],
+  'ingredients_en': ['lampredotto', 'bread', 'green sauce', 'chilli', 'broth'],
+  'places': [{'name': 'Nerbone Mercato Centrale'}, {'name': 'Tripperia Pollini'}, {'name': 'Trippaio Nencioni'}]},
+ {'name': 'Pappa al Pomodoro',
+  'name_en': 'Tomato Bread Soup',
+  'description': 'Zuppa densa di pane toscano raffermo, pomodoro, aglio, basilico e olio extravergine, nata dal recupero ma diventata '
+                 'classico. La qualit? sta nella dolcezza del pomodoro, nella consistenza cremosa e nel profumo finale dell?olio. Il '
+                 'risultato migliore ? rustico ma armonioso, mai liquido e mai pesante.',
+  'description_en': 'A thick soup of stale Tuscan bread, tomato, garlic, basil and extra virgin olive oil, born from thrift and turned '
+                    'into a classic. Quality lies in tomato sweetness, creamy texture and the final fragrance of the oil.',
+  'ingredients': ['pane toscano', 'pomodoro', 'aglio', 'basilico', 'olio extravergine'],
+  'ingredients_en': ['Tuscan bread', 'tomato', 'garlic', 'basil', 'extra virgin olive oil'],
+  'places': [{'name': 'Trattoria 4 Leoni'}, {'name': 'Trattoria Z? Z?'}, {'name': 'Trattoria Coco Lezzone'}]},
+ {'name': 'Ribollita',
+  'name_en': 'Ribollita Tuscan Soup',
+  'description': 'Minestra toscana di pane, cavolo nero, fagioli e verdure, ribollita per concentrare sapore e consistenza. ? cucina '
+                 'povera ma profondissima: vegetale, densa, nutriente, migliore quando il pane lega tutto senza diventare colla. Il '
+                 'profumo del cavolo nero deve restare leggibile anche dopo la seconda cottura.',
+  'description_en': 'A Tuscan soup of bread, black kale, beans and vegetables, reboiled to concentrate flavour and texture. It is humble '
+                    'but deeply flavoured cooking: vegetal, dense and nourishing, best when the bread binds everything without becoming '
+                    'gluey.',
+  'ingredients': ['pane toscano', 'cavolo nero', 'fagioli', 'carote', 'sedano'],
+  'ingredients_en': ['Tuscan bread', 'black kale', 'beans', 'carrots', 'celery'],
+  'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria La Casalinga'}, {'name': 'Trattoria Da Ruggero'}]},
+ {'name': 'Crostini Neri',
+  'name_en': 'Tuscan Chicken Liver Crostini',
+  'description': 'Fette di pane tostato con pat? caldo di fegatini di pollo, capperi, acciughe e aromi, antipasto classico toscano. Sono '
+                 'intensi e sapidi: la qualit? sta nell?equilibrio tra fegato, acidit?, sale e pane croccante. Devono essere serviti '
+                 'caldi, con pat? morbido e pane ancora ben sostenuto.',
+  'description_en': 'Slices of toasted bread with warm chicken-liver p?t?, capers, anchovies and aromatics, a classic Tuscan starter. They '
+                    'are intense and savoury: quality lies in the balance of liver, acidity, salt and crisp bread. They should be served '
+                    'warm, with soft p?t? and bread that still holds well.',
+  'ingredients': ['fegatini di pollo', 'pane', 'capperi', 'acciughe', 'burro'],
+  'ingredients_en': ['chicken livers', 'bread', 'capers', 'anchovies', 'butter'],
+  'places': [{'name': 'Buca Mario'}, {'name': 'Cibr?o Trattoria'}, {'name': 'Antico Ristoro di Cambi'}]},
+ {'name': 'Panzanella',
+  'name_en': 'Panzanella Bread Salad',
+  'description': 'Insalata estiva di pane toscano ammollato, pomodori, cetriolo, cipolla rossa, basilico e olio. ? freschissima ma non '
+                 'banale: il pane deve assorbire i succhi senza disfarsi, creando una struttura rustica e profumata. La qualit? dipende da '
+                 'riposo, olio e acidit? dosata con attenzione.',
+  'description_en': 'A summer salad of soaked Tuscan bread, tomatoes, cucumber, red onion, basil and oil. It is very fresh but not '
+                    'trivial: the bread should absorb the juices without collapsing, creating a rustic fragrant structure. Quality depends '
+                    'on resting time, oil and acidity measured with care.',
+  'ingredients': ['pane toscano', 'pomodori', 'cetriolo', 'cipolla rossa', 'basilico'],
+  'ingredients_en': ['Tuscan bread', 'tomatoes', 'cucumber', 'red onion', 'basil'],
+  'places': [{'name': 'Osteria del Porcellino'}, {'name': 'Trattoria Borgo Antico'}, {'name': 'Trattoria Sostanza'}]},
+ {'name': 'Schiacciata Fiorentina',
+  'name_en': 'Florentine Carnival Cake',
+  'description': 'Dolce soffice e basso profumato all?arancia, tipico del Carnevale, spolverato con zucchero a velo e spesso decorato con '
+                 'il giglio. ? semplice ma preciso: mollica leggera, aroma agrumato, dolcezza misurata e forte identit? cittadina. Non '
+                 'deve sembrare un pan di Spagna generico, ma un dolce cittadino preciso.',
+  'description_en': 'A soft low cake scented with orange, typical of Carnival, dusted with icing sugar and often decorated with the lily. '
+                    'It is simple but precise: light crumb, citrus aroma, measured sweetness and strong civic identity.',
+  'ingredients': ['farina', 'uova', 'zucchero', 'arancia', 'lievito'],
+  'ingredients_en': ['flour', 'eggs', 'sugar', 'orange', 'baking powder'],
+  'places': [{'name': 'Pasticceria Giorgio'}, {'name': 'Pasticceria Stefania Firenze'}, {'name': 'Pasticceria Marisa'}]},
+ {'name': 'Cantucci con Vin Santo',
+  'name_en': 'Cantucci with Vin Santo',
+  'description': 'Biscotti secchi alle mandorle serviti con Vin Santo, da intingere lentamente nel vino dolce toscano. Il rito conta '
+                 'quanto il gusto: croccantezza, mandorla tostata, alcol morbido e finale conviviale di trattoria. Il cantuccio deve '
+                 'resistere all?inzuppo senza sbriciolarsi subito.',
+  'description_en': 'Dry almond biscuits served with Vin Santo, slowly dipped into the Tuscan sweet wine. The ritual matters as much as '
+                    'the taste: crunch, toasted almond, soft alcohol and a convivial trattoria-style ending. The biscuit should withstand '
+                    'dipping without crumbling immediately into the glass.',
+  'ingredients': ['farina', 'mandorle', 'zucchero', 'uova', 'Vin Santo'],
+  'ingredients_en': ['flour', 'almonds', 'sugar', 'eggs', 'Vin Santo'],
+  'places': [{'name': 'Il Cantuccio di San Lorenzo'}, {'name': 'Caff? Gilli'}, {'name': 'Ristorante Boccanegra'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🧱', 'title': 'Il centro storico sembra ancora una città di pietra compatta', 'title_en': 'The historic centre still feels like a compact stone city', 'body': 'La percezione urbana di Firenze nasce da strade strette, facciate sobrie, torri e palazzi che mantengono una continuità rara.', 'body_en': 'Florence\'s urban perception comes from narrow streets, sober facades, towers and palaces that maintain a rare continuity.'},

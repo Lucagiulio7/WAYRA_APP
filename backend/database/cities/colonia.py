@@ -84,6 +84,7 @@ ATTRACTIONS = [
  {'city': 'colonia', 'block_id': 608, 'zone': 'deutz_rheinpark', 'category_level': 2, 'name': 'Lanxess Arena', 'name_en': 'Lanxess Arena', 'description': 'La più grande arena per concerti e eventi di Colonia, oltre 20.000 posti, nei pressi del Rheinpark di Deutz.', 'description_en': "Cologne's largest concert and events arena, over 20,000 seats, near the Deutz Rheinpark.", 'latitude': 50.9429, 'longitude': 6.9813, 'estimated_visit_time': 20, 'tags': ['arena', 'concerti', 'eventi'], 'attraction_type': 'arena', 'ticket_url': None},
 ]
 
+
 FOOD_SPOTS = [
  # ── dom_altstadt ──────────────────────────────────────────────────────────────
  {'city': 'colonia', 'zone': 'dom_altstadt', 'category_level': 1, 'name': 'Kölsch am Dom', 'name_en': 'Kölsch Beer at the Cathedral', 'description': 'La birra Kölsch servita dal Köbes in un tradizionale Stange al bicchiere da 0,2 litri, il rito irrinunciabile di Colonia.', 'description_en': "Kölsch beer served by the Köbes in a traditional 0.2-litre Stange glass, the unmissable Cologne ritual.", 'latitude': 50.9410, 'longitude': 6.9580, 'estimated_visit_time': 20, 'tags': ['kölsch', 'birra', 'tradizione'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.5},
@@ -166,17 +167,6 @@ FOOD_SPOTS = [
  {'city': 'colonia', 'zone': 'deutz_rheinpark', 'category_level': 3, 'name': 'Hanse Stube Deutz Fine', 'name_en': 'Deutz Fine Dining', 'description': 'Ristorante di alta cucina renana sulla riva destra del Reno, con vista sulla cattedrale gotica e cucina d\'eccellenza.', 'description_en': "Fine Rhineland dining restaurant on the right Rhine bank, with views of the Gothic cathedral and excellent cuisine.", 'latitude': 50.9393, 'longitude': 6.9803, 'estimated_visit_time': 115, 'tags': ['fine dining', 'renano', 'duomo'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.5},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Kölsch', 'name_en': 'Kölsch Beer', 'description': 'Birra chiara di Colonia ad alta fermentazione e maturazione a freddo, servita nel bicchiere Stange da 0,2 litri dai camerieri Köbes.', 'description_en': 'Cologne’s pale top-fermented and cold-conditioned beer, served in the 0.2-litre Stange glass by the Köbes waiters.', 'ingredients': ["malto d'orzo", 'luppolo', 'lievito Kölsch', 'acqua del Reno'], 'ingredients_en': ['barley malt', 'hops', 'Kölsch yeast', 'Rhine water'], 'places': ['Frueh am Dom Cologne', 'Brauerei Paeffgen Cologne', 'Peters Brauhaus Cologne']},
- {'name': 'Himmel un Äd', 'name_en': 'Heaven and Earth', 'description': 'Purè di patate con sanguinaccio fritto e cipolla caramellata, il piatto renano per eccellenza (Cielo e Terra).', 'description_en': "Mashed potatoes with fried blood pudding and caramelised onion, the quintessential Rhineland dish (Heaven and Earth).", 'ingredients': ['patate', 'sanguinaccio', 'cipolla', 'burro', 'sale'], 'ingredients_en': ['potatoes', 'blood pudding', 'onion', 'butter', 'salt'], 'places': ['Brauhaus Sion Cologne', 'Brauerei Paeffgen Cologne', 'Frueh am Dom Cologne']},
- {'name': 'Halve Hahn', 'name_en': 'Halve Hahn', 'description': 'Panino di pane di segale con formaggio Gouda stagionato, senape e cipolla, il classico spuntino delle birrerie di Colonia.', 'description_en': "A rye bread sandwich with aged Gouda cheese, mustard and onion, the classic snack of Cologne's breweries.", 'ingredients': ['pane di segale', 'Gouda stagionato', 'senape', 'cipolla'], 'ingredients_en': ['rye bread roll', 'aged Gouda', 'mustard', 'onion'], 'places': ['Frueh am Dom Cologne', 'Peters Brauhaus Cologne', 'Brauhaus Sion Cologne']},
- {'name': 'Rheinischer Sauerbraten', 'name_en': 'Rhineland Sauerbraten', 'description': 'Arrosto di manzo marinato nell\'aceto e spezie renane per giorni, servito con salsa di uvetta e Knödel.', 'description_en': 'Beef roast marinated in vinegar and Rhineland spices for days, served with raisin sauce and dumplings.', 'ingredients': ['manzo', 'aceto di vino', 'cipolla', 'uvetta', 'spezie renane', 'Knödel'], 'ingredients_en': ['beef', 'wine vinegar', 'onion', 'raisins', 'Rhineland spices', 'dumplings'], 'places': ['Brauerei zur Malzmuehle Cologne', 'Peters Brauhaus Cologne', 'Max Stark Cologne']},
- {'name': 'Reibekuchen', 'name_en': 'Potato Pancakes', 'description': 'Frittelline di patate grattugiate fritte nell\'olio, servite con Apfelmus (composta di mele) o panna acida, street food renano.', 'description_en': 'Grated potato fritters fried in oil, served with Apfelmus (apple sauce) or sour cream, Rhineland street food.', 'ingredients': ['patate', 'cipolla', 'farina', 'uova', 'composta di mele'], 'ingredients_en': ['potatoes', 'onion', 'flour', 'eggs', 'apple sauce'], 'places': ['Reibekuchen Heinz Cologne', 'Brauhaus Sion Cologne', 'Frueh am Dom Cologne']},
- {'name': 'Kölner Kaviar', 'name_en': 'Cologne Caviar', 'description': 'Il nomignolo ironico del sanguinaccio di Colonia, servito come snack nelle birrerie con pane di segale e senape.', 'description_en': "The ironic nickname for Cologne blood sausage, served as a snack in breweries with rye bread and mustard.", 'ingredients': ['sanguinaccio', 'spezie', 'cipolla', 'pane di segale', 'senape'], 'ingredients_en': ['blood sausage', 'spices', 'onion', 'rye bread', 'mustard'], 'places': ['Brauerei Paeffgen Cologne', 'Brauerei zur Malzmuehle Cologne', 'Brauhaus Sion Cologne']},
- {'name': 'Muscheln in Kölsch', 'name_en': 'Mussels in Kölsch', 'description': 'Cozze fresche cotte nella birra Kölsch con cipolla, prezzemolo e pepe, piatto stagionale invernale delle birrerie.', 'description_en': 'Fresh mussels cooked in Kölsch beer with onion, parsley and pepper, a seasonal winter dish of the breweries.', 'ingredients': ['cozze fresche', 'Kölsch', 'cipolla', 'prezzemolo', 'pepe'], 'ingredients_en': ['fresh mussels', 'Kölsch beer', 'onion', 'parsley', 'pepper'], 'places': ['Brauhaus Sion Cologne', 'Frueh am Dom Cologne', 'Peters Brauhaus Cologne']},
- {'name': 'Eau de Cologne Cake', 'name_en': 'Cologne Cake', 'description': 'Torta speziata tipica del Carnevale di Colonia, aromatizzata con scorze di limone e spezie come nella tradizione del 4711.', 'description_en': 'Spiced cake typical of the Cologne Carnival, flavoured with lemon zest and spices as in the 4711 tradition.', 'ingredients': ['farina', 'burro', 'zucchero', 'scorza di limone', 'spezie'], 'ingredients_en': ['flour', 'butter', 'sugar', 'lemon zest', 'spices'], 'places': ['Cafe Reichard Cologne', 'Cafe Riese Cologne', 'Konditorei Fromme Cologne']},
-]
-
 CULTURE_FACTS = [
  {'icon': '⛪', 'title': 'Il Duomo di Colonia ha impiegato 632 anni per essere costruito', 'title_en': 'Cologne Cathedral took 632 years to build', 'body': 'I lavori iniziarono nel 1248 e si conclusero nel 1880, rendendo il Duomo uno dei cantieri più lunghi della storia dell\'architettura.', 'body_en': 'Construction began in 1248 and was completed in 1880, making the Cathedral one of the longest building projects in architectural history.'},
  {'icon': '🍺', 'title': 'Il Kölsch è tutelato dalla legge europea come la Champagne', 'title_en': 'Kölsch is protected by European law like Champagne', 'body': 'Il Kölsch può essere prodotto solo a Colonia, dove 21 birrerie hanno il diritto di produrlo, servito sempre nel Stange da 0,2 litri.', 'body_en': "Kölsch can only be produced in Cologne, where 21 breweries have the right to brew it, always served in the 0.2-litre Stange glass."},
@@ -191,3 +181,92 @@ CULTURE_FACTS = [
  {'icon': '🎵', 'title': 'La scena musicale elettronica di Colonia è famosa nel mondo', 'title_en': "Cologne's electronic music scene is world famous", 'body': 'La label Kompakt e i club come il Gewölbe hanno reso Colonia, insieme a Berlino, capitale europea della musica elettronica.', 'body_en': 'The Kompakt label and clubs like Gewölbe have made Cologne, alongside Berlin, a European capital of electronic music.'},
  {'icon': '🌍', 'title': 'Colonia è la città più cosmopolita della Germania', 'title_en': 'Cologne is Germany\'s most cosmopolitan city', 'body': 'Con oltre 180 nazionalità residenti, Colonia ha la più alta percentuale di popolazione straniera tra le grandi città tedesche.', 'body_en': 'With over 180 nationalities resident, Cologne has the highest percentage of foreign population among Germany\'s major cities.'},
 ]
+
+
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Kölsch',
+  'name_en': 'Kölsch Beer',
+  'description': 'Birra chiara ad alta fermentazione servita nei bicchieri stretti chiamati Stangen, simbolo assoluto della convivialità '
+                 'di Colonia. È fresca, leggera, secca e continua ad arrivare finché non si copre il bicchiere con il sottobicchiere. La '
+                 'sua forza sta nella bevibilità continua, più sociale che degustativa.',
+  'description_en': 'A pale top-fermented beer served in narrow glasses called Stangen, the absolute symbol of Cologne conviviality. It is '
+                    'fresh, light and dry, and keeps arriving until the glass is covered with the coaster. Its strength lies in continuous '
+                    'drinkability, more social than contemplative.',
+  'ingredients': ['acqua', 'malto d’orzo', 'luppolo', 'lievito'],
+  'ingredients_en': ['water', 'barley malt', 'hops', 'yeast'],
+  'places': ['Früh am Dom Cologne', 'Peters Brauhaus Cologne', 'Brauerei Päffgen Cologne']},
+ {'name': 'Himmel un Äd',
+  'name_en': 'Heaven and Earth',
+  'description': 'Piatto renano di purè di patate, mele cotte, cipolle fritte e spesso sanguinaccio, chiamato “cielo e terra” per mela e '
+                 'patata. È dolce, salato, morbido e croccante insieme, profondamente popolare e molto locale. La qualità sta nel '
+                 'bilanciamento tra mela, patata e cipolla dorata.',
+  'description_en': 'A Rhineland dish of mashed potatoes, stewed apples, fried onions and often blood sausage, called “heaven and earth” '
+                    'for apple and potato. It is sweet, salty, soft and crisp at once, deeply popular and very local.',
+  'ingredients': ['patate', 'mele', 'cipolle', 'sanguinaccio', 'burro'],
+  'ingredients_en': ['potatoes', 'apples', 'onions', 'blood sausage', 'butter'],
+  'places': ['Brauerei Päffgen Cologne', 'Peters Brauhaus Cologne', 'Max Stark Cologne']},
+ {'name': 'Halve Hahn',
+  'name_en': 'Halve Hahn Rye Roll',
+  'description': 'Panino di segale con formaggio Gouda, cipolla, burro e senape, nonostante il nome faccia pensare al pollo. È uno '
+                 'spuntino da birreria tipicamente coloniese: essenziale, sapido, perfetto per accompagnare una Kölsch fresca. Deve essere '
+                 'fresco, netto e ben condito, senza perdere la sua semplicità.',
+  'description_en': 'A rye roll with Gouda cheese, onion, butter and mustard, despite a name that sounds like chicken. It is a typical '
+                    'Cologne beer-hall snack: essential, savoury and perfect with a fresh Kölsch. It should be fresh, direct and well '
+                    'seasoned without losing its simplicity.',
+  'ingredients': ['pane di segale', 'Gouda', 'cipolla', 'burro', 'senape'],
+  'ingredients_en': ['rye bread', 'Gouda', 'onion', 'butter', 'mustard'],
+  'places': ['Früh am Dom Cologne', 'Peters Brauhaus Cologne', 'Brauhaus Sion Cologne']},
+ {'name': 'Rheinischer Sauerbraten',
+  'name_en': 'Rhenish Sauerbraten',
+  'description': 'Arrosto marinato a lungo in aceto, vino, spezie e verdure, poi cotto lentamente e servito con salsa agrodolce. La '
+                 'versione renana è profonda e speziata, spesso addensata con uvetta o pan di zenzero. La lunga marinatura deve dare '
+                 'complessità senza rendere la salsa aggressiva.',
+  'description_en': 'A roast marinated for a long time in vinegar, wine, spices and vegetables, then slowly cooked and served with '
+                    'sweet-sour sauce. The Rhenish version is deep and spiced, often enriched with raisins or gingerbread. The long '
+                    'marinade should add complexity without making the sauce aggressive.',
+  'ingredients': ['manzo', 'aceto', 'vino rosso', 'spezie', 'uvetta'],
+  'ingredients_en': ['beef', 'vinegar', 'red wine', 'spices', 'raisins'],
+  'places': ['Max Stark Cologne', 'Brauerei zur Malzmühle Cologne', 'Peters Brauhaus Cologne']},
+ {'name': 'Reibekuchen',
+  'name_en': 'Potato Pancakes',
+  'description': 'Frittelle di patate grattugiate, croccanti e dorate, servite con salsa di mele o accompagnamenti salati. Sono cibo da '
+                 'mercato e birreria: semplici, calde, immediate, con il contrasto tra patata rustica e dolcezza della mela. Devono '
+                 'arrivare caldi, con superficie asciutta e interno ancora morbido.',
+  'description_en': 'Golden crisp pancakes made from grated potatoes, served with apple sauce or savoury accompaniments. They are market '
+                    'and beer-hall food: simple, hot and immediate, with a contrast between rustic potato and apple sweetness. They should '
+                    'arrive hot, with a dry surface and an interior still soft.',
+  'ingredients': ['patate', 'cipolla', 'uova', 'farina', 'salsa di mele'],
+  'ingredients_en': ['potatoes', 'onion', 'eggs', 'flour', 'apple sauce'],
+  'places': ['Rievkoochebud Cologne', 'Peters Brauhaus Cologne', 'Brauhaus Sion Cologne']},
+ {'name': 'Kölner Kaviar',
+  'name_en': 'Cologne Caviar',
+  'description': 'Nome ironico per sanguinaccio servito con cipolle, pane di segale e senape, molto lontano dal caviale vero. È cucina '
+                 'popolare renana: sapore intenso, consistenza morbida, tono scherzoso e abbinamento naturale con la birra locale. La '
+                 'qualità dipende dalla freschezza del pane e dal taglio non troppo pesante.',
+  'description_en': 'An ironic name for blood sausage served with onions, rye bread and mustard, very far from real caviar. It is popular '
+                    'Rhineland cooking: intense flavour, soft texture, playful tone and a natural pairing with local beer.',
+  'ingredients': ['sanguinaccio', 'cipolla', 'pane di segale', 'senape'],
+  'ingredients_en': ['blood sausage', 'onion', 'rye bread', 'mustard'],
+  'places': ['Brauerei Päffgen Cologne', 'Max Stark Cologne', 'Früh am Dom Cologne']},
+ {'name': 'Muscheln in Kölsch',
+  'name_en': 'Mussels in Kölsch',
+  'description': 'Cozze cotte con birra Kölsch, cipolle, erbe e verdure aromatiche, piatto stagionale molto amato lungo il Reno. Il gusto '
+                 'è marino ma leggero, con la birra che aggiunge freschezza, profumo e identità cittadina. Il piatto funziona quando il '
+                 'fondo resta profumato, leggero e non amaro.',
+  'description_en': 'Mussels cooked with Kölsch beer, onions, herbs and aromatic vegetables, a seasonal dish loved along the Rhine. The '
+                    'taste is marine but light, with the beer adding freshness, aroma and civic identity. The dish works when the cooking '
+                    'juices stay fragrant, light and never bitter.',
+  'ingredients': ['cozze', 'Kölsch', 'cipolla', 'prezzemolo', 'sedano'],
+  'ingredients_en': ['mussels', 'Kölsch beer', 'onion', 'parsley', 'celery'],
+  'places': ['Brauerei zur Malzmühle Cologne', 'Peters Brauhaus Cologne', 'Früh am Dom Cologne']},
+ {'name': 'Eau de Cologne Cake',
+  'name_en': 'Eau de Cologne Cake',
+  'description': 'Dolce moderno ispirato al profumo simbolo della città, con note agrumate, creme leggere o aromi floreali. Non è '
+                 'tradizione antica, ma funziona come omaggio gastronomico a Colonia: elegante, profumato, turistico nel senso migliore. '
+                 'Deve restare delicato, evitando che il riferimento profumato diventi invadente.',
+  'description_en': 'A modern dessert inspired by the city’s symbolic fragrance, with citrus notes, light creams or floral aromas. It is '
+                    'not an ancient tradition, but works as a gastronomic homage to Cologne: elegant, scented and tourist-friendly in the '
+                    'best sense.',
+  'ingredients': ['pan di Spagna', 'crema', 'agrumi', 'vaniglia', 'zucchero'],
+  'ingredients_en': ['sponge cake', 'cream', 'citrus', 'vanilla', 'sugar'],
+  'places': ['Café Reichard Cologne', 'TörtchenTörtchen Cologne', 'Café Wahlen Cologne']}]

@@ -121,16 +121,89 @@ FOOD_SPOTS = [
  {'city': 'roma', 'zone': 'ostiense', 'category_level': 3, 'name': 'Checchino dal 1887', 'name_en': 'Checchino dal 1887', 'description': "Ristorante storico di Testaccio aperto nel 1887, inventore della coda alla vaccinara: cucina romanesca di quinto quarto elevata a arte con cantina leggendaria.", 'description_en': "A historic Testaccio restaurant open since 1887, credited with inventing coda alla vaccinara — offal cuisine elevated to art, with a legendary wine cellar.", 'latitude': 41.8780, 'longitude': 12.4775, 'estimated_visit_time': 120, 'tags': ['gastronomia', 'storia'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'rating': 4.6},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Cacio e Pepe', 'name_en': 'Cacio e Pepe', 'description': "Il piatto simbolo di Roma: tonnarelli o spaghetti mantecati con pecorino romano e pepe nero, fino a creare una crema intensa senza panna. La difficoltà sta tutta nell'emulsione, semplice negli ingredienti ma tecnica nell'esecuzione.", 'description_en': "Rome's signature dish: tonnarelli or spaghetti tossed with Pecorino Romano and black pepper until they form an intense cream, with no cream added. The difficulty lies entirely in the emulsion, simple in ingredients but technical in execution.", 'ingredients': ['tonnarelli', 'pecorino romano', 'pepe nero'], 'ingredients_en': ['tonnarelli pasta', 'Pecorino Romano', 'black pepper'], 'places': [{'name': 'Felice a Testaccio'}, {'name': 'Salumeria Roscioli'}, {'name': 'Da Cesare al Casaletto'}]},
- {'name': 'Carbonara', 'name_en': 'Carbonara', 'description': "La pasta romana più famosa al mondo: rigatoni o spaghetti con guanciale croccante, tuorli d'uovo, pecorino romano e pepe nero. Niente panna: la cremosità nasce dal calore della pasta e dall'equilibrio tra uova e formaggio.", 'description_en': "The world's most famous Roman pasta: rigatoni or spaghetti with crispy guanciale, egg yolks, Pecorino Romano and black pepper. Absolutely no cream: the creaminess comes from the heat of the pasta and the balance between eggs and cheese.", 'ingredients': ['rigatoni', 'guanciale', "tuorli d'uovo", 'pecorino romano', 'pepe nero'], 'ingredients_en': ['rigatoni', 'guanciale', 'egg yolks', 'Pecorino Romano', 'black pepper'], 'places': [{'name': 'Salumeria Roscioli'}, {'name': 'Luciano Cucina Italiana'}, {'name': 'Trattoria Pennestri'}]},
- {'name': 'Supplì al Telefono', 'name_en': 'Supplì al Telefono', 'description': 'Crocchette di riso al ragù fritte fino a doratura, con un cuore di mozzarella filante che si allunga come un filo telefonico. Sono lo street food romano per eccellenza, da mangiare caldo appena uscito dalla friggitoria.', 'description_en': "Fried rice croquettes with meat ragù, cooked until golden, with a molten mozzarella center that stretches like a telephone wire. They are Rome's quintessential street food, best eaten hot straight from the fryer.", 'ingredients': ['riso', 'ragù di carne', 'mozzarella', 'uovo', 'pangrattato'], 'ingredients_en': ['rice', 'meat ragù', 'mozzarella', 'egg', 'breadcrumbs'], 'places': [{'name': 'Supplì Roma'}, {'name': 'Trapizzino Trastevere'}, {'name': 'Friggitoria Testaccio'}]},
- {'name': 'Amatriciana', 'name_en': 'Amatriciana', 'description': 'Sugo di pomodoro, guanciale croccante e pecorino romano, spesso servito con bucatini o rigatoni. Nato ad Amatrice e adottato da Roma, vive nel contrasto tra dolcezza del pomodoro, sapidità del formaggio e grasso profumato del guanciale.', 'description_en': 'Tomato sauce, crispy guanciale and Pecorino Romano, often served with bucatini or rigatoni. Born in Amatrice and adopted by Rome, it lives in the contrast between tomato sweetness, cheese savoriness and the fragrant fat of guanciale.', 'ingredients': ['bucatini', 'guanciale', 'pomodoro San Marzano', 'pecorino romano', 'vino bianco'], 'ingredients_en': ['bucatini', 'guanciale', 'San Marzano tomato', 'Pecorino Romano', 'white wine'], 'places': [{'name': 'Da Cesare al Casaletto'}, {'name': 'Armando al Pantheon'}, {'name': 'Flavio al Velavevodetto'}]},
- {'name': 'Coda alla Vaccinara', 'name_en': 'Coda alla Vaccinara', 'description': 'Coda di bue brasata lentamente con sedano, pomodoro, cacao o cioccolato, pinoli e uvetta. È uno dei piatti più profondi del quinto quarto romano: povero per origine, ricchissimo per gusto e struttura.', 'description_en': 'Oxtail slowly braised with celery, tomato, cocoa or chocolate, pine nuts and raisins. It is one of the deepest dishes of Roman offal cuisine: poor in origin, extremely rich in flavor and structure.', 'ingredients': ['coda di bue', 'sedano', 'pomodoro', 'cioccolato fondente', 'pinoli', 'uvetta'], 'ingredients_en': ['oxtail', 'celery', 'tomato', 'dark chocolate', 'pine nuts', 'raisins'], 'places': [{'name': 'Checchino dal 1887'}, {'name': 'Trattoria Agustarello'}, {'name': "Osteria dell'Angelo"}]},
- {'name': 'Carciofo alla Romana e alla Giudia', 'name_en': 'Roman and Jewish-Style Artichokes', 'description': 'Due preparazioni iconiche del carciofo romanesco: alla romana, brasato con menta, aglio e olio fino a diventare tenero; alla giudia, fritto intero fino ad aprirsi come un fiore croccante. Raccontano insieme la cucina popolare ebraico-romana.', 'description_en': 'Two iconic preparations of Roman artichoke: alla Romana, braised with mint, garlic and oil until tender; alla Giudia, deep-fried whole until it opens like a crisp flower. Together they tell the story of Jewish-Roman popular cuisine.', 'ingredients': ['carciofi romaneschi', 'menta', 'aglio', 'olio extravergine', 'limone'], 'ingredients_en': ['Roman artichokes', 'mint', 'garlic', 'extra virgin olive oil', 'lemon'], 'places': [{'name': 'Trattoria da Enzo al 29'}, {'name': 'Ristorante Checco er Carettiere'}, {'name': 'Osteria Flaminio'}]},
- {'name': 'Maritozzo con la Panna', 'name_en': 'Maritozzo con la Panna', 'description': 'Soffice panino dolce romano, leggermente profumato e tagliato al centro per accogliere abbondante panna montata fresca. Nato come colazione tradizionale, oggi è uno dei dolci più riconoscibili delle pasticcerie e dei forni di Roma.', 'description_en': "A soft Roman sweet bun, lightly fragrant and cut through the center to hold abundant fresh whipped cream. Born as a traditional breakfast, it is now one of the most recognizable sweets in Rome's pastry shops and bakeries.", 'ingredients': ['brioche al miele', 'panna montata fresca'], 'ingredients_en': ['honey brioche bun', 'fresh whipped cream'], 'places': [{'name': 'Pasticceria Regoli'}, {'name': 'Il Maritozzaro'}, {'name': 'Roscioli Caffè Pasticceria'}]},
- {'name': 'Gricia', 'name_en': 'Gricia', 'description': 'La carbonara in bianco e antenata dei grandi primi romani: rigatoni o tonnarelli con guanciale croccante, pecorino romano e pepe nero. Senza uova e senza pomodoro, mette in primo piano la qualità del guanciale e della mantecatura.', 'description_en': "Carbonara's white ancestor and one of the roots of Rome's great pasta dishes: rigatoni or tonnarelli with crispy guanciale, Pecorino Romano and black pepper. With no eggs and no tomato, it puts the quality of guanciale and the final emulsion first.", 'ingredients': ['rigatoni', 'guanciale', 'pecorino romano', 'pepe nero'], 'ingredients_en': ['rigatoni', 'guanciale', 'Pecorino Romano', 'black pepper'], 'places': [{'name': 'Da Cesare al Casaletto'}, {'name': 'Flavio al Velavevodetto'}, {'name': 'Trattoria Pennestri'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Cacio e Pepe',
+  'name_en': 'Cacio e Pepe',
+  'description': 'Pasta romana essenziale con pecorino romano, pepe nero e acqua di cottura, senza panna n? burro. La difficolt? sta '
+                 'nell?emulsione: cremosa, sapida, profumata, con pepe evidente e formaggio che avvolge la pasta senza grumi. La qualit? '
+                 'dipende anche dalla temperatura, che decide la riuscita della crema.',
+  'description_en': 'An essential Roman pasta with pecorino romano, black pepper and cooking water, without cream or butter. The '
+                    'difficulty lies in the emulsion: creamy, savoury and fragrant, with clear pepper and cheese coating the pasta without '
+                    'clumps.',
+  'ingredients': ['pasta', 'pecorino romano', 'pepe nero', 'acqua di cottura'],
+  'ingredients_en': ['pasta', 'pecorino romano', 'black pepper', 'cooking water'],
+  'places': [{'name': 'Felice a Testaccio'}, {'name': 'Salumeria Roscioli'}, {'name': 'Da Cesare al Casaletto'}]},
+ {'name': 'Carbonara',
+  'name_en': 'Carbonara',
+  'description': 'Pasta con uova, pecorino romano, guanciale e pepe, costruita su cremosit? e precisione del calore, senza panna. ? una '
+                 'delle prove pi? serie della cucina romana: guanciale croccante, salsa setosa, sapidit? controllata e pasta ben '
+                 'mantecata.',
+  'description_en': 'Pasta with eggs, pecorino romano, guanciale and pepper, built on creaminess and precise heat control, without cream. '
+                    'It is one of the serious tests of Roman cooking: crisp guanciale, silky sauce, controlled saltiness and well-finished '
+                    'pasta.',
+  'ingredients': ['pasta', 'uova', 'pecorino romano', 'guanciale', 'pepe nero'],
+  'ingredients_en': ['pasta', 'eggs', 'pecorino romano', 'guanciale', 'black pepper'],
+  'places': [{'name': 'Salumeria Roscioli'}, {'name': 'Luciano Cucina Italiana'}, {'name': 'Trattoria Pennestri'}]},
+ {'name': 'Suppl? al Telefono',
+  'name_en': 'Suppl? al Telefono',
+  'description': 'Crocchetta romana di riso al pomodoro con cuore di mozzarella filante, impanata e fritta fino a diventare dorata. Il '
+                 'nome richiama il filo di formaggio quando si apre: deve essere asciutto fuori, morbido dentro e ben saporito.',
+  'description_en': 'A Roman rice croquette with tomato rice and a melting mozzarella centre, breaded and fried until golden. Its name '
+                    'recalls the string of cheese when opened: it should be dry outside, soft inside and deeply savoury.',
+  'ingredients': ['riso', 'pomodoro', 'mozzarella', 'pangrattato', 'olio'],
+  'ingredients_en': ['rice', 'tomato', 'mozzarella', 'breadcrumbs', 'oil'],
+  'places': [{'name': 'Suppl? Roma'}, {'name': 'Trapizzino Trastevere'}, {'name': 'Friggitoria Testaccio'}]},
+ {'name': 'Amatriciana',
+  'name_en': 'Amatriciana',
+  'description': 'Pasta con pomodoro, guanciale, pecorino e peperoncino, nata ad Amatrice ma adottata con forza dalla cucina romana. Deve '
+                 'essere diretta e intensa: grasso del guanciale, acidit? del pomodoro e sapidit? del pecorino devono bilanciarsi. La '
+                 'qualit? si misura nel guanciale croccante e nella salsa non acquosa.',
+  'description_en': 'Pasta with tomato, guanciale, pecorino and chilli, born in Amatrice but strongly adopted by Roman cooking. It should '
+                    'be direct and intense: guanciale fat, tomato acidity and pecorino saltiness must balance each other. Quality is '
+                    'measured by crisp guanciale and sauce that is never watery.',
+  'ingredients': ['pasta', 'pomodoro', 'guanciale', 'pecorino romano', 'peperoncino'],
+  'ingredients_en': ['pasta', 'tomato', 'guanciale', 'pecorino romano', 'chilli'],
+  'places': [{'name': 'Da Cesare al Casaletto'}, {'name': 'Armando al Pantheon'}, {'name': 'Flavio al Velavevodetto'}]},
+ {'name': 'Coda alla Vaccinara',
+  'name_en': 'Oxtail alla Vaccinara',
+  'description': 'Coda di bue stufata lentamente con sedano, pomodoro, vino e aromi, piatto storico della cucina del quinto quarto romana. '
+                 '? gelatinosa, profonda e complessa: la carne deve cedere senza sfaldarsi e la salsa restare ricca ma pulita.',
+  'description_en': 'Oxtail slowly stewed with celery, tomato, wine and aromatics, a historic dish of Roman quinto quarto cooking. It is '
+                    'gelatinous, deep and complex: the meat should yield without collapsing and the sauce remain rich but clean.',
+  'ingredients': ['coda di bue', 'sedano', 'pomodoro', 'vino', 'aromi'],
+  'ingredients_en': ['oxtail', 'celery', 'tomato', 'wine', 'aromatics'],
+  'places': [{'name': 'Checchino dal 1887'}, {'name': 'Trattoria Agustarello'}, {'name': "Osteria dell'Angelo"}]},
+ {'name': 'Carciofo alla Romana e alla Giudia',
+  'name_en': 'Roman and Jewish-Style Artichokes',
+  'description': 'Due modi iconici di mangiare il carciofo a Roma: alla romana, morbido con mentuccia e aglio, oppure alla giudia, fritto '
+                 'e croccante. Raccontano due anime della citt?: trattoria popolare e cucina ebraico-romana, entrambe tecniche e '
+                 'stagionali.',
+  'description_en': 'Two iconic ways to eat artichoke in Rome: alla romana, soft with mint and garlic, or alla giudia, fried and crisp. '
+                    'They express two souls of the city: popular trattoria cooking and Roman-Jewish cuisine, both technical and seasonal.',
+  'ingredients': ['carciofi', 'mentuccia', 'aglio', 'olio', 'limone'],
+  'ingredients_en': ['artichokes', 'mint', 'garlic', 'oil', 'lemon'],
+  'places': [{'name': 'Trattoria da Enzo al 29'}, {'name': 'Ristorante Checco er Carettiere'}, {'name': 'Osteria Flaminio'}]},
+ {'name': 'Maritozzo con la Panna',
+  'name_en': 'Cream-Filled Maritozzo',
+  'description': 'Panino dolce lievitato, tagliato e riempito con panna montata, simbolo della colazione e pasticceria romana. Deve essere '
+                 'soffice ma non secco, profumato di agrumi o vaniglia, con panna fresca e dolcezza non eccessiva. La qualit? sta nel '
+                 'taglio netto e nella panna montata al momento.',
+  'description_en': 'A sweet yeasted bun, split and filled with whipped cream, a symbol of Roman breakfast and pastry culture. It should '
+                    'be soft but not dry, scented with citrus or vanilla, with fresh cream and sweetness that is not excessive.',
+  'ingredients': ['farina', 'uova', 'zucchero', 'panna', 'agrumi'],
+  'ingredients_en': ['flour', 'eggs', 'sugar', 'cream', 'citrus'],
+  'places': [{'name': 'Pasticceria Regoli'}, {'name': 'Il Maritozzaro'}, {'name': 'Roscioli Caff? Pasticceria'}]},
+ {'name': 'Gricia',
+  'name_en': 'Gricia',
+  'description': 'Pasta con guanciale, pecorino romano e pepe, spesso considerata antenata bianca dell?amatriciana. ? essenziale e '
+                 'potentissima: il grasso del guanciale deve creare la salsa, il pecorino dare profondit? e il pepe chiudere con profumo. '
+                 'La qualit? richiede mantecatura rapida e guanciale ben sciolto.',
+  'description_en': 'Pasta with guanciale, pecorino romano and pepper, often considered the white ancestor of amatriciana. It is essential '
+                    'and powerful: guanciale fat should create the sauce, pecorino add depth and pepper finish with aroma. Quality '
+                    'requires quick finishing and guanciale fat rendered properly.',
+  'ingredients': ['pasta', 'guanciale', 'pecorino romano', 'pepe nero'],
+  'ingredients_en': ['pasta', 'guanciale', 'pecorino romano', 'black pepper'],
+  'places': [{'name': 'Da Cesare al Casaletto'}, {'name': 'Flavio al Velavevodetto'}, {'name': 'Trattoria Pennestri'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🏛️', 'title': '2.800 anni di storia continua', 'title_en': '2,800 years of continuous history', 'body': "Roma è una delle città abitate più antiche d'Europa. Fondata secondo la leggenda da Romolo nel 753 a.C., ha visto passare repubbliche, imperi e papi senza mai essere abbandonata.", 'body_en': "Rome is one of Europe's oldest continuously inhabited cities. Founded according to legend by Romulus in 753 BC, it has witnessed republics, empires and popes without ever being abandoned."},

@@ -77,6 +77,25 @@ function normalize(value: string): string {
     .trim();
 }
 
+function vibeSymbol(key: string): string {
+  if (["centro", "centro storico", "centrale"].includes(key)) return "C";
+  if (["attrazioni", "culturale", "storico", "arte", "autentico"].includes(key)) return "A";
+  if (["vita notturna", "movida", "locali"].includes(key)) return "N";
+  if (["metro", "mercati"].includes(key)) return "M";
+  if (["trasporti", "stazione", "turistico"].includes(key)) return "T";
+  if (["tranquillo"].includes(key)) return "Q";
+  if (["famiglie", "gastronomia", "cibo"].includes(key)) return "F";
+  if (["sicuro", "shopping", "commercio"].includes(key)) return "S";
+  if (["residenziale", "romantico"].includes(key)) return "R";
+  if (["verde", "parco", "parchi", "panoramica", "vista panoramica", "collina"].includes(key)) return "V";
+  if (["budget"].includes(key)) return "$";
+  if (["lusso", "elegante"].includes(key)) return "L";
+  if (["mare", "spiaggia", "porto"].includes(key)) return "W";
+  if (["universita", "studenti"].includes(key)) return "U";
+  if (["business"].includes(key)) return "B";
+  return "#";
+}
+
 function vibeStyle(tag: string, lang: string) {
   const key = normalize(tag.replace(/_/g, " "));
   const style = VIBE_STYLES[key] ?? {
@@ -86,9 +105,9 @@ function vibeStyle(tag: string, lang: string) {
     labelEn: tag.replace(/_/g, " "),
   };
   return {
-    icon: style.icon,
+    icon: vibeSymbol(key),
     color: style.color,
-    label: lang === "en" ? style.labelEn : style.labelIt,
+    label: key === "universita" ? (lang === "en" ? "University" : "Università") : (lang === "en" ? style.labelEn : style.labelIt),
   };
 }
 

@@ -132,16 +132,93 @@ FOOD_SPOTS = [
  {'city': 'marrakech', 'zone': 'palmeraie', 'category_level': 3, 'name': 'Orange Palmeraie', 'name_en': 'Palmeraie Orange Juice', 'description': 'Succo fresco per una pausa rapida nel settore più aperto della città.', 'description_en': "Fresh juice for a quick break in the city's most open sector.", 'latitude': 31.6753, 'longitude': -7.9518, 'estimated_visit_time': 10, 'tags': ['snack', 'succo', 'rapido'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
 ]
 
-FOODS_BY_CITY = [
- {'city': 'marrakech', 'name': 'Tagine', 'name_en': 'Tagine', 'description': 'Stufato marocchino cotto lentamente nel recipiente conico di terracotta, con carne o verdure, spezie calde, frutta secca e salsa profumata.', 'description_en': 'A Moroccan stew slowly cooked in the conical clay pot, with meat or vegetables, warm spices, dried fruit and fragrant sauce.', 'ingredients': ['agnello o pollo', 'verdure', 'olive', 'spezie ras el hanout', 'limone preservato'], 'ingredients_en': ['lamb or chicken', 'vegetables', 'olives', 'ras el hanout spice blend', 'preserved lemon'], 'type': 'main', 'places': ['Nomad Marrakech', 'Cafe Clock Marrakech', 'Al Fassia Marrakech']},
- {'city': 'marrakech', 'name': 'Couscous', 'name_en': 'Couscous', 'description': 'Semola di grano duro cotta a vapore servita con sette verdure brasate, ceci e carne, piatto rituale del venerdì marocchino.', 'description_en': 'Steamed durum-wheat semolina served with seven braised vegetables, chickpeas and meat, a Moroccan Friday ritual dish.', 'ingredients': ['semola di grano duro', 'verdure', 'carne', 'brodo', 'ceci'], 'ingredients_en': ['semolina', 'vegetables', 'meat', 'broth', 'chickpeas'], 'type': 'main', 'places': ['Al Fassia Marrakech', 'Amal Womens Training Center Marrakech', 'La Maison Arabe Marrakech']},
- {'city': 'marrakech', 'name': 'Pastilla', 'name_en': 'Pastilla', 'description': 'Tortino di pasta sfoglia warqa ripieno di carne speziata, mandorle tostate e cannella, finito con zucchero a velo dolce-salato.', 'description_en': 'A warqa pastry pie filled with spiced meat, toasted almonds and cinnamon, finished with a sweet-savoury dusting of icing sugar.', 'ingredients': ['pasta warqa', 'piccione o pollo', 'mandorle', 'cannella', 'zucchero a velo'], 'ingredients_en': ['warqa pastry', 'pigeon or chicken', 'almonds', 'cinnamon', 'icing sugar'], 'type': 'main', 'places': ['Al Fassia Marrakech', 'La Maison Arabe Marrakech', 'Dar Yacout Marrakech']},
- {'city': 'marrakech', 'name': 'Harira', 'name_en': 'Harira', 'description': 'Zuppa densa di pomodoro, lenticchie e ceci profumata con coriandolo fresco e succo di limone, tradizionale per rompere il digiuno del Ramadan.', 'description_en': 'A thick soup of tomato, lentils and chickpeas scented with fresh coriander and lemon juice, traditional for breaking the Ramadan fast.', 'ingredients': ['pomodoro', 'lenticchie', 'ceci', 'coriandolo', 'limone'], 'ingredients_en': ['tomato', 'lentils', 'chickpeas', 'coriander', 'lemon'], 'type': 'starter', 'places': ['Jemaa el Fna Food Stalls Marrakech', 'Amal Womens Training Center Marrakech', 'Cafe Clock Marrakech']},
- {'city': 'marrakech', 'name': 'Msemen', 'name_en': 'Msemen', 'description': 'Pane piatto a strati di pasta ripiegata, dorato sulla piastra in burro chiarificato e servito con miele a colazione.', 'description_en': 'A square flatbread of folded layered dough, browned on the griddle in clarified butter and served with honey at breakfast.', 'ingredients': ['farina', 'semola', 'olio', 'burro', 'sale'], 'ingredients_en': ['flour', 'semolina', 'oil', 'butter', 'salt'], 'type': 'snack', 'places': ['Jemaa el Fna Food Stalls Marrakech', 'Cafe des Epices Marrakech', 'Amal Womens Training Center Marrakech']},
- {'city': 'marrakech', 'name': 'Baghrir', 'name_en': 'Baghrir', 'description': 'Crêpes di semola con la superficie crivellata di mille piccoli buchi, ideali per assorbire miele caldo e burro fuso a colazione.', 'description_en': 'Semolina pancakes with a surface pocked by a thousand tiny holes, ideal for soaking up warm honey and melted butter at breakfast.', 'ingredients': ['semola fine', 'lievito', 'sale', 'miele', 'burro fuso'], 'ingredients_en': ['fine semolina', 'yeast', 'salt', 'honey', 'melted butter'], 'type': 'snack', 'places': ['Cafe des Epices Marrakech', 'Atay Cafe Marrakech', 'Amal Womens Training Center Marrakech']},
- {'city': 'marrakech', 'name': 'Chebakia', 'name_en': 'Chebakia', 'description': 'Pasticcini fritti a forma di rosa intrecciata immersi nel miele caldo e cosparsi di semi di sesamo, dolce immancabile del Ramadan.', 'description_en': 'Rose-shaped braided fried pastries soaked in warm honey and sprinkled with sesame seeds, an essential Ramadan sweet.', 'ingredients': ['farina', 'sesamo', 'miele', "acqua di fiori d'arancio", 'olio di frittura'], 'ingredients_en': ['flour', 'sesame seeds', 'honey', 'orange blossom water', 'frying oil'], 'type': 'dessert', 'places': ['Patisserie des Princes Marrakech', 'Jemaa el Fna Food Stalls Marrakech', 'Al Jawda Marrakech']},
- {'city': 'marrakech', 'name': 'Tè alla menta', 'name_en': 'Mint Tea', 'description': 'Tè verde gunpowder bollito a lungo con mazzetti di menta e tanto zucchero, versato da alto nei piccoli bicchieri come segno di ospitalità.', 'description_en': 'Gunpowder green tea simmered with bunches of mint and plenty of sugar, poured from a height into small glasses as a sign of hospitality.', 'ingredients': ['tè verde', 'menta fresca', 'zucchero', 'acqua bollente'], 'ingredients_en': ['green tea', 'fresh mint', 'sugar', 'boiling water'], 'type': 'drink', 'places': ['Bacha Coffee Marrakech', 'Cafe des Epices Marrakech', 'Le Jardin Marrakech']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Tagine',
+  'name_en': 'Tagine',
+  'description': 'Stufato cotto lentamente nel recipiente conico di terracotta, con carne, verdure, spezie, frutta secca o limone '
+                 'conservato. A Marrakech ? una grammatica culinaria pi? che un singolo piatto: profumato, morbido, stratificato, migliore '
+                 'quando la salsa resta concentrata ma non pesante.',
+  'description_en': 'A stew slowly cooked in the conical earthenware pot, with meat, vegetables, spices, dried fruit or preserved lemon. '
+                    'In Marrakech it is more a culinary grammar than a single dish: fragrant, tender and layered, best when the sauce is '
+                    'concentrated but not heavy.',
+  'ingredients': ['carne', 'verdure', 'spezie', 'limone conservato', 'frutta secca'],
+  'ingredients_en': ['meat', 'vegetables', 'spices', 'preserved lemon', 'dried fruit'],
+  'places': ['Nomad Marrakech', 'Cafe Clock Marrakech', 'Al Fassia Marrakech']},
+ {'name': 'Couscous',
+  'name_en': 'Couscous',
+  'description': 'Semola cotta a vapore e servita con verdure, ceci, brodo speziato e carne, tradizionalmente legata al pranzo del '
+                 'venerd?. Deve essere leggero e sgranato, non compatto: il valore sta nell?equilibrio tra cereale, brodo, dolcezza delle '
+                 'verdure e spezie.',
+  'description_en': 'Steamed semolina served with vegetables, chickpeas, spiced broth and meat, traditionally linked to Friday lunch. It '
+                    'should be light and separate, not compact: value lies in the balance between grain, broth, vegetable sweetness and '
+                    'spices.',
+  'ingredients': ['semola', 'verdure', 'ceci', 'brodo', 'spezie'],
+  'ingredients_en': ['semolina', 'vegetables', 'chickpeas', 'broth', 'spices'],
+  'places': ['Al Fassia Marrakech', 'Amal Womens Training Center Marrakech', 'La Maison Arabe Marrakech']},
+ {'name': 'Pastilla',
+  'name_en': 'Pastilla',
+  'description': 'Torta salata-dolce di sfoglia sottilissima, tradizionalmente con piccione o pollo, mandorle, cannella e zucchero a velo. '
+                 '? uno dei piatti marocchini pi? eleganti: croccante, speziata, profumata, capace di tenere insieme dolcezza e sapidit?. '
+                 'La qualit? sta nel contrasto tra sfoglia asciutta e ripieno aromatico.',
+  'description_en': 'A sweet-savoury pie of very thin pastry, traditionally with pigeon or chicken, almonds, cinnamon and icing sugar. It '
+                    'is one of Morocco?s most elegant dishes: crisp, spiced and fragrant, able to hold sweetness and savouriness together.',
+  'ingredients': ['pasta warqa', 'pollo', 'mandorle', 'cannella', 'zucchero a velo'],
+  'ingredients_en': ['warqa pastry', 'chicken', 'almonds', 'cinnamon', 'icing sugar'],
+  'places': ['Al Fassia Marrakech', 'La Maison Arabe Marrakech', 'Dar Yacout Marrakech']},
+ {'name': 'Harira',
+  'name_en': 'Harira Soup',
+  'description': 'Zuppa marocchina di pomodoro, lenticchie, ceci, erbe, spezie e talvolta carne, molto legata al Ramadan. ? nutriente ma '
+                 'vivace: acidit?, coriandolo, legumi e spezie devono creare un brodo denso, aromatico e non monotono. La migliore lascia '
+                 'calore e freschezza insieme, senza coprire i legumi.',
+  'description_en': 'A Moroccan soup of tomato, lentils, chickpeas, herbs, spices and sometimes meat, strongly linked to Ramadan. It is '
+                    'nourishing yet lively: acidity, coriander, legumes and spices should create a dense, aromatic and never monotonous '
+                    'broth.',
+  'ingredients': ['pomodoro', 'lenticchie', 'ceci', 'coriandolo', 'spezie'],
+  'ingredients_en': ['tomato', 'lentils', 'chickpeas', 'coriander', 'spices'],
+  'places': ['Jemaa el Fna Food Stalls Marrakech', 'Amal Womens Training Center Marrakech', 'Cafe Clock Marrakech']},
+ {'name': 'Msemen',
+  'name_en': 'Msemen Flatbread',
+  'description': 'Sfoglia quadrata marocchina, piegata pi? volte e cotta su piastra, servita con miele, burro o ripieni salati. ? cibo da '
+                 'colazione e strada: elastico, stratificato, leggermente croccante fuori, migliore quando arriva caldo e appena unto.',
+  'description_en': 'A square Moroccan flatbread, folded several times and cooked on a griddle, served with honey, butter or savoury '
+                    'fillings. It is breakfast and street food: elastic, layered and slightly crisp outside, best when hot and lightly '
+                    'glossy.',
+  'ingredients': ['farina', 'semola', 'olio', 'burro', 'miele'],
+  'ingredients_en': ['flour', 'semolina', 'oil', 'butter', 'honey'],
+  'places': ['Jemaa el Fna Food Stalls Marrakech', 'Cafe des Epices Marrakech', 'Amal Womens Training Center Marrakech']},
+ {'name': 'Baghrir',
+  'name_en': 'Baghrir Pancakes',
+  'description': 'Cr?pe marocchina spugnosa piena di piccoli fori, preparata con semola e servita con burro fuso e miele. La texture ? '
+                 'tutto: deve assorbire il condimento senza rompersi, restando leggera, tiepida e piacevolmente porosa. La qualit? si vede '
+                 'dalla regolarit? dei fori e dalla leggerezza finale.',
+  'description_en': 'A spongy Moroccan pancake full of tiny holes, made with semolina and served with melted butter and honey. Texture is '
+                    'everything: it should absorb the topping without breaking, remaining light, warm and pleasantly porous. Quality shows '
+                    'in the regularity of the holes and the final lightness.',
+  'ingredients': ['semola', 'farina', 'lievito', 'burro', 'miele'],
+  'ingredients_en': ['semolina', 'flour', 'yeast', 'butter', 'honey'],
+  'places': ['Cafe des Epices Marrakech', 'Atay Cafe Marrakech', 'Amal Womens Training Center Marrakech']},
+ {'name': 'Chebakia',
+  'name_en': 'Chebakia Sesame Pastry',
+  'description': 'Dolce fritto intrecciato, immerso nel miele e ricoperto di sesamo, profumato con anice, cannella o acqua di fiori '
+                 'd?arancio. ? intenso e festivo: croccante, appiccicoso, speziato, spesso servito con harira durante il Ramadan. La '
+                 'qualit? evita l?eccesso di miele, mantenendo forma e croccantezza.',
+  'description_en': 'A braided fried pastry dipped in honey and covered with sesame, scented with anise, cinnamon or orange blossom water. '
+                    'It is intense and festive: crisp, sticky and spiced, often served with harira during Ramadan. Quality avoids excess '
+                    'honey while keeping shape and crunch.',
+  'ingredients': ['farina', 'miele', 'sesamo', 'anice', 'cannella'],
+  'ingredients_en': ['flour', 'honey', 'sesame', 'anise', 'cinnamon'],
+  'places': ['Patisserie des Princes Marrakech', 'Jemaa el Fna Food Stalls Marrakech', 'Al Jawda Marrakech']},
+ {'name': 'T? alla menta',
+  'name_en': 'Moroccan Mint Tea',
+  'description': 'T? verde con molta menta fresca e zucchero, versato dall?alto per ossigenarlo e creare schiuma. A Marrakech ? gesto di '
+                 'ospitalit? e pausa quotidiana: dolce, profumato, rituale, pi? importante come esperienza sociale che come semplice '
+                 'bevanda.',
+  'description_en': 'Green tea with plenty of fresh mint and sugar, poured from above to aerate it and create foam. In Marrakech it is a '
+                    'gesture of hospitality and daily pause: sweet, fragrant and ritualistic, more important as a social experience than '
+                    'as a simple drink.',
+  'ingredients': ['t? verde', 'menta', 'zucchero', 'acqua'],
+  'ingredients_en': ['green tea', 'mint', 'sugar', 'water'],
+  'places': ['Bacha Coffee Marrakech', 'Cafe des Epices Marrakech', 'Le Jardin Marrakech']}]
 
 CULTURE_FACTS = [
  {'city': 'marrakech', 'icon': '🔴', 'title': 'La città rossa', 'title_en': 'The Red City', 'body': 'Marrakech è chiamata città rossa per il colore diffuso di mura e facciate, dovuto all\'uso storico di terra e pigmenti locali.', 'body_en': 'Marrakech is called the red city because of the widespread colour of its walls and facades, linked to the historic use of local earth and pigments.'},

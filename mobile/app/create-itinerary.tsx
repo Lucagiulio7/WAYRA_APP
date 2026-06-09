@@ -21,12 +21,14 @@ import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import CountryFlag from "react-native-country-flag";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAttractions, BuilderAttraction } from "@/hooks/useAttractions";
 import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useCityExtras } from "@/hooks/useCityExtras";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { languageOption } from "@/i18n";
 import { BuilderMap, MapSlot } from "@/components/BuilderMap";
 import { useBuilderStore } from "@/store/builderStore";
 import { SkeletonList } from "@/components/Skeleton";
@@ -370,6 +372,7 @@ export default function CreateItineraryScreen() {
   const numDays = Math.max(1, parseInt(ndStr, 10) || 1);
   const { lang, toggle } = useLanguage();
   const { colors } = useTheme();
+  const currentLanguage = languageOption(lang);
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const { attractions, loading, error } = useAttractions(city);
@@ -935,7 +938,7 @@ export default function CreateItineraryScreen() {
           <Ionicons name="help-circle-outline" size={22} color={colors.accentGold} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggle} activeOpacity={0.7} style={styles.flagBtn}>
-          <Text style={styles.flagEmoji}>{lang === "it" ? "🇮🇹" : "🇬🇧"}</Text>
+          <CountryFlag isoCode={currentLanguage.flagIso} size={14} />
         </TouchableOpacity>
         <TouchableOpacity
           ref={(ref) => setGuideTarget("view", ref)}

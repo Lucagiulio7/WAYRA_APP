@@ -118,16 +118,93 @@ FOOD_SPOTS = [
  {'city': 'oslo', 'zone': 'holmenkollen_nordmarka', 'category_level': 3, 'name': 'Skyline Forest Dining', 'name_en': 'Skyline Forest Dining', 'description': 'Tavolo finale di tono alto per chiudere bene il margine verde di Oslo.', 'description_en': 'A higher-end final table for rounding off Oslo\'s green edge well.', 'latitude': 59.9648, 'longitude': 10.6691, 'estimated_visit_time': 100, 'tags': ['gastronomia', 'fine dining'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'rating': 4.4, 'price_range': '€€€'},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Farikal', 'name_en': 'Farikal', 'description': 'Stufato autunnale di pezzi di agnello e cavolo verza cotti a lungo con pepe nero in grani, piatto nazionale norvegese servito d\'autunno.', 'description_en': 'An autumn stew of lamb and Savoy cabbage slow-cooked with whole black peppercorns, the Norwegian national dish of the autumn season.', 'ingredients': ['agnello', 'cavolo', 'pepe nero', 'sale'], 'ingredients_en': ['lamb', 'cabbage', 'black pepper', 'salt'], 'places': ['Kaffistova Oslo', 'Engebret Cafe Oslo', 'Dovrehallen Oslo']},
- {'name': 'Kjottkaker', 'name_en': 'Norwegian Meatballs', 'description': 'Grandi polpette di carne macinata con cipolla, servite con salsa bruna scura, patate lesse e mirtilli rossi, classico casalingo norvegese.', 'description_en': 'Large minced meat balls with onion, served with dark brown gravy, boiled potatoes and lingonberries, a Norwegian home classic.', 'ingredients': ['carne macinata', 'cipolla', 'salsa bruna', 'patate'], 'ingredients_en': ['minced meat', 'onion', 'brown sauce', 'potatoes'], 'places': ['Kaffistova Oslo', 'Dovrehallen Oslo', 'Engebret Cafe Oslo']},
- {'name': 'Rakfisk', 'name_en': 'Rakfisk', 'description': 'Trota di lago salata e fatta fermentare per mesi in salamoia, dal profumo intenso, servita cruda con pane piatto, panna acida e cipolla.', 'description_en': 'Lake trout salted and fermented in brine for months, intensely scented, served raw with flatbread, sour cream and onion.', 'ingredients': ['trota fermentata', 'flatbread', 'cipolla', 'panna acida'], 'ingredients_en': ['fermented trout', 'flatbread', 'onion', 'sour cream'], 'places': ['Engebret Cafe Oslo', 'Lorry Oslo', 'Vaaghals Oslo']},
- {'name': 'Gravlaks', 'name_en': 'Gravlaks', 'description': 'Salmone crudo curato sotto sale, zucchero e abbondante aneto per giorni, servito a fette sottilissime con salsa di senape dolce.', 'description_en': 'Raw salmon cured for days under salt, sugar and plenty of dill, served in paper-thin slices with a sweet mustard sauce.', 'ingredients': ['salmone', 'aneto', 'sale', 'zucchero'], 'ingredients_en': ['salmon', 'dill', 'salt', 'sugar'], 'places': ['Fiskeriet Youngstorget Oslo', 'Engebret Cafe Oslo', 'Vaaghals Oslo']},
- {'name': 'Reinsdyrgryte', 'name_en': 'Reindeer Stew', 'description': 'Stufato norvegese di renna con funghi, panna e bacche di ginepro, piatto ricco e montano legato alla cucina del Nord.', 'description_en': 'A Norwegian reindeer stew with mushrooms, cream and juniper berries, a rich mountain dish tied to Northern cuisine.', 'ingredients': ['renna', 'funghi', 'panna', 'mirtilli rossi'], 'ingredients_en': ['reindeer', 'mushrooms', 'cream', 'lingonberries'], 'places': ['Lorry Oslo', 'Engebret Cafe Oslo', 'Kaffistova Oslo']},
- {'name': 'Skillingsbolle', 'name_en': 'Cinnamon Bun', 'description': 'Soffice girella lievitata profumata di cannella e cardamomo, dolce della pausa "kaffe og kake" nei caffè di Oslo.', 'description_en': 'A soft cinnamon-and-cardamom spiral bun, the sweet of the "kaffe og kake" coffee break in Oslo cafés.', 'ingredients': ['farina', 'burro', 'cannella', 'zucchero'], 'ingredients_en': ['flour', 'butter', 'cinnamon', 'sugar'], 'places': ['Baker Hansen Oslo', 'Godt Brod Grunerlokka Oslo', 'W B Samson Oslo']},
- {'name': 'Waffle norvegese', 'name_en': 'Norwegian Waffle', 'description': 'Waffle a forma di cuore intrecciato, soffici e profumati di cardamomo, serviti caldi con panna acida, formaggio brunost o marmellata di lamponi.', 'description_en': 'Heart-shaped interlocking waffles, soft and scented with cardamom, served warm with sour cream, brunost cheese or raspberry jam.', 'ingredients': ['farina', 'latte', 'uova', 'burro'], 'ingredients_en': ['flour', 'milk', 'eggs', 'butter'], 'places': ['Haralds Vaffel Oslo', 'Kaffistova Oslo', 'Frognerseteren Oslo']},
- {'name': 'Brunost', 'name_en': 'Brown Cheese', 'description': 'Formaggio marrone dolciastro a pasta dura ottenuto facendo caramellare a lungo il siero di latte, affettato sottile su pane o waffle.', 'description_en': 'A sweet, hard brown cheese obtained by long-simmering whey until caramelised, thinly sliced on bread or waffles.', 'ingredients': ['siero di latte', 'latte', 'panna'], 'ingredients_en': ['whey', 'milk', 'cream'], 'places': ['Mathallen Oslo', 'Kaffistova Oslo', 'Frognerseteren Oslo']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'F?rik?l',
+  'name_en': 'F?rik?l Lamb and Cabbage',
+  'description': 'Stufato nazionale norvegese di agnello, cavolo e pepe nero, cotto lentamente fino a diventare morbido e aromatico. ? '
+                 'cucina essenziale e stagionale: pochi ingredienti, brodo pulito, dolcezza del cavolo e carne tenera senza pesantezza. La '
+                 'qualit? si misura nella limpidezza del brodo e nella dolcezza del cavolo.',
+  'description_en': 'Norway?s national stew of lamb, cabbage and black pepper, slowly cooked until tender and aromatic. It is essential '
+                    'seasonal cooking: few ingredients, clean broth, cabbage sweetness and tender meat without heaviness. Quality is '
+                    'measured by broth clarity, cabbage sweetness and pepper that stays gentle.',
+  'ingredients': ['agnello', 'cavolo', 'pepe nero', 'sale', 'patate'],
+  'ingredients_en': ['lamb', 'cabbage', 'black pepper', 'salt', 'potatoes'],
+  'places': ['Kaffistova Oslo', 'Engebret Cafe Oslo', 'Dovrehallen Oslo']},
+ {'name': 'Kj?ttkaker',
+  'name_en': 'Norwegian Meat Cakes',
+  'description': 'Polpette norvegesi pi? grandi e morbide delle meatballs comuni, servite con salsa bruna, patate, piselli e confettura di '
+                 'mirtilli rossi. Sono comfort food domestico: saporite, delicate, molto legate alle mense tradizionali e ai pranzi '
+                 'familiari.',
+  'description_en': 'Norwegian meat cakes, larger and softer than common meatballs, served with brown sauce, potatoes, peas and '
+                    'lingonberry jam. They are home-style comfort food: savoury, gentle and strongly tied to traditional cafeterias and '
+                    'family lunches. The best versions feel tender, balanced and never compact or dry.',
+  'ingredients': ['carne macinata', 'latte', 'farina', 'salsa bruna', 'patate'],
+  'ingredients_en': ['minced meat', 'milk', 'flour', 'brown sauce', 'potatoes'],
+  'places': ['Kaffistova Oslo', 'Dovrehallen Oslo', 'Engebret Cafe Oslo']},
+ {'name': 'Rakfisk',
+  'name_en': 'Rakfisk Fermented Fish',
+  'description': 'Pesce d?acqua dolce fermentato, spesso trota, servito con lefse, panna acida, cipolla e patate. ? un sapore forte e '
+                 'tradizionale: salino, pungente, complesso, da assaggiare con contorni capaci di equilibrarne l?intensit?. La qualit? '
+                 'richiede fermentazione pulita, profumo controllato e contorni freschi.',
+  'description_en': 'Fermented freshwater fish, often trout, served with lefse, sour cream, onion and potatoes. It is a strong traditional '
+                    'flavour: saline, pungent and complex, best tasted with sides able to balance its intensity. Quality requires clean '
+                    'fermentation, controlled aroma and fresh sides that soften the impact.',
+  'ingredients': ['trota', 'sale', 'lefse', 'panna acida', 'cipolla'],
+  'ingredients_en': ['trout', 'salt', 'lefse', 'sour cream', 'onion'],
+  'places': ['Engebret Cafe Oslo', 'Lorry Oslo', 'Vaaghals Oslo']},
+ {'name': 'Gravlaks',
+  'name_en': 'Gravlaks Cured Salmon',
+  'description': 'Salmone marinato con sale, zucchero e aneto, servito a fette sottili con salsa alla senape o pane. A Oslo racconta il '
+                 'lato elegante del pesce nordico: texture setosa, dolcezza misurata, profumo di aneto e sapore pulito.',
+  'description_en': 'Salmon cured with salt, sugar and dill, served in thin slices with mustard sauce or bread. In Oslo it shows the '
+                    'elegant side of Nordic fish: silky texture, measured sweetness, dill aroma and clean flavour.',
+  'ingredients': ['salmone', 'sale', 'zucchero', 'aneto', 'senape'],
+  'ingredients_en': ['salmon', 'salt', 'sugar', 'dill', 'mustard'],
+  'places': ['Fiskeriet Youngstorget Oslo', 'Engebret Cafe Oslo', 'Vaaghals Oslo']},
+ {'name': 'Reinsdyrgryte',
+  'name_en': 'Reindeer Stew',
+  'description': 'Stufato di renna con panna, funghi, ginepro e spesso mirtilli rossi, legato alla cucina nordica e sami. ? profondo ma '
+                 'non aggressivo: carne magra, salsa cremosa, note boschive e acidit? dolce della frutta. La qualit? sta nella carne '
+                 'tenera e nella salsa cremosa ma non coprente.',
+  'description_en': 'A reindeer stew with cream, mushrooms, juniper and often lingonberries, linked to Nordic and S?mi cooking. It is deep '
+                    'but not aggressive: lean meat, creamy sauce, woodland notes and sweet acidity from the berries. Quality lies in '
+                    'tender meat and a creamy sauce that does not cover it.',
+  'ingredients': ['renna', 'panna', 'funghi', 'ginepro', 'mirtilli rossi'],
+  'ingredients_en': ['reindeer', 'cream', 'mushrooms', 'juniper', 'lingonberries'],
+  'places': ['Lorry Oslo', 'Engebret Cafe Oslo', 'Kaffistova Oslo']},
+ {'name': 'Skillingsbolle',
+  'name_en': 'Norwegian Cinnamon Bun',
+  'description': 'Girella dolce alla cannella, morbida e profumata, venduta nelle bakery come pausa quotidiana con caff?. Deve essere '
+                 'burrosa ma non pesante, con cannella ben distribuita, superficie leggermente caramellata e mollica soffice. La qualit? '
+                 'migliore lascia burro, spezie e lievitazione in equilibrio.',
+  'description_en': 'A sweet cinnamon bun, soft and fragrant, sold in bakeries as an everyday coffee break. It should be buttery but not '
+                    'heavy, with well-distributed cinnamon, a lightly caramelised surface and soft crumb. The best versions keep butter, '
+                    'spice and fermentation in balance.',
+  'ingredients': ['farina', 'burro', 'cannella', 'zucchero', 'lievito'],
+  'ingredients_en': ['flour', 'butter', 'cinnamon', 'sugar', 'yeast'],
+  'places': ['Baker Hansen Oslo', 'Godt Brod Grunerlokka Oslo', 'W B Samson Oslo']},
+ {'name': 'Waffle norvegese',
+  'name_en': 'Norwegian Waffle',
+  'description': 'Waffle sottile a forma di cuore, morbido pi? che croccante, servito con panna acida, marmellata o brunost. In Norvegia ? '
+                 'merenda, accoglienza e pausa informale: delicato, tiepido, pi? domestico che da dessert elaborato. La qualit? dipende '
+                 'dalla leggerezza dell?impasto e dal servizio appena tiepido.',
+  'description_en': 'A thin heart-shaped waffle, soft rather than crisp, served with sour cream, jam or brunost. In Norway it is snack, '
+                    'hospitality and informal pause: delicate, warm and more home-like than elaborate dessert. Quality depends on light '
+                    'batter and serving it while still gently warm.',
+  'ingredients': ['farina', 'uova', 'latte', 'burro', 'marmellata'],
+  'ingredients_en': ['flour', 'eggs', 'milk', 'butter', 'jam'],
+  'places': ['Haralds Vaffel Oslo', 'Kaffistova Oslo', 'Frognerseteren Oslo']},
+ {'name': 'Brunost',
+  'name_en': 'Brunost Brown Cheese',
+  'description': 'Formaggio marrone norvegese dal gusto dolce e caramellato, ottenuto dal siero cotto a lungo, servito a fette sottili su '
+                 'pane o waffle. ? sorprendente: lattico, salato-dolce, quasi toffee, molto identitario nella colazione norvegese. La '
+                 'qualit? sta nel taglio sottile, che rende il sapore pi? armonico.',
+  'description_en': 'Norwegian brown cheese with a sweet caramel flavour, made from whey cooked for a long time, served in thin slices on '
+                    'bread or waffles. It is surprising: milky, sweet-salty, almost toffee-like and highly distinctive at Norwegian '
+                    'breakfast.',
+  'ingredients': ['siero di latte', 'latte', 'panna', 'sale'],
+  'ingredients_en': ['whey', 'milk', 'cream', 'salt'],
+  'places': ['Mathallen Oslo', 'Kaffistova Oslo', 'Frognerseteren Oslo']}]
 
 CULTURE_FACTS = [
  {'icon': '🌊', 'title': 'Il fiordo conta davvero nella lettura urbana', 'title_en': 'The fjord truly shapes the urban reading', 'body': 'A Oslo l\'acqua non è solo sfondo: orienta il centro, i nuovi waterfront e la percezione complessiva della città.', 'body_en': 'In Oslo water is not just a backdrop: it shapes the centre, the new waterfronts and the city\'s overall perception.'},

@@ -132,16 +132,89 @@ FOOD_SPOTS = [
  {'city': 'edimburgo', 'zone': 'arthurs_seat', 'category_level': 3, 'name': 'Park edge elegant dining', 'name_en': 'Park edge elegant dining', 'description': 'Tavola più elegante per rappresentare la fascia sud est vicina a Holyrood Park.', 'description_en': 'A more elegant table representing the south eastern belt near Holyrood Park.', 'latitude': 55.9452, 'longitude': -3.1734, 'estimated_visit_time': 95, 'tags': ['elegante', 'parco', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Haggis', 'name_en': 'Haggis', 'description': 'Insaccato di interiora di pecora, avena e spezie cotto a vapore, piatto nazionale scozzese servito con neeps e tatties.', 'description_en': "A pudding of sheep offal, oats and spices steamed in a casing, the Scottish national dish served with neeps and tatties.", 'ingredients': ['interiora di pecora', 'avena', 'cipolla', 'spezie', 'brodo'], 'ingredients_en': ['sheep offal', 'oatmeal', 'onion', 'spices', 'stock'], 'places': ['Makars Mash Bar Edinburgh', 'Arcade Bar Haggis and Whisky House Edinburgh', 'The Royal McGregor Edinburgh']},
- {'name': 'Cullen Skink', 'name_en': 'Cullen Skink', 'description': 'Zuppa densa e cremosa di eglefino affumicato, patate e cipolla, originaria del villaggio costiero di Cullen.', 'description_en': 'A thick, creamy soup of smoked haddock, potatoes and onion, originating from the coastal village of Cullen.', 'ingredients': ['eglefino affumicato', 'patate', 'cipolla', 'latte', 'burro'], 'ingredients_en': ['smoked haddock', 'potatoes', 'onion', 'milk', 'butter'], 'places': ['The Scran and Scallie Edinburgh', 'Ondine Edinburgh', 'The Mussel Inn Edinburgh']},
- {'name': 'Scotch Pie', 'name_en': 'Scotch Pie', 'description': 'Piccola pie a parete dritta con guscio di pasta croccante e ripieno speziato di agnello o manzo, classico street food scozzese.', 'description_en': 'A small straight-walled pie with a crisp hot-water crust and spiced lamb or beef filling, a Scottish street food classic.', 'ingredients': ['pasta', 'carne di agnello o manzo', 'spezie', 'brodo'], 'ingredients_en': ['hot water crust pastry', 'lamb or beef mince', 'spices', 'stock'], 'places': ['The Piemaker Edinburgh', 'Auld Jocks Pie Shoppe Edinburgh', 'John Bain and Son Edinburgh']},
- {'name': 'Shortbread', 'name_en': 'Shortbread', 'description': 'Biscotto friabile dal cuore burroso, fatto con tre soli ingredienti, immancabile nei tea time scozzesi.', 'description_en': 'A crumbly biscuit with a buttery heart, made with only three ingredients, indispensable at Scottish tea time.', 'ingredients': ['farina', 'burro', 'zucchero'], 'ingredients_en': ['flour', 'butter', 'sugar'], 'places': ['Pinnies and Poppy Seeds Edinburgh', 'Mimis Bakehouse Edinburgh', 'Cranachan and Crowdie Edinburgh']},
- {'name': 'Cranachan', 'name_en': 'Cranachan', 'description': 'Dessert a strati di panna montata al whisky, miele, lamponi freschi e avena tostata, dolce simbolo dei festeggiamenti scozzesi.', 'description_en': 'A layered dessert of whisky-laced whipped cream, honey, fresh raspberries and toasted oats, a symbolic Scottish celebration sweet.', 'ingredients': ['panna', 'avena', 'whisky', 'miele', 'lamponi'], 'ingredients_en': ['cream', 'oats', 'whisky', 'honey', 'raspberries'], 'places': ['Whiski Rooms Edinburgh', 'The Witchery Edinburgh', 'Makars Mash Bar Edinburgh']},
- {'name': 'Neeps and Tatties', 'name_en': 'Neeps and Tatties', 'description': 'Doppia purea di rape gialle e patate burrose, contorno classico servito insieme allo haggis nella tavola tradizionale.', 'description_en': 'A double mash of yellow turnips and buttery potatoes, the classic side dish served alongside haggis in traditional meals.', 'ingredients': ['rape', 'patate', 'burro', 'sale'], 'ingredients_en': ['turnips', 'potatoes', 'butter', 'salt'], 'places': ['Makars Mash Bar Edinburgh', 'Arcade Bar Haggis and Whisky House Edinburgh', 'The Royal McGregor Edinburgh']},
- {'name': 'Salmone affumicato scozzese', 'name_en': 'Scottish Smoked Salmon', 'description': 'Salmone delle highlands curato a sale e affumicato a freddo su legni di quercia, classico nei brunch e nei sandwich edimburghesi.', 'description_en': 'Highland salmon cured in salt and cold-smoked over oak wood, a classic on Edinburgh brunch menus and open sandwiches.', 'ingredients': ['salmone', 'sale', 'fumo di legno', 'aneto'], 'ingredients_en': ['salmon', 'salt', 'wood smoke', 'dill'], 'places': ['Ondine Edinburgh', 'The Scran and Scallie Edinburgh', 'The Mussel Inn Edinburgh']},
- {'name': 'Tablet', 'name_en': 'Scottish Tablet', 'description': 'Dolcetto duro e granuloso a base di zucchero e latte condensato cotti a lungo, simile a un fudge molto friabile.', 'description_en': 'A hard, grainy confection made of sugar and condensed milk cooked at length, akin to a very crumbly fudge.', 'ingredients': ['zucchero', 'latte condensato', 'burro'], 'ingredients_en': ['sugar', 'condensed milk', 'butter'], 'places': ['Fudge Kitchen Edinburgh', 'The Fudge House Edinburgh', 'Cranachan and Crowdie Edinburgh']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Haggis',
+  'name_en': 'Haggis',
+  'description': 'Insaccato scozzese di frattaglie ovine, avena, cipolla e spezie, servito con pur? di rape e patate. ? molto pi? '
+                 'equilibrato di quanto sembri: pepato, cereale, morbido, centrale per capire identit? e rituali gastronomici scozzesi. La '
+                 'qualit? sta nella speziatura presente ma non invadente, mai monotona.',
+  'description_en': 'A Scottish preparation of sheep offal, oats, onion and spices, served with mashed turnips and potatoes. It is far '
+                    'more balanced than it may sound: peppery, grainy and soft, central to Scottish food identity and ritual.',
+  'ingredients': ['frattaglie ovine', 'avena', 'cipolla', 'spezie', 'rape'],
+  'ingredients_en': ['sheep offal', 'oats', 'onion', 'spices', 'turnips'],
+  'places': ['Makars Mash Bar Edinburgh', 'Arcade Bar Haggis and Whisky House Edinburgh', 'The Royal McGregor Edinburgh']},
+ {'name': 'Cullen Skink',
+  'name_en': 'Cullen Skink',
+  'description': 'Zuppa scozzese cremosa di eglefino affumicato, patate, cipolla e latte, nata sulla costa nord-orientale ma amatissima '
+                 'anche a Edimburgo. La qualit? sta nel fumo delicato, nella consistenza vellutata e nel gusto marino non aggressivo. La '
+                 'qualit? si misura quando panna e pesce affumicato restano perfettamente bilanciati.',
+  'description_en': 'A creamy Scottish soup of smoked haddock, potatoes, onion and milk, born on the north-east coast but loved in '
+                    'Edinburgh too. Quality lies in gentle smoke, velvety texture and a marine flavour that is never aggressive.',
+  'ingredients': ['eglefino affumicato', 'patate', 'cipolla', 'latte', 'burro'],
+  'ingredients_en': ['smoked haddock', 'potatoes', 'onion', 'milk', 'butter'],
+  'places': ['The Scran and Scallie Edinburgh', 'Ondine Edinburgh', 'The Mussel Inn Edinburgh']},
+ {'name': 'Scotch Pie',
+  'name_en': 'Scotch Pie',
+  'description': 'Piccola torta salata a doppia crosta, ripiena di carne speziata, spesso mangiata calda durante eventi sportivi o pause '
+                 'veloci. ? compatta e diretta: guscio croccante, interno succoso, sapore pepato e forte carattere popolare. Deve essere '
+                 'abbastanza ricca da saziare, ma non tanto grassa da appesantire.',
+  'description_en': 'A small double-crust savoury pie filled with spiced meat, often eaten hot at sports events or during quick breaks. It '
+                    'is compact and direct: crisp shell, juicy filling, peppery flavour and strong popular character. It should be rich '
+                    'enough to satisfy, but not so fatty that it feels heavy.',
+  'ingredients': ['pasta bris?e', 'carne macinata', 'pepe', 'brodo', 'strutto'],
+  'ingredients_en': ['shortcrust pastry', 'minced meat', 'pepper', 'broth', 'lard'],
+  'places': ['The Piemaker Edinburgh', 'Auld Jocks Pie Shoppe Edinburgh', 'John Bain and Son Edinburgh']},
+ {'name': 'Shortbread',
+  'name_en': 'Shortbread',
+  'description': 'Biscotto scozzese di burro, farina e zucchero, friabile, ricco e apparentemente semplicissimo. Deve sciogliersi in bocca '
+                 'senza diventare unto: il profumo di burro ? tutto, e a Edimburgo accompagna bene t?, caff? e souvenir gastronomici.',
+  'description_en': 'A Scottish biscuit made with butter, flour and sugar, crumbly, rich and apparently very simple. It should melt in the '
+                    'mouth without feeling greasy: butter aroma is everything, and in Edinburgh it suits tea, coffee and edible souvenirs.',
+  'ingredients': ['burro', 'farina', 'zucchero', 'sale'],
+  'ingredients_en': ['butter', 'flour', 'sugar', 'salt'],
+  'places': ['Pinnies and Poppy Seeds Edinburgh', 'Mimis Bakehouse Edinburgh', 'Cranachan and Crowdie Edinburgh']},
+ {'name': 'Cranachan',
+  'name_en': 'Cranachan',
+  'description': 'Dessert scozzese con panna montata, lamponi, avena tostata, miele e whisky, fresco ma ricco. ? un dolce identitario '
+                 'perch? unisce prodotti simbolici locali: cereale, frutta, latticini e distillato in una consistenza morbida e profumata. '
+                 'La qualit? sta nel contrasto tra panna morbida, avena croccante e whisky dosato.',
+  'description_en': 'A Scottish dessert with whipped cream, raspberries, toasted oats, honey and whisky, fresh yet rich. It is an identity '
+                    'dessert because it combines symbolic local products: grain, fruit, dairy and spirit in a soft fragrant texture.',
+  'ingredients': ['panna', 'lamponi', 'avena', 'miele', 'whisky'],
+  'ingredients_en': ['cream', 'raspberries', 'oats', 'honey', 'whisky'],
+  'places': ['Whiski Rooms Edinburgh', 'The Witchery Edinburgh', 'Makars Mash Bar Edinburgh']},
+ {'name': 'Neeps and Tatties',
+  'name_en': 'Neeps and Tatties',
+  'description': 'Pur? di rape e patate serviti spesso con haggis, parte fondamentale del piatto scozzese tradizionale. Sembrano solo '
+                 'contorno, ma bilanciano spezie e intensit?: dolcezza vegetale, morbidezza, burro e una semplicit? molto efficace. La '
+                 'qualit? dipende da burro, sale e consistenza, non da ingredienti complessi.',
+  'description_en': 'Mashed turnips and potatoes, often served with haggis, a fundamental part of the traditional Scottish plate. They may '
+                    'seem like a side dish, but balance spice and intensity: vegetable sweetness, softness, butter and very effective '
+                    'simplicity.',
+  'ingredients': ['rape', 'patate', 'burro', 'sale', 'pepe'],
+  'ingredients_en': ['turnips', 'potatoes', 'butter', 'salt', 'pepper'],
+  'places': ['Makars Mash Bar Edinburgh', 'Arcade Bar Haggis and Whisky House Edinburgh', 'The Royal McGregor Edinburgh']},
+ {'name': 'Salmone affumicato scozzese',
+  'name_en': 'Scottish Smoked Salmon',
+  'description': 'Salmone scozzese curato e affumicato lentamente, servito con pane, burro, limone o insalate leggere. La qualit? si '
+                 'riconosce nella texture setosa, nel fumo fine e nel sapore pulito, senza eccesso di sale. Deve risultare elegante e '
+                 'fresco, non soltanto affumicato o salato.',
+  'description_en': 'Scottish salmon cured and slowly smoked, served with bread, butter, lemon or light salads. Quality is recognised in '
+                    'the silky texture, fine smoke and clean flavour, without excessive salt. It should feel elegant and fresh, not merely '
+                    'smoky or salty, with a clean finish.',
+  'ingredients': ['salmone', 'sale', 'fumo di legno', 'limone', 'burro'],
+  'ingredients_en': ['salmon', 'salt', 'wood smoke', 'lemon', 'butter'],
+  'places': ['Ondine Edinburgh', 'The Scran and Scallie Edinburgh', 'The Mussel Inn Edinburgh']},
+ {'name': 'Tablet',
+  'name_en': 'Scottish Tablet',
+  'description': 'Dolce scozzese di zucchero, latte condensato e burro, simile al fudge ma pi? granuloso e friabile. ? intensamente dolce, '
+                 'quindi va assaggiato in piccoli pezzi: la qualit? sta nella consistenza sabbiosa ma non secca. Il risultato migliore ? '
+                 'intenso ma preciso, senza diventare solo zucchero.',
+  'description_en': 'A Scottish sweet made from sugar, condensed milk and butter, similar to fudge but grainier and more brittle. It is '
+                    'intensely sweet, so it is best tasted in small pieces: quality lies in a sandy but not dry texture.',
+  'ingredients': ['zucchero', 'latte condensato', 'burro', 'vaniglia'],
+  'ingredients_en': ['sugar', 'condensed milk', 'butter', 'vanilla'],
+  'places': ['Fudge Kitchen Edinburgh', 'The Fudge House Edinburgh', 'Cranachan and Crowdie Edinburgh']}]
 
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'La città vive sotto il segno del castello e della rocca', 'title_en': 'The city lives under the sign of the castle and the rock', 'body': 'La presenza del castello sul rilievo domina la percezione urbana in quasi ogni punto centrale.', 'body_en': "The castle's presence on the height dominates urban perception from almost every central point."},

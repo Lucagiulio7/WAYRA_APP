@@ -58,6 +58,7 @@ ATTRACTIONS = [
  {'city': 'copenaghen', 'block_id': 152, 'zone': 'refshaleoen', 'category_level': 2, 'name': 'Urban Rigger view', 'name_en': 'Urban Rigger view', 'description': 'Punto interessante per leggere la sperimentazione abitativa contemporanea legata al porto.', 'description_en': 'An interesting point for reading contemporary housing experimentation tied to the harbour.', 'latitude': 55.6910, 'longitude': 12.6073, 'estimated_visit_time': 20, 'tags': ['architettura', 'porto', 'contemporaneo'], 'attraction_type': 'area contemporanea', 'ticket_url': None},
 ]
 
+
 FOOD_SPOTS = [
  {'city': 'copenaghen', 'zone': 'nyhavn_kongens_nytorv', 'category_level': 1, 'name': 'Vaffelbageren Nyhavn', 'name_en': 'Vaffelbageren Nyhavn', 'description': 'Gelato e cono in una delle passeggiate più classiche lungo il canale.', 'description_en': 'Ice cream and cones on one of the most classic canal side walks.', 'latitude': 55.6797, 'longitude': 12.5913, 'estimated_visit_time': 15, 'tags': ['gelato', 'snack', 'canale'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.3},
  {'city': 'copenaghen', 'zone': 'nyhavn_kongens_nytorv', 'category_level': 1, 'name': 'Andersen Bakery Nyhavn', 'name_en': 'Andersen Bakery Nyhavn', 'description': 'Bakery molto adatta a una pausa dolce o salata tra il canale e il centro elegante.', 'description_en': 'A bakery well suited for a sweet or savoury break between the canal and the elegant centre.', 'latitude': 55.6800, 'longitude': 12.5895, 'estimated_visit_time': 15, 'tags': ['bakery', 'snack', 'dolci'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.3},
@@ -132,17 +133,6 @@ FOOD_SPOTS = [
  {'city': 'copenaghen', 'zone': 'refshaleoen', 'category_level': 3, 'name': 'Alchemist area dining', 'name_en': 'Alchemist area dining', 'description': 'Voce simbolica di fascia altissima per la parte più sperimentale del waterfront.', 'description_en': "A symbolic ultra high end entry for the waterfront's most experimental side.", 'latitude': 55.6925, 'longitude': 12.6165, 'estimated_visit_time': 120, 'tags': ['alta cucina', 'sperimentale', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.7},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Smørrebrød', 'name_en': 'Smørrebrød', 'description': 'Tartine aperte di pane di segale scuro imburrato e ricoperte da combinazioni elaborate di aringhe, carne, uova ed erbe fresche.', 'description_en': 'Open sandwiches on buttered dark rye bread, topped with elaborate combinations of pickled herring, cold cuts, eggs and fresh herbs.', 'ingredients': ['pane di segale', 'burro', 'aringa o carne', 'erbe', 'verdure'], 'ingredients_en': ['rye bread', 'butter', 'herring or cold cuts', 'fresh herbs', 'vegetables'], 'places': ['Restaurant Schonnemann Copenhagen', 'Aamanns 1921 Copenhagen', 'Restaurant Kronborg Copenhagen']},
- {'name': 'Frikadeller', 'name_en': 'Frikadeller', 'description': 'Polpette piatte di maiale e vitello rosolate nel burro, servite con patate, salsa bruna e cavolo rosso, classico del pranzo casalingo danese.', 'description_en': 'Flat pork and veal patties pan-fried in butter, served with potatoes, brown gravy and red cabbage, a Danish home lunch classic.', 'ingredients': ['carne macinata', 'cipolla', 'uova', 'farina', 'burro'], 'ingredients_en': ['minced meat', 'onion', 'eggs', 'flour', 'butter'], 'places': ['Restaurant Puk Copenhagen', 'Frk Barners Kaelder Copenhagen', 'Restaurant Schonnemann Copenhagen']},
- {'name': 'Stegt flæsk', 'name_en': 'Stegt flæsk', 'description': 'Fette spesse di pancetta di maiale arrostite fino a renderle croccantissime, servite con patate lesse e salsa cremosa al prezzemolo.', 'description_en': 'Thick slices of pork belly roasted until ultra-crispy, served with boiled potatoes and a creamy parsley sauce.', 'ingredients': ['maiale', 'patate', 'prezzemolo', 'latte', 'burro'], 'ingredients_en': ['pork belly', 'potatoes', 'parsley', 'milk', 'butter'], 'places': ['Restaurant Puk Copenhagen', 'Frk Barners Kaelder Copenhagen', 'Rio Bravo Copenhagen']},
- {'name': 'Flæskestegssandwich', 'name_en': 'Flæskesteg Sandwich', 'description': 'Panino caldo con fette d\'arrosto di maiale e cotenna croccante, accompagnate da cavolo rosso, cetriolini sotto aceto e salsa al rafano.', 'description_en': 'A warm bun stuffed with slices of roast pork and crackling, topped with pickled red cabbage, gherkins and horseradish sauce.', 'ingredients': ['pane', 'maiale arrosto', 'cavolo rosso', 'cetrioli', 'salsa'], 'ingredients_en': ['bread roll', 'roast pork', 'red cabbage', 'pickles', 'sauce'], 'places': ['Isted Grill Copenhagen', 'Husmanns Vinstue Copenhagen', 'Meyers Deli Copenhagen']},
- {'name': 'Rød pølse', 'name_en': 'Red Danish Hot Dog', 'description': 'Iconica salsiccia danese rossa servita nel panino o nuda con senape, ketchup, remoulade, cipolle fritte e fresche, hot dog dei chioschi di strada.', 'description_en': 'The iconic bright red Danish sausage served in a bun or naked with mustard, ketchup, remoulade and crispy fried onions at street kiosks.', 'ingredients': ['würstel rosso', 'pane', 'senape', 'cipolla fritta', 'cetrioli'], 'ingredients_en': ['red sausage', 'hot dog bun', 'mustard', 'fried onion', 'pickles'], 'places': ['DOP Copenhagen', 'Johns Hotdog Deli Copenhagen', 'Harrys Place Copenhagen']},
- {'name': 'Æbleskiver', 'name_en': 'Æbleskiver', 'description': 'Piccole sfere soffici di pastella cotte in apposito stampo in ghisa, spolverate di zucchero a velo e servite con marmellata, dolce di Natale.', 'description_en': 'Small fluffy batter spheres cooked in a special cast-iron pan, dusted with icing sugar and served with jam, a Danish Christmas treat.', 'ingredients': ['farina', 'uova', 'latte', 'burro', 'zucchero'], 'ingredients_en': ['flour', 'eggs', 'milk', 'butter', 'sugar'], 'places': ['Hviids Vinstue Copenhagen', 'Restaurant Puk Copenhagen', 'Tivoli Food Hall Copenhagen']},
- {'name': 'Kanelsnegl', 'name_en': 'Cinnamon Swirl Pastry', 'description': 'Lumaca di pasta sfoglia danese arrotolata su un ricco ripieno di burro, zucchero e cannella, immancabile nelle vetrine delle bakery di Copenaghen.', 'description_en': 'A Danish puff pastry swirl wrapped around a rich filling of butter, sugar and cinnamon, a fixture in every Copenhagen bakery window.', 'ingredients': ['farina', 'burro', 'cannella', 'zucchero', 'lievito'], 'ingredients_en': ['flour', 'butter', 'cinnamon', 'sugar', 'yeast'], 'places': ['Sankt Peders Bageri Copenhagen', 'Juno the Bakery Copenhagen', 'Andersen Bakery Copenhagen']},
- {'name': 'Risalamande', 'name_en': 'Risalamande', 'description': 'Budino freddo di riso al latte mescolato con panna montata, vaniglia e mandorle tritate, servito sotto una salsa di ciliegie alla vigilia di Natale.', 'description_en': 'A cold rice pudding folded with whipped cream, vanilla and chopped almonds, served under a warm cherry sauce on Christmas Eve.', 'ingredients': ['riso', 'panna', 'mandorle', 'vaniglia', 'salsa di ciliegie'], 'ingredients_en': ['rice', 'cream', 'almonds', 'vanilla', 'cherry sauce'], 'places': ['Restaurant Puk Copenhagen', 'Frk Barners Kaelder Copenhagen', 'Hviids Vinstue Copenhagen']},
-]
-
 CULTURE_FACTS = [
  {'icon': '🚲', 'title': 'La bicicletta è una struttura quotidiana della città', 'title_en': "The bicycle is part of the city's daily structure", 'body': 'A Copenaghen la bici non è solo immagine urbana ma un vero sistema di mobilità quotidiano e diffuso.', 'body_en': 'In Copenhagen the bicycle is not just an urban image but a true and widespread daily mobility system.'},
  {'icon': '🌊', 'title': 'Il rapporto con l\'acqua definisce molti quartieri', 'title_en': 'The relationship with water defines many districts', 'body': 'Canali, porto e waterfront contemporanei modellano la percezione della città in modo continuo.', 'body_en': 'Canals, harbour spaces and contemporary waterfronts continuously shape the perception of the city.'},
@@ -157,3 +147,89 @@ CULTURE_FACTS = [
  {'icon': '🌱', 'title': 'La sostenibilità è spesso resa visibile nello spazio urbano', 'title_en': 'Sustainability is often made visible in urban space', 'body': 'Impianti come CopenHill mostrano come la città racconti pubblicamente alcune scelte ambientali.', 'body_en': 'Places such as CopenHill show how the city publicly narrates some of its environmental choices.'},
  {'icon': '🎶', 'title': 'La città alterna calma nordica e vita sociale molto attiva', 'title_en': 'The city alternates Nordic calm with very active social life', 'body': 'Quartieri residenziali ordinati convivono con mercati, locali, musica e spazi collettivi molto frequentati.', 'body_en': 'Orderly residential districts coexist with markets, venues, music and heavily used shared spaces.'},
 ]
+
+
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Smørrebrød',
+  'name_en': 'Smørrebrød Open Sandwich',
+  'description': 'Pane di segale imburrato e ricoperto con aringhe, salmone, roast beef, uova o verdure, composto con grande attenzione '
+                 'estetica. È il simbolo del pranzo danese: ordinato, sapido, stratificato e molto più raffinato di un semplice panino.',
+  'description_en': 'Buttered rye bread topped with herring, salmon, roast beef, eggs or vegetables, arranged with strong visual care. It '
+                    'is the symbol of Danish lunch: orderly, savoury, layered and far more refined than a simple sandwich.',
+  'ingredients': ['pane di segale', 'burro', 'aringa', 'salmone', 'uova'],
+  'ingredients_en': ['rye bread', 'butter', 'herring', 'salmon', 'eggs'],
+  'places': ['Aamanns 1921 Copenhagen', 'Schønnemann Copenhagen', 'Restaurant Kronborg Copenhagen']},
+ {'name': 'Frikadeller',
+  'name_en': 'Danish Meatballs',
+  'description': 'Polpette danesi di maiale o vitello, rosolate in padella e servite con patate, salsa e verdure. Sono cucina domestica '
+                 'rassicurante: morbide, dorate, delicate ma saporite, spesso associate a pranzi familiari e tavole tradizionali. La '
+                 'qualità si sente nella rosolatura uniforme e nella consistenza mai stopposa.',
+  'description_en': 'Danish meatballs made from pork or veal, pan-fried and served with potatoes, sauce and vegetables. They are '
+                    'reassuring home cooking: soft, golden, delicate yet savoury, often linked to family lunches and traditional tables. '
+                    'Quality shows in even browning and a texture that is never dry.',
+  'ingredients': ['maiale', 'vitello', 'uova', 'cipolla', 'patate'],
+  'ingredients_en': ['pork', 'veal', 'eggs', 'onion', 'potatoes'],
+  'places': ['Restaurant Puk Copenhagen', 'Frk. Barners Kælder Copenhagen', 'Restaurant Karla Copenhagen']},
+ {'name': 'Stegt flæsk',
+  'name_en': 'Crispy Pork with Parsley Sauce',
+  'description': 'Pancetta di maiale tagliata a fette e cotta fino a diventare croccante, servita con patate e salsa al prezzemolo. '
+                 'Considerato piatto nazionale danese, è semplice e diretto: grasso, croccantezza, cremosità e comfort nordico. La salsa '
+                 'deve alleggerire la pancetta, non nasconderne la croccantezza.',
+  'description_en': 'Slices of pork belly cooked until crisp, served with potatoes and parsley sauce. Considered Denmark’s national dish, '
+                    'it is simple and direct: fat, crunch, creaminess and Nordic comfort in one plate. The sauce should lighten the pork '
+                    'belly, not hide its crispness.',
+  'ingredients': ['pancetta di maiale', 'patate', 'prezzemolo', 'latte', 'burro'],
+  'ingredients_en': ['pork belly', 'potatoes', 'parsley', 'milk', 'butter'],
+  'places': ['Restaurant Puk Copenhagen', 'Frk. Barners Kælder Copenhagen', 'Restaurant Klubben Copenhagen']},
+ {'name': 'Flæskestegssandwich',
+  'name_en': 'Roast Pork Sandwich',
+  'description': 'Panino con arrosto di maiale, cotenna croccante, cavolo rosso, cetrioli sottaceto e salsa, amatissimo nei mercati e '
+                 'negli eventi. È ricco ma bilanciato: carne succosa, acidità, dolcezza e croccantezza nello stesso morso. È ideale quando '
+                 'il pane regge i succhi senza diventare molle.',
+  'description_en': 'A sandwich with roast pork, crisp crackling, red cabbage, pickled cucumbers and sauce, loved at markets and events. '
+                    'It is rich but balanced: juicy meat, acidity, sweetness and crunch in the same bite. It is best when the bread holds '
+                    'the juices without becoming soggy.',
+  'ingredients': ['arrosto di maiale', 'pane', 'cavolo rosso', 'cetrioli sottaceto', 'salsa'],
+  'ingredients_en': ['roast pork', 'bread', 'red cabbage', 'pickled cucumbers', 'sauce'],
+  'places': ['Isted Grill Copenhagen', 'Hallernes Smørrebrød Copenhagen', 'Tivoli Food Hall Copenhagen']},
+ {'name': 'Rød pølse',
+  'name_en': 'Red Danish Hot Dog',
+  'description': 'Wurstel rosso danese servito nel pane o da solo, con senape, ketchup, remoulade, cipolle crude e fritte, cetrioli '
+                 'sottaceto. È street food nostalgico e urbano, colorato, veloce, pieno di contrasti dolci, acidi e croccanti. La qualità '
+                 'sta nel ritmo degli ingredienti, non nella complessità.',
+  'description_en': 'A red Danish sausage served in a bun or alone, with mustard, ketchup, remoulade, raw and fried onions, and pickled '
+                    'cucumbers. It is nostalgic urban street food: colourful, fast and full of sweet, sour and crunchy contrasts.',
+  'ingredients': ['wurstel rosso', 'pane', 'remoulade', 'cipolle', 'cetrioli sottaceto'],
+  'ingredients_en': ['red sausage', 'bread', 'remoulade', 'onions', 'pickled cucumbers'],
+  'places': ['DØP Copenhagen', 'John’s Hotdog Deli Copenhagen', 'Harry’s Place Copenhagen']},
+ {'name': 'Æbleskiver',
+  'name_en': 'Æbleskiver Pancake Balls',
+  'description': 'Palline dolci simili a piccole frittelle tonde, servite con zucchero a velo e confettura, soprattutto nel periodo '
+                 'natalizio. Devono essere dorate fuori e soffici dentro, più legate al rituale domestico che alla pasticceria elegante. '
+                 'La qualità si riconosce dalla leggerezza dell’impasto e dalla cottura uniforme.',
+  'description_en': 'Sweet balls similar to small round pancakes, served with icing sugar and jam, especially during the Christmas season. '
+                    'They should be golden outside and soft inside, tied more to home ritual than elegant pastry. Quality is recognised in '
+                    'the lightness of the batter and even cooking.',
+  'ingredients': ['farina', 'uova', 'latte', 'zucchero', 'confettura'],
+  'ingredients_en': ['flour', 'eggs', 'milk', 'sugar', 'jam'],
+  'places': ['Sankt Peders Bageri Copenhagen', 'Andersen Bakery Copenhagen', 'Conditori La Glace Copenhagen']},
+ {'name': 'Kanelsnegl',
+  'name_en': 'Cinnamon Roll',
+  'description': 'Girella alla cannella di pasta lievitata, glassata o semplice, fondamentale nella cultura danese del forno e della pausa '
+                 'caffè. A Copenaghen può essere burrosa, speziata, caramellata ai bordi, perfetta per capire il lato quotidiano della '
+                 'città.',
+  'description_en': 'A cinnamon swirl made from yeasted dough, glazed or plain, central to Danish bakery culture and coffee breaks. In '
+                    'Copenhagen it can be buttery, spiced and caramelised at the edges, perfect for understanding the city’s everyday '
+                    'side.',
+  'ingredients': ['farina', 'burro', 'cannella', 'zucchero', 'lievito'],
+  'ingredients_en': ['flour', 'butter', 'cinnamon', 'sugar', 'yeast'],
+  'places': ['Sankt Peders Bageri Copenhagen', 'Juno the Bakery Copenhagen', 'Andersen Bakery Copenhagen']},
+ {'name': 'Risalamande',
+  'name_en': 'Risalamande Rice Dessert',
+  'description': 'Dessert natalizio di riso al latte mescolato con panna montata, mandorle e vaniglia, servito con salsa calda di '
+                 'ciliegie. È morbido, profumato e rituale: spesso nasconde una mandorla intera che trasforma il dolce in gioco familiare.',
+  'description_en': 'A Christmas dessert of rice pudding mixed with whipped cream, almonds and vanilla, served with warm cherry sauce. It '
+                    'is soft, fragrant and ritualistic: often hiding one whole almond that turns the dessert into a family game.',
+  'ingredients': ['riso', 'latte', 'panna', 'mandorle', 'ciliegie'],
+  'ingredients_en': ['rice', 'milk', 'cream', 'almonds', 'cherries'],
+  'places': ['Restaurant Puk Copenhagen', 'Frk. Barners Kælder Copenhagen', 'Conditori La Glace Copenhagen']}]

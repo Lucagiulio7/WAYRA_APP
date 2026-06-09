@@ -2,6 +2,7 @@ import { useRef, useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/constants/api";
 import { Itinerary, ExperienceLevel } from "@/types";
+import { track } from "@/services/AnalyticsService";
 
 interface GenerateParams {
   city: string;
@@ -130,10 +131,32 @@ export function useItinerary(): UseItineraryReturn {
 
   const generate = useCallback(
     async (params: GenerateParams): Promise<Itinerary | null> => {
+      track("trip_created", {
+        city: params.city,
+        num_days: params.num_days,
+        level: String(params.level),
+        max_walk_km: params.max_walk_km ?? 5,
+      });
+
       try {
-        return await mutateAsyncRef.current(params);
-      } catch {
-        // l'errore è già in mutation.error, non serve rilanciare
+        const result = await mutateAsyncRef.current(params);
+        track("itinerary_generated", {
+          city: result.city,
+          requested_num_days: params.num_days,
+          generated_num_days: result.days.length,
+          level: Array.isArray(result.level) ? "mix" : String(result.level),
+          max_walk_km: params.max_walk_km ?? 5,
+          stops_count: result.days.reduce((sum, day) => sum + day.stops.length, 0),
+        });
+        return result;
+      } catch (error: any) {
+        track("trip_generation_failed", {
+          city: params.city,
+          num_days: params.num_days,
+          level: String(params.level),
+          max_walk_km: params.max_walk_km ?? 5,
+          error: error?.message ?? "unknown",
+        });
         return null;
       }
     },

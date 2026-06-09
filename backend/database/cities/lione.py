@@ -140,16 +140,86 @@ FOOD_SPOTS = [
  {'city': 'lione', 'zone': 'tete_dor_cite_internationale', 'category_level': 3, 'name': 'Maison Clovis', 'name_en': 'Maison Clovis', 'description': 'Alta cucina con radici lionesi e aperture internazionali, in un contesto elegante nel quartiere residenziale del sesto.', 'description_en': 'High cuisine with Lyon roots and international openings, in an elegant setting in the residential sixth arrondissement.', 'latitude': 45.7774, 'longitude': 4.8532, 'estimated_visit_time': 120, 'tags': ['alta cucina', 'elegante', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.5},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Quenelle de brochet', 'name_en': 'Pike Quenelle', 'description': 'Morbida quenelle di luccio lavorata con una base leggera di farina, uova e burro, cotta al forno e servita con salsa Nantua.', 'description_en': 'A soft pike quenelle made with a light base of flour, eggs and butter, baked and served with Nantua sauce.', 'ingredients': ['luccio', 'uova', 'panna', 'burro', 'salsa Nantua', 'gamberi di fiume'], 'ingredients_en': ['pike', 'eggs', 'cream', 'butter', 'Nantua sauce', 'crayfish'], 'places': ['Cafe Comptoir Abel Lyon', 'Le Garet Lyon', 'Daniel et Denise Lyon']},
- {'name': 'Salade Lyonnaise', 'name_en': 'Lyonnaise Salad', 'description': 'Insalata di scarola riccia con lardons fritti croccanti, crostini e un uovo in camicia, condita con vinaigrette calda.', 'description_en': 'Curly frisée salad with crispy fried lardons, croutons and a poached egg, dressed with warm vinaigrette.', 'ingredients': ['scarola riccia', 'lardons', 'uova', 'crostini', 'aceto', 'senape'], 'ingredients_en': ['curly frisée', 'lardons', 'eggs', 'croutons', 'vinegar', 'mustard'], 'places': ['Daniel et Denise Lyon', 'Le Bouchon des Filles Lyon', 'Le Garet Lyon']},
- {'name': 'Grattons', 'name_en': 'Grattons', 'description': 'Ciccioli di maiale croccanti e dorati, antipasto tipico dei bouchons lyonnais servito come stuzzichino con il vino.', 'description_en': 'Crispy golden pork cracklings, a typical appetiser of the bouchons lyonnais served as a snack with wine.', 'ingredients': ['pancetta di maiale', 'sale', 'pepe', 'strutto'], 'ingredients_en': ['pork belly', 'salt', 'pepper', 'lard'], 'places': ['Les Halles de Lyon Paul Bocuse Lyon', 'Daniel et Denise Lyon', 'Le Garet Lyon']},
- {'name': 'Cervelle de canut', 'name_en': 'Cervelle de Canut', 'description': 'Formaggio fresco di capra o mucca aromatizzato con erbe, scalogno, aglio, olio e aceto: il piatto dei tessitori della Croix-Rousse.', 'description_en': 'Fresh goat or cow cheese flavoured with herbs, shallot, garlic, oil and vinegar: the dish of the Croix-Rousse weavers.', 'ingredients': ['fromage blanc', 'erba cipollina', 'scalogno', 'aglio', 'olio d\'oliva', 'aceto bianco'], 'ingredients_en': ['fromage blanc', 'chives', 'shallot', 'garlic', 'olive oil', 'white vinegar'], 'places': ['Le Bouchon des Filles Lyon', 'Daniel et Denise Lyon', 'Bouchon Tupin Lyon']},
- {'name': 'Tarte à la praline', 'name_en': 'Pink Praline Tart', 'description': 'Crostata con crema alle praline rose, il dolce più iconico di Lione dal colore intenso e dal sapore caramellato molto particolare.', 'description_en': 'A shortcrust tart with pink praline cream, Lyon\'s most iconic dessert with its intense colour and very distinctive caramelised flavour.', 'ingredients': ['praline rosa', 'panna', 'burro', 'pasta frolla', 'zucchero'], 'ingredients_en': ['pink pralines', 'cream', 'butter', 'shortcrust pastry', 'sugar'], 'places': ['Boulangerie du Palais Lyon', 'Sebastien Bouillet Lyon', 'Jocteur Lyon']},
- {'name': 'Andouillette à la lyonnaise', 'name_en': 'Andouillette Lyonnaise', 'description': 'Salsiccia di trippa con sapore intenso e rustico, grigliata e servita con senape forte e cipolle, piatto forte dei bouchons.', 'description_en': 'A tripe sausage with an intense and rustic flavour, grilled and served with strong mustard and onions, a staple of the bouchons.', 'ingredients': ['trippa di maiale', 'cipolle', 'senape di Digione', 'aceto di vino', 'erbe aromatiche'], 'ingredients_en': ['pork tripe', 'onions', 'Dijon mustard', 'wine vinegar', 'aromatic herbs'], 'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
- {'name': 'Gratin de cardons à la moelle', 'name_en': 'Cardoon Gratin with Bone Marrow', 'description': 'Il gratin di cardi con midollo di bue è il piatto invernale per eccellenza della cucina lionese, servito tradizionalmente a Natale.', 'description_en': 'Cardoon gratin with beef bone marrow is the quintessential winter dish of Lyon cuisine, traditionally served at Christmas.', 'ingredients': ['cardi', 'midollo di bue', 'parmigiano', 'burro', 'panna', 'limone'], 'ingredients_en': ['cardoons', 'beef bone marrow', 'parmesan', 'butter', 'cream', 'lemon'], 'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
- {'name': 'Beaujolais Nouveau', 'name_en': 'Beaujolais Nouveau', 'description': 'Il vino novello del Beaujolais, rilasciato ogni terzo giovedì di novembre, è parte essenziale della cultura enogastronomica lionese e celebrato in tutta la città.', 'description_en': 'The Beaujolais Nouveau wine, released every third Thursday of November, is an essential part of Lyon\'s wine and food culture and celebrated throughout the city.', 'ingredients': ['uva Gamay', 'fermentazione carbonica'], 'ingredients_en': ['Gamay grapes', 'carbonic maceration'], 'places': ['Les Halles de Lyon Paul Bocuse Lyon', 'Le Verre et L Assiette Lyon', 'La Cave des Voyageurs Lyon']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Quenelle de brochet',
+  'name_en': 'Pike Quenelle',
+  'description': 'Preparazione soffice di luccio, uova, burro e panade, modellata a forma ovale e servita con salsa Nantua ai crostacei. ? '
+                 'uno dei simboli dei bouchon lionesi: delicata ma ricca, ariosa al centro, capace di trasformare un pesce minuto in '
+                 'piatto elegante.',
+  'description_en': 'A soft preparation of pike, eggs, butter and panade, shaped into an oval and served with crayfish-based Nantua sauce. '
+                    'It is one of the symbols of Lyon bouchons: delicate yet rich, airy in the centre and able to turn a modest fish into '
+                    'an elegant dish.',
+  'ingredients': ['luccio', 'uova', 'burro', 'farina', 'salsa Nantua'],
+  'ingredients_en': ['pike', 'eggs', 'butter', 'flour', 'Nantua sauce'],
+  'places': ['Cafe Comptoir Abel Lyon', 'Le Garet Lyon', 'Daniel et Denise Lyon']},
+ {'name': 'Salade Lyonnaise',
+  'name_en': 'Lyonnaise Salad',
+  'description': 'Insalata tiepida con lattuga, pancetta croccante, crostini e uovo in camicia, condita con vinaigrette decisa. Sembra '
+                 'semplice ma ? molto precisa: il tuorlo deve legare gli ingredienti, mentre pancetta e pane danno sapidit? e struttura.',
+  'description_en': 'A warm salad with lettuce, crisp bacon, croutons and poached egg, dressed with a sharp vinaigrette. It seems simple '
+                    'but is very precise: the yolk should bind the ingredients, while bacon and bread provide savouriness and structure.',
+  'ingredients': ['lattuga', 'pancetta', 'uovo', 'crostini', 'vinaigrette'],
+  'ingredients_en': ['lettuce', 'bacon', 'egg', 'croutons', 'vinaigrette'],
+  'places': ['Daniel et Denise Lyon', 'Le Bouchon des Filles Lyon', 'Le Garet Lyon']},
+ {'name': 'Grattons',
+  'name_en': 'Pork Cracklings',
+  'description': 'Piccoli pezzi di maiale cotti nel proprio grasso fino a diventare dorati, croccanti e intensamente saporiti. Nei bouchon '
+                 'sono snack e memoria popolare insieme: rustici, salati, perfetti con vino, ma migliori quando restano friabili e non '
+                 'unti.',
+  'description_en': 'Small pieces of pork cooked in their own fat until golden, crisp and intensely savoury. In bouchons they are both '
+                    'snack and popular memory: rustic, salty and perfect with wine, but best when crumbly rather than greasy.',
+  'ingredients': ['maiale', 'grasso', 'sale', 'pepe'],
+  'ingredients_en': ['pork', 'fat', 'salt', 'pepper'],
+  'places': ['Les Halles de Lyon Paul Bocuse Lyon', 'Daniel et Denise Lyon', 'Le Garet Lyon']},
+ {'name': 'Cervelle de canut',
+  'name_en': 'Cervelle de Canut Cheese Spread',
+  'description': 'Crema fresca di formaggio bianco, erbe, scalogno, aglio, aceto e olio, servita con pane o patate. Il nome ironico '
+                 'richiama i tessitori lionesi: ? un piatto povero ma brillante, acidulo, erbaceo e molto conviviale. La qualit? migliore '
+                 '? fresca, cremosa e mai troppo pungente.',
+  'description_en': 'A fresh spread of fromage blanc, herbs, shallot, garlic, vinegar and oil, served with bread or potatoes. Its ironic '
+                    'name refers to Lyon?s silk workers: it is humble but bright, tangy, herbaceous and very convivial.',
+  'ingredients': ['formaggio bianco', 'erbe', 'scalogno', 'aglio', 'aceto'],
+  'ingredients_en': ['fromage blanc', 'herbs', 'shallot', 'garlic', 'vinegar'],
+  'places': ['Le Bouchon des Filles Lyon', 'Daniel et Denise Lyon', 'Bouchon Tupin Lyon']},
+ {'name': 'Tarte ? la praline',
+  'name_en': 'Praline Tart',
+  'description': 'Crostata dolce con guscio friabile e ripieno rosa di praline lionesi, mandorle caramellate e panna. ? scenografica ma '
+                 'non deve essere solo zucchero: la qualit? sta nell?equilibrio tra croccantezza, crema densa e aroma tostato della '
+                 'mandorla.',
+  'description_en': 'A sweet tart with a crumbly shell and a pink filling of Lyon pralines, caramelised almonds and cream. It is '
+                    'theatrical but should not be only sugar: quality lies in the balance of crunch, dense cream and toasted almond aroma.',
+  'ingredients': ['pasta frolla', 'praline rosa', 'mandorle', 'panna', 'zucchero'],
+  'ingredients_en': ['shortcrust pastry', 'pink pralines', 'almonds', 'cream', 'sugar'],
+  'places': ['Boulangerie du Palais Lyon', 'Sebastien Bouillet Lyon', 'Jocteur Lyon']},
+ {'name': 'Andouillette ? la lyonnaise',
+  'name_en': 'Lyonnaise Andouillette',
+  'description': 'Salsiccia di trippa e frattaglie di maiale, dal profumo deciso, spesso cotta alla griglia o in salsa di senape. ? un '
+                 'piatto per palati curiosi: intenso, tradizionale, divisivo, ma molto rappresentativo della cucina carnivora lionese.',
+  'description_en': 'A sausage of tripe and pork offal, with a strong aroma, often grilled or cooked in mustard sauce. It is a dish for '
+                    'curious eaters: intense, traditional and divisive, but highly representative of Lyon?s meat-centred cooking.',
+  'ingredients': ['trippa', 'maiale', 'senape', 'vino bianco', 'spezie'],
+  'ingredients_en': ['tripe', 'pork', 'mustard', 'white wine', 'spices'],
+  'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
+ {'name': 'Gratin de cardons ? la moelle',
+  'name_en': 'Cardoon and Bone Marrow Gratin',
+  'description': 'Cardi cotti e gratinati con salsa cremosa e midollo, piatto festivo e profondamente lionese. Il cardo porta una nota '
+                 'vegetale leggermente amara, mentre il midollo d? ricchezza: l?equilibrio deve restare elegante, non semplicemente '
+                 'pesante. Deve conservare il carattere vegetale del cardo anche sotto la gratinatura.',
+  'description_en': 'Cardoons cooked and baked with a creamy sauce and bone marrow, a festive and deeply Lyonnais dish. The cardoon brings '
+                    'a slightly bitter vegetal note, while marrow adds richness: the balance should remain elegant, not merely heavy.',
+  'ingredients': ['cardi', 'midollo', 'panna', 'formaggio', 'burro'],
+  'ingredients_en': ['cardoons', 'bone marrow', 'cream', 'cheese', 'butter'],
+  'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
+ {'name': 'Beaujolais Nouveau',
+  'name_en': 'Beaujolais Nouveau',
+  'description': 'Vino rosso giovane prodotto nella regione vicina del Beaujolais, celebrato ogni novembre con un forte rito conviviale. ? '
+                 'leggero, fruttato e immediato: pi? che un vino da meditazione, racconta festa, territorio e cultura dei bouchon.',
+  'description_en': 'A young red wine produced in the nearby Beaujolais region, celebrated every November through a strong convivial '
+                    'ritual. It is light, fruity and immediate: more than a contemplative wine, it expresses celebration, territory and '
+                    'bouchon culture.',
+  'ingredients': ['uva gamay', 'lieviti', 'mosto'],
+  'ingredients_en': ['gamay grapes', 'yeasts', 'must'],
+  'places': ['Les Halles de Lyon Paul Bocuse Lyon', 'Le Verre et L Assiette Lyon', 'La Cave des Voyageurs Lyon']}]
 
 CULTURE_FACTS = [
  {'icon': '🍽️', 'title': 'Capitale gastronomica mondiale', 'title_en': 'World gastronomic capital', 'body': 'Lione è universalmente riconosciuta come la capitale mondiale della gastronomia, grazie a Paul Bocuse e alla straordinaria tradizione dei bouchons e delle mères lyonnaises.', 'body_en': 'Lyon is universally recognised as the world gastronomic capital, thanks to Paul Bocuse and the extraordinary tradition of bouchons and mères lyonnaises.'},

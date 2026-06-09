@@ -40,6 +40,8 @@ import { useSavedItineraries } from "@/hooks/useSavedItineraries";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cityLabel } from "@/utils/cityLabels";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { track } from "@/services/AnalyticsService";
+import { languageOption } from "@/i18n";
 
 // LayoutAnimation ÃƒÂ¨ disabilitato di default su Android Ã¢â‚¬â€ abilitiamolo per la tab bar
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -171,26 +173,47 @@ const VIBE_MAP: Record<string, { emoji: string; color: string; labelIt: string; 
 };
 
 function normalizeVibeTag(tag: string): string {
-  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[_-]+/g, " ");
+}
+
+function vibeMeta(tag: string): { emoji: string; color: string; labelIt: string; labelEn: string } {
+  const cleaned = tag.replace(/[_-]+/g, " ").trim();
+  if (normalizeVibeTag(tag) === "universita") {
+    return { emoji: "U", color: "#4f46e5", labelIt: "Università", labelEn: "University" };
+  }
+  return VIBE_MAP[normalizeVibeTag(tag)] ?? {
+    emoji: "#",
+    color: "#888888",
+    labelIt: cleaned || tag,
+    labelEn: cleaned || tag,
+  };
 }
 
 function vibeIconName(tag: string): keyof typeof Ionicons.glyphMap {
   const key = normalizeVibeTag(tag);
-  if (["centro", "centrale", "attrazioni", "turistico"].includes(key)) return "location-outline";
-  if (["vita notturna", "locali"].includes(key)) return "moon-outline";
+  if (["centro", "centro storico", "centrale", "attrazioni", "turistico"].includes(key)) return "location-outline";
+  if (["vita notturna", "movida", "locali"].includes(key)) return "moon-outline";
   if (["metro", "trasporti", "stazione"].includes(key)) return "train-outline";
   if (["tranquillo", "famiglie", "sicuro"].includes(key)) return "shield-checkmark-outline";
+  if (["residenziale"].includes(key)) return "home-outline";
+  if (["verde", "parco", "parchi"].includes(key)) return "leaf-outline";
   if (["budget"].includes(key)) return "wallet-outline";
-  if (["lusso"].includes(key)) return "diamond-outline";
-  if (["culturale", "arte"].includes(key)) return "color-palette-outline";
+  if (["lusso", "elegante"].includes(key)) return "diamond-outline";
+  if (["culturale", "arte", "storico"].includes(key)) return "color-palette-outline";
   if (["mare", "spiaggia", "porto"].includes(key)) return "water-outline";
-  if (["mercati", "gastronomia"].includes(key)) return "restaurant-outline";
-  if (["shopping"].includes(key)) return "bag-outline";
-  if (["universita"].includes(key)) return "school-outline";
+  if (["mercati", "gastronomia", "cibo"].includes(key)) return "restaurant-outline";
+  if (["shopping", "commercio"].includes(key)) return "bag-outline";
+  if (["universita", "studenti"].includes(key)) return "school-outline";
   if (["panoramica", "vista panoramica", "collina"].includes(key)) return "trail-sign-outline";
   if (["romantico"].includes(key)) return "heart-outline";
   if (["autentico"].includes(key)) return "sparkles-outline";
+  if (["business"].includes(key)) return "business-outline";
   return "pricetag-outline";
+}
+
+function safeVibeIconName(tag: string): keyof typeof Ionicons.glyphMap {
+  const icon = vibeIconName(tag);
+  return Ionicons.glyphMap[icon] ? icon : "pricetag-outline";
 }
 
 function neighborhoodProsCons(tags: string[] | undefined, lang: string): { pros: string[]; cons: string[] } {
@@ -291,14 +314,23 @@ function displayStopName(stop: Stop, lang: string): string {
 }
 
 function displayFoodName(food: Food, lang: string): string {
+  if (lang === "fr") return food.name_fr ?? food.name_en ?? food.name;
   return lang === "en" && food.name_en ? food.name_en : food.name;
 }
 
 function displayFoodDescription(food: Food, lang: string): string {
+  if (lang === "fr") return food.description_fr ?? food.description_en ?? food.description;
   return lang === "en" && food.description_en ? food.description_en : food.description;
 }
 
-function displayRestaurantName(restaurant: { name: string; name_en?: string | null }, lang: string): string {
+function displayFoodIngredients(food: Food, lang: string): string[] {
+  if (lang === "fr") return food.ingredients_fr?.length ? food.ingredients_fr : food.ingredients_en?.length ? food.ingredients_en : food.ingredients ?? [];
+  if (lang === "en") return food.ingredients_en?.length ? food.ingredients_en : food.ingredients ?? [];
+  return food.ingredients ?? [];
+}
+
+function displayRestaurantName(restaurant: { name: string; name_en?: string | null; name_fr?: string | null }, lang: string): string {
+  if (lang === "fr") return restaurant.name_fr ?? restaurant.name_en ?? restaurant.name;
   return lang === "en" && restaurant.name_en ? restaurant.name_en : restaurant.name;
 }
 
@@ -447,9 +479,8 @@ function buildItineraryPdfHtml({
     <article class="info-card">
       <h3>${htmlEscape(displayFoodName(food, lang))}</h3>
       <p>${htmlEscape(displayFoodDescription(food, lang))}</p>
-      ${(lang === "en" && food.ingredients_en?.length ? food.ingredients_en : food.ingredients ?? [])
-        .map((ingredient) => `<em>${htmlEscape(ingredient)}</em>`).join("")}
-      ${(food.places ?? []).map((place) => `<p class="tip">${htmlEscape(place.name)}${place.maps_link ? ` Ã‚Â· <a href="${htmlEscape(place.maps_link)}">Maps</a>` : ""}</p>`).join("")}
+      ${displayFoodIngredients(food, lang).map((ingredient) => `<em>${htmlEscape(ingredient)}</em>`).join("")}
+      ${(food.places ?? []).map((place) => `<p class="tip">${htmlEscape(displayRestaurantName(place, lang))}${place.maps_link ? ` Ã‚Â· <a href="${htmlEscape(place.maps_link)}">Maps</a>` : ""}</p>`).join("")}
     </article>
   `).join("");
 
@@ -881,6 +912,9 @@ function foodSpotToRestaurant(a: BuilderAttraction, mealType: MealType): Restaur
     latitude: a.latitude,
     longitude: a.longitude,
     maps_link: `https://www.google.com/maps/search/?api=1&query=${a.latitude},${a.longitude}`,
+    recommended_dishes: a.recommended_dishes,
+    recommended_dishes_en: a.recommended_dishes_en,
+    has_curated_dish_match: a.has_curated_dish_match,
   };
 }
 
@@ -925,6 +959,7 @@ export default function ItineraryScreen() {
   const router = useRouter();
   const { lang, t, toggle } = useLanguage();
   const { colors } = useTheme();
+  const currentLanguage = languageOption(lang);
   const [tab, setTabRaw] = useState<Tab>("itinerary");
 
   // Wrapper con animazione spring sulla tab bar:
@@ -1094,6 +1129,30 @@ export default function ItineraryScreen() {
   const [dayCardDragging, setDayCardDragging] = useState(false);
 
   const savedId = itinerary ? findSavedId(itinerary) : null;
+  const viewedItineraryKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!itinerary) return;
+    const key = `${itinerary.city}|${itinerary.num_days}|${Array.isArray(itinerary.level) ? "mix" : itinerary.level}`;
+    if (viewedItineraryKeyRef.current === key) return;
+    viewedItineraryKeyRef.current = key;
+    track("trip_viewed", {
+      city: itinerary.city,
+      num_days: itinerary.num_days,
+      level: Array.isArray(itinerary.level) ? "mix" : String(itinerary.level),
+      max_walk_km: itinerary.max_walk_km ?? null,
+      days_count: itinerary.days.length,
+      stops_count: itinerary.days.reduce((sum, day) => sum + day.stops.length, 0),
+    });
+  }, [itinerary]);
+
+  useEffect(() => {
+    if (!itinerary) return;
+    track(tab === "food" ? "restaurant_or_food_viewed" : tab === "neighborhoods" ? "accommodation_area_viewed" : "itinerary_tab_viewed", {
+      city: itinerary.city,
+      tab,
+    });
+  }, [itinerary?.city, tab]);
 
   useEffect(() => {
     AsyncStorage.getItem(ITINERARY_GUIDE_KEY).then((val) => {
@@ -1159,6 +1218,17 @@ export default function ItineraryScreen() {
     setMapMode("food");
     setMapDayNumber(day.day);
     setMapVisible(true);
+    track("map_opened", {
+      city: itinerary.city,
+      mode: "food",
+      day: day.day,
+      has_user_origin: Boolean(origin),
+    });
+    track("restaurant_or_food_viewed", {
+      city: itinerary.city,
+      source: "where_should_i_eat",
+      day: day.day,
+    });
   }, [itinerary, isOriginInDestination, lang]);
 
   const handleSelectFoodFromMap = useCallback((foodSpotId: number) => {
@@ -1168,6 +1238,15 @@ export default function ItineraryScreen() {
 
     const { dayIndex, mealType } = foodSelection;
     const selectedRestaurant = foodSpotToRestaurant(spot, mealType);
+    const day = itinerary.days[dayIndex];
+    const alreadySelected = Boolean(day?.restaurants?.some((r) => r.id === foodSpotId));
+    track(alreadySelected ? "restaurant_removed" : "restaurant_selected", {
+      city: itinerary.city,
+      day: day?.day ?? null,
+      restaurant_id: foodSpotId,
+      restaurant_name: spot.name,
+      curated_dish_match: Boolean((spot as any).has_curated_dish_match),
+    });
     setItinerary((prev) => {
       if (!prev) return prev;
       return {
@@ -1189,6 +1268,12 @@ export default function ItineraryScreen() {
   }, [itinerary, foodSelection, enrichedFoodSpots]);
 
   const handleRemoveRestaurant = useCallback((dayIndex: number, restaurantId: number) => {
+    track("restaurant_removed", {
+      city: itinerary?.city,
+      day: itinerary?.days[dayIndex]?.day ?? null,
+      restaurant_id: restaurantId,
+      source: "selected_list",
+    });
     setItinerary((prev) => {
       if (!prev) return prev;
       return {
@@ -1200,7 +1285,7 @@ export default function ItineraryScreen() {
         ),
       };
     });
-  }, []);
+  }, [itinerary?.city, itinerary?.days]);
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Aggiungi attrazione non assegnata al giorno Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -1344,10 +1429,16 @@ export default function ItineraryScreen() {
     setSaveChoiceVisible(false);
     const html = buildItineraryPdfHtml({ itinerary, neighborhoods, cityInfo, lang });
     setPdfPreviewHtml(html);
+    track("pdf_preview_opened", {
+      city: itinerary.city,
+      num_days: itinerary.num_days,
+      level: Array.isArray(itinerary.level) ? "mix" : String(itinerary.level),
+    });
   };
 
   const handlePrintPdfPreview = async () => {
     if (!pdfPreviewHtml) return;
+    track("pdf_export_started", { city: itinerary?.city, platform: Platform.OS });
 
     if (Platform.OS !== "web") {
       try {
@@ -1390,6 +1481,11 @@ export default function ItineraryScreen() {
     if (!itinerary) return;
     if (savedId) await remove(savedId);
     else await save(itinerary);
+    track(savedId ? "trip_unsaved" : "trip_saved", {
+      city: itinerary.city,
+      num_days: itinerary.num_days,
+      level: Array.isArray(itinerary.level) ? "mix" : String(itinerary.level),
+    });
     setSaveChoiceVisible(false);
   };
 
@@ -1397,6 +1493,19 @@ export default function ItineraryScreen() {
     if (!itinerary) return;
     setSaveChoiceVisible(true);
   };
+
+  const handleToggleDay = useCallback((dayNumber: number) => {
+    setOpenDay((current) => {
+      const next = current === dayNumber ? null : dayNumber;
+      if (next !== null) {
+        track("itinerary_day_viewed", {
+          city: itinerary?.city,
+          day: dayNumber,
+        });
+      }
+      return next;
+    });
+  }, [itinerary?.city]);
 
   if (itineraryLoading) {
     return (
@@ -1461,7 +1570,7 @@ export default function ItineraryScreen() {
           <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggle} activeOpacity={0.7} style={[styles.flagBtn, { backgroundColor: colors.card2 }]}>
-          <CountryFlag isoCode={lang === "it" ? "it" : "gb"} size={14} />
+          <CountryFlag isoCode={currentLanguage.flagIso} size={14} />
         </TouchableOpacity>
       </View>
 
@@ -1493,6 +1602,12 @@ export default function ItineraryScreen() {
                         setFoodSelection(null);
                         setMapDayNumber(itinerary.days[0]?.day ?? 1);
                         setMapVisible(true);
+                        track("map_opened", {
+                          city: itinerary.city,
+                          mode: "itinerary",
+                          day: itinerary.days[0]?.day ?? null,
+                          source: "global_button",
+                        });
                       }}
                       activeOpacity={0.8}
                     >
@@ -1533,7 +1648,7 @@ export default function ItineraryScreen() {
                 <DayCard
                   day={day}
                   open={openDay === day.day}
-                  onToggleOpen={() => setOpenDay((current) => current === day.day ? null : day.day)}
+                  onToggleOpen={() => handleToggleDay(day.day)}
                   onOptimizeDay={() => handleOptimizeDayOrder(i)}
                   onReorder={(newStops) => handleReorderStops(i, newStops)}
                   onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
@@ -1560,7 +1675,13 @@ export default function ItineraryScreen() {
             ) : (
               <>
                 <TouchableOpacity
-                  onPress={() => setNeighborhoodMapVisible(true)}
+                  onPress={() => {
+                    setNeighborhoodMapVisible(true);
+                    track("map_opened", {
+                      city: itinerary.city,
+                      mode: "neighborhoods",
+                    });
+                  }}
                   activeOpacity={0.82}
                   style={[styles.neighborhoodMapBtn, { backgroundColor: colors.card2, borderColor: colors.accentGold + "66" }]}
                 >
@@ -1585,7 +1706,20 @@ export default function ItineraryScreen() {
                 key={food.id}
                 food={food}
                 expanded={openFoodId === food.id}
-                onToggle={() => setOpenFoodId((current) => current === food.id ? null : food.id)}
+                onToggle={() => {
+                  setOpenFoodId((current) => {
+                    const next = current === food.id ? null : food.id;
+                    if (next !== null) {
+                      track("restaurant_or_food_viewed", {
+                        city: itinerary.city,
+                        food_id: food.id,
+                        food_name: food.name,
+                        source: "food_tab",
+                      });
+                    }
+                    return next;
+                  });
+                }}
               />
             ))}
           </>
@@ -2076,14 +2210,14 @@ function NeighborhoodCard({ neighborhood: n, lang }: { neighborhood: Neighborhoo
       {n.vibe_tags && n.vibe_tags.length > 0 && (
         <View style={styles.vibeRow}>
           {n.vibe_tags.map((tag) => {
-            const vibe = VIBE_MAP[normalizeVibeTag(tag)] ?? { emoji: "??", color: "#888", labelIt: tag, labelEn: tag };
+            const vibe = vibeMeta(tag);
             const label = lang === "en" ? vibe.labelEn : vibe.labelIt;
             return (
               <View
                 key={tag}
                 style={[styles.vibeChip, { borderColor: vibe.color + "55", backgroundColor: vibe.color + "18" }]}
               >
-                <Ionicons name={vibeIconName(tag)} size={13} color={vibe.color} />
+                <Ionicons name={safeVibeIconName(tag)} size={13} color={vibe.color} />
                 <Text style={[styles.vibeLabel, { color: vibe.color }]}>{label}</Text>
               </View>
             );

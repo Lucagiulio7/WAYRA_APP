@@ -126,16 +126,88 @@ FOOD_SPOTS = [
     {'city': 'londra', 'zone': 'camden', 'category_level': 3, 'name': 'York and Albany', 'name_en': 'York and Albany', 'description': 'Brasserie più ordinata e adatta a una cena più curata vicino a Regents Park.', 'description_en': 'A tidier brasserie suitable for a more polished dinner near Regents Park.', 'latitude': 51.5356, 'longitude': -0.1431, 'estimated_visit_time': 90, 'tags': ['gastronomia'], 'food_type': 'brasserie', 'meal_type': 'dinner', 'rating': 4.2},
 ]
 
-FOODS_BY_CITY = [
-    {'name': 'Fish and Chips', 'name_en': 'Fish and Chips', 'description': 'Il piatto nazionale britannico: merluzzo in pastella di birra fritto croccante con chips spesse, servito con mushy peas e salsa tartara.', 'description_en': 'The classic British national dish: cod in crisp beer batter with thick-cut chips, served with mushy peas and tartare sauce.', 'ingredients': ['merluzzo', 'pastella di birra', 'patate', 'piselli', 'aceto di malto'], 'ingredients_en': ['cod', 'beer batter', 'potatoes', 'mushy peas', 'malt vinegar'], 'places': [{'name': 'The Mayfair Chippy'}, {'name': 'Poppies Fish and Chips Spitalfields'}, {'name': 'Sutton and Sons Islington'}]},
-    {'name': 'Full English Breakfast', 'name_en': 'Full English Breakfast', 'description': 'La colazione completa britannica: bacon, uova, salsicce, fagioli in salsa di pomodoro, funghi, pomodori e black pudding su toast.', 'description_en': 'The full British breakfast: bacon, eggs, sausages, baked beans, mushrooms, tomatoes and black pudding served with toast.', 'ingredients': ['bacon', 'uova', 'salsicce di maiale', 'baked beans', 'funghi', 'black pudding', 'toast'], 'ingredients_en': ['bacon', 'eggs', 'pork sausages', 'baked beans', 'mushrooms', 'black pudding', 'toast'], 'places': [{'name': 'Regency Cafe'}, {'name': "St James's Cafe"}, {'name': 'The Cafe in the Crypt'}]},
-    {'name': 'Sunday Roast', 'name_en': 'Sunday Roast', 'description': 'Il pranzo della domenica: arrosto di manzo o agnello con Yorkshire pudding, patate arrosto, verdure e gravy. Il rito sociale britannico per eccellenza.', 'description_en': 'The archetypal British Sunday lunch: roast beef or lamb with Yorkshire pudding, roast potatoes, vegetables and gravy. A true social ritual.', 'ingredients': ['manzo o agnello', 'Yorkshire pudding', 'patate arrosto', 'carote', 'gravy'], 'ingredients_en': ['beef or lamb', 'Yorkshire pudding', 'roast potatoes', 'carrots', 'gravy'], 'places': [{'name': 'The Quality Chop House'}, {'name': 'The Camberwell Arms'}, {'name': 'Blacklock Soho'}]},
-    {'name': 'Chicken Tikka Masala', 'name_en': 'Chicken Tikka Masala', 'description': "Il curry più ordinato del Regno Unito, inventato probabilmente a Glasgow negli anni '70: pollo in salsa cremosa di pomodoro e spezie. Piatto nazionale adottato.", 'description_en': "The UK's most ordered curry, probably invented in Glasgow in the 1970s: chicken in a creamy tomato-and-spice sauce. An adopted national dish.", 'ingredients': ['pollo', 'pomodoro', 'panna', 'cumino', 'coriandolo', 'garam masala', 'riso basmati'], 'ingredients_en': ['chicken', 'tomato', 'cream', 'cumin', 'coriander', 'garam masala', 'basmati rice'], 'places': [{'name': 'Dishoom Covent Garden'}, {'name': 'The Cinnamon Club'}, {'name': 'Brigadiers'}]},
-    {'name': 'Afternoon Tea', 'name_en': 'Afternoon Tea', 'description': 'Rito pomeridiano delle 16:00: tramezzini al cetriolo, scones con clotted cream e marmellata, pasticcini e torte su alzatine argentate, tutto annaffiato da tè Earl Grey.', 'description_en': 'The classic 4 p.m. ritual: cucumber sandwiches, scones with clotted cream and jam, pastries and cakes on silver stands, all accompanied by Earl Grey tea.', 'ingredients': ['tramezzini', 'scones', 'clotted cream', 'marmellata', 'pasticcini', 'tè Earl Grey'], 'ingredients_en': ['sandwiches', 'scones', 'clotted cream', 'jam', 'pastries', 'Earl Grey tea'], 'places': [{'name': 'The Ritz London'}, {'name': 'Claridge’s'}, {'name': 'Fortnum and Mason Diamond Jubilee Tea Salon'}]},
-    {'name': 'Pie and Mash', 'name_en': 'Pie and Mash', 'description': 'Tortino di carne macinata con purè di patate e liquor verde (salsa di prezzemolo): il comfort food della working class londinese dal XIX secolo.', 'description_en': "A minced-meat pie with mashed potatoes and green liquor parsley sauce: the comfort food of London's working class since the 19th century.", 'ingredients': ['carne macinata di manzo', 'pasta sfoglia', 'purè di patate', 'salsa liquor al prezzemolo'], 'ingredients_en': ['minced beef', 'puff pastry', 'mashed potatoes', 'parsley liquor sauce'], 'places': [{'name': 'M Manze Tower Bridge'}, {'name': 'Goddards at Greenwich'}, {'name': 'F Cooke Hoxton'}]},
-    {'name': 'Eton Mess', 'name_en': 'Eton Mess', 'description': 'Dessert estivo inglese nato a Eton College: fragole fresche schiacciate, meringa sbriciolata e panna montata mescolate insieme in un caos volutamente disordinato.', 'description_en': 'A classic English summer dessert born at Eton College: crushed fresh strawberries, crumbled meringue and whipped cream mixed together in deliberate disorder.', 'ingredients': ['fragole', 'meringa', 'panna montata'], 'ingredients_en': ['strawberries', 'meringue', 'whipped cream'], 'places': [{'name': 'Rules'}, {'name': 'The Ivy Victoria'}, {'name': 'Kitchen W8'}]},
-    {'name': 'Scotch Egg', 'name_en': 'Scotch Egg', 'description': 'Uovo sodo avvolto in salsiccia di maiale, impanato e fritto: originariamente snack da picnic vittoriano, oggi street food da pub e mercati.', 'description_en': 'A hard-boiled egg wrapped in pork sausage meat, breadcrumbed and fried: once a Victorian picnic snack, now a staple of pubs and food markets.', 'ingredients': ['uovo', 'salsiccia di maiale', 'pangrattato', 'senape'], 'ingredients_en': ['egg', 'pork sausage meat', 'breadcrumbs', 'mustard'], 'places': [{'name': 'The Harwood Arms'}, {'name': 'The Guinea Grill'}, {'name': 'The Ginger Pig Borough Market'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Fish and Chips',
+  'name_en': 'Fish and Chips',
+  'description': 'Filetto di merluzzo o eglefino fritto in pastella, servito con patatine spesse, sale, aceto e talvolta mushy peas. A '
+                 'Londra ? un classico popolare: deve avere crosta asciutta, pesce succoso e patate robuste, senza odore di olio stanco.',
+  'description_en': 'Cod or haddock fried in batter, served with thick chips, salt, vinegar and sometimes mushy peas. In London it is a '
+                    'popular classic: it should have dry crust, juicy fish and sturdy chips, without the smell of tired oil.',
+  'ingredients': ['merluzzo', 'farina', 'birra', 'patate', 'aceto'],
+  'ingredients_en': ['cod', 'flour', 'beer', 'potatoes', 'vinegar'],
+  'places': [{'name': 'The Mayfair Chippy'}, {'name': 'Poppies Fish and Chips Spitalfields'}, {'name': 'Sutton and Sons Islington'}]},
+ {'name': 'Full English Breakfast',
+  'name_en': 'Full English Breakfast',
+  'description': 'Colazione sostanziosa con uova, bacon, salsicce, fagioli, pomodoro, funghi, toast e spesso black pudding. ? quasi un '
+                 'manifesto della cucina da caf? britannico: generosa, salata, rituale, migliore quando ogni elemento ? cotto '
+                 'separatamente e resta riconoscibile.',
+  'description_en': 'A substantial breakfast with eggs, bacon, sausages, beans, tomato, mushrooms, toast and often black pudding. It is '
+                    'almost a manifesto of British caf? cooking: generous, savoury and ritualistic, best when each element is cooked '
+                    'separately and remains recognisable.',
+  'ingredients': ['uova', 'bacon', 'salsicce', 'fagioli', 'toast'],
+  'ingredients_en': ['eggs', 'bacon', 'sausages', 'beans', 'toast'],
+  'places': [{'name': 'Regency Cafe'}, {'name': "St James's Cafe"}, {'name': 'The Cafe in the Crypt'}]},
+ {'name': 'Sunday Roast',
+  'name_en': 'Sunday Roast',
+  'description': 'Arrosto domenicale di manzo, pollo, agnello o maiale con patate, verdure, gravy e Yorkshire pudding. Nei pub londinesi ? '
+                 'rito sociale: conta l?equilibrio tra carne succosa, salsa profonda, patate croccanti e verdure non trascurate. La '
+                 'qualit? emerge soprattutto nel gravy, che deve unire il piatto.',
+  'description_en': 'A Sunday roast of beef, chicken, lamb or pork with potatoes, vegetables, gravy and Yorkshire pudding. In London pubs '
+                    'it is a social ritual: balance matters between juicy meat, deep gravy, crisp potatoes and vegetables that are not '
+                    'neglected.',
+  'ingredients': ['carne arrosto', 'patate', 'gravy', 'Yorkshire pudding', 'verdure'],
+  'ingredients_en': ['roast meat', 'potatoes', 'gravy', 'Yorkshire pudding', 'vegetables'],
+  'places': [{'name': 'The Quality Chop House'}, {'name': 'The Camberwell Arms'}, {'name': 'Blacklock Soho'}]},
+ {'name': 'Chicken Tikka Masala',
+  'name_en': 'Chicken Tikka Masala',
+  'description': 'Pollo marinato e cotto al tandoor, servito in salsa cremosa speziata al pomodoro, simbolo della cucina '
+                 'britannico-indiana. A Londra racconta multiculturalit? pi? che tradizione antica: deve essere profumato, morbido, ricco '
+                 'ma non dolciastro. La qualit? sta nella salsa, speziata ma non piatta, e nel pollo ancora succoso.',
+  'description_en': 'Tandoor-cooked marinated chicken served in a creamy spiced tomato sauce, a symbol of British-Indian cooking. In '
+                    'London it speaks of multicultural identity more than ancient tradition: it should be fragrant, tender, rich but not '
+                    'sugary.',
+  'ingredients': ['pollo', 'yogurt', 'pomodoro', 'spezie', 'panna'],
+  'ingredients_en': ['chicken', 'yoghurt', 'tomato', 'spices', 'cream'],
+  'places': [{'name': 'Dishoom Covent Garden'}, {'name': 'The Cinnamon Club'}, {'name': 'Brigadiers'}]},
+ {'name': 'Afternoon Tea',
+  'name_en': 'Afternoon Tea',
+  'description': 'Rito pomeridiano con t?, sandwich, scones con clotted cream e confettura, dolci e piccoli pasticcini. A Londra pu? '
+                 'essere turistico o raffinatissimo: il valore sta nel ritmo del servizio, nella qualit? del t? e nella precisione dei '
+                 'bocconi.',
+  'description_en': 'An afternoon ritual with tea, sandwiches, scones with clotted cream and jam, cakes and small pastries. In London it '
+                    'can be touristy or very refined: value lies in service rhythm, tea quality and the precision of each bite.',
+  'ingredients': ['t?', 'scones', 'clotted cream', 'confettura', 'sandwich'],
+  'ingredients_en': ['tea', 'scones', 'clotted cream', 'jam', 'sandwiches'],
+  'places': [{'name': 'The Ritz London'}, {'name': 'Claridge?s'}, {'name': 'Fortnum and Mason Diamond Jubilee Tea Salon'}]},
+ {'name': 'Pie and Mash',
+  'name_en': 'Pie and Mash',
+  'description': 'Torta salata ripiena di carne con pur? di patate e liquor, salsa verde al prezzemolo tipica dell?East End. ? cucina '
+                 'operaia londinese: semplice, calda, economica, con il contrasto tra guscio croccante, ripieno umido e salsa erbacea.',
+  'description_en': 'A savoury meat pie with mashed potatoes and liquor, a green parsley sauce typical of the East End. It is '
+                    'working-class London cooking: simple, warm and economical, with contrast between crisp shell, moist filling and '
+                    'herbaceous sauce.',
+  'ingredients': ['pasta salata', 'carne', 'patate', 'prezzemolo', 'brodo'],
+  'ingredients_en': ['savoury pastry', 'meat', 'potatoes', 'parsley', 'broth'],
+  'places': [{'name': 'M Manze Tower Bridge'}, {'name': 'Goddards at Greenwich'}, {'name': 'F Cooke Hoxton'}]},
+ {'name': 'Eton Mess',
+  'name_en': 'Eton Mess',
+  'description': 'Dessert di meringa spezzata, panna montata e fragole, volutamente disordinato ma molto equilibrato se ben fatto. ? '
+                 'dolce, fresco e leggero: la qualit? sta nel contrasto tra croccantezza, crema morbida e frutta non troppo zuccherata.',
+  'description_en': 'A dessert of broken meringue, whipped cream and strawberries, deliberately messy but very balanced when well made. It '
+                    'is sweet, fresh and light: quality lies in the contrast between crunch, soft cream and fruit that is not '
+                    'over-sweetened.',
+  'ingredients': ['meringa', 'panna', 'fragole', 'zucchero'],
+  'ingredients_en': ['meringue', 'cream', 'strawberries', 'sugar'],
+  'places': [{'name': 'Rules'}, {'name': 'The Ivy Victoria'}, {'name': 'Kitchen W8'}]},
+ {'name': 'Scotch Egg',
+  'name_en': 'Scotch Egg',
+  'description': 'Uovo sodo o morbido avvolto in carne di salsiccia, impanato e fritto, servito come snack da pub o gastronomia. La '
+                 'versione migliore ha tuorlo ancora cremoso, carne ben condita e panatura asciutta, senza diventare solo pesante.',
+  'description_en': 'A hard or soft-boiled egg wrapped in sausage meat, breaded and fried, served as a pub or deli snack. The best version '
+                    'has a still-creamy yolk, well-seasoned meat and dry breading, without becoming merely heavy.',
+  'ingredients': ['uovo', 'carne di salsiccia', 'pangrattato', 'spezie', 'olio'],
+  'ingredients_en': ['egg', 'sausage meat', 'breadcrumbs', 'spices', 'oil'],
+  'places': [{'name': 'The Harwood Arms'}, {'name': 'The Guinea Grill'}, {'name': 'The Ginger Pig Borough Market'}]}]
 
 CULTURE_FACTS = [
     {'icon': '🕰️', 'title': 'Big Ben si chiama in realtà Elizabeth Tower', 'title_en': 'Big Ben is actually called Elizabeth Tower', 'body': 'Il nome Big Ben indica solo la campana principale da 13 tonnellate, non la torre. La torre fu ribattezzata Elizabeth Tower nel 2012 per il Giubileo di Diamante della Regina. Per quasi 150 anni non aveva nome ufficiale.', 'body_en': "The name Big Ben technically refers only to the 13-tonne bell, not the tower. The tower was renamed Elizabeth Tower in 2012 for the Queen's Diamond Jubilee. For almost 150 years it had no official name."},

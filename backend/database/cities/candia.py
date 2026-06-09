@@ -59,6 +59,7 @@ ATTRACTIONS = [
  {'city': 'candia', 'block_id': 1316, 'zone': 'amnisos_arenes', 'category_level': 3, 'name': 'Belvedere della costa est', 'name_en': 'East Coast Viewpoint', 'description': 'Punto utile per legare spiaggia, costa bassa e aperture sul mare cretese.', 'description_en': 'A useful point for linking beach, low coast and open views over the Cretan sea.', 'latitude': 35.3384, 'longitude': 25.2083, 'estimated_visit_time': 20, 'tags': ['panorama', 'costa', 'spiaggia'], 'attraction_type': 'belvedere', 'ticket_url': None},
 ]
 
+
 FOOD_SPOTS = [
  {'city': 'candia', 'zone': 'centro_morosini', 'category_level': 1, 'name': 'Bougatsa Morosini', 'name_en': 'Morosini Bougatsa', 'description': 'Pausa dolce o salata molto tipica nel quadrante piu centrale della città.', 'description_en': 'A very typical sweet or savoury break in the city\'s most central district.', 'latitude': 35.3388, 'longitude': 25.1345, 'estimated_visit_time': 15, 'tags': ['dolci', 'street food', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.1},
  {'city': 'candia', 'zone': 'centro_morosini', 'category_level': 1, 'name': 'Greek Coffee Lions', 'name_en': 'Lions Coffee', 'description': 'Pausa caffe nel cuore piu urbano e vissuto di Candia.', 'description_en': 'A coffee break in Candia\'s most urban and lived-in heart.', 'latitude': 35.3389, 'longitude': 25.1343, 'estimated_visit_time': 15, 'tags': ['caffe', 'centro', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
@@ -133,17 +134,6 @@ FOOD_SPOTS = [
  {'city': 'candia', 'zone': 'amnisos_arenes', 'category_level': 3, 'name': 'Eastern Coast Fine Table', 'name_en': 'Eastern Coast Fine Table', 'description': 'Scelta piu elegante tra costa aperta, spiaggia e archeologia.', 'description_en': 'A more elegant choice among open coast, beach and archaeology.', 'latitude': 35.3405, 'longitude': 25.2029, 'estimated_visit_time': 95, 'tags': ['fine dining', 'costa', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.1},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Dakos', 'name_en': 'Dakos', 'description': 'Pane d\'orzo biscottato bagnato di pomodoro grattugiato, formaggio fresco mizithra e olio d\'oliva, classica meraviglia cretese.', 'description_en': 'Barley rusk softened with grated ripe tomato, fresh mizithra cheese and olive oil, a classic Cretan summer dish.', 'ingredients': ['pane d\'orzo', 'pomodoro', 'feta o mizithra', 'olio', 'origano'], 'ingredients_en': ['barley rusk', 'ripe tomato', 'feta or mizithra', 'olive oil', 'oregano'], 'places': ['Peskesi Heraklion', 'Parasties Heraklion', 'Ippokampos Heraklion']},
- {'name': 'Kalitsounia', 'name_en': 'Kalitsounia Pastries', 'description': 'Piccoli fagottini di pasta sottile ripieni di erbe selvatiche o formaggio fresco, in versione salata o dolcificati con miele.', 'description_en': 'Small thin pastry parcels filled with wild greens or fresh cheese, either savoury or sweetened with thyme honey.', 'ingredients': ['farina', 'formaggio', 'erbe o miele', 'olio'], 'ingredients_en': ['flour', 'cheese', 'herbs or honey', 'olive oil'], 'places': ['Kirkor Heraklion', 'Peskesi Heraklion', 'Phyllosophies Heraklion']},
- {'name': 'Gamopilafo', 'name_en': 'Cretan Rice Pilaf', 'description': 'Riso pilaf cremoso cotto nel ricco brodo di agnello e capra, piatto cerimoniale dei matrimoni tradizionali cretesi.', 'description_en': 'Creamy pilaf rice cooked in rich lamb and goat broth, the ceremonial dish of traditional Cretan weddings.', 'ingredients': ['riso', 'brodo di carne', 'burro', 'limone'], 'ingredients_en': ['rice', 'meat broth', 'butter', 'lemon'], 'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Parasties Heraklion']},
- {'name': 'Antikristo', 'name_en': 'Antikristo Lamb', 'description': 'Agnello intero infilzato in stecche di legno e cotto lentamente in piedi davanti a un fuoco aperto, antica tradizione pastorale cretese.', 'description_en': 'Whole lamb skewered on wooden stakes and slowly roasted upright in front of an open fire, an ancient Cretan shepherd tradition.', 'ingredients': ['agnello', 'sale'], 'ingredients_en': ['lamb', 'salt'], 'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Parasties Heraklion']},
- {'name': 'Bougatsa cretese', 'name_en': 'Cretan Bougatsa', 'description': 'Sfoglia croccante ripiena di formaggio fresco mizithra o crema dolce, servita calda spolverata di zucchero a velo e cannella.', 'description_en': 'Crisp filo pastry filled with fresh mizithra cheese or sweet custard, served warm dusted with icing sugar and cinnamon.', 'ingredients': ['sfoglia', 'formaggio o crema', 'zucchero'], 'ingredients_en': ['filo pastry', 'cheese or custard cream', 'sugar'], 'places': ['Kirkor Heraklion', 'Phyllosophies Heraklion', 'Krasas Heraklion']},
- {'name': 'Chochlioi boubouristi', 'name_en': 'Fried Snails', 'description': 'Lumache cretesi saltate a faccia in giù in olio d\'oliva con sale, rosmarino e una spruzzata finale di aceto.', 'description_en': 'Cretan snails sautéed face-down in olive oil with salt, rosemary and a final splash of vinegar.', 'ingredients': ['lumache', 'olio', 'aceto', 'rosmarino'], 'ingredients_en': ['snails', 'olive oil', 'vinegar', 'rosemary'], 'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Parasties Heraklion']},
- {'name': 'Souvlaki greco', 'name_en': 'Greek Souvlaki', 'description': "Spiedini di carne cotti alla griglia e avvolti in pane pita morbido con tzatziki, cipolle e pomodoro, street food urbano di Candia.", 'description_en': "Grilled meat skewers wrapped in soft pita with tzatziki, onions and tomato, an urban street food classic in Heraklion.", 'ingredients': ['carne', 'pane pita', 'cipolla', 'pomodoro', 'tzatziki'], 'ingredients_en': ['meat', 'pita bread', 'onion', 'tomato', 'tzatziki'], 'places': ['Krasas Heraklion', 'Oti Thes Heraklion', 'Souvlaki Grigoris Heraklion']},
- {'name': 'Raki cretese', 'name_en': 'Cretan Raki', 'description': 'Tsikoudia trasparente distillato dalle vinacce dopo la vendemmia, offerto come benvenuto in ogni tavola e taverna cretese.', 'description_en': 'A clear tsikoudia distilled from grape pomace after the harvest, offered as a welcome in every Cretan home and tavern.', 'ingredients': ['vinacce'], 'ingredients_en': ['grape pomace'], 'places': ['Peskesi Heraklion', 'Parasties Heraklion', 'Kagiampis Heraklion']},
-]
-
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'Candia conserva un forte impianto veneziano', 'title_en': 'Candia preserves a strong Venetian structure', 'body': 'Mura, loggia, fortezza e porto rendono ancora molto leggibile la lunga presenza veneziana.', 'body_en': 'Walls, loggia, fortress and harbour still make the long Venetian presence highly legible.'},
  {'icon': '🏺', 'title': 'La città vive in rapporto continuo con il mondo minoico', 'title_en': 'The city lives in constant relation with the Minoan world', 'body': 'Museo archeologico e Cnosso fanno di Candia una porta diretta verso la civiltà antica di Creta.', 'body_en': 'The archaeological museum and Knossos make Candia a direct gateway to ancient Cretan civilisation.'},
@@ -158,3 +148,86 @@ CULTURE_FACTS = [
  {'icon': '🌍', 'title': 'Candia unisce turismo globale e vita locale cretese', 'title_en': 'Candia combines global tourism and local Cretan life', 'body': 'La città vive insieme come porta d\'ingresso internazionale e come centro urbano molto quotidiano.', 'body_en': 'The city lives both as an international gateway and as a highly everyday urban centre.'},
  {'icon': '☀️', 'title': 'La luce è una parte reale del paesaggio urbano', 'title_en': 'Light is a real part of the urban landscape', 'body': 'Mare, pietra chiara, mura e piazze aperte danno a Candia un carattere molto luminoso e mediterraneo.', 'body_en': 'Sea, pale stone, walls and open squares give Candia a very luminous and Mediterranean character.'},
 ]
+
+
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Dakos',
+  'name_en': 'Dakos Barley Rusk',
+  'description': 'Fetta di pane d’orzo secco ammorbidita con pomodoro maturo, olio extravergine, origano e formaggio mizithra. È '
+                 'l’insalata cretese in forma essenziale: fresca, sapida, ruvida, costruita sulla qualità di ingredienti semplici e '
+                 'mediterranei. La qualità dipende soprattutto dal contrasto tra pane croccante e pomodoro succoso.',
+  'description_en': 'A slice of dry barley rusk softened with ripe tomato, extra virgin olive oil, oregano and mizithra cheese. It is '
+                    'Cretan salad in essential form: fresh, savoury, rustic and built on the quality of simple Mediterranean ingredients.',
+  'ingredients': ['pane d’orzo', 'pomodoro', 'mizithra', 'olio extravergine', 'origano'],
+  'ingredients_en': ['barley rusk', 'tomato', 'mizithra', 'extra virgin olive oil', 'oregano'],
+  'places': ['Peskesi Heraklion', 'Kouzeineri Heraklion', 'Erganos Heraklion']},
+ {'name': 'Kalitsounia',
+  'name_en': 'Kalitsounia Cheese Pastries',
+  'description': 'Piccole tortine o ravioli cretesi, dolci o salati, ripieni di formaggio fresco, erbe spontanee o miele. Sono molto '
+                 'locali: cambiano per forma e ripieno, ma devono restare fragranti, delicati e legati alla pasticceria domestica '
+                 'dell’isola.',
+  'description_en': 'Small Cretan pies or dumplings, sweet or savoury, filled with fresh cheese, wild herbs or honey. They are strongly '
+                    'local: shape and filling vary, but they should remain fragrant, delicate and tied to the island’s home baking.',
+  'ingredients': ['farina', 'formaggio fresco', 'erbe', 'miele', 'olio'],
+  'ingredients_en': ['flour', 'fresh cheese', 'herbs', 'honey', 'oil'],
+  'places': ['Kirkor Heraklion', 'Peskesi Heraklion', 'Phyllo Sophies Heraklion']},
+ {'name': 'Gamopilafo',
+  'name_en': 'Cretan Wedding Pilaf',
+  'description': 'Riso cotto in brodo ricco di carne, tradizionalmente servito ai matrimoni cretesi, con limone e burro di capra o pecora. '
+                 'Il risultato è cremoso ma non pesante: semplice nell’aspetto, profondissimo nel sapore. È un piatto da assaggiare caldo, '
+                 'quando brodo e limone restano ancora evidenti.',
+  'description_en': 'Rice cooked in a rich meat broth, traditionally served at Cretan weddings, with lemon and goat or sheep butter. The '
+                    'result is creamy but not heavy: simple in appearance, very deep in flavour. It is best tasted warm, when broth and '
+                    'lemon remain clearly present.',
+  'ingredients': ['riso', 'brodo di carne', 'limone', 'burro di capra', 'sale'],
+  'ingredients_en': ['rice', 'meat broth', 'lemon', 'goat butter', 'salt'],
+  'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Parasties Heraklion']},
+ {'name': 'Antikristo',
+  'name_en': 'Antikristo Lamb',
+  'description': 'Agnello cotto lentamente attorno al fuoco, non direttamente sulla fiamma, secondo una tecnica pastorale cretese molto '
+                 'antica. La carne resta succosa e affumicata, con grasso ben sciolto e sapore essenziale di sale, fuoco e tempo.',
+  'description_en': 'Lamb slowly cooked around the fire, not directly over the flame, using a very old Cretan pastoral technique. The meat '
+                    'stays juicy and smoky, with well-rendered fat and an essential flavour of salt, fire and time.',
+  'ingredients': ['agnello', 'sale', 'fuoco di legna', 'erbe cretesi'],
+  'ingredients_en': ['lamb', 'salt', 'wood fire', 'Cretan herbs'],
+  'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Ippokampos Heraklion']},
+ {'name': 'Bougatsa cretese',
+  'name_en': 'Cretan Bougatsa',
+  'description': 'Sfoglia sottile e friabile ripiena di crema, formaggio dolce o mizithra, servita calda con zucchero e cannella. A Candia '
+                 'è una colazione amatissima: profumata, morbida al centro, croccante fuori e spesso consumata appena sfornata. La qualità '
+                 'si riconosce dalla sfoglia asciutta e dal ripieno non troppo dolce.',
+  'description_en': 'Thin flaky pastry filled with custard, sweet cheese or mizithra, served warm with sugar and cinnamon. In Heraklion it '
+                    'is a much-loved breakfast: fragrant, soft in the centre, crisp outside and often eaten freshly baked.',
+  'ingredients': ['pasta fillo', 'crema', 'mizithra', 'zucchero', 'cannella'],
+  'ingredients_en': ['filo pastry', 'custard', 'mizithra', 'sugar', 'cinnamon'],
+  'places': ['Kirkor Heraklion', 'Phyllo Sophies Heraklion', 'To Paradosiako Heraklion']},
+ {'name': 'Chochlioi boubouristi',
+  'name_en': 'Fried Snails',
+  'description': 'Lumache fritte in padella con olio d’oliva, rosmarino e aceto, specialità cretese dal gusto deciso. Il nome richiama il '
+                 'rumore della cottura: devono essere sapide, aromatiche, leggermente croccanti e profondamente legate alla campagna. Il '
+                 'piatto è rustico ma preciso, con acidità sufficiente a pulire il palato.',
+  'description_en': 'Snails pan-fried with olive oil, rosemary and vinegar, a Cretan speciality with a bold taste. The name evokes the '
+                    'sound of cooking: they should be savoury, aromatic, slightly crisp and deeply tied to the countryside.',
+  'ingredients': ['lumache', 'olio d’oliva', 'rosmarino', 'aceto', 'sale'],
+  'ingredients_en': ['snails', 'olive oil', 'rosemary', 'vinegar', 'salt'],
+  'places': ['Peskesi Heraklion', 'Erganos Heraklion', 'Parasties Heraklion']},
+ {'name': 'Souvlaki greco',
+  'name_en': 'Greek Souvlaki',
+  'description': 'Spiedini o pita con carne grigliata, verdure, patatine e salsa, presenti in tutta la Grecia ma fondamentali anche nella '
+                 'vita veloce di Candia. La qualità sta nella carne ben cotta, nella pita calda e nell’equilibrio dei condimenti.',
+  'description_en': 'Skewers or pita wraps with grilled meat, vegetables, chips and sauce, found across Greece but central to fast '
+                    'everyday eating in Heraklion too. Quality lies in well-cooked meat, warm pita and balanced condiments. It should feel '
+                    'quick and generous, but still fresh and carefully assembled.',
+  'ingredients': ['maiale', 'pollo', 'pita', 'pomodoro', 'tzatziki'],
+  'ingredients_en': ['pork', 'chicken', 'pita', 'tomato', 'tzatziki'],
+  'places': ['Siga Siga Heraklion', 'Oti Thes Heraklion', 'Krasas Heraklion']},
+ {'name': 'Raki cretese',
+  'name_en': 'Cretan Raki',
+  'description': 'Distillato di vinacce servito in piccoli bicchieri, spesso offerto a fine pasto come gesto di ospitalità. A Creta '
+                 'accompagna conversazione, meze e ritualità quotidiana: secco, diretto, caldo, più sociale che semplicemente alcolico. La '
+                 'qualità migliore lascia calore e profumo, non solo forza alcolica.',
+  'description_en': 'A grape-pomace spirit served in small glasses, often offered after a meal as a gesture of hospitality. In Crete it '
+                    'accompanies conversation, meze and daily ritual: dry, direct, warming and more social than merely alcoholic.',
+  'ingredients': ['vinacce', 'acqua', 'lieviti naturali'],
+  'ingredients_en': ['grape pomace', 'water', 'natural yeasts'],
+  'places': ['Peskesi Heraklion', 'Parasties Heraklion', 'Erganos Heraklion']}]

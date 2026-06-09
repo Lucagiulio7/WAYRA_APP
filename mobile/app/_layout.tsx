@@ -16,6 +16,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { queryClient, asyncStoragePersister } from "@/lib/queryClient";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { track } from "@/services/AnalyticsService";
 
 // ── Sentry: error monitoring in produzione ────────────────────────────────────
 const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN;
@@ -57,6 +58,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync();
   }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    track("app_opened");
+  }, []);
 
   // Gestisce il deep link di ritorno dopo OAuth (es. viaggio-ai://auth-callback?code=...)
   useEffect(() => {

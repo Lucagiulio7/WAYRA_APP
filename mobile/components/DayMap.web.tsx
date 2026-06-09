@@ -140,17 +140,25 @@ function buildHtml(
   );
   const selectedFoodSpots = (day.restaurants ?? [])
     .filter((r) => validCoords(r.latitude, r.longitude))
-    .map((r) => ({
-      id: r.id,
-      lat: r.latitude,
-      lon: r.longitude,
-      name: esc(isEn && r.name_en ? r.name_en : r.name),
-      desc: esc((isEn && r.description_en ? r.description_en : r.description) ?? ""),
-      type: esc(r.food_type ?? ""),
-      mealType: esc(r.meal_type ?? ""),
-      rating: r.rating ?? null,
-      mapsLink: r.maps_link,
-    }));
+    .map((r) => {
+      const source = allFoodSpots.find((spot) => spot.id === r.id);
+      const recommendedDishes = isEn && (r.recommended_dishes_en?.length || source?.recommended_dishes_en?.length)
+        ? (r.recommended_dishes_en ?? source?.recommended_dishes_en ?? [])
+        : (r.recommended_dishes ?? source?.recommended_dishes ?? []);
+      return {
+        id: r.id,
+        lat: r.latitude,
+        lon: r.longitude,
+        name: esc(isEn && r.name_en ? r.name_en : r.name),
+        desc: esc((isEn && r.description_en ? r.description_en : r.description) ?? ""),
+        type: esc(r.food_type ?? ""),
+        mealType: esc(r.meal_type ?? ""),
+        rating: r.rating ?? null,
+        mapsLink: r.maps_link,
+        recommendedDishes: recommendedDishes.map(esc),
+        hasDishMatch: Boolean(r.has_curated_dish_match || source?.has_curated_dish_match || recommendedDishes.length),
+      };
+    });
   const targetMeal = foodSelection?.mealType;
   const foodSpots = allFoodSpots
     .filter((a) =>
@@ -236,7 +244,7 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .unass-dot{width:24px;height:24px;border-radius:50%;background:${mapBg};border:1.5px solid ${filterBdr};display:flex;align-items:center;justify-content:center;font-size:13px;opacity:.85;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
 .food-dot{width:30px;height:30px;border-radius:50%;background:#6ee7b7;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 10px rgba(0,0,0,.45);line-height:1}
 .food-dot.typical{background:#f97316;box-shadow:0 2px 12px rgba(249,115,22,.55)}
-.food-dot.selected{width:34px;height:34px;background:#f97316;border:2.5px solid #fff;box-shadow:0 0 0 6px rgba(249,115,22,.34),0 0 0 12px rgba(249,115,22,.14),0 2px 14px rgba(0,0,0,.58)}
+.food-dot.selected{width:34px;height:34px;background:#a855f7;border:2.5px solid #fff;box-shadow:0 0 0 6px rgba(168,85,247,.36),0 0 0 12px rgba(168,85,247,.16),0 2px 14px rgba(0,0,0,.58)}
 .origin-dot{width:18px;height:18px;border-radius:50%;background:#2f8cff;border:3px solid #fff;box-shadow:0 0 0 7px rgba(47,140,255,.28),0 2px 12px rgba(0,0,0,.45);animation:originPulse 1.45s ease-in-out infinite}
 @keyframes originPulse{0%{box-shadow:0 0 0 4px rgba(47,140,255,.42),0 2px 12px rgba(0,0,0,.45)}55%{box-shadow:0 0 0 13px rgba(47,140,255,.08),0 2px 12px rgba(0,0,0,.45)}100%{box-shadow:0 0 0 4px rgba(47,140,255,.42),0 2px 12px rgba(0,0,0,.45)}}
 .pop-dist{font-size:10px;color:#7eb8f7;margin-top:3px;margin-bottom:2px}
@@ -500,9 +508,11 @@ SELECTED_FOOD.forEach(function(f){
   var icon=L.divIcon({html:'<div class="food-dot selected">🍽</div>',className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-19]});
   var url=f.mapsLink || mapsUrl(f.lat,f.lon,f.name);
   var nd=nearestDayDist(f.lat,f.lon);
+  var dishes=(f.recommendedDishes||[]).join(', ');
   var popup='<div class="pop-badge pop-badge-expl">'+SELECTED_FOOD_LABEL+'</div>'+
     '<div class="pop-name">'+f.name+'</div>'+
     (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
+    (dishes?'<div class="pop-meta">🍝 '+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
     (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
     (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
     (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
@@ -617,7 +627,7 @@ export function DayMap({
     [day.stops],
   );
   const restaurantSignature = useMemo(
-    () => (day.restaurants ?? []).map((r) => `${r.id}:${r.latitude}:${r.longitude}:${r.meal_type ?? ""}`).join("|"),
+    () => (day.restaurants ?? []).map((r) => `${r.id}:${r.latitude}:${r.longitude}:${r.meal_type ?? ""}:${(r.recommended_dishes ?? []).join(",")}:${(r.recommended_dishes_en ?? []).join(",")}`).join("|"),
     [day.restaurants],
   );
 

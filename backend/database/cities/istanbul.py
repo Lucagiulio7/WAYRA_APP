@@ -133,16 +133,88 @@ FOOD_SPOTS = [
  {'city': 'istanbul', 'zone': 'uskudar_kadikoy', 'category_level': 3, 'name': 'Dondurma Uskudar', 'name_en': 'Uskudar Ice Cream', 'description': 'Pausa fresca con vista sullo stretto.', 'description_en': 'A cool break with views over the strait.', 'latitude': 41.0223, 'longitude': 29.0134, 'estimated_visit_time': 10, 'tags': ['gelato', 'snack', 'bosforo'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Kebap', 'name_en': 'Kebap', 'description': 'Grande famiglia di piatti di carne alla brace o allo spiedo, centrale nella cucina urbana turca.', 'description_en': 'A broad family of grilled or spit roasted meat dishes central to urban Turkish cuisine.', 'ingredients': ['carne', 'spezie', 'pane', 'verdure'], 'ingredients_en': ['lamb or beef', 'spices', 'flatbread', 'grilled vegetables'], 'places': ['Zubeyir Ocakbasi Istanbul', 'Hamdi Restaurant Istanbul', 'Beyti Istanbul']},
- {'name': 'Balik ekmek', 'name_en': 'Fish Sandwich', 'description': 'Panino di pesce molto legato alle banchine e al lato marittimo di Istanbul.', 'description_en': "A fish sandwich strongly tied to the waterfront and Istanbul's maritime side.", 'ingredients': ['pane', 'pesce', 'cipolla', 'insalata', 'limone'], 'ingredients_en': ['bread', 'fish', 'onion', 'salad', 'lemon'], 'places': ['Tarihi Eminonu Balik Ekmek Istanbul', 'Balikci Sabahattin Istanbul', 'Super Mario Balik Ekmek Istanbul']},
- {'name': 'Meze', 'name_en': 'Meze', 'description': 'Serie di piccoli piatti da condividere, fondamentale nel ritmo conviviale della tavola turca.', 'description_en': 'A series of small plates to share, fundamental to the convivial rhythm of Turkish dining.', 'ingredients': ['verdure', 'yogurt', 'olio', 'pesce', 'legumi'], 'ingredients_en': ['vegetables', 'yoghurt', 'olive oil', 'fish', 'legumes'], 'places': ['Eleos Beyoglu Istanbul', 'Karakoy Lokantasi Istanbul', 'Asmali Cavit Istanbul']},
- {'name': 'Lahmacun', 'name_en': 'Lahmacun', 'description': 'Sfoglia sottile con carne speziata e limone, tra gli street food più diffusi.', 'description_en': 'A thin flatbread with spiced meat and lemon, among the most widespread street foods.', 'ingredients': ['farina', 'carne macinata', 'pomodoro', 'prezzemolo', 'limone'], 'ingredients_en': ['flour', 'minced meat', 'tomato', 'parsley', 'lemon'], 'places': ['Halil Lahmacun Istanbul', 'Ciya Sofrasi Istanbul', 'Fistik Kebap Lahmacun Istanbul']},
- {'name': 'Simit', 'name_en': 'Simit', 'description': 'Ciambella turca ricoperta di sesamo, croccante fuori e morbida dentro, venduta per strada come colazione o spuntino quotidiano.', 'description_en': 'A Turkish sesame-coated ring, crisp outside and soft inside, sold on the street as an everyday breakfast or snack.', 'ingredients': ['farina', 'lievito', 'sesamo', 'melassa'], 'ingredients_en': ['flour', 'yeast', 'sesame seeds', 'molasses'], 'places': ['Galata Simitcisi Istanbul', 'Tarihi Karakoy Simitcisi Istanbul', 'Simit Sarayi Taksim Istanbul']},
- {'name': 'Baklava', 'name_en': 'Baklava', 'description': 'Dolce di sfoglia, pistacchi o noci e sciroppo, fortemente associato alla pasticceria ottomana.', 'description_en': 'A pastry dessert of thin layers, pistachios or walnuts and syrup, strongly associated with Ottoman confectionery.', 'ingredients': ['pasta fillo', 'pistacchi', 'noci', 'burro', 'sciroppo'], 'ingredients_en': ['filo pastry', 'pistachios', 'walnuts', 'butter', 'syrup'], 'places': ['Karakoy Gulluoglu Istanbul', 'Hafiz Mustafa 1864 Istanbul', 'Koskeroglu Baklava Istanbul']},
- {'name': 'Kofte', 'name_en': 'Kofte', 'description': 'Polpette turche di carne macinata speziata, grigliate o cotte in padella e servite con pane, insalata, cipolla e yogurt.', 'description_en': 'Turkish meatballs of spiced minced meat, grilled or pan-cooked and served with bread, salad, onion and yogurt.', 'ingredients': ['carne macinata', 'cipolla', 'cumino', 'pepe', 'prezzemolo'], 'ingredients_en': ['minced meat', 'onion', 'cumin', 'pepper', 'parsley'], 'places': ['Tarihi Sultanahmet Koftecisi Istanbul', 'Meshur Filibe Koftecisi Istanbul', 'Akcaabat Koftecisi Istanbul']},
- {'name': 'Midye dolma', 'name_en': 'Stuffed Mussels', 'description': 'Cozze ripiene di riso speziato, tipico snack da passeggio vicino al mare e nei quartieri serali.', 'description_en': 'Mussels stuffed with spiced rice, a typical walking snack near the sea and in evening districts.', 'ingredients': ['cozze', 'riso', 'spezie', 'limone'], 'ingredients_en': ['mussels', 'rice', 'spices', 'lemon'], 'places': ['Midyeci Ahmet Besiktas Istanbul', 'Mercan Kokorec Midye Istanbul', 'Sampiyon Kokorec Istanbul']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Kebap',
+  'name_en': 'Kebab',
+  'description': 'Carne grigliata alla brace o allo spiedo, marinata con spezie, servita con pane, verdure, yogurt o riso a seconda dello '
+                 'stile. A Istanbul non ? un solo piatto ma una famiglia gastronomica: fumo, succosit?, taglio della carne e cottura fanno '
+                 'davvero la differenza.',
+  'description_en': 'Grilled or skewered meat cooked over embers, marinated with spices and served with bread, vegetables, yoghurt or rice '
+                    'depending on the style. In Istanbul it is not one dish but a food family: smoke, juiciness, meat cut and cooking '
+                    'truly matter.',
+  'ingredients': ['agnello', 'manzo', 'spezie', 'pane', 'yogurt'],
+  'ingredients_en': ['lamb', 'beef', 'spices', 'bread', 'yoghurt'],
+  'places': ['Zubeyir Ocakbasi Istanbul', 'Hamdi Restaurant Istanbul', 'Beyti Istanbul']},
+ {'name': 'Balik ekmek',
+  'name_en': 'Bal?k Ekmek Fish Sandwich',
+  'description': 'Panino di pesce grigliato, di solito sgombro o altro pesce azzurro, servito con cipolla, insalata e limone vicino al '
+                 'Bosforo. ? street food marittimo e urbano: semplice, profumato, perfetto quando il pesce ? caldo e il pane resta '
+                 'leggermente croccante.',
+  'description_en': 'A grilled fish sandwich, usually mackerel or another oily fish, served with onion, salad and lemon near the '
+                    'Bosphorus. It is maritime urban street food: simple, fragrant and best when the fish is hot and the bread stays '
+                    'slightly crisp.',
+  'ingredients': ['pesce', 'pane', 'cipolla', 'insalata', 'limone'],
+  'ingredients_en': ['fish', 'bread', 'onion', 'salad', 'lemon'],
+  'places': ['Tarihi Eminonu Balik Ekmek Istanbul', 'Balikci Sabahattin Istanbul', 'Super Mario Balik Ekmek Istanbul']},
+ {'name': 'Meze',
+  'name_en': 'Meze',
+  'description': 'Serie di piccoli piatti freddi e caldi, come melanzane, yogurt, pesce marinato, fagioli, erbe e salse, condivisi al '
+                 'centro della tavola. A Istanbul sono un rito sociale: non contorno, ma modo lento di iniziare il pasto e parlare.',
+  'description_en': 'A series of small cold and hot dishes, such as aubergines, yoghurt, marinated fish, beans, herbs and sauces, shared '
+                    'at the centre of the table. In Istanbul they are a social ritual: not a side dish, but a slow way to begin eating and '
+                    'talking.',
+  'ingredients': ['melanzane', 'yogurt', 'erbe', 'pesce', 'olio d?oliva'],
+  'ingredients_en': ['aubergines', 'yoghurt', 'herbs', 'fish', 'olive oil'],
+  'places': ['Eleos Beyoglu Istanbul', 'Karakoy Lokantasi Istanbul', 'Asmali Cavit Istanbul']},
+ {'name': 'Lahmacun',
+  'name_en': 'Lahmacun',
+  'description': 'Sfoglia sottile cotta al forno con carne macinata speziata, pomodoro, peperone, cipolla ed erbe, arrotolata con limone e '
+                 'prezzemolo. Deve essere sottile, fragrante e saporita senza diventare pesante, perfetta come pasto veloce ma molto '
+                 'curato.',
+  'description_en': 'A thin oven-baked flatbread topped with spiced minced meat, tomato, pepper, onion and herbs, rolled with lemon and '
+                    'parsley. It should be thin, fragrant and savoury without becoming heavy, perfect as fast food that is still carefully '
+                    'made.',
+  'ingredients': ['farina', 'carne macinata', 'pomodoro', 'peperone', 'prezzemolo'],
+  'ingredients_en': ['flour', 'minced meat', 'tomato', 'pepper', 'parsley'],
+  'places': ['Halil Lahmacun Istanbul', 'Ciya Sofrasi Istanbul', 'Fistik Kebap Lahmacun Istanbul']},
+ {'name': 'Simit',
+  'name_en': 'Simit Sesame Bread Ring',
+  'description': 'Anello di pane ricoperto di sesamo, croccante fuori e morbido dentro, venduto ovunque da carretti e panetterie. ? uno '
+                 'dei simboli quotidiani di Istanbul: colazione, spuntino, compagno del t?, buono quando il sesamo ? tostato e profumato.',
+  'description_en': 'A sesame-covered bread ring, crisp outside and soft inside, sold everywhere from carts and bakeries. It is one of '
+                    'Istanbul?s everyday symbols: breakfast, snack and companion to tea, best when the sesame is toasted and fragrant.',
+  'ingredients': ['farina', 'sesamo', 'melassa', 'lievito', 'sale'],
+  'ingredients_en': ['flour', 'sesame', 'molasses', 'yeast', 'salt'],
+  'places': ['Galata Simitcisi Istanbul', 'Tarihi Karakoy Simitcisi Istanbul', 'Simit Sarayi Taksim Istanbul']},
+ {'name': 'Baklava',
+  'name_en': 'Baklava',
+  'description': 'Dolce di sottilissime sfoglie, pistacchi o noci, burro chiarificato e sciroppo, tagliato in piccoli rombi o quadrati. La '
+                 'versione migliore ? ricca ma non stucchevole: croccante, profumata, con frutta secca evidente e sciroppo ben assorbito.',
+  'description_en': 'A dessert of very thin pastry layers, pistachios or walnuts, clarified butter and syrup, cut into small diamonds or '
+                    'squares. The best version is rich but not cloying: crisp, fragrant, with clear nut flavour and syrup properly '
+                    'absorbed.',
+  'ingredients': ['pasta fillo', 'pistacchi', 'noci', 'burro', 'sciroppo'],
+  'ingredients_en': ['filo pastry', 'pistachios', 'walnuts', 'butter', 'syrup'],
+  'places': ['Karakoy Gulluoglu Istanbul', 'Hafiz Mustafa 1864 Istanbul', 'Koskeroglu Baklava Istanbul']},
+ {'name': 'Kofte',
+  'name_en': 'K?fte Meatballs',
+  'description': 'Polpette turche di carne macinata, spezie, cipolla ed erbe, grigliate o cotte in padella e servite con pane, riso o '
+                 'insalata. A Istanbul sono immediate ma tecniche: devono restare succose, ben speziate e con una rosolatura pulita.',
+  'description_en': 'Turkish meatballs made with minced meat, spices, onion and herbs, grilled or pan-cooked and served with bread, rice '
+                    'or salad. In Istanbul they are immediate yet technical: they should stay juicy, well spiced and cleanly browned.',
+  'ingredients': ['manzo', 'agnello', 'cipolla', 'spezie', 'prezzemolo'],
+  'ingredients_en': ['beef', 'lamb', 'onion', 'spices', 'parsley'],
+  'places': ['Tarihi Sultanahmet Koftecisi Istanbul', 'Meshur Filibe Koftecisi Istanbul', 'Akcaabat Koftecisi Istanbul']},
+ {'name': 'Midye dolma',
+  'name_en': 'Stuffed Mussels',
+  'description': 'Cozze ripiene di riso speziato, pinoli, erbe e talvolta uvetta, servite fredde con limone come street food notturno. '
+                 'Sono piccole ma intense: il riso deve essere aromatico, la cozza pulita e il limone aggiunto all?ultimo momento.',
+  'description_en': 'Mussels stuffed with spiced rice, pine nuts, herbs and sometimes raisins, served cold with lemon as late-night street '
+                    'food. They are small but intense: the rice should be aromatic, the mussel clean and the lemon added at the last '
+                    'moment.',
+  'ingredients': ['cozze', 'riso', 'pinoli', 'spezie', 'limone'],
+  'ingredients_en': ['mussels', 'rice', 'pine nuts', 'spices', 'lemon'],
+  'places': ['Midyeci Ahmet Besiktas Istanbul', 'Mercan Kokorec Midye Istanbul', 'Sampiyon Kokorec Istanbul']}]
 
 CULTURE_FACTS = [
  {'icon': '🌉', 'title': 'Istanbul vive letteralmente tra due continenti', 'title_en': 'Istanbul literally lives between two continents', 'body': 'La distinzione tra sponda europea e asiatica non è solo geografica ma anche un modo concreto di percepire ritmi e quartieri diversi.', 'body_en': 'The distinction between the European and Asian sides is not only geographic but also a concrete way of sensing different rhythms and districts.'},

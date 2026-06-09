@@ -60,6 +60,7 @@ ATTRACTIONS = [
  {'city': 'bucarest', 'block_id': 908, 'zone': 'obor', 'category_level': 3, 'name': 'Passaggio del mercato Obor', 'name_en': 'Obor market passage', 'description': 'Passaggio utile per aggiungere una lettura più minuta e quotidiana del grande quadrante mercatale.', 'description_en': 'A useful passage for adding a more detailed and everyday reading of the large market district.', 'latitude': 44.4530, 'longitude': 26.1246, 'estimated_visit_time': 20, 'tags': ['mercato', 'passaggio', 'vita locale'], 'attraction_type': 'passaggio urbano', 'ticket_url': None},
 ]
 
+
 FOOD_SPOTS = [
  {'city': 'bucarest', 'zone': 'lipscani_centro_vecchio', 'category_level': 1, 'name': 'Covrigi Lipscani', 'name_en': 'Lipscani Pretzel Stop', 'description': 'Snack veloce molto tipico nel cuore del centro vecchio.', 'description_en': 'A very typical quick snack in the heart of the old town.', 'latitude': 44.4312, 'longitude': 26.1028, 'estimated_visit_time': 15, 'tags': ['street food', 'centro', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
  {'city': 'bucarest', 'zone': 'lipscani_centro_vecchio', 'category_level': 1, 'name': 'Coffee Hanul', 'name_en': 'Hanul Coffee', 'description': 'Pausa caffe nel quadrante storico piu visitato.', 'description_en': 'A coffee break in the most visited historic district.', 'latitude': 44.4303, 'longitude': 26.1033, 'estimated_visit_time': 15, 'tags': ['caffe', 'centro', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
@@ -134,17 +135,6 @@ FOOD_SPOTS = [
  {'city': 'bucarest', 'zone': 'obor', 'category_level': 3, 'name': 'Market Fine Table', 'name_en': 'Market Fine Table', 'description': 'Scelta piu elegante nel quadrante alimentare piu famoso della città.', 'description_en': 'A more elegant choice in the city\'s most famous food district.', 'latitude': 44.4525, 'longitude': 26.1241, 'estimated_visit_time': 95, 'tags': ['fine dining', 'mercato', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.1},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Sarmale', 'name_en': 'Stuffed Cabbage Rolls', 'description': 'Involtini di foglie di crauti fermentati ripieni di carne macinata e riso, cotti a lungo in salsa di pomodoro e affumicatura.', 'description_en': 'Rolls of fermented cabbage leaves stuffed with minced meat and rice, slow-cooked in tomato sauce with a smoky note.', 'ingredients': ['cavolo', 'carne macinata', 'riso', 'pomodoro', 'spezie'], 'ingredients_en': ['cabbage leaves', 'minced meat', 'rice', 'tomato', 'spices'], 'places': ["Caru' cu Bere Bucharest", 'Vatra Bucharest', 'Lacrimi si Sfinti Bucharest']},
- {'name': 'Mici', 'name_en': 'Romanian Grilled Sausages', 'description': 'Piccoli cilindri di carne macinata speziata cotti alla griglia, serviti caldi con senape, pane e birra nelle terrazze popolari di Bucarest.', 'description_en': 'Small cylinders of spiced minced meat grilled over flame, served hot with mustard, bread and beer on Bucharest’s popular terraces.', 'ingredients': ['manzo', 'maiale', 'aglio', 'pepe', 'cumino'], 'ingredients_en': ['beef', 'pork', 'garlic', 'pepper', 'cumin'], 'places': ['La Cocosatu Bucharest', "Caru' cu Bere Bucharest", 'Terasa Obor Mici Bucharest']},
- {'name': 'Ciorbă de burtă', 'name_en': 'Tripe Soup', 'description': 'Zuppa densa di trippa di manzo arricchita con panna acida, aglio e aceto, considerata anche un classico rimedio postumi sbornia.', 'description_en': "A rich beef tripe soup enriched with sour cream, garlic and vinegar, also considered a classic hangover remedy.", 'ingredients': ['trippa', 'panna acida', 'aglio', 'aceto', 'uova'], 'ingredients_en': ['tripe', 'sour cream', 'garlic', 'vinegar', 'eggs'], 'places': ['Vatra Bucharest', "Caru' cu Bere Bucharest", "Hanu' lui Manuc Bucharest"]},
- {'name': 'Papanasi', 'name_en': 'Papanasi', 'description': 'Ciambelle di formaggio fresco fritte fino a doratura, servite calde con panna acida densa e confettura ai frutti rossi.', 'description_en': 'Fresh cheese doughnuts fried until golden, served warm with a generous dollop of sour cream and red berry jam.', 'ingredients': ['formaggio fresco', 'farina', 'uova', 'panna acida', 'marmellata'], 'ingredients_en': ['fresh cheese', 'flour', 'eggs', 'sour cream', 'jam'], 'places': ['Vatra Bucharest', "Caru' cu Bere Bucharest", 'La Mama Bucharest']},
- {'name': 'Cozonac', 'name_en': 'Sweet Cozonac Bread', 'description': 'Pan brioche festivo arrotolato a strati con un ripieno scuro di noci tritate, cacao e rum, preparato a Pasqua e Natale.', 'description_en': 'A festive sweet bread rolled with a dark filling of crushed walnuts, cocoa and rum, traditionally baked at Easter and Christmas.', 'ingredients': ['farina', 'uova', 'burro', 'noci', 'cacao'], 'ingredients_en': ['flour', 'eggs', 'butter', 'walnuts', 'cocoa'], 'places': ['Casa Capsa Bucharest', 'Zoomserie Bucharest', 'Cofetaria Alice Bucharest']},
- {'name': 'Zacuscă', 'name_en': 'Vegetable Spread', 'description': 'Crema autunnale di melanzane e peperoni arrostiti pestati con olio e cipolla, conservata in vasetto per tutto l\'inverno.', 'description_en': 'An autumn spread of roasted aubergines and peppers blended with onion and oil, jarred to be enjoyed throughout winter.', 'ingredients': ['melanzane', 'peperoni', 'cipolla', 'pomodoro', 'olio'], 'ingredients_en': ['aubergine', 'peppers', 'onion', 'tomato', 'oil'], 'places': ['Vatra Bucharest', 'Lacrimi si Sfinti Bucharest', "Hanu' lui Manuc Bucharest"]},
- {'name': 'Ciorbă de perișoare', 'name_en': 'Meatball Soup', 'description': 'Brodo acidulo con polpettine di carne e riso e tante verdure di stagione, comfort food quotidiano nelle case romene.', 'description_en': 'A tangy broth with small meat-and-rice meatballs and plenty of seasonal vegetables, an everyday comfort food in Romanian homes.', 'ingredients': ['carne macinata', 'riso', 'verdure', 'brodo', 'erbe'], 'ingredients_en': ['minced meat', 'rice', 'vegetables', 'broth', 'herbs'], 'places': ['La Mama Bucharest', 'Vatra Bucharest', "Hanu' lui Manuc Bucharest"]},
- {'name': 'Țuică', 'name_en': 'Plum Brandy', 'description': 'Distillato di prugne fermentate dal sapore intenso, servito come aperitivo o digestivo nelle case e nei ristoranti romeni.', 'description_en': 'A strong spirit distilled from fermented plums, served as an aperitif or digestif in Romanian homes and restaurants.', 'ingredients': ['prugne'], 'ingredients_en': ['plums'], 'places': ["Caru' cu Bere Bucharest", 'Vatra Bucharest', 'Lacrimi si Sfinti Bucharest']},
-]
-
 CULTURE_FACTS = [
  {'icon': '🏛️', 'title': 'Bucarest alterna grande monumentalità e tessuto irregolare', 'title_en': 'Bucharest alternates huge monumentality and irregular fabric', 'body': 'La città passa rapidamente da grandi assi e palazzi enormi a strade più minute e stratificate.', 'body_en': 'The city quickly moves from huge avenues and enormous palaces to smaller, more layered streets.'},
  {'icon': '🧱', 'title': 'Il Novecento pesa moltissimo sulla lettura urbana', 'title_en': 'The twentieth century strongly shapes the urban reading', 'body': "Il Palazzo del Parlamento e i grandi boulevard rendono molto visibile la trasformazione forzata della città.", 'body_en': "The Palace of the Parliament and the great boulevards make the city's forced transformation highly visible."},
@@ -159,3 +149,87 @@ CULTURE_FACTS = [
  {'icon': '🚶', 'title': 'Il centro storico si visita bene a piedi ma la città è ampia', 'title_en': 'The old centre works well on foot but the city is broad', 'body': 'Bucarest richiede di alternare passeggiate compatte a salti urbani molto più larghi.', 'body_en': 'Bucharest requires alternating compact walks with much broader urban jumps.'},
  {'icon': '🌆', 'title': 'Bucarest cambia tono molto rapidamente', 'title_en': 'Bucharest changes tone very quickly', 'body': 'È una città di contrasti rapidi tra monumentale, quotidiano, verde, traffico e memoria.', 'body_en': 'It is a city of rapid contrasts between monumentality, everyday life, greenery, traffic and memory.'},
 ]
+
+
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Sarmale',
+  'name_en': 'Stuffed Cabbage Rolls',
+  'description': 'Involtini di cavolo fermentato ripieni di carne macinata, riso, cipolla ed erbe, cotti lentamente in salsa di pomodoro. '
+                 'Sono un piatto identitario rumeno: sapidi, morbidi, leggermente aciduli, spesso serviti con panna acida e polenta '
+                 'fumante. Il piatto funziona bene quando il ripieno resta compatto ma non asciutto.',
+  'description_en': 'Fermented cabbage rolls stuffed with minced meat, rice, onion and herbs, slowly cooked in tomato sauce. They are a '
+                    'Romanian identity dish: savoury, soft, gently tangy, often served with sour cream and steaming polenta. The dish '
+                    'works best when the filling stays compact but never dry.',
+  'ingredients': ['cavolo fermentato', 'carne macinata', 'riso', 'pomodoro', 'panna acida'],
+  'ingredients_en': ['fermented cabbage', 'minced meat', 'rice', 'tomato', 'sour cream'],
+  'places': ['Caru cu Bere Bucharest', 'Hanu lui Manuc Bucharest', 'La Mama Bucharest']},
+ {'name': 'Mici',
+  'name_en': 'Mici Grilled Sausages',
+  'description': 'Piccoli cilindri di carne macinata speziata, grigliati senza budello fino a diventare succosi dentro e ben rosolati '
+                 'fuori. A Bucarest sono cibo conviviale da birreria e mercato, serviti con senape forte, pane e spesso una birra fredda.',
+  'description_en': 'Small cylinders of spiced minced meat, grilled without casing until juicy inside and well browned outside. In '
+                    'Bucharest they are sociable beer-hall and market food, served with sharp mustard, bread and often a cold beer.',
+  'ingredients': ['manzo', 'maiale', 'aglio', 'timo', 'senape'],
+  'ingredients_en': ['beef', 'pork', 'garlic', 'thyme', 'mustard'],
+  'places': ['Obor Market Bucharest', 'Caru cu Bere Bucharest', 'La Ceaunu Crăpat Bucharest']},
+ {'name': 'Ciorbă de burtă',
+  'name_en': 'Tripe Soup',
+  'description': 'Zuppa cremosa e acidula di trippa, brodo, panna acida, aglio e aceto, amata per il contrasto tra intensità e freschezza. '
+                 'È una preparazione tradizionale molto riconoscibile: comfort food robusto, spesso personalizzato al tavolo con '
+                 'peperoncino.',
+  'description_en': 'A creamy, tangy tripe soup made with broth, sour cream, garlic and vinegar, loved for the contrast between intensity '
+                    'and freshness. It is a very recognisable traditional preparation: hearty comfort food, often adjusted at the table '
+                    'with chilli.',
+  'ingredients': ['trippa', 'panna acida', 'aglio', 'aceto', 'brodo'],
+  'ingredients_en': ['tripe', 'sour cream', 'garlic', 'vinegar', 'broth'],
+  'places': ['Vatra Bucharest', 'Hanu Berarilor Bucharest', 'La Mama Bucharest']},
+ {'name': 'Papanași',
+  'name_en': 'Papanași Cheese Doughnuts',
+  'description': 'Dolce scenografico a base di formaggio fresco, fritto o bollito, servito con panna acida e confettura di amarene o '
+                 'frutti di bosco. La versione più amata è alta, dorata, morbida e leggermente acidula, perfetta come finale sostanzioso.',
+  'description_en': 'A showy dessert made with fresh cheese, fried or boiled, served with sour cream and sour-cherry or berry jam. The '
+                    'best-loved version is tall, golden, soft and gently tangy, perfect as a substantial final course.',
+  'ingredients': ['formaggio fresco', 'farina', 'uova', 'panna acida', 'confettura'],
+  'ingredients_en': ['fresh cheese', 'flour', 'eggs', 'sour cream', 'jam'],
+  'places': ['Caru cu Bere Bucharest', 'Hanu lui Manuc Bucharest', 'Vatra Bucharest']},
+ {'name': 'Cozonac',
+  'name_en': 'Cozonac Sweet Bread',
+  'description': 'Pane dolce arrotolato e soffice, profumato con vaniglia o agrumi e farcito con noci, cacao, uvetta o rahat. È legato '
+                 'alle feste familiari rumene: ricco, fragrante, da tagliare a fette spesse e mangiare lentamente. La qualità si sente '
+                 'soprattutto nella mollica elastica e nel profumo appena tostato.',
+  'description_en': 'A soft rolled sweet bread scented with vanilla or citrus and filled with walnuts, cocoa, raisins or rahat. It is tied '
+                    'to Romanian family holidays: rich, fragrant, sliced thick and meant to be eaten slowly.',
+  'ingredients': ['farina', 'uova', 'burro', 'noci', 'cacao'],
+  'ingredients_en': ['flour', 'eggs', 'butter', 'walnuts', 'cocoa'],
+  'places': ['Casa Capșa Bucharest', 'French Revolution Bucharest', 'Pain Plaisir Bucharest']},
+ {'name': 'Zacuscă',
+  'name_en': 'Zacuscă Vegetable Spread',
+  'description': 'Crema rustica di melanzane, peperoni arrostiti, cipolla e pomodoro, cotta a lungo fino a diventare dolce, affumicata e '
+                 'concentrata. Si mangia su pane, spesso come antipasto, e racconta molto della cucina domestica di conserva. La qualità '
+                 'emerge quando le verdure restano riconoscibili ma perfettamente amalgamate.',
+  'description_en': 'A rustic spread of aubergines, roasted peppers, onion and tomato, cooked for a long time until sweet, smoky and '
+                    'concentrated. It is eaten on bread, often as a starter, and says a lot about Romanian home preserving.',
+  'ingredients': ['melanzane', 'peperoni', 'cipolla', 'pomodoro', 'olio'],
+  'ingredients_en': ['aubergines', 'peppers', 'onion', 'tomato', 'oil'],
+  'places': ['Lacrimi și Sfinți Bucharest', 'Vatra Bucharest', 'Zexe Bucharest']},
+ {'name': 'Ciorbă de perișoare',
+  'name_en': 'Meatball Sour Soup',
+  'description': 'Zuppa acidula con piccole polpette di carne e riso, verdure, erbe e brodo vivace, spesso resa fresca da borș o limone. È '
+                 'quotidiana ma completa: calda, nutriente, equilibrata tra parte carnosa, verdure e nota aspra.',
+  'description_en': 'A tangy soup with small meat-and-rice meatballs, vegetables, herbs and lively broth, often freshened with borș or '
+                    'lemon. It is everyday yet complete: warm, nourishing and balanced between meatiness, vegetables and sourness. Its '
+                    'quality lies in a broth that feels bright, balanced and never heavy.',
+  'ingredients': ['carne macinata', 'riso', 'carote', 'sedano', 'borș'],
+  'ingredients_en': ['minced meat', 'rice', 'carrots', 'celery', 'borș'],
+  'places': ['La Mama Bucharest', 'Hanu Berarilor Bucharest', 'Vatra Bucharest']},
+ {'name': 'Țuică',
+  'name_en': 'Țuică Plum Brandy',
+  'description': 'Distillato tradizionale di prugne, servito in piccoli bicchieri come aperitivo o chiusura conviviale. Può essere ruvido '
+                 'o sorprendentemente aromatico: più che un semplice alcolico, accompagna ospitalità, feste e cucina casalinga rumena. La '
+                 'qualità migliore è pulita, fruttata e capace di chiudere il pasto senza appesantire.',
+  'description_en': 'A traditional plum brandy served in small glasses as an aperitif or convivial ending. It can be rough or surprisingly '
+                    'aromatic: more than a simple spirit, it accompanies hospitality, celebrations and Romanian home cooking. The best '
+                    'versions are clean, fruity and able to close the meal without heaviness.',
+  'ingredients': ['prugne', 'lieviti naturali', 'acqua'],
+  'ingredients_en': ['plums', 'natural yeasts', 'water'],
+  'places': ['Caru cu Bere Bucharest', 'Lacrimi și Sfinți Bucharest', 'Hanu lui Manuc Bucharest']}]

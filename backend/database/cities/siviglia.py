@@ -134,16 +134,88 @@ FOOD_SPOTS = [
  {'city': 'siviglia', 'zone': 'los_remedios', 'category_level': 3, 'name': 'Lalola de Javi Abascal area dining', 'name_en': 'Lalola area dining', 'description': 'Voce di fascia alta per una cena più curata nella fascia ovest centrale.', 'description_en': 'A high end entry for a more polished dinner in the central western belt.', 'latitude': 37.3772, 'longitude': -6.0017, 'estimated_visit_time': 95, 'tags': ['curato', 'cena', 'ovest'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.4},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Espinacas con garbanzos', 'name_en': 'Spinach with chickpeas', 'description': 'Stufato di spinaci e ceci speziato con cumino, paprika e aglio fritto, tapa storica della Quaresima sivigliana.', 'description_en': 'A stew of spinach and chickpeas spiced with cumin, paprika and fried garlic, a historic Lenten Seville tapa.', 'ingredients': ['spinaci', 'ceci', 'aglio', 'cumino', 'olio'], 'ingredients_en': ['spinach', 'chickpeas', 'garlic', 'cumin', 'olive oil'], 'places': ['El Rinconcillo Seville', 'Bodega Santa Cruz Las Columnas Seville', 'Bar Alfalfa Seville']},
- {'name': 'Pescaíto frito', 'name_en': 'Fried fish', 'description': 'Frittura mista di pesciolini infarinati e cotti in olio d\'oliva bollente, classica del quartiere di Triana sulle rive del Guadalquivir.', 'description_en': 'A mixed fry of small fish coated in flour and cooked in hot olive oil, a classic of the Triana riverside neighbourhood.', 'ingredients': ['pesce piccolo', 'farina', 'olio', 'sale'], 'ingredients_en': ['small fish', 'flour', 'oil', 'salt'], 'places': ['Freiduria Puerta de la Carne Seville', 'Freiduria La Isla Seville', 'Blanco Cerrillo Seville']},
- {'name': 'Solomillo al whisky', 'name_en': 'Pork tenderloin in whisky sauce', 'description': 'Medaglioni di filetto di maiale rosolati in una salsa intensa di aglio fritto, whisky e succo di limone, gloria dei bar di Siviglia.', 'description_en': 'Pork tenderloin medallions seared in an intense sauce of fried garlic, whisky and lemon juice, a glory of Seville tapas bars.', 'ingredients': ['maiale', 'aglio', 'whisky', 'olio', 'spezie'], 'ingredients_en': ['pork', 'garlic', 'whisky', 'oil', 'spices'], 'places': ['Bodeguita Antonio Romero Seville', 'Casa Morales Seville', 'Eslava Seville']},
- {'name': 'Montadito de pringá', 'name_en': 'Pringá sandwich', 'description': 'Piccolo panino andaluso farcito con le carni morbide e saporite del cocido, pressato e servito caldo nei bar di Siviglia.', 'description_en': 'A small Andalusian sandwich filled with the soft, flavorful meats from cocido, pressed and served hot in Seville bars.', 'ingredients': ['pane', 'carni del cocido', 'grasso', 'spezie'], 'ingredients_en': ['bread', 'cocido meats', 'fat', 'spices'], 'places': ['Bodeguita Romero Seville', 'Bodega Santa Cruz Las Columnas Seville', 'Bar Baratillo Seville']},
- {'name': 'Gazpacho andaluz', 'name_en': 'Andalusian gazpacho', 'description': 'Zuppa fredda di pomodoro, cetriolo, peperone, aglio e pane frullata fino a vellutarsi, regina delle estati incandescenti di Siviglia.', 'description_en': 'A cold soup of tomato, cucumber, pepper, garlic and bread blended until silky, queen of the searing Seville summers.', 'ingredients': ['pomodoro', 'cetriolo', 'peperone', 'aglio', 'pane', 'olio'], 'ingredients_en': ['tomato', 'cucumber', 'pepper', 'garlic', 'bread', 'olive oil'], 'places': ['El Rinconcillo Seville', 'Casa Robles Seville', 'La Azotea Seville']},
- {'name': 'Torrijas', 'name_en': 'Spanish soaked sweet bread', 'description': 'Fette di pane raffermo inzuppate nel latte e nell\'uovo, fritte e cosparse di zucchero alla cannella, dolce di Settimana Santa sevillano.', 'description_en': 'Slices of stale bread soaked in milk and egg, then fried and coated in cinnamon sugar, a Holy Week sweet in Seville.', 'ingredients': ['pane', 'latte', 'uova', 'zucchero', 'cannella'], 'ingredients_en': ['bread', 'milk', 'eggs', 'sugar', 'cinnamon'], 'places': ['Confiteria La Campana Seville', 'Manu Jara Seville', 'Horno San Buenaventura Seville']},
- {'name': 'Huevos a la flamenca', 'name_en': 'Flamenco eggs', 'description': 'Uova al tegamino cotte nel forno su un letto di sofrito di pomodoro, peperoni, piselli e fettine di chorizo e prosciutto.', 'description_en': 'Baked eggs cooked in the oven on a bed of tomato sofrito with peppers, peas and slices of chorizo and ham.', 'ingredients': ['uova', 'pomodoro', 'piselli', 'patate', 'chorizo'], 'ingredients_en': ['eggs', 'tomato', 'peas', 'potatoes', 'chorizo'], 'places': ['Casa Ricardo Seville', 'La Brunilda Seville', 'Bar Dos de Mayo Seville']},
- {'name': 'Caracoles', 'name_en': 'Seasonal snails', 'description': 'Piccole lumache bollite in brodo speziato con menta, finocchio selvatico e aglio, irrinunciabile tapa estiva nei bar di periferia.', 'description_en': 'Small snails boiled in spiced broth with mint, wild fennel and garlic, an essential summer tapa in neighbourhood bars.', 'ingredients': ['lumache', 'brodo', 'menta', 'spezie', 'aglio'], 'ingredients_en': ['snails', 'broth', 'mint', 'spices', 'garlic'], 'places': ['Casa Diego Seville', 'Bodeguita Romero Seville', 'Bar Los Claveles Seville']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
+  'name_en': 'Spinach with Chickpeas',
+  'description': 'Tapa sivigliana di spinaci, ceci, aglio, pane fritto, cumino e paprika, spesso legata alla tradizione quaresimale. ? '
+                 'vegetale ma intensa: cremosa, speziata, sapida, perfetta quando i ceci restano integri e gli spinaci non diventano '
+                 'acquosi.',
+  'description_en': 'A Sevillian tapa of spinach, chickpeas, garlic, fried bread, cumin and paprika, often linked to Lenten tradition. It '
+                    'is vegetal yet intense: creamy, spiced and savoury, best when chickpeas stay whole and spinach does not become '
+                    'watery.',
+  'ingredients': ['spinaci', 'ceci', 'aglio', 'cumino', 'paprika'],
+  'ingredients_en': ['spinach', 'chickpeas', 'garlic', 'cumin', 'paprika'],
+  'places': ['El Rinconcillo Seville', 'Bodega Santa Cruz Las Columnas Seville', 'Bar Alfalfa Seville']},
+ {'name': 'Pesca?to frito',
+  'name_en': 'Fried Small Fish',
+  'description': 'Piccoli pesci e frutti di mare infarinati e fritti rapidamente, serviti caldi con limone, classico dell?Andalusia '
+                 'occidentale. La qualit? sta nella frittura asciutta, nel pesce fresco e nella leggerezza: deve profumare di mare, non di '
+                 'olio.',
+  'description_en': 'Small fish and seafood lightly floured and quickly fried, served hot with lemon, a classic of western Andalusia. '
+                    'Quality lies in dry frying, fresh fish and lightness: it should smell of the sea, not of oil.',
+  'ingredients': ['pesce', 'farina', 'olio', 'limone', 'sale'],
+  'ingredients_en': ['fish', 'flour', 'oil', 'lemon', 'salt'],
+  'places': ['Freiduria Puerta de la Carne Seville', 'Freiduria La Isla Seville', 'Blanco Cerrillo Seville']},
+ {'name': 'Solomillo al whisky',
+  'name_en': 'Pork Tenderloin in Whisky Sauce',
+  'description': 'Filetto di maiale cotto con aglio, olio, limone e whisky, servito spesso come tapa con patate. ? una specialit? da bar '
+                 'sivigliano: salsa intensa ma brillante, carne tenera, aglio evidente e fondo da raccogliere col pane.',
+  'description_en': 'Pork tenderloin cooked with garlic, oil, lemon and whisky, often served as a tapa with potatoes. It is a Sevillian '
+                    'bar speciality: intense but bright sauce, tender meat, clear garlic and juices meant to be collected with bread.',
+  'ingredients': ['filetto di maiale', 'whisky', 'aglio', 'limone', 'olio'],
+  'ingredients_en': ['pork tenderloin', 'whisky', 'garlic', 'lemon', 'oil'],
+  'places': ['Bodeguita Antonio Romero Seville', 'Casa Morales Seville', 'Eslava Seville']},
+ {'name': 'Montadito de pring?',
+  'name_en': 'Pring? Sandwich',
+  'description': 'Piccolo panino caldo ripieno di carni del puchero, come maiale, chorizo, morcilla e pancetta, schiacciate insieme. ? una '
+                 'tapa popolare e potentissima: grassa, sapida, morbida, migliore quando il pane resta croccante fuori. La qualit? dipende '
+                 'dalla carne ben amalgamata e dal servizio caldo.',
+  'description_en': 'A small hot sandwich filled with meats from puchero stew, such as pork, chorizo, morcilla and bacon, mashed together. '
+                    'It is a powerful popular tapa: fatty, savoury and soft, best when the bread stays crisp outside.',
+  'ingredients': ['pane', 'maiale', 'chorizo', 'morcilla', 'pancetta'],
+  'ingredients_en': ['bread', 'pork', 'chorizo', 'morcilla', 'bacon'],
+  'places': ['Bodeguita Romero Seville', 'Bodega Santa Cruz Las Columnas Seville', 'Bar Baratillo Seville']},
+ {'name': 'Gazpacho andaluz',
+  'name_en': 'Andalusian Gazpacho',
+  'description': 'Zuppa fredda di pomodoro, peperone, cetriolo, aglio, pane, olio e aceto, fondamentale nelle estati andaluse. Deve essere '
+                 'fresca, liscia e viva: acidit?, dolcezza del pomodoro e olio buono devono restare in equilibrio. La qualit? si riconosce '
+                 'nel servizio freddo e nella texture vellutata.',
+  'description_en': 'A cold soup of tomato, pepper, cucumber, garlic, bread, oil and vinegar, fundamental in Andalusian summers. It should '
+                    'be fresh, smooth and lively: acidity, tomato sweetness and good oil must remain in balance. Quality is recognised in '
+                    'cold service and a velvety texture.',
+  'ingredients': ['pomodoro', 'peperone', 'cetriolo', 'aglio', 'olio d?oliva'],
+  'ingredients_en': ['tomato', 'pepper', 'cucumber', 'garlic', 'olive oil'],
+  'places': ['El Rinconcillo Seville', 'Casa Robles Seville', 'La Azotea Seville']},
+ {'name': 'Torrijas',
+  'name_en': 'Spanish Torrijas',
+  'description': 'Fette di pane imbevute in latte o vino, passate nell?uovo, fritte e cosparse di zucchero o miele, tipiche della '
+                 'Settimana Santa. Sono morbide, profumate e dolci, ma la qualit? richiede frittura pulita e interno non zuppo.',
+  'description_en': 'Slices of bread soaked in milk or wine, dipped in egg, fried and covered with sugar or honey, typical of Holy Week. '
+                    'They are soft, fragrant and sweet, but quality requires clean frying and an interior that is not soggy.',
+  'ingredients': ['pane', 'latte', 'uova', 'zucchero', 'miele'],
+  'ingredients_en': ['bread', 'milk', 'eggs', 'sugar', 'honey'],
+  'places': ['Confiteria La Campana Seville', 'Manu Jara Seville', 'Horno San Buenaventura Seville']},
+ {'name': 'Huevos a la flamenca',
+  'name_en': 'Flamenco-Style Eggs',
+  'description': 'Uova cotte al forno con pomodoro, piselli, peperoni, chorizo e talvolta patate o prosciutto, in terracotta. ? un piatto '
+                 'colorato e generoso: tuorlo morbido, salsa saporita e ingredienti distribuiti senza diventare confusi. La qualit? '
+                 'dipende dalla cottura dell?uovo, che non deve asciugarsi.',
+  'description_en': 'Eggs baked with tomato, peas, peppers, chorizo and sometimes potatoes or ham, in an earthenware dish. It is colourful '
+                    'and generous: soft yolk, savoury sauce and ingredients distributed without becoming confused. Quality depends on egg '
+                    'cooking, which should never dry out.',
+  'ingredients': ['uova', 'pomodoro', 'piselli', 'chorizo', 'peperoni'],
+  'ingredients_en': ['eggs', 'tomato', 'peas', 'chorizo', 'peppers'],
+  'places': ['Casa Ricardo Seville', 'La Brunilda Seville', 'Bar Dos de Mayo Seville']},
+ {'name': 'Caracoles',
+  'name_en': 'Sevillian Snails',
+  'description': 'Lumachine cotte in brodo speziato con erbe, aglio e aromi, servite come tapa stagionale soprattutto in primavera. Sono '
+                 'conviviali e particolari: piccole, saporite, profumate, da mangiare lentamente con una birra fredda. La qualit? sta nel '
+                 'brodo aromatico e nella pulizia del sapore.',
+  'description_en': 'Small snails cooked in a spiced broth with herbs, garlic and aromatics, served as a seasonal tapa especially in '
+                    'spring. They are convivial and distinctive: small, savoury, fragrant and meant to be eaten slowly with a cold beer.',
+  'ingredients': ['lumache', 'aglio', 'erbe', 'spezie', 'brodo'],
+  'ingredients_en': ['snails', 'garlic', 'herbs', 'spices', 'broth'],
+  'places': ['Casa Diego Seville', 'Bodeguita Romero Seville', 'Bar Los Claveles Seville']}]
 
 CULTURE_FACTS = [
  {'icon': '💃', 'title': 'Il flamenco è una presenza reale nella città, non solo uno spettacolo per visitatori', 'title_en': 'Flamenco is a real presence in the city, not just a show for visitors', 'body': 'Siviglia mantiene un legame forte con il flamenco come pratica culturale e identitaria quotidiana.', 'body_en': 'Seville keeps a strong link with flamenco as a daily cultural and identity practice.'},

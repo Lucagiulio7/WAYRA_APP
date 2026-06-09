@@ -133,16 +133,92 @@ FOOD_SPOTS = [
  {'city': 'stoccolma', 'zone': 'skeppsholmen_waterfront', 'category_level': 3, 'name': 'Blasieholmen waterfront dining', 'name_en': 'Blasieholmen waterfront dining', 'description': 'Cena più scenografica per chi vuole restare sul bordo del porto interno.', 'description_en': 'A more scenic dinner for those wanting to stay on the edge of the inner harbour.', 'latitude': 59.3299, 'longitude': 18.0809, 'estimated_visit_time': 95, 'tags': ['porto', 'elegante', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Köttbullar', 'name_en': 'Swedish meatballs', 'description': 'Polpette svedesi di carne servite con salsa cremosa, purè di patate, cetriolini e confettura di mirtilli rossi.', 'description_en': 'Swedish meatballs served with creamy sauce, mashed potatoes, pickled cucumber and lingonberry jam.', 'ingredients': ['carne macinata', 'pangrattato', 'cipolla', 'uova', 'salsa', 'mirtilli rossi'], 'ingredients_en': ['minced beef and pork', 'breadcrumbs', 'onion', 'eggs', 'cream gravy', 'lingonberries'], 'places': ['Meatballs for the People Stockholm', 'Tradition Stockholm', 'Pelikan Stockholm']},
- {'name': 'Toast Skagen', 'name_en': 'Toast Skagen', 'description': 'Pane tostato con gamberi e salsa cremosa, molto presente nelle tavole svedesi classiche.', 'description_en': 'Toasted bread with shrimp and creamy topping, very common in classic Swedish dining.', 'ingredients': ['pane', 'gamberi', 'maionese', 'aneto', 'limone'], 'ingredients_en': ['toast bread', 'shrimp', 'mayonnaise', 'dill', 'lemon'], 'places': ['Sturehof Stockholm', 'Lisa Elmqvist Stockholm', 'Prinsen Stockholm']},
- {'name': 'Gravlax', 'name_en': 'Gravlax', 'description': 'Salmone marinato tipico della cucina nordica, spesso servito con senape e aneto.', 'description_en': 'Salmon cured in the Nordic tradition, often served with mustard and dill.', 'ingredients': ['salmone', 'sale', 'zucchero', 'aneto', 'senape'], 'ingredients_en': ['salmon', 'salt', 'sugar', 'dill', 'mustard'], 'places': ['Lisa Elmqvist Stockholm', 'Pelikan Stockholm', 'Tradition Stockholm']},
- {'name': 'Smörgåsbord', 'name_en': 'Smorgasbord', 'description': 'Tavola mista di piatti freddi e caldi che racconta la varietà della cucina svedese.', 'description_en': 'A mixed table of cold and hot dishes telling the variety of Swedish cuisine.', 'ingredients': ['aringhe', 'salmone', 'pane', 'formaggi', 'salumi', 'uova'], 'ingredients_en': ['herring', 'salmon', 'bread', 'cheeses', 'cold meats', 'eggs'], 'places': ['Grand Hotel Veranda Stockholm', 'Operakallaren Stockholm', 'Pelikan Stockholm']},
- {'name': 'Kanelbulle', 'name_en': 'Cinnamon bun', 'description': 'Soffice girella svedese alla cannella e cardamomo, profumata e burrosa, simbolo della pausa caffè fika.', 'description_en': 'A soft Swedish cinnamon and cardamom bun, fragrant and buttery, a symbol of the fika coffee break.', 'ingredients': ['farina', 'burro', 'cannella', 'zucchero', 'lievito'], 'ingredients_en': ['flour', 'butter', 'cinnamon', 'sugar', 'yeast'], 'places': ['Vete Katten Stockholm', 'Fabrique Stockholm', 'Lillebrors Bageri Stockholm']},
- {'name': 'Räkmacka', 'name_en': 'Shrimp sandwich', 'description': 'Panino aperto con gamberi molto diffuso nelle zone di mercato e waterfront.', 'description_en': 'An open sandwich with shrimp, very widespread in market and waterfront areas.', 'ingredients': ['pane', 'gamberi', 'uova', 'maionese', 'aneto'], 'ingredients_en': ['bread', 'shrimp', 'boiled eggs', 'mayonnaise', 'dill'], 'places': ['Lisa Elmqvist Stockholm', 'Sturehof Stockholm', 'Bla Porten Stockholm']},
- {'name': 'Sill', 'name_en': 'Pickled herring', 'description': 'Aringa marinata in aceto, zucchero, cipolla e spezie, servita fredda in molte varianti nelle tavole festive svedesi.', 'description_en': 'Herring marinated in vinegar, sugar, onion and spices, served cold in many variations on Swedish festive tables.', 'ingredients': ['aringa', 'aceto', 'zucchero', 'cipolla', 'spezie'], 'ingredients_en': ['herring', 'vinegar', 'sugar', 'onion', 'spices'], 'places': ['Nystekt Stromming Stockholm', 'Pelikan Stockholm', 'Tradition Stockholm']},
- {'name': 'Prinsesstårta', 'name_en': 'Princess cake', 'description': 'Torta svedese a strati con pan di Spagna, crema, panna e copertura verde di marzapane.', 'description_en': 'A Swedish layered cake with sponge cake, custard, whipped cream and a green marzipan covering.', 'ingredients': ['pan di spagna', 'crema', 'panna', 'marzapane', 'confettura'], 'ingredients_en': ['sponge cake', 'custard', 'whipped cream', 'marzipan', 'raspberry jam'], 'places': ['Vete Katten Stockholm', 'Tossebageriet Stockholm', 'Thelins Stockholm']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'K?ttbullar',
+  'name_en': 'Swedish Meatballs',
+  'description': 'Polpette svedesi di carne macinata, servite con pur? di patate, salsa bruna, cetrioli e confettura di mirtilli rossi. A '
+                 'Stoccolma sono comfort food identitario: morbide, saporite, equilibrate tra grasso, dolcezza della frutta e acidit? dei '
+                 'contorni.',
+  'description_en': 'Swedish meatballs made from minced meat, served with mashed potatoes, brown sauce, cucumber and lingonberry jam. In '
+                    'Stockholm they are identity-rich comfort food: soft, savoury and balanced between fat, fruit sweetness and the '
+                    'acidity of the sides.',
+  'ingredients': ['carne macinata', 'patate', 'salsa bruna', 'mirtilli rossi', 'cetrioli'],
+  'ingredients_en': ['minced meat', 'potatoes', 'brown sauce', 'lingonberries', 'cucumbers'],
+  'places': ['Meatballs for the People Stockholm', 'Tradition Stockholm', 'Pelikan Stockholm']},
+ {'name': 'Toast Skagen',
+  'name_en': 'Toast Skagen',
+  'description': 'Toast elegante con gamberi, maionese, aneto, limone e spesso uova di pesce, creato come classico moderno della cucina '
+                 'svedese. Deve essere fresco e cremoso ma non pesante, con pane croccante e gusto marino pulito. La qualit? dipende dai '
+                 'gamberi freddi e dalla maionese dosata con precisione.',
+  'description_en': 'An elegant toast with shrimps, mayonnaise, dill, lemon and often fish roe, created as a modern classic of Swedish '
+                    'cooking. It should be fresh and creamy but not heavy, with crisp bread and clean marine flavour.',
+  'ingredients': ['gamberi', 'pane tostato', 'maionese', 'aneto', 'limone'],
+  'ingredients_en': ['shrimps', 'toast', 'mayonnaise', 'dill', 'lemon'],
+  'places': ['Sturehof Stockholm', 'Lisa Elmqvist Stockholm', 'Prinsen Stockholm']},
+ {'name': 'Gravlax',
+  'name_en': 'Gravlax',
+  'description': 'Salmone marinato con sale, zucchero e aneto, servito a fette sottili con salsa alla senape dolce. ? un piatto nordico '
+                 'raffinato: texture setosa, profumo erbaceo, dolcezza misurata e sapore di pesce pulito. La qualit? richiede marinatura '
+                 'uniforme e taglio sottile, mai asciutto.',
+  'description_en': 'Salmon cured with salt, sugar and dill, served in thin slices with sweet mustard sauce. It is a refined Nordic dish: '
+                    'silky texture, herbal aroma, measured sweetness and clean fish flavour. Quality requires even curing and thin '
+                    'slicing, never dry or harsh.',
+  'ingredients': ['salmone', 'sale', 'zucchero', 'aneto', 'senape'],
+  'ingredients_en': ['salmon', 'salt', 'sugar', 'dill', 'mustard'],
+  'places': ['Lisa Elmqvist Stockholm', 'Pelikan Stockholm', 'Tradition Stockholm']},
+ {'name': 'Sm?rg?sbord',
+  'name_en': 'Sm?rg?sbord',
+  'description': 'Buffet svedese ordinato in pi? passaggi, con aringhe, salmone, patate, formaggi, carni, pane e dolci. Non ? solo '
+                 'abbondanza: la qualit? sta nel ritmo, nella variet? equilibrata e nel rispetto dell?ordine dei sapori. Deve essere '
+                 'abbondante ma leggibile, non una semplice accumulazione.',
+  'description_en': 'A Swedish buffet arranged in several stages, with herring, salmon, potatoes, cheeses, meats, bread and sweets. It is '
+                    'not just abundance: quality lies in rhythm, balanced variety and respect for the order of flavours. It should be '
+                    'abundant but readable, not a simple accumulation.',
+  'ingredients': ['aringhe', 'salmone', 'patate', 'formaggi', 'pane'],
+  'ingredients_en': ['herring', 'salmon', 'potatoes', 'cheeses', 'bread'],
+  'places': ['Grand Hotel Veranda Stockholm', 'Operakallaren Stockholm', 'Pelikan Stockholm']},
+ {'name': 'Kanelbulle',
+  'name_en': 'Cinnamon Bun',
+  'description': 'Girella svedese alla cannella e cardamomo, morbida e profumata, simbolo della fika quotidiana. Deve essere burrosa ma '
+                 'leggera, con spezie ben distribuite, superficie leggermente lucida e mollica elastica che resta fresca. La qualit? sta '
+                 'anche nel profumo del cardamomo e nella cottura uniforme.',
+  'description_en': 'A Swedish cinnamon and cardamom bun, soft and fragrant, a symbol of everyday fika. It should be buttery but light, '
+                    'with well-distributed spices, a slightly glossy surface and elastic crumb that stays fresh. Quality also lies in '
+                    'cardamom aroma and even baking.',
+  'ingredients': ['farina', 'burro', 'cannella', 'cardamomo', 'zucchero'],
+  'ingredients_en': ['flour', 'butter', 'cinnamon', 'cardamom', 'sugar'],
+  'places': ['Vete Katten Stockholm', 'Fabrique Stockholm', 'Lillebrors Bageri Stockholm']},
+ {'name': 'R?kmacka',
+  'name_en': 'Shrimp Sandwich',
+  'description': 'Sandwich aperto con abbondanti gamberi, uovo, maionese, aneto e limone, spesso servito su pane chiaro o di segale. ? '
+                 'fresco e generoso: la qualit? dipende dai gamberi, dalla salsa dosata e dal pane che regge.',
+  'description_en': 'An open sandwich with plenty of shrimps, egg, mayonnaise, dill and lemon, often served on white or rye bread. It is '
+                    'fresh and generous: quality depends on the shrimps, measured sauce and bread that can hold everything.',
+  'ingredients': ['gamberi', 'pane', 'uovo', 'maionese', 'aneto'],
+  'ingredients_en': ['shrimps', 'bread', 'egg', 'mayonnaise', 'dill'],
+  'places': ['Lisa Elmqvist Stockholm', 'Sturehof Stockholm', 'Bla Porten Stockholm']},
+ {'name': 'Sill',
+  'name_en': 'Pickled Herring',
+  'description': 'Aringa marinata in versioni dolci, acidule, speziate o cremose, servita con patate, panna acida, erba cipollina e pane. '
+                 '? centrale nelle feste svedesi: sapore deciso, acidit? controllata e forte legame con tavole stagionali. Deve restare '
+                 'fresco e brillante, mai coperto da marinature troppo dolci.',
+  'description_en': 'Pickled herring in sweet, tangy, spiced or creamy versions, served with potatoes, sour cream, chives and bread. It is '
+                    'central to Swedish celebrations: bold flavour, controlled acidity and a strong bond with seasonal tables. It should '
+                    'stay fresh and bright, never covered by overly sweet marinades.',
+  'ingredients': ['aringa', 'aceto', 'zucchero', 'patate', 'panna acida'],
+  'ingredients_en': ['herring', 'vinegar', 'sugar', 'potatoes', 'sour cream'],
+  'places': ['Nystekt Stromming Stockholm', 'Pelikan Stockholm', 'Tradition Stockholm']},
+ {'name': 'Prinsesst?rta',
+  'name_en': 'Princess Cake',
+  'description': 'Torta svedese a strati con pan di Spagna, crema, panna montata, confettura e copertura verde di marzapane. ? '
+                 'scenografica ma delicata: la qualit? sta nella leggerezza della panna, nel marzapane sottile e nella dolcezza non '
+                 'eccessiva.',
+  'description_en': 'A Swedish layered cake with sponge, custard, whipped cream, jam and green marzipan covering. It is theatrical but '
+                    'delicate: quality lies in light cream, thin marzipan and sweetness that is not excessive. The best slice keeps '
+                    'structure without losing its airy, creamy softness.',
+  'ingredients': ['pan di Spagna', 'crema', 'panna', 'marzapane', 'confettura'],
+  'ingredients_en': ['sponge cake', 'custard', 'cream', 'marzipan', 'jam'],
+  'places': ['Vete Katten Stockholm', 'Tossebageriet Stockholm', 'Thelins Stockholm']}]
 
 CULTURE_FACTS = [
  {'icon': '🏝️', 'title': 'Stoccolma si legge davvero come una città di isole', 'title_en': 'Stockholm is truly read as a city of islands', 'body': 'Ponti, traghetti e affacci continui fanno dell\'acqua una struttura reale della vita urbana.', 'body_en': 'Bridges, ferries and constant viewpoints make water a real structure of urban life.'},

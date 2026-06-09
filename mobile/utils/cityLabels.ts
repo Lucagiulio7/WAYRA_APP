@@ -1,4 +1,4 @@
-const CITY_LABELS: Record<string, { it: string; en: string }> = {
+const CITY_LABELS: Record<string, { it: string; en: string; fr?: string }> = {
   amburgo: { it: "Amburgo", en: "Hamburg" },
   amsterdam: { it: "Amsterdam", en: "Amsterdam" },
   annecy: { it: "Annecy", en: "Annecy" },
@@ -54,6 +54,6 @@ function fallbackCityLabel(city: string): string {
 export function cityLabel(city: string, lang: string = "it"): string {
   const labels = CITY_LABELS[city];
   if (!labels) return fallbackCityLabel(city);
+  if (lang === "fr") return labels.fr ?? labels.en ?? labels.it;
   return lang === "en" ? labels.en : labels.it;
 }
-

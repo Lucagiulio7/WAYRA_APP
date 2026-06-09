@@ -133,16 +133,92 @@ FOOD_SPOTS = [
  {'city': 'valencia', 'zone': 'malvarrosa_albufera', 'category_level': 3, 'name': 'Albufera Sunset Dining', 'name_en': 'Albufera Sunset Dining', 'description': 'Cena più curata nel paesaggio più iconico fuori dal centro urbano.', 'description_en': 'A more refined dinner in the most iconic landscape outside the urban centre.', 'latitude': 39.3209, 'longitude': -0.3348, 'estimated_visit_time': 100, 'tags': ['tramonto', 'laguna', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Paella Valenciana', 'name_en': 'Valencian Paella', 'description': 'Riso allo zafferano cotto in padella larga con pollo, coniglio, fagiolini piatti e garrofó, ricetta tradizionale codificata dalla città.', 'description_en': 'Saffron rice cooked in a wide flat pan with chicken, rabbit, flat green beans and garrofó, the city\'s codified traditional recipe.', 'ingredients': ['riso', 'pollo', 'coniglio', 'fagiolini', 'garrofó', 'zafferano'], 'ingredients_en': ['short-grain rice', 'chicken', 'rabbit', 'flat green beans', 'garrofó beans', 'saffron'], 'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'Restaurante Levante Valencia']},
- {'name': 'Fideuà', 'name_en': 'Fideuà', 'description': 'Pasta corta tostata nella paella e cotta in brodo di pesce con seppia e gamberi, servita con maionese all\'aglio alioli.', 'description_en': 'Short pasta toasted in the paella pan and cooked in fish stock with cuttlefish and prawns, served with garlic alioli mayonnaise.', 'ingredients': ['fideos', 'brodo di pesce', 'seppia', 'gamberi', 'alioli'], 'ingredients_en': ['short noodles', 'fish stock', 'cuttlefish', 'prawns', 'alioli'], 'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'El Coso del Mar Valencia']},
- {'name': 'Esgarraet', 'name_en': 'Esgarraet', 'description': 'Insalata valenciana di peperoni arrostiti, baccalà sfilacciato, aglio e olio d’oliva, servita fredda come antipasto sapido.', 'description_en': 'A Valencian salad of roasted peppers, shredded salt cod, garlic and olive oil, served cold as a savory appetizer.', 'ingredients': ['peperoni arrostiti', 'baccalà', 'aglio', 'olio extravergine'], 'ingredients_en': ['roasted peppers', 'salt cod', 'garlic', 'extra virgin olive oil'], 'places': ['Casa Montana Valencia', 'Palace Fesol Valencia', 'Taberna Alkazar Valencia']},
- {'name': 'All i Pebre', 'name_en': 'All i Pebre', 'description': 'Stufato dei pescatori della laguna dell\'Albufera con anguilla, aglio, paprika dolce e patate, piatto identitario di Valencia.', 'description_en': 'A fishermen\'s stew from the Albufera lagoon with eel, garlic, sweet paprika and potatoes, a defining Valencian dish.', 'ingredients': ['anguilla', 'aglio', 'paprika', 'patate', 'brodo'], 'ingredients_en': ['eel', 'garlic', 'paprika', 'potatoes', 'broth'], 'places': ['Nou Raco Valencia', 'Bon Aire El Palmar Valencia', "L'Alqueria del Pou Valencia"]},
- {'name': 'Clóchinas', 'name_en': 'Valencian Mussels', 'description': 'Piccole cozze locali del Mediterraneo cotte in pentola con limone, alloro e pepe, specialità estiva delle taverne di Valencia.', 'description_en': 'Small local Mediterranean mussels cooked in a pot with lemon, bay leaf and pepper, a summer specialty of Valencia\'s taverns.', 'ingredients': ['cozze valenciane', 'limone', 'pepe', 'alloro'], 'ingredients_en': ['Valencian mussels', 'lemon', 'pepper', 'bay leaf'], 'places': ['Casa Montana Valencia', 'La Pilareta Valencia', 'Bar Pilar Valencia']},
- {'name': 'Bunyols de Carbassa', 'name_en': 'Pumpkin Fritters', 'description': 'Frittelle morbide di pasta di zucca fritte e rotolate nello zucchero, immancabili nelle bancarelle delle Fallas di marzo.', 'description_en': 'Soft pumpkin-dough fritters fried and rolled in sugar, a must-have at the street stalls during the March Fallas festival.', 'ingredients': ['zucca', 'farina', 'lievito', 'zucchero', 'olio'], 'ingredients_en': ['pumpkin', 'flour', 'yeast', 'sugar', 'oil'], 'places': ['Horchateria Fabian Valencia', 'Horchateria Santa Catalina Valencia', 'Bunoleria El Contraste Valencia']},
- {'name': 'Horchata con Fartons', 'name_en': 'Horchata with Fartons', 'description': 'Bevanda fresca e lattiginosa ricavata dal tubero della chufa, accompagnata da fartons, biscotti lunghi e dolci per intingerli.', 'description_en': 'A cool, milky drink made from tiger-nut tubers, served with fartons, long sweet biscuits for dipping.', 'ingredients': ['chufa', 'acqua', 'zucchero', 'fartons'], 'ingredients_en': ['tiger nuts', 'water', 'sugar', 'fartons pastry'], 'places': ['Horchateria Daniel Valencia', 'Horchateria Santa Catalina Valencia', 'Horchateria Panach Valencia']},
- {'name': 'Agua de Valencia', 'name_en': 'Agua de Valencia', 'description': 'Cocktail brioso a base di succo d\'arancia fresco, cava, vodka e gin, inventato nei bar del centro storico negli anni Cinquanta.', 'description_en': 'A lively cocktail of fresh orange juice, cava, vodka and gin, invented in the old town\'s bars in the 1950s.', 'ingredients': ["succo d'arancia", 'cava', 'vodka', 'gin', 'zucchero'], 'ingredients_en': ['orange juice', 'cava', 'vodka', 'gin', 'sugar'], 'places': ['Cafe Madrid Valencia', 'Cafe de las Horas Valencia', 'Sant Jaume Valencia']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Paella Valenciana',
+  'name_en': 'Valencian Paella',
+  'description': 'Riso cotto in padella larga con pollo, coniglio, fagiolini, garrof?, zafferano e brodo, nato nelle campagne valenciane. '
+                 '? il piatto identitario della citt?: conta il riso asciutto, il socarrat, la cottura uniforme e il rispetto degli '
+                 'ingredienti tradizionali.',
+  'description_en': 'Rice cooked in a wide pan with chicken, rabbit, green beans, garrof?, saffron and broth, born in the Valencian '
+                    'countryside. It is the city?s identity dish: dry rice, socarrat, even cooking and respect for traditional ingredients '
+                    'matter.',
+  'ingredients': ['riso', 'pollo', 'coniglio', 'garrof?', 'zafferano'],
+  'ingredients_en': ['rice', 'chicken', 'rabbit', 'garrof?', 'saffron'],
+  'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'Restaurante Levante Valencia']},
+ {'name': 'Fideu?',
+  'name_en': 'Fideu? Noodle Paella',
+  'description': 'Piatto marinaro simile alla paella ma preparato con pasta corta invece del riso, brodo di pesce, frutti di mare e spesso '
+                 'alioli. Deve essere saporita e asciutta, con pasta ben tostata e gusto di mare netto.',
+  'description_en': 'A seafood dish similar to paella but made with short noodles instead of rice, fish broth, seafood and often alioli. '
+                    'It should be savoury and dry, with well-toasted pasta and clear sea flavour. The best versions also develop a lightly '
+                    'toasted base and balanced alioli.',
+  'ingredients': ['fideos', 'brodo di pesce', 'gamberi', 'calamari', 'alioli'],
+  'ingredients_en': ['noodles', 'fish broth', 'prawns', 'squid', 'alioli'],
+  'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'El Coso del Mar Valencia']},
+ {'name': 'Esgarraet',
+  'name_en': 'Esgarraet Pepper and Cod Salad',
+  'description': 'Insalata valenciana di peperoni arrostiti, baccal? sfilacciato, aglio e olio d?oliva, servita fredda come tapa. ? '
+                 'semplice e intensa: dolcezza del peperone, sapidit? del pesce e olio buono devono restare in equilibrio. La qualit? '
+                 'dipende dalla dolcezza dei peperoni e dal baccal? ben dissalato.',
+  'description_en': 'A Valencian salad of roasted peppers, shredded salt cod, garlic and olive oil, served cold as a tapa. It is simple '
+                    'and intense: pepper sweetness, fish saltiness and good oil should remain in balance. Quality depends on pepper '
+                    'sweetness and salt cod that is properly desalinated.',
+  'ingredients': ['peperoni arrostiti', 'baccal?', 'aglio', 'olio d?oliva', 'sale'],
+  'ingredients_en': ['roasted peppers', 'salt cod', 'garlic', 'olive oil', 'salt'],
+  'places': ['Casa Montana Valencia', 'Palace Fesol Valencia', 'Taberna Alkazar Valencia']},
+ {'name': 'All i Pebre',
+  'name_en': 'All i Pebre Eel Stew',
+  'description': 'Stufato tradizionale dell?Albufera con anguilla, patate, aglio, paprika e peperoncino, dal nome che significa aglio e '
+                 'pepe. ? rustico e territoriale: brodo intenso, patate morbide, pesce saporito e piccantezza controllata. La qualit? si '
+                 'misura nella salsa legata e nella carne dell?anguilla tenera.',
+  'description_en': 'A traditional Albufera stew with eel, potatoes, garlic, paprika and chilli, its name meaning garlic and pepper. It is '
+                    'rustic and territorial: intense broth, soft potatoes, savoury fish and controlled heat. Quality is measured by a '
+                    'bound sauce and eel flesh that stays tender and clean.',
+  'ingredients': ['anguilla', 'patate', 'aglio', 'paprika', 'peperoncino'],
+  'ingredients_en': ['eel', 'potatoes', 'garlic', 'paprika', 'chilli'],
+  'places': ['Nou Raco Valencia', 'Bon Aire El Palmar Valencia', "L'Alqueria del Pou Valencia"]},
+ {'name': 'Cl?chinas',
+  'name_en': 'Valencian Mussels',
+  'description': 'Piccole cozze valenciane stagionali, pi? delicate di molte cozze comuni, servite spesso al vapore con limone o aromi '
+                 'leggeri. La qualit? sta nella freschezza, nella dimensione minuta e nel sapore marino pulito. La qualit? migliore evita '
+                 'cotture lunghe e conserva succo e delicatezza.',
+  'description_en': 'Small seasonal Valencian mussels, more delicate than many common mussels, often steamed with lemon or light '
+                    'aromatics. Quality lies in freshness, small size and clean marine flavour. The best quality avoids long cooking and '
+                    'preserves juice, delicacy and clean aroma.',
+  'ingredients': ['cl?chinas', 'limone', 'alloro', 'olio', 'sale'],
+  'ingredients_en': ['cl?chinas mussels', 'lemon', 'bay leaf', 'oil', 'salt'],
+  'places': ['Casa Montana Valencia', 'La Pilareta Valencia', 'Bar Pilar Valencia']},
+ {'name': 'Bunyols de Carbassa',
+  'name_en': 'Pumpkin Fritters',
+  'description': 'Frittelle dolci di zucca, farina e lievito, tipiche delle Fallas e servite con zucchero o cioccolata calda. Devono '
+                 'essere leggere, dorate e profumate, con dolcezza vegetale evidente ma frittura asciutta. La qualit? sta nella zucca '
+                 'riconoscibile e nella leggerezza dell?impasto.',
+  'description_en': 'Sweet fritters made with pumpkin, flour and yeast, typical of Fallas and served with sugar or hot chocolate. They '
+                    'should be light, golden and fragrant, with clear vegetable sweetness but dry frying. Quality lies in recognisable '
+                    'pumpkin and the lightness of the dough.',
+  'ingredients': ['zucca', 'farina', 'lievito', 'zucchero', 'olio'],
+  'ingredients_en': ['pumpkin', 'flour', 'yeast', 'sugar', 'oil'],
+  'places': ['Horchateria Fabian Valencia', 'Horchateria Santa Catalina Valencia', 'Bunoleria El Contraste Valencia']},
+ {'name': 'Horchata con Fartons',
+  'name_en': 'Horchata with Fartons',
+  'description': 'Bevanda fresca di chufa servita con fartons, dolci allungati e soffici da intingere, simbolo dell?estate valenciana. ? '
+                 'rinfrescante e lattiginosa senza latte: la qualit? sta nella chufa, nella dolcezza misurata e nel servizio freddo. La '
+                 'qualit? del farton conta perch? deve assorbire senza disfarsi.',
+  'description_en': 'A chilled tiger-nut drink served with fartons, long soft pastries made for dipping, a symbol of Valencian summer. It '
+                    'is refreshing and milky without milk: quality lies in the tiger nut, measured sweetness and cold service.',
+  'ingredients': ['chufa', 'acqua', 'zucchero', 'fartons'],
+  'ingredients_en': ['tiger nuts', 'water', 'sugar', 'fartons'],
+  'places': ['Horchateria Daniel Valencia', 'Horchateria Santa Catalina Valencia', 'Horchateria Panach Valencia']},
+ {'name': 'Agua de Valencia',
+  'name_en': 'Agua de Valencia Cocktail',
+  'description': 'Cocktail nato a Valencia con succo d?arancia, cava, gin e vodka, servito in caraffa e legato alla vita serale. Deve '
+                 'essere fresco e agrumato, non solo alcolico: l?arancia locale deve restare protagonista. La qualit? dipende da succo '
+                 'fresco e bollicina ancora viva.',
+  'description_en': 'A cocktail born in Valencia with orange juice, cava, gin and vodka, served in a jug and linked to evening social '
+                    'life. It should be fresh and citrusy, not merely alcoholic: local orange should remain the protagonist.',
+  'ingredients': ['succo d?arancia', 'cava', 'gin', 'vodka', 'zucchero'],
+  'ingredients_en': ['orange juice', 'cava', 'gin', 'vodka', 'sugar'],
+  'places': ['Cafe Madrid Valencia', 'Cafe de las Horas Valencia', 'Sant Jaume Valencia']}]
 
 CULTURE_FACTS = [
  {'icon': '🥘', 'title': 'La paella qui è una questione molto seria', 'title_en': 'Paella is a very serious matter here', 'body': 'A Valencia la paella tradizionale non è solo un piatto famoso ma un elemento identitario legato a famiglie, domeniche e territorio.', 'body_en': 'In Valencia, traditional paella is not just a famous dish but an identity marker tied to families, Sundays and territory.'},

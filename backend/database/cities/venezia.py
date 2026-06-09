@@ -156,16 +156,89 @@ FOOD_SPOTS = [
  {'city': 'venezia', 'zone': 'burano_torcello', 'category_level': 2, 'name': 'Panificio Garbo Burano', 'name_en': 'Panificio Garbo Burano', 'description': 'Forno e pasticceria di Burano dove trovare tutti i dolci tipici della tradizione: bussolà, zaletti ed essi buranelli preparati secondo le ricette antiche.', 'description_en': 'Burano bakery-pastry shop offering all the traditional island sweets: bussolà, zaletti and essi buranelli made to old recipes.', 'latitude': 45.4858, 'longitude': 12.4180, 'estimated_visit_time': 25, 'tags': ['panetteria', 'burano', 'bussola'], 'food_type': 'panetteria', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.4},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Sarde in saor', 'name_en': 'Sweet and Sour Sardines', 'description': 'Sarde fritte marinate in cipolle, aceto, uvetta e pinoli, ricetta marinara che nasceva per conservare il pesce in barca.', 'description_en': 'Fried sardines marinated in onions, vinegar, raisins and pine nuts, a sailors\' recipe born to preserve fish on board.', 'ingredients': ['sarde', 'cipolla', 'aceto', 'uvetta', 'pinoli'], 'ingredients_en': ['sardines', 'onion', 'white wine vinegar', 'raisins', 'pine nuts'], 'places': [{'name': "Cantina Do Spade"}, {'name': "All'Arco"}, {'name': "Osteria Alla Vedova"}]},
- {'name': 'Baccalà mantecato', 'name_en': 'Creamed Salt Cod', 'description': 'Spuma morbida di stoccafisso lavorato con olio fino a diventare bianca e cremosa, classico dei bacari spalmato sulla polenta.', 'description_en': 'Soft whipped stockfish worked with olive oil until white and creamy, a bacari classic spread on slices of polenta.', 'ingredients': ['stoccafisso', 'olio', 'aglio', 'prezzemolo'], 'ingredients_en': ['stockfish', 'olive oil', 'garlic', 'parsley'], 'places': [{'name': 'Cantina Do Mori'}, {'name': 'Ristoteca Oniga'}, {'name': 'Al Mercà Venezia'}]},
- {'name': 'Cicchetti', 'name_en': 'Cicchetti', 'description': 'Piccoli assaggi su crostini e fettine di pane serviti al banco dei bacari, rito sociale dell\'ombra di vino veneziana.', 'description_en': 'Small bites on crostini and bread slices served at bacari counters, the social ritual of the Venetian "ombra" of wine.', 'ingredients': ['pane', 'pesce', 'verdure', 'salumi', 'salse'], 'ingredients_en': ['bread', 'fish', 'vegetables', 'cured meats', 'sauces'], 'places': [{'name': 'Cantina Do Mori'}, {'name': 'Al Portego'}, {'name': 'Bacareto da Lele'}]},
- {'name': 'Fegato alla veneziana', 'name_en': 'Venetian Liver', 'description': 'Fegato di vitello a fettine sottili cotto velocemente con tante cipolle dolci stufate, piatto storico della cucina cittadina.', 'description_en': 'Thinly sliced veal liver cooked quickly with a generous amount of slow-stewed sweet onions, a historic dish of the city.', 'ingredients': ['fegato', 'cipolla', 'burro', 'olio'], 'ingredients_en': ['calf liver', 'onion', 'butter', 'olive oil'], 'places': [{'name': 'Trattoria La Bitta'}, {'name': 'Trattoria Dona Onesta'}, {'name': 'Cantina Do Spade'}]},
- {'name': 'Risi e bisi', 'name_en': 'Rice and Peas', 'description': 'Primo primaverile a metà fra risotto e minestra, con piselli freschi e brodo, un tempo offerto al Doge per la festa di San Marco.', 'description_en': 'A spring first course halfway between risotto and soup, with fresh peas and broth, once offered to the Doge for the feast of Saint Mark.', 'ingredients': ['riso', 'piselli', 'brodo', 'burro', 'parmigiano'], 'ingredients_en': ['rice', 'peas', 'broth', 'butter', 'Parmesan'], 'places': [{'name': 'Anice Stellato'}, {'name': 'Trattoria Alla Madonna'}, {'name': 'La Zucca'}]},
- {'name': 'Moeche', 'name_en': 'Soft-Shell Crabs', 'description': 'Granchi della laguna catturati nel breve momento della muta, infarinati e fritti interi per gustarli con il loro guscio molle.', 'description_en': 'Lagoon crabs caught during the brief moulting moment, floured and deep-fried whole to be eaten with their soft shell intact.', 'ingredients': ['granchi molli', 'uovo', 'farina', 'olio'], 'ingredients_en': ['soft-shell crabs', 'egg', 'flour', 'oil'], 'places': [{'name': 'Poste Vecie'}, {'name': 'Le Antiche Carampane'}, {'name': 'Al Gatto Nero Burano'}]},
- {'name': 'Bigoli in salsa', 'name_en': 'Bigoli in Sauce', 'description': 'Spaghettoni rustici di grano duro conditi con una salsa di cipolle stufate e acciughe sciolte, piatto di magro veneziano.', 'description_en': 'Rustic durum wheat spaghetti dressed with a sauce of slow-stewed onions and melted anchovies, a Venetian lean-day dish.', 'ingredients': ['bigoli', 'cipolla', 'acciughe', 'olio'], 'ingredients_en': ['bigoli pasta', 'onion', 'anchovies', 'olive oil'], 'places': [{'name': 'Ristorante da Ivo'}, {'name': 'Osteria Alla Vedova'}, {'name': 'Hostaria Sant\'Aponal'}]},
- {'name': 'Bussolà', 'name_en': 'Bussola Biscuit', 'description': 'Biscotto burroso di Burano a forma di esse o di anello, un tempo preparato dalle mogli dei pescatori per i lunghi viaggi in mare.', 'description_en': 'A buttery biscuit from Burano shaped like an S or a ring, once prepared by fishermen\'s wives for long sea voyages.', 'ingredients': ['farina', 'burro', 'uova', 'zucchero'], 'ingredients_en': ['flour', 'butter', 'eggs', 'sugar'], 'places': [{'name': 'Pasticceria Costantini Burano'}, {'name': 'Pasticceria Palmisano Carmelina'}, {'name': 'Panificio Garbo Burano'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Sarde in saor',
+  'name_en': 'Sardines in Saor',
+  'description': 'Sarde fritte e marinate con cipolle, aceto, pinoli e uvetta, nate come preparazione di conservazione della tradizione '
+                 'veneziana. Il piatto vive di equilibrio: pesce sapido, cipolla dolce, acidit? misurata e riposo sufficiente a legare i '
+                 'sapori.',
+  'description_en': 'Fried sardines marinated with onions, vinegar, pine nuts and raisins, born as a preservation dish in Venetian '
+                    'tradition. The dish depends on balance: savoury fish, sweet onion, measured acidity and enough resting time to bind '
+                    'the flavours.',
+  'ingredients': ['sarde', 'cipolle', 'aceto', 'pinoli', 'uvetta'],
+  'ingredients_en': ['sardines', 'onions', 'vinegar', 'pine nuts', 'raisins'],
+  'places': [{'name': 'Cantina Do Spade'}, {'name': "All'Arco"}, {'name': 'Osteria Alla Vedova'}]},
+ {'name': 'Baccal? mantecato',
+  'name_en': 'Creamed Salt Cod',
+  'description': 'Baccal? montato con olio fino a diventare una crema soffice e sapida, servita su polenta o crostini nei bacari. Deve '
+                 'essere arioso, non fibroso, con sale controllato e gusto di pesce pulito ma presente. La qualit? migliore lascia la '
+                 'crema leggera e persistente al palato.',
+  'description_en': 'Salt cod whipped with oil until it becomes a soft savoury cream, served on polenta or crostini in bacari. It should '
+                    'be airy, not fibrous, with controlled salt and clean but present fish flavour. The best quality leaves the cream '
+                    'light and persistent on the palate.',
+  'ingredients': ['baccal?', 'olio', 'aglio', 'polenta', 'prezzemolo'],
+  'ingredients_en': ['salt cod', 'oil', 'garlic', 'polenta', 'parsley'],
+  'places': [{'name': 'Cantina Do Mori'}, {'name': 'Ristoteca Oniga'}, {'name': 'Al Merc? Venezia'}]},
+ {'name': 'Cicchetti',
+  'name_en': 'Venetian Cicchetti',
+  'description': 'Piccoli assaggi da bacaro serviti con un?ombra di vino: crostini, polpette, pesce, verdure, baccal? o salumi. Sono il '
+                 'modo pi? veneziano di mangiare: informale, vario, sociale, costruito su bocconi precisi e giro tra locali. La qualit? '
+                 'dipende dalla freschezza e dal servizio immediato al banco.',
+  'description_en': 'Small bacaro bites served with a glass of wine: crostini, meatballs, fish, vegetables, salt cod or cured meats. They '
+                    'are the most Venetian way to eat: informal, varied and social, built around precise bites and moving between bars.',
+  'ingredients': ['pane', 'pesce', 'baccal?', 'verdure', 'salumi'],
+  'ingredients_en': ['bread', 'fish', 'salt cod', 'vegetables', 'cured meats'],
+  'places': [{'name': 'Cantina Do Mori'}, {'name': 'Al Portego'}, {'name': 'Bacareto da Lele'}]},
+ {'name': 'Fegato alla veneziana',
+  'name_en': 'Venetian Liver and Onions',
+  'description': 'Fegato di vitello cotto con molte cipolle dolci, vino o aceto, servito morbido e profumato. ? un classico veneziano di '
+                 'equilibrio: il fegato deve restare tenero, mentre la cipolla addolcisce e arrotonda l?intensit?. La qualit? richiede '
+                 'cottura breve e cipolle lungamente ammorbidite.',
+  'description_en': 'Calf liver cooked with plenty of sweet onions, wine or vinegar, served soft and fragrant. It is a Venetian classic of '
+                    'balance: the liver should stay tender, while onion sweetens and rounds out the intensity.',
+  'ingredients': ['fegato di vitello', 'cipolle', 'vino bianco', 'burro', 'prezzemolo'],
+  'ingredients_en': ['calf liver', 'onions', 'white wine', 'butter', 'parsley'],
+  'places': [{'name': 'Trattoria La Bitta'}, {'name': 'Trattoria Dona Onesta'}, {'name': 'Cantina Do Spade'}]},
+ {'name': 'Risi e bisi',
+  'name_en': 'Rice and Peas',
+  'description': 'Piatto veneziano a met? tra risotto e minestra, con riso, piselli freschi, brodo e spesso pancetta o cipolla. '
+                 'Tradizionalmente legato alla primavera e a San Marco, deve essere cremoso ma fluido, dolce e vegetale. La qualit? sta '
+                 'nel rapporto corretto tra riso, brodo e piselli.',
+  'description_en': 'A Venetian dish halfway between risotto and soup, with rice, fresh peas, broth and often pancetta or onion. '
+                    'Traditionally linked to spring and Saint Mark, it should be creamy but fluid, sweet and vegetal. Quality lies in the '
+                    'correct ratio of rice, broth and peas.',
+  'ingredients': ['riso', 'piselli', 'brodo', 'cipolla', 'pancetta'],
+  'ingredients_en': ['rice', 'peas', 'broth', 'onion', 'pancetta'],
+  'places': [{'name': 'Anice Stellato'}, {'name': 'Trattoria Alla Madonna'}, {'name': 'La Zucca'}]},
+ {'name': 'Moeche',
+  'name_en': 'Soft-Shell Lagoon Crabs',
+  'description': 'Piccoli granchi della laguna pescati durante la muta, quando il guscio ? tenerissimo, spesso fritti interi. Sono '
+                 'stagionali e preziosi: la qualit? dipende da freschezza, frittura asciutta e sapore lagunare delicato ma riconoscibile. '
+                 'La qualit? richiede stagionalit? reale e servizio immediato dopo la frittura.',
+  'description_en': 'Small lagoon crabs caught during moulting, when the shell is very tender, often fried whole. They are seasonal and '
+                    'precious: quality depends on freshness, dry frying and delicate but recognisable lagoon flavour. Quality requires '
+                    'true seasonality and immediate service after frying.',
+  'ingredients': ['moeche', 'farina', 'uova', 'olio', 'sale'],
+  'ingredients_en': ['soft-shell crabs', 'flour', 'eggs', 'oil', 'salt'],
+  'places': [{'name': 'Poste Vecie'}, {'name': 'Le Antiche Carampane'}, {'name': 'Al Gatto Nero Burano'}]},
+ {'name': 'Bigoli in salsa',
+  'name_en': 'Bigoli in Anchovy Sauce',
+  'description': 'Pasta lunga e ruvida con salsa di cipolle e acciughe o sarde salate, piatto semplice e profondamente veneziano. Deve '
+                 'essere sapida ma non aggressiva, con cipolla dolce, pesce ben sciolto e pasta capace di trattenere la salsa.',
+  'description_en': 'Long rough pasta with a sauce of onions and anchovies or salted sardines, a simple and deeply Venetian dish. It '
+                    'should be savoury but not aggressive, with sweet onion, well-melted fish and pasta able to hold the sauce.',
+  'ingredients': ['bigoli', 'cipolle', 'acciughe', 'olio', 'pepe'],
+  'ingredients_en': ['bigoli pasta', 'onions', 'anchovies', 'oil', 'pepper'],
+  'places': [{'name': 'Ristorante da Ivo'}, {'name': 'Osteria Alla Vedova'}, {'name': "Hostaria Sant'Aponal"}]},
+ {'name': 'Bussol?',
+  'name_en': 'Bussol? Burano Biscuit',
+  'description': 'Biscotto tradizionale di Burano, ricco di burro e uova, spesso a forma di ciambella o esse, nato per conservarsi a '
+                 'lungo. ? semplice ma profumato: friabile, dorato, ideale con caff?, vino dolce o passeggiate lagunari.',
+  'description_en': 'A traditional Burano biscuit, rich in butter and eggs, often shaped as a ring or an S, originally made to keep well. '
+                    'It is simple but fragrant: crumbly, golden, ideal with coffee, sweet wine or lagoon walks.',
+  'ingredients': ['farina', 'burro', 'uova', 'zucchero', 'vaniglia'],
+  'ingredients_en': ['flour', 'butter', 'eggs', 'sugar', 'vanilla'],
+  'places': [{'name': 'Pasticceria Costantini Burano'}, {'name': 'Pasticceria Palmisano Carmelina'}, {'name': 'Panificio Garbo Burano'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🚤', 'title': "A Venezia l'acqua è una vera infrastruttura urbana", 'title_en': 'In Venice, water is real urban infrastructure', 'body': "Canali, vaporetti, ponti e approdi rendono l'acqua parte strutturale della mobilità e della vita quotidiana.", 'body_en': 'Canals, water buses, bridges and landings make water a structural part of mobility and everyday life.'},

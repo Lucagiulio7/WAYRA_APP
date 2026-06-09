@@ -134,16 +134,87 @@ FOOD_SPOTS = [
  {'city': 'napoli', 'zone': 'positipo_mergellina', 'category_level': 3, 'name': 'Tarallo sul Golfo', 'name_en': 'Gulf Tarallo', 'description': 'Spuntino salato tipico da accompagnare con la vista sul mare.', 'description_en': 'A typical savoury snack to enjoy with a sea view.', 'latitude': 40.8247, 'longitude': 14.2200, 'estimated_visit_time': 10, 'tags': ['snack', 'tarallo', 'panorama'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
 ]
 
-FOODS_BY_CITY = [
- {'city': 'napoli', 'name': 'Pizza napoletana', 'name_en': 'Neapolitan Pizza', 'description': 'Disco di pasta lievitata a lungo e cotto per pochi secondi nel forno a legna a circa 485°C, con cornicione alto, centro morbido, pomodoro San Marzano, fior di latte e basilico fresco. È il simbolo gastronomico assoluto di Napoli.', 'description_en': 'A long-leavened dough disc baked for a few seconds in a wood-fired oven at about 485°C, with a high cornicione, soft center, San Marzano tomato, fior di latte and fresh basil. It is Naples’ absolute gastronomic symbol.', 'ingredients': ['farina 00', 'acqua', 'lievito', 'sale', 'pomodoro San Marzano', 'fior di latte', 'basilico'], 'ingredients_en': ['00 flour', 'water', 'yeast', 'salt', 'San Marzano tomatoes', 'fior di latte mozzarella', 'basil'], 'type': 'main', 'places': [{'name': 'L’Antica Pizzeria da Michele'}, {'name': 'Sorbillo ai Tribunali'}, {'name': '50 Kalò'}]},
- {'city': 'napoli', 'name': 'Ragù napoletano', 'name_en': 'Neapolitan Ragù', 'description': 'Sugo denso di pomodoro cotto per ore con carni miste, vino rosso e pazienza domenicale, fino a diventare scuro e profondo. Condisce ziti spezzati a mano e rappresenta più un rito familiare che una semplice salsa.', 'description_en': 'A thick tomato sauce cooked for hours with mixed meats, red wine and Sunday patience, until it becomes dark and deep. It dresses hand-broken ziti and represents more a family ritual than a simple sauce.', 'ingredients': ['manzo', 'maiale', 'pomodoro', 'cipolla', 'vino rosso', 'strutto'], 'ingredients_en': ['beef', 'pork', 'tomato', 'onion', 'red wine', 'lard'], 'type': 'main', 'places': [{'name': 'Tandem Ragù'}, {'name': 'La Locanda del Grifo'}, {'name': 'Nennella'}]},
- {'city': 'napoli', 'name': 'Genovese', 'name_en': 'Genovese Pasta', 'description': 'Sugo napoletano di cipolle stufate lentamente per ore con tagli di manzo, fino a sciogliersi in una crema dorata e dolce. Nonostante il nome, è uno dei piatti più profondamente napoletani della cucina di casa.', 'description_en': 'A Neapolitan sauce of onions slowly stewed for hours with cuts of beef, until they melt into a golden, sweet cream. Despite the name, it is one of the most deeply Neapolitan dishes of home cooking.', 'ingredients': ['pasta', 'cipolle', 'manzo', 'vino bianco', 'olio'], 'ingredients_en': ['pasta', 'onions', 'beef', 'white wine', 'olive oil'], 'type': 'main', 'places': [{'name': 'La Campagnola'}, {'name': 'Antica Capri'}, {'name': 'Cantina del Gallo'}]},
- {'city': 'napoli', 'name': 'Cuoppo', 'name_en': 'Fried Paper Cone', 'description': 'Cono di carta paglia riempito di fritti bollenti: pesciolini, calamari, alici, crocchè e zeppoline secondo la zona. È il modo più napoletano di mangiare camminando, tra vicoli, mare e friggitorie.', 'description_en': 'A straw-paper cone filled with piping hot fried bites: small fish, squid, anchovies, crocchè and zeppoline depending on the area. It is the most Neapolitan way to eat while walking, between alleys, sea and fry shops.', 'ingredients': ['pesce misto', 'pastella', 'olio di frittura', 'sale'], 'ingredients_en': ['mixed fried fish', 'batter', 'frying oil', 'salt'], 'type': 'snack', 'places': [{'name': 'Cuoppo dei Decumani'}, {'name': 'Cuoppo di Via dei Tribunali'}, {'name': 'Cuoppo di Mare'}]},
- {'city': 'napoli', 'name': 'Pizza a portafoglio', 'name_en': 'Wallet Pizza', 'description': 'Piccola pizza margherita appena uscita dal forno, piegata in quattro come un portafoglio per essere mangiata in piedi senza posate. È lo street food dei vicoli, economico, caldo e pensato per continuare a camminare.', 'description_en': 'A small margherita pizza straight from the oven, folded into quarters like a wallet so it can be eaten standing up without cutlery. It is the street food of the alleyways, cheap, hot and made for walking on.', 'ingredients': ['impasto pizza', 'pomodoro', 'fior di latte', 'olio'], 'ingredients_en': ['pizza dough', 'tomato', 'fior di latte mozzarella', 'olive oil'], 'type': 'snack', 'places': [{'name': 'Di Matteo Napoli'}, {'name': 'Antica Pizzeria Port’Alba'}, {'name': 'Pizzeria Tutino'}]},
- {'city': 'napoli', 'name': 'Tarallo nzogna e pepe', 'name_en': 'Lard and Pepper Tarallo', 'description': 'Ciambella rustica cotta due volte, preparata con strutto, pepe nero e mandorle intere, croccante e molto saporita. Nasce come spuntino povero e oggi accompagna passeggiate sul lungomare, birra fredda e soste nei chioschi.', 'description_en': 'A rustic twice-baked ring made with lard, black pepper and whole almonds, crisp and intensely savory. Born as a humble snack, it now accompanies seafront walks, cold beer and stops at kiosks.', 'ingredients': ['farina', 'strutto', 'pepe nero', 'mandorle'], 'ingredients_en': ['flour', 'lard', 'black pepper', 'almonds'], 'type': 'snack', 'places': [{'name': 'Leopoldo Infante Napoli'}, {'name': 'Taralleria Napoletana'}, {'name': 'Fresco Forno Napoli'}]},
- {'city': 'napoli', 'name': 'Sfogliatella', 'name_en': 'Sfogliatella', 'description': 'Conchiglia di pasta a strati sottilissimi e croccanti, ripiena di crema di semolino, ricotta, canditi e cannella. Nella versione riccia è friabile e scenografica, nella frolla più morbida e domestica: entrambe sono Napoli pura.', 'description_en': 'A shell of extremely thin, crisp pastry layers, filled with semolina cream, ricotta, candied peel and cinnamon. In the riccia version it is flaky and theatrical, in the frolla version softer and homier: both are pure Naples.', 'ingredients': ['semolino', 'ricotta', "scorza d'arancia candita", 'cannella'], 'ingredients_en': ['semolina', 'ricotta', 'candied orange peel', 'cinnamon'], 'type': 'dessert', 'places': [{'name': 'Sfogliatelle Attanasio'}, {'name': 'Antica Pasticceria Pintauro'}, {'name': 'Sfogliatella Mary Napoli'}]},
- {'city': 'napoli', 'name': 'Babà', 'name_en': 'Baba', 'description': 'Tortino lievitato a forma di fungo, inzuppato fino al cuore in sciroppo al rum e servito lucido, morbido e profumato. Di origine francese, è diventato uno dei simboli più affettuosi della pasticceria napoletana.', 'description_en': 'A mushroom-shaped leavened cake soaked to the core in rum syrup and served glossy, soft and fragrant. French in origin, it has become one of the most beloved symbols of Neapolitan pastry.', 'ingredients': ['farina', 'uova', 'burro', 'sciroppo al rum'], 'ingredients_en': ['flour', 'eggs', 'butter', 'rum syrup'], 'type': 'dessert', 'places': [{'name': 'Scaturchio Napoli'}, {'name': 'Pasticceria Capparelli Napoli'}, {'name': 'Pasticceria Poppella Napoli'}]},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Pizza napoletana',
+  'name_en': 'Neapolitan Pizza',
+  'description': 'Pizza con impasto lievitato a lungo, cornicione alto, centro sottile, pomodoro, mozzarella, basilico e olio, cotta '
+                 'rapidamente in forno a legna. ? il simbolo gastronomico di Napoli: tecnica, materia prima e cottura devono creare '
+                 'leggerezza, elasticit? e profumo.',
+  'description_en': 'Pizza with long-fermented dough, high cornicione, thin centre, tomato, mozzarella, basil and oil, quickly baked in a '
+                    'wood-fired oven. It is Naples? gastronomic symbol: technique, ingredients and baking should create lightness, '
+                    'elasticity and aroma. The best version feels fragrant and digestible, not merely soft or wet.',
+  'ingredients': ['farina', 'pomodoro', 'mozzarella', 'basilico', 'olio extravergine'],
+  'ingredients_en': ['flour', 'tomato', 'mozzarella', 'basil', 'extra virgin olive oil'],
+  'places': [{'name': 'L?Antica Pizzeria da Michele'}, {'name': 'Sorbillo ai Tribunali'}, {'name': '50 Kal?'}]},
+ {'name': 'Rag? napoletano',
+  'name_en': 'Neapolitan Rag?',
+  'description': 'Sugo lento di carne e pomodoro, cotto per ore fino a diventare scuro, denso e profondo, spesso servito con pasta o come '
+                 'piatto della domenica. Non ? solo condimento: ? rito familiare, pazienza, profumo di casa e stratificazione di sapore.',
+  'description_en': 'A slow sauce of meat and tomato, cooked for hours until dark, dense and deep, often served with pasta or as Sunday '
+                    'food. It is not merely a condiment: it is family ritual, patience, home aroma and layered flavour.',
+  'ingredients': ['pomodoro', 'manzo', 'maiale', 'cipolla', 'vino'],
+  'ingredients_en': ['tomato', 'beef', 'pork', 'onion', 'wine'],
+  'places': [{'name': 'Tandem Rag?'}, {'name': 'La Locanda del Grifo'}, {'name': 'Nennella'}]},
+ {'name': 'Genovese',
+  'name_en': 'Genovese Onion Rag?',
+  'description': 'Sugo napoletano di cipolle cotte lentissimamente con carne fino a diventare dolci, cremose e brunite, nonostante il nome '
+                 'richiami Genova. ? intenso ma morbido: la qualit? sta nella pazienza della cottura e nell?equilibrio tra carne e '
+                 'cipolla.',
+  'description_en': 'A Neapolitan sauce of onions cooked very slowly with meat until sweet, creamy and browned, despite the name recalling '
+                    'Genoa. It is intense yet soft: quality lies in patient cooking and the balance between meat and onion.',
+  'ingredients': ['cipolle', 'manzo', 'olio', 'vino bianco', 'pasta'],
+  'ingredients_en': ['onions', 'beef', 'oil', 'white wine', 'pasta'],
+  'places': [{'name': 'La Campagnola'}, {'name': 'Antica Capri'}, {'name': 'Cantina del Gallo'}]},
+ {'name': 'Cuoppo',
+  'name_en': 'Neapolitan Fried Cone',
+  'description': 'Cono di carta pieno di fritti napoletani, spesso zeppoline, crocch?, arancini, pesce o verdure, pensato per essere '
+                 'mangiato camminando. La qualit? sta nella frittura asciutta, nel ritmo dei bocconi e nella variet? senza eccesso di '
+                 'unto.',
+  'description_en': 'A paper cone filled with Neapolitan fried bites, often zeppoline, crocch?, arancini, fish or vegetables, made to be '
+                    'eaten while walking. Quality lies in dry frying, the rhythm of small bites and variety without excess grease.',
+  'ingredients': ['pastella', 'patate', 'riso', 'pesce', 'olio'],
+  'ingredients_en': ['batter', 'potatoes', 'rice', 'fish', 'oil'],
+  'places': [{'name': 'Cuoppo dei Decumani'}, {'name': 'Cuoppo di Via dei Tribunali'}, {'name': 'Cuoppo di Mare'}]},
+ {'name': 'Pizza a portafoglio',
+  'name_en': 'Wallet Pizza',
+  'description': 'Pizza piccola e morbida piegata in quattro, venduta come street food economico e velocissimo. Deve mantenere profumo e '
+                 'identit? della pizza napoletana in formato da passeggio: elastica, calda, succosa, facile da mangiare senza perdere il '
+                 'condimento.',
+  'description_en': 'A small soft pizza folded into quarters, sold as cheap and very quick street food. It should keep the aroma and '
+                    'identity of Neapolitan pizza in walking format: elastic, hot, juicy and easy to eat without losing the topping.',
+  'ingredients': ['farina', 'pomodoro', 'mozzarella', 'basilico', 'olio'],
+  'ingredients_en': ['flour', 'tomato', 'mozzarella', 'basil', 'oil'],
+  'places': [{'name': 'Di Matteo Napoli'}, {'name': 'Antica Pizzeria Port?Alba'}, {'name': 'Pizzeria Tutino'}]},
+ {'name': 'Tarallo nzogna e pepe',
+  'name_en': 'Lard and Pepper Tarallo',
+  'description': 'Tarallo salato con sugna, pepe e mandorle, friabile e molto profumato, tipico di forni e passeggiate sul lungomare. ? '
+                 'semplice ma potente: grasso, pepe e mandorla devono fondersi senza rendere il morso pesante. La qualit? si riconosce '
+                 'nella friabilit? netta e nel pepe persistente.',
+  'description_en': 'A savoury tarallo with lard, pepper and almonds, crumbly and highly fragrant, typical of bakeries and seaside walks. '
+                    'It is simple but powerful: fat, pepper and almond should merge without making the bite heavy. Quality is recognised '
+                    'in clean crumbliness and persistent pepper.',
+  'ingredients': ['farina', 'sugna', 'pepe', 'mandorle', 'lievito'],
+  'ingredients_en': ['flour', 'lard', 'pepper', 'almonds', 'yeast'],
+  'places': [{'name': 'Leopoldo Infante Napoli'}, {'name': 'Taralleria Napoletana'}, {'name': 'Fresco Forno Napoli'}]},
+ {'name': 'Sfogliatella',
+  'name_en': 'Sfogliatella Pastry',
+  'description': 'Dolce napoletano in versione riccia o frolla, ripieno di ricotta, semolino, canditi e aromi, servito idealmente caldo. '
+                 'La riccia deve essere croccante e stratificata, la frolla pi? morbida: entrambe devono profumare di agrumi e crema.',
+  'description_en': 'A Neapolitan pastry in riccia or frolla form, filled with ricotta, semolina, candied fruit and aromas, ideally served '
+                    'warm. Riccia should be crisp and layered, frolla softer: both should smell of citrus and cream. The filling should be '
+                    'creamy but structured, never heavy or overly sweet.',
+  'ingredients': ['ricotta', 'semolino', 'canditi', 'pasta sfoglia', 'arancia'],
+  'ingredients_en': ['ricotta', 'semolina', 'candied fruit', 'pastry', 'orange'],
+  'places': [{'name': 'Sfogliatelle Attanasio'}, {'name': 'Antica Pasticceria Pintauro'}, {'name': 'Sfogliatella Mary Napoli'}]},
+ {'name': 'Bab?',
+  'name_en': 'Rum Bab?',
+  'description': 'Dolce lievitato imbevuto di sciroppo al rum, soffice, elastico e lucido, spesso servito semplice o con crema. A Napoli ? '
+                 'un?icona di pasticceria: deve essere molto umido ma non sfatto, profumato e leggero al morso.',
+  'description_en': 'A yeasted cake soaked in rum syrup, soft, elastic and glossy, often served plain or with cream. In Naples it is a '
+                    'pastry icon: it should be very moist but not collapsed, fragrant and light to the bite.',
+  'ingredients': ['farina', 'uova', 'rum', 'zucchero', 'lievito'],
+  'ingredients_en': ['flour', 'eggs', 'rum', 'sugar', 'yeast'],
+  'places': [{'name': 'Scaturchio Napoli'}, {'name': 'Pasticceria Capparelli Napoli'}, {'name': 'Pasticceria Poppella Napoli'}]}]
 
 CULTURE_FACTS = [
  {'city': 'napoli', 'icon': '⛰️', 'title': 'Napoli si legge in verticale', 'title_en': 'Naples Is Read Vertically', 'body': 'Tra scale, funicolari, colline e discese sul mare, Napoli è una città da capire anche in altezza e non solo in pianta.', 'body_en': 'Between stairways, funiculars, hills and descents to the sea, Naples is a city to understand in height and not only on a map.'},

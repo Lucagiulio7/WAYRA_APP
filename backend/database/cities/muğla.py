@@ -120,16 +120,89 @@ FOOD_SPOTS = [
  {'city': 'muğla', 'zone': 'kentsel_kesit', 'category_level': 3, 'name': 'Muğla Fine South', 'name_en': 'Muğla Fine South', 'description': 'Ristorante di tono più alto sul margine urbano meridionale.', 'description_en': 'A higher-tone restaurant on the southern urban edge.', 'latitude': 37.2075, 'longitude': 28.3604, 'estimated_visit_time': 95, 'tags': ['gastronomia', 'fine dining'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'rating': 4.5, 'price_range': '€€€'},
 ]
 
-FOODS_BY_CITY = [
- {'name': 'Muğla Köftesi', 'name_en': 'Muğla Meatballs', 'description': 'Polpette di carne grigliate appiattite a mano, profumate con prezzemolo e cumino, servite con pomodoro alla brace e pane caldo.', 'description_en': 'Hand-flattened grilled meat patties scented with parsley and cumin, served with charred tomato and warm flatbread.', 'ingredients': ['carne macinata', 'cipolla', 'spezie', 'pane'], 'ingredients_en': ['minced beef or lamb', 'onion', 'spices', 'bread'], 'places': ['Mugla Koftecisi Mugla', 'Sini Mugla', 'Supuroglu Mugla']},
- {'name': 'Çökertme Kebabı', 'name_en': 'Çökertme Kebab', 'description': 'Carne di vitello affettata sottile servita su un letto di patate alla julienne fritte croccanti, coperto da yogurt all\'aglio e salsa di pomodoro.', 'description_en': 'Thinly sliced veal served on a bed of crispy fried matchstick potatoes, topped with garlic yogurt and tomato sauce.', 'ingredients': ['carne', 'yogurt', 'patate', 'pomodoro'], 'ingredients_en': ['meat', 'yogurt', 'thin potatoes', 'tomato'], 'places': ['Doy Doy Restaurant Bodrum Mugla', 'Kocadon Bodrum Mugla', 'Limon Gumusluk Mugla']},
- {'name': 'Keşkek', 'name_en': 'Keşkek', 'description': 'Grano cotto a lungo con carne d\'agnello fino a sfilacciarsi insieme in una purea densa, piatto cerimoniale dei matrimoni anatolici.', 'description_en': 'Wheat slow-cooked with lamb until they shred together into a thick porridge, a ceremonial dish at Anatolian weddings.', 'ingredients': ['grano', 'carne', 'burro', 'sale'], 'ingredients_en': ['wheat', 'meat', 'butter', 'salt'], 'places': ['Sini Mugla', 'Supuroglu Mugla', 'Kocadon Bodrum Mugla']},
- {'name': 'Gözleme', 'name_en': 'Gözleme', 'description': 'Pane azzimo tirato sottile a mano e farcito di formaggio fresco, spinaci o patate prima di essere cotto sulla piastra rovente nei mercati.', 'description_en': 'A thin hand-stretched flatbread filled with fresh cheese, spinach or potato before being cooked on the hot griddle at the markets.', 'ingredients': ['farina', 'formaggio', 'spinaci', 'patate'], 'ingredients_en': ['flour', 'cheese', 'spinach', 'potatoes'], 'places': ['Mugla Pazari Gozleme Mugla', 'Sini Mugla', 'Karya Gozleme Mugla']},
- {'name': 'Börek', 'name_en': 'Börek', 'description': 'Fagottini o rotoli di sfoglia di pasta fillo croccante ripieni di formaggio bianco, spinaci o carne speziata, classico salato della colazione turca.', 'description_en': 'Crisp filo pastry rolls or parcels filled with white cheese, spinach or spiced meat, a savoury classic of Turkish breakfast.', 'ingredients': ['pasta fillo', 'formaggio', 'spinaci', 'carne'], 'ingredients_en': ['filo pastry', 'cheese', 'spinach', 'meat'], 'places': ['Mugla Borekcisi Mugla', 'Sini Mugla', 'Mugla Pazari Mugla']},
- {'name': 'Simit', 'name_en': 'Simit', 'description': 'Pane ad anello intrecciato ricoperto da abbondanti semi di sesamo tostati, classica colazione di strada turca accompagnata da tè caldo.', 'description_en': 'A braided ring of bread coated in plenty of toasted sesame seeds, a classic Turkish street breakfast paired with hot çay tea.', 'ingredients': ['farina', 'lievito', 'sesamo', 'acqua'], 'ingredients_en': ['flour', 'yeast', 'sesame seeds', 'water'], 'places': ['Mugla Simit Sarayi Mugla', 'Mugla Firin Mugla', 'Karya Pastanesi Mugla']},
- {'name': 'Lokma', 'name_en': 'Lokma', 'description': 'Piccole frittelle di pasta lievitata fritte dorate e immerse nello sciroppo profumato di limone, dolce da strada distribuito anche in beneficenza.', 'description_en': 'Small leavened dough fritters fried golden and dipped in lemon-scented syrup, a street sweet also given out as charity.', 'ingredients': ['farina', 'lievito', 'zucchero', 'sciroppo'], 'ingredients_en': ['flour', 'yeast', 'sugar', 'syrup'], 'places': ['Mugla Lokmacisi Mugla', 'Karya Pastanesi Mugla', 'Mugla Pazari Mugla']},
- {'name': 'Sütlaç', 'name_en': 'Rice Pudding', 'description': 'Budino di riso e latte cotto a lungo, servito in piccole pirofile di terracotta con una crosticina caramellata e una spolverata di cannella.', 'description_en': 'A rice and milk pudding slowly cooked, served in small clay dishes with a caramelised top crust and a dusting of cinnamon.', 'ingredients': ['riso', 'latte', 'zucchero', 'cannella'], 'ingredients_en': ['rice', 'milk', 'sugar', 'cinnamon'], 'places': ['Sutis Mugla', 'Karya Pastanesi Mugla', 'Sini Mugla']},
-]
+# Normalized detailed food descriptions.
+FOODS_BY_CITY = [{'name': 'Mu?la K?ftesi',
+  'name_en': 'Mu?la Meatballs',
+  'description': 'Polpette locali di carne macinata, pane, cipolla e spezie, grigliate o cotte in padella e servite con insalata, yogurt o '
+                 'pane. Sono semplici ma identitarie: la qualit? sta nella succosit?, nella speziatura discreta e nel profumo della carne '
+                 'appena cotta.',
+  'description_en': 'Local meatballs made with minced meat, bread, onion and spices, grilled or pan-cooked and served with salad, yoghurt '
+                    'or bread. They are simple but identity-rich: quality lies in juiciness, discreet spicing and the aroma of freshly '
+                    'cooked meat.',
+  'ingredients': ['carne macinata', 'pane', 'cipolla', 'spezie', 'yogurt'],
+  'ingredients_en': ['minced meat', 'bread', 'onion', 'spices', 'yoghurt'],
+  'places': ['Mugla Koftecisi Mugla', 'Sini Mugla', 'Supuroglu Mugla']},
+ {'name': '??kertme Kebab?',
+  'name_en': '??kertme Kebab',
+  'description': 'Specialit? dell?area di Bodrum e Mu?la con carne saltata o grigliata, patate sottilissime fritte, yogurt all?aglio e '
+                 'salsa di pomodoro. ? ricca ma bilanciata: croccantezza, acidit?, carne succosa e salsa devono restare distinguibili '
+                 'nello stesso piatto.',
+  'description_en': 'A speciality from the Bodrum and Mu?la area with saut?ed or grilled meat, very thin fried potatoes, garlic yoghurt '
+                    'and tomato sauce. It is rich but balanced: crunch, acidity, juicy meat and sauce should remain distinct on the same '
+                    'plate.',
+  'ingredients': ['manzo', 'patate', 'yogurt', 'aglio', 'pomodoro'],
+  'ingredients_en': ['beef', 'potatoes', 'yoghurt', 'garlic', 'tomato'],
+  'places': ['Doy Doy Restaurant Bodrum Mugla', 'Kocadon Bodrum Mugla', 'Limon Gumusluk Mugla']},
+ {'name': 'Ke?kek',
+  'name_en': 'Ke?kek Wheat and Meat Stew',
+  'description': 'Piatto tradizionale di grano pestato e carne cotto a lungo fino a diventare cremoso, spesso legato a feste e matrimoni. '
+                 'La consistenza ? fondamentale: densa, elastica, quasi rituale, con sapore profondo ma non aggressivo. La qualit? '
+                 'migliore resta cremosa ma non collosa, con grano ancora percepibile.',
+  'description_en': 'A traditional dish of pounded wheat and meat cooked for a long time until creamy, often linked to celebrations and '
+                    'weddings. Texture is fundamental: dense, elastic, almost ritualistic, with deep but not aggressive flavour. The best '
+                    'version stays creamy but not gluey, with wheat still perceptible.',
+  'ingredients': ['grano', 'carne', 'burro', 'brodo', 'spezie'],
+  'ingredients_en': ['wheat', 'meat', 'butter', 'broth', 'spices'],
+  'places': ['Sini Mugla', 'Supuroglu Mugla', 'Kocadon Bodrum Mugla']},
+ {'name': 'G?zleme',
+  'name_en': 'G?zleme Flatbread',
+  'description': 'Sfoglia sottile turca cotta su piastra e farcita con formaggio, spinaci, patate, erbe o carne macinata. Nei mercati di '
+                 'Mu?la ? cibo immediato e artigianale: pasta elastica, ripieno caldo, bordi leggermente croccanti e profumo di piastra.',
+  'description_en': 'A thin Turkish flatbread cooked on a griddle and filled with cheese, spinach, potatoes, herbs or minced meat. In '
+                    'Mu?la markets it is immediate handmade food: elastic dough, warm filling, slightly crisp edges and griddle aroma.',
+  'ingredients': ['farina', 'formaggio', 'spinaci', 'patate', 'burro'],
+  'ingredients_en': ['flour', 'cheese', 'spinach', 'potatoes', 'butter'],
+  'places': ['Mugla Pazari Gozleme Mugla', 'Sini Mugla', 'Karya Gozleme Mugla']},
+ {'name': 'B?rek',
+  'name_en': 'B?rek Pastry',
+  'description': 'Preparazione salata di sfoglie yufka con formaggio, erbe, patate o carne, cotta al forno o in padella. ? comune in tutta '
+                 'la Turchia ma a Mu?la resta molto quotidiana: friabile, sapida, buona quando la sfoglia non diventa oleosa.',
+  'description_en': 'A savoury preparation of yufka pastry with cheese, herbs, potatoes or meat, baked or pan-cooked. It is common across '
+                    'Turkey but remains very everyday in Mu?la: flaky, savoury and best when the pastry does not become oily.',
+  'ingredients': ['yufka', 'formaggio', 'erbe', 'patate', 'olio'],
+  'ingredients_en': ['yufka', 'cheese', 'herbs', 'potatoes', 'oil'],
+  'places': ['Mugla Borekcisi Mugla', 'Sini Mugla', 'Mugla Pazari Mugla']},
+ {'name': 'Simit',
+  'name_en': 'Simit Sesame Ring',
+  'description': 'Anello di pane ricoperto di sesamo, croccante fuori e morbido dentro, venduto in panetterie e chioschi come colazione o '
+                 'spuntino. La qualit? sta nel sesamo ben tostato, nella crosta sottile e nella mollica ancora elastica.',
+  'description_en': 'A sesame-covered bread ring, crisp outside and soft inside, sold in bakeries and stalls as breakfast or snack. '
+                    'Quality lies in well-toasted sesame, thin crust and a crumb that remains elastic. The best versions feel fresh, '
+                    'balanced and never dry despite the crisp crust.',
+  'ingredients': ['farina', 'sesamo', 'melassa', 'lievito', 'sale'],
+  'ingredients_en': ['flour', 'sesame', 'molasses', 'yeast', 'salt'],
+  'places': ['Mugla Simit Sarayi Mugla', 'Mugla Firin Mugla', 'Karya Pastanesi Mugla']},
+ {'name': 'Lokma',
+  'name_en': 'Lokma Fried Dough',
+  'description': 'Piccole palline di pasta fritta immerse nello sciroppo, servite spesso in occasioni religiose, feste o distribuzioni '
+                 'pubbliche. Devono essere dorate e leggere, croccanti fuori e sciroppose dentro, dolci ma non completamente molli. La '
+                 'qualit? dipende da frittura asciutta e sciroppo assorbito con misura.',
+  'description_en': 'Small balls of fried dough soaked in syrup, often served during religious occasions, celebrations or public '
+                    'distributions. They should be golden and light, crisp outside and syrupy inside, sweet but not completely soft. '
+                    'Quality depends on dry frying and syrup absorbed with restraint.',
+  'ingredients': ['farina', 'lievito', 'zucchero', 'olio', 'sciroppo'],
+  'ingredients_en': ['flour', 'yeast', 'sugar', 'oil', 'syrup'],
+  'places': ['Mugla Lokmacisi Mugla', 'Karya Pastanesi Mugla', 'Mugla Pazari Mugla']},
+ {'name': 'S?tla?',
+  'name_en': 'Turkish Rice Pudding',
+  'description': 'Budino turco di riso, latte e zucchero, servito freddo o cotto al forno con superficie leggermente brunita. ? un dolce '
+                 'semplice e familiare: cremoso, lattico, delicato, migliore quando il riso resta percepibile senza diventare pesante.',
+  'description_en': 'A Turkish rice pudding made with rice, milk and sugar, served cold or oven-baked with a lightly browned surface. It '
+                    'is a simple family dessert: creamy, milky and delicate, best when the rice remains perceptible without becoming '
+                    'heavy.',
+  'ingredients': ['riso', 'latte', 'zucchero', 'vaniglia', 'cannella'],
+  'ingredients_en': ['rice', 'milk', 'sugar', 'vanilla', 'cinnamon'],
+  'places': ['Sutis Mugla', 'Karya Pastanesi Mugla', 'Sini Mugla']}]
 
 CULTURE_FACTS = [
  {'icon': '🕌', 'title': 'Muğla conserva bene una scala urbana ottomana', 'title_en': 'Muğla preserves an Ottoman urban scale well', 'body': 'Moschee, bazar, case tradizionali e piccoli spazi pubblici rendono molto leggibile il tessuto storico.', 'body_en': 'Mosques, bazaars, traditional houses and small public spaces make the historic fabric highly legible.'},
