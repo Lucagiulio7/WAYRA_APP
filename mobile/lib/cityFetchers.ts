@@ -1,68 +1,37 @@
 /**
- * cityFetchers.ts
- * Funzioni fetch pure per i dati di una città.
- * Usate sia dagli hook TanStack Query sia da useCityDownload (prefetch offline).
- * Non importano React — sono chiamabili in qualsiasi contesto.
+ * City content access through the Wayra backend.
+ * Supabase is reserved for authentication and user-owned data.
  */
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/constants/supabase";
+import { API_BASE_URL } from "@/constants/api";
 import type { BuilderAttraction } from "@/hooks/useAttractions";
 import type { CityInfo, Food, CultureFact, Neighborhood } from "@/types";
 
-const HEADERS = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-};
-
-async function safeFetch<T>(url: string): Promise<T> {
-  const r = await fetch(url, { headers: HEADERS });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+interface BackendEnvelope<T> {
+  data: T;
 }
 
-// ─── Attrazioni ───────────────────────────────────────────────────────────────
+async function backendFetch<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+  if (!response.ok) throw new Error(`Backend HTTP ${response.status}`);
+  const payload = (await response.json()) as BackendEnvelope<T>;
+  return payload.data;
+}
 
 export async function fetchAttractions(city: string): Promise<BuilderAttraction[]> {
-  const url =
-    `${SUPABASE_URL}/rest/v1/attractions` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&is_food_spot=eq.false` +
-    `&select=id,name,name_en,description,description_en,` +
-    `category_level,latitude,longitude,estimated_visit_time,` +
-    `tags,attraction_type,ticket_url,block_id,zone` +
-    `&order=category_level.asc,name.asc`;
-  return safeFetch<BuilderAttraction[]>(url);
+  const encodedCity = encodeURIComponent(city);
+  return backendFetch<BuilderAttraction[]>(`/api/attractions?city=${encodedCity}`);
 }
-
-// ─── Ristoranti / Food ────────────────────────────────────────────────────────
 
 export async function fetchFoodSpots(city: string): Promise<BuilderAttraction[]> {
-  const url =
-    `${SUPABASE_URL}/rest/v1/attractions` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&is_food_spot=eq.true` +
-    `&select=id,name,name_en,description,description_en,` +
-    `category_level,latitude,longitude,estimated_visit_time,` +
-    `tags,attraction_type,ticket_url,is_food_spot,food_type,meal_type,rating,block_id,zone` +
-    `&order=attraction_type.asc,name.asc`;
-  return safeFetch<BuilderAttraction[]>(url);
+  const encodedCity = encodeURIComponent(city);
+  return backendFetch<BuilderAttraction[]>(`/api/food-spots?city=${encodedCity}`);
 }
-
-// ─── City info ────────────────────────────────────────────────────────────────
 
 export async function fetchCityInfo(city: string): Promise<CityInfo | null> {
-  const url =
-    `${SUPABASE_URL}/rest/v1/city_info` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&select=city,currency,currency_en,language,language_en,english_level,english_note,english_note_en,` +
-    `timezone,emergency_numbers,voltage,water,water_en,tipping,tipping_en,transport_apps,useful_apps,` +
-    `quick_tips,quick_tips_en,max_days_iconico,max_days_esploratore` +
-    `&limit=1`;
-  const data = await safeFetch<CityInfo[]>(url);
-  return Array.isArray(data) && data.length > 0 ? data[0] : null;
+  const encodedCity = encodeURIComponent(city);
+  return backendFetch<CityInfo | null>(`/api/city-info?city=${encodedCity}`);
 }
-
-// ─── City extras (foods + culture facts) ─────────────────────────────────────
 
 export interface CityExtrasData {
   foods: Food[];
@@ -70,52 +39,22 @@ export interface CityExtrasData {
 }
 
 export async function fetchCityExtras(city: string): Promise<CityExtrasData> {
-  const foodsUrl =
-    `${SUPABASE_URL}/rest/v1/foods` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&select=id,name,name_en,description,description_en,ingredients,ingredients_en,city,places`;
-
-  const factsUrl =
-    `${SUPABASE_URL}/rest/v1/culture_facts` +
-    `?city=eq.${encodeURIComponent(city)}` +
-    `&select=icon,title,title_en,body,body_en` +
-    `&order=sort_order.asc`;
-
-  const [foodsData, factsData] = await Promise.all([
-    safeFetch<Food[]>(foodsUrl),
-    safeFetch<CultureFact[]>(factsUrl),
+  const encodedCity = encodeURIComponent(city);
+  const [foods, cultureFacts] = await Promise.all([
+    backendFetch<Food[]>(`/api/foods?city=${encodedCity}`),
+    backendFetch<CultureFact[]>(`/api/culture-facts?city=${encodedCity}`),
   ]);
-
-  return {
-    foods: Array.isArray(foodsData) ? foodsData : [],
-    cultureFacts: Array.isArray(factsData) ? factsData : [],
-  };
+  return { foods, cultureFacts };
 }
 
-// ─── Quartieri ────────────────────────────────────────────────────────────────
-
 export async function fetchNeighborhoods(city: string): Promise<Neighborhood[]> {
-  const baseUrl =
-    `${SUPABASE_URL}/rest/v1/neighborhoods` +
-    `?city=eq.${encodeURIComponent(city)}`;
-  const withGeojsonUrl =
-    `${baseUrl}` +
-    `&select=id,name,name_en,description,description_en,vibe_tags,geojson` +
-    `&order=sort_order.asc`;
-  const legacyUrl =
-    `${baseUrl}` +
-    `&select=id,name,name_en,description,description_en,vibe_tags` +
-    `&order=sort_order.asc`;
-
-  let data: Neighborhood[];
-  try {
-    data = await safeFetch<Neighborhood[]>(withGeojsonUrl);
-  } catch {
-    data = await safeFetch<Neighborhood[]>(legacyUrl);
-  }
+  const encodedCity = encodeURIComponent(city);
+  const data = await backendFetch<Neighborhood[]>(
+    `/api/neighborhoods?city=${encodedCity}`,
+  );
 
   const seen = new Set<string>();
-  return (Array.isArray(data) ? data : []).filter((item) => {
+  return data.filter((item) => {
     const key = `${item.name}`.trim().toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);

@@ -12,6 +12,7 @@ from database.models import Attraction, Food
 from database.cities import ALL_CITIES
 from services.itinerary_builder import build_itinerary
 from services.rate_limit import proxy_aware_remote_address
+from services.static_content import localize_attractions, localize_culture, localize_foods
 
 router = APIRouter(prefix="/api/itinerary", tags=["itinerary"])
 limiter = Limiter(key_func=proxy_aware_remote_address)
@@ -51,10 +52,13 @@ def _food_terms(food: Food) -> set[str]:
     values: list[object] = [
         food.name,
         food.name_en,
+        getattr(food, "name_fr", None),
         food.description,
         food.description_en,
+        getattr(food, "description_fr", None),
         *food.ingredients_list(),
         *food.ingredients_en_list(),
+        *food.ingredients_fr_list(),
     ]
     terms: set[str] = set()
     for value in values:
@@ -73,8 +77,10 @@ def _food_spot_text(spot: Attraction) -> str:
             for value in [
                 spot.name,
                 spot.name_en,
+                getattr(spot, "name_fr", None),
                 spot.description,
                 spot.description_en,
+                getattr(spot, "description_fr", None),
                 spot.food_type,
                 spot.meal_type,
                 *spot.tags_list(),
@@ -93,6 +99,10 @@ def _recommended_place(spot: Attraction, city: str) -> dict:
     return {
         "name": spot.name,
         "name_en": spot.name_en,
+        "name_fr": getattr(spot, "name_fr", None),
+        "description": spot.description,
+        "description_en": getattr(spot, "description_en", None),
+        "description_fr": getattr(spot, "description_fr", None),
         "maps_link": _restaurant_maps_link(spot.name, city),
         "rating": spot.rating,
         "food_type": spot.food_type,
@@ -119,6 +129,7 @@ def _place_from_curated_data(place: dict, food_spots: list[Attraction], city: st
     return {
         "name": name,
         "name_en": place.get("name_en"),
+        "name_fr": place.get("name_fr"),
         "maps_link": _restaurant_maps_link(name, city),
         "rating": place.get("rating"),
         "food_type": place.get("food_type"),
@@ -284,8 +295,8 @@ def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get
 
     try:
         days = build_itinerary(
-            attractions=[a.to_dict() for a in attractions],
-            food_spots=[f.to_dict() for f in food_spots],
+            attractions=localize_attractions(city, [a.to_dict() for a in attractions]),
+            food_spots=localize_attractions(city, [f.to_dict() for f in food_spots]),
             num_days=body.num_days,
             level=body.level,
             max_walk_km=body.max_walk_km,
@@ -301,7 +312,10 @@ def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get
 
     # Traditional dishes (deterministic: sorted by id, first 6)
     foods = db.query(Food).filter(Food.city == city).order_by(Food.id).all()
-    food_recommendations = _foods_with_recommended_places(city, foods, food_spots)
+    food_recommendations = localize_foods(
+        city,
+        _foods_with_recommended_places(city, foods, food_spots),
+    )
 
     return {
         "success": True,
@@ -312,6 +326,6 @@ def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get
             "max_walk_km": body.max_walk_km,
             "days": days,
             "food_recommendations": food_recommendations,
-            "culture_facts": CULTURE_FACTS.get(city, []),
+            "culture_facts": localize_culture(city, CULTURE_FACTS.get(city, [])),
         },
     }

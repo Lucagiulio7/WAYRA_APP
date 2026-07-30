@@ -11,9 +11,8 @@ jest.mock("react", () => ({
   useCallback: (fn: any) => fn,
 }));
 
-jest.mock("@/constants/supabase", () => ({
-  SUPABASE_URL: "https://fake.supabase.co",
-  SUPABASE_ANON_KEY: "fakekey",
+jest.mock("@/constants/api", () => ({
+  API_BASE_URL: "https://fake-api.example",
 }), { virtual: true });
 
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -44,10 +43,14 @@ describe("cityFetchers — URL correctness", () => {
   global.fetch = mockFetch;
 
   beforeEach(() => {
-    mockFetch.mockResolvedValue({
+    mockFetch.mockImplementation(async (url: string) => ({
       ok: true,
-      json: async () => [],
-    });
+      json: async () => {
+        if (url.includes("/api/city-info")) return { data: { city: "roma" } };
+        if (url.includes("fake-api.example")) return { data: [{}] };
+        return [];
+      },
+    }));
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -56,29 +59,29 @@ describe("cityFetchers — URL correctness", () => {
     const { fetchAttractions } = require("../lib/cityFetchers");
     await fetchAttractions("roma");
     const url: string = mockFetch.mock.calls[0][0];
-    expect(url).toContain("city=eq.roma");
-    expect(url).toContain("is_food_spot=eq.false");
+    expect(url).toContain("/api/attractions?city=roma");
   });
 
   it("fetchFoodSpots include is_food_spot=true", async () => {
     const { fetchFoodSpots } = require("../lib/cityFetchers");
     await fetchFoodSpots("venezia");
     const url: string = mockFetch.mock.calls[0][0];
-    expect(url).toContain("is_food_spot=eq.true");
-    expect(url).toContain("city=eq.venezia");
+    expect(url).toContain("/api/food-spots?city=venezia");
   });
 
   it("fetchCityInfo punta a city_info con limit=1", async () => {
     const { fetchCityInfo } = require("../lib/cityFetchers");
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => [{ city: "roma" }] });
     const result = await fetchCityInfo("roma");
     const url: string = mockFetch.mock.calls[0][0];
-    expect(url).toContain("city_info");
-    expect(url).toContain("limit=1");
+    expect(url).toContain("/api/city-info?city=roma");
     expect(result).toMatchObject({ city: "roma" });
   });
 
-  it("fetchCityInfo restituisce null se array vuoto", async () => {
+  it("fetchCityInfo restituisce null quando il backend non ha dati", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: null }),
+    });
     const { fetchCityInfo } = require("../lib/cityFetchers");
     const result = await fetchCityInfo("inesistente");
     expect(result).toBeNull();
@@ -90,21 +93,21 @@ describe("cityFetchers — URL correctness", () => {
     expect(mockFetch).toHaveBeenCalledTimes(2);
     const urls: string[] = mockFetch.mock.calls.map((c: any) => c[0]);
     expect(urls.some((u) => u.includes("foods"))).toBe(true);
-    expect(urls.some((u) => u.includes("culture_facts"))).toBe(true);
+    expect(urls.some((u) => u.includes("culture-facts"))).toBe(true);
   });
 
   it("fetchNeighborhoods punta a neighborhoods con order sort_order", async () => {
     const { fetchNeighborhoods } = require("../lib/cityFetchers");
     await fetchNeighborhoods("firenze");
     const url: string = mockFetch.mock.calls[0][0];
-    expect(url).toContain("neighborhoods");
-    expect(url).toContain("sort_order.asc");
+    expect(url).toContain("/api/neighborhoods?city=firenze");
   });
 
   it("lancia errore se HTTP non ok", async () => {
     const { fetchAttractions } = require("../lib/cityFetchers");
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 503, json: async () => null });
-    await expect(fetchAttractions("roma")).rejects.toThrow("HTTP 503");
+    mockFetch.mockResolvedValue({ ok: false, status: 503, json: async () => null });
+    await expect(fetchAttractions("roma")).rejects.toThrow("Backend HTTP 503");
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("fetchAttractions codifica correttamente città con spazio", async () => {
