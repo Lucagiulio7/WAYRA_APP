@@ -133,9 +133,9 @@ FOOD_SPOTS = [
 ]
 
 # Normalized detailed food descriptions.
-FOODS_BY_CITY = [{'name': 'Cocido madrile?o',
+FOODS_BY_CITY = [{'name': 'Cocido madrileño',
   'name_en': 'Madrid Cocido Stew',
-  'description': 'Stufato madrileno servito in pi? passaggi, con ceci, carni, chorizo, verdure e brodo, spesso iniziando dalla zuppa. ? un '
+  'description': 'Stufato madrileno servito in più passaggi, con ceci, carni, chorizo, verdure e brodo, spesso iniziando dalla zuppa. È un '
                  'piatto completo e rituale: sostanzioso, domestico, ideale nei mesi freddi, con sapore profondo che nasce dalla lunga '
                  'cottura condivisa.',
   'description_en': 'A Madrid stew served in several stages, with chickpeas, meats, chorizo, vegetables and broth, often starting with the '
@@ -143,59 +143,59 @@ FOODS_BY_CITY = [{'name': 'Cocido madrile?o',
                     'shared cooking.',
   'ingredients': ['ceci', 'manzo', 'pollo', 'chorizo', 'verdure'],
   'ingredients_en': ['chickpeas', 'beef', 'chicken', 'chorizo', 'vegetables'],
-  'places': [{'name': 'Malacat?n'}, {'name': 'La Bola'}, {'name': 'Lhardy'}]},
+  'places': [{'name': 'Malacatín'}, {'name': 'La Bola'}, {'name': 'Lhardy'}]},
  {'name': 'Bocadillo de calamares',
   'name_en': 'Fried Calamari Sandwich',
   'description': 'Panino bianco con anelli di calamaro fritti, spesso condito solo con limone o maionese, simbolo popolare intorno a Plaza '
-                 'Mayor. La qualit? sta nella frittura leggera, nel calamaro tenero e nel pane capace di assorbire senza diventare '
+                 'Mayor. La qualità sta nella frittura leggera, nel calamaro tenero e nel pane capace di assorbire senza diventare '
                  'gommoso.',
   'description_en': 'A white roll filled with fried squid rings, often dressed only with lemon or mayonnaise, a popular symbol around '
                     'Plaza Mayor. Quality lies in light frying, tender squid and bread able to absorb without becoming rubbery.',
   'ingredients': ['calamari', 'pane', 'farina', 'olio', 'limone'],
   'ingredients_en': ['squid', 'bread', 'flour', 'oil', 'lemon'],
-  'places': [{'name': 'La Campana'}, {'name': 'Bar La Ideal'}, {'name': 'Casa R?a'}]},
- {'name': 'Tortilla espa?ola',
+  'places': [{'name': 'La Campana'}, {'name': 'Bar La Ideal'}, {'name': 'Casa Rúa'}]},
+ {'name': 'Tortilla española',
   'name_en': 'Spanish Omelette',
   'description': 'Frittata spessa di patate, uova e spesso cipolla, servita a fette nei bar e nelle case. A Madrid divide tra chi la vuole '
-                 'pi? cotta o cremosa: il punto ideale conserva patate morbide, uovo succoso e sapore pulito.',
+                 'più cotta o cremosa: il punto ideale conserva patate morbide, uovo succoso e sapore pulito.',
   'description_en': 'A thick omelette of potatoes, eggs and often onion, served in slices in bars and homes. In Madrid it divides those '
                     'who prefer it firmer or creamier: the ideal point keeps soft potatoes, juicy egg and clean flavour.',
-  'ingredients': ['uova', 'patate', 'cipolla', 'olio d?oliva', 'sale'],
+  'ingredients': ['uova', 'patate', 'cipolla', 'olio d’oliva', 'sale'],
   'ingredients_en': ['eggs', 'potatoes', 'onion', 'olive oil', 'salt'],
   'places': [{'name': 'Casa Dani'}, {'name': 'Sylkar'}, {'name': 'La Ardosa'}]},
- {'name': 'Callos a la madrile?a',
+ {'name': 'Callos a la madrileña',
   'name_en': 'Madrid-Style Tripe',
-  'description': 'Trippa stufata con chorizo, morcilla, paprika e salsa densa, piatto storico delle taverne madrilene. ? intenso e '
-                 'gelatinoso, ma deve restare equilibrato: spezie, grasso e collagene devono fondersi senza coprire la personalit? della '
-                 'trippa. La qualit? migliore ? profonda ma pulita, mai solo grassa.',
+  'description': 'Trippa stufata con chorizo, morcilla, paprika e salsa densa, piatto storico delle taverne madrilene. È intenso e '
+                 'gelatinoso, ma deve restare equilibrato: spezie, grasso e collagene devono fondersi senza coprire la personalità della '
+                 'trippa. La qualità migliore è profonda ma pulita, mai solo grassa.',
   'description_en': 'Tripe stewed with chorizo, morcilla, paprika and thick sauce, a historic dish of Madrid taverns. It is intense and '
-                    'gelatinous, but should remain balanced: spice, fat and collagen must merge without hiding the tripe?s personality.',
+                    'gelatinous, but should remain balanced: spice, fat and collagen must merge without hiding the tripe’s personality.',
   'ingredients': ['trippa', 'chorizo', 'morcilla', 'paprika', 'pomodoro'],
   'ingredients_en': ['tripe', 'chorizo', 'morcilla', 'paprika', 'tomato'],
-  'places': [{'name': 'Casa Lucio'}, {'name': 'Malacat?n'}, {'name': 'La Tasquer?a'}]},
+  'places': [{'name': 'Casa Lucio'}, {'name': 'Malacatín'}, {'name': 'La Tasquería'}]},
  {'name': 'Churros con chocolate',
   'name_en': 'Churros with Chocolate',
   'description': 'Bastoncini di pasta fritta serviti con cioccolata calda densa, amatissimi a colazione o dopo una notte fuori. Devono '
                  'essere croccanti fuori e leggeri dentro, con cioccolato abbastanza intenso da avvolgere senza sembrare budino. La '
-                 'qualit? si sente quando la frittura resta asciutta anche dopo l?inzuppo.',
+                 'qualità si sente quando la frittura resta asciutta anche dopo l’inzuppo.',
   'description_en': 'Fried dough sticks served with thick hot chocolate, loved at breakfast or after a night out. They should be crisp '
                     'outside and light inside, with chocolate intense enough to coat them without feeling like pudding.',
   'ingredients': ['farina', 'acqua', 'olio', 'zucchero', 'cioccolato'],
   'ingredients_en': ['flour', 'water', 'oil', 'sugar', 'chocolate'],
-  'places': [{'name': 'Chocolater?a San Gin?s'}, {'name': 'Chocolater?a Valor'}, {'name': 'Los Artesanos 1902'}]},
- {'name': 'Croquetas de jam?n',
+  'places': [{'name': 'Chocolatería San Ginés'}, {'name': 'Chocolatería Valor'}, {'name': 'Los Artesanos 1902'}]},
+ {'name': 'Croquetas de jamón',
   'name_en': 'Ham Croquettes',
-  'description': 'Crocchette di besciamella densa e jam?n, impanate e fritte fino a ottenere esterno sottile e interno cremoso. Nei bar '
+  'description': 'Crocchette di besciamella densa e jamón, impanate e fritte fino a ottenere esterno sottile e interno cremoso. Nei bar '
                  'madrileni sono una prova tecnica: devono essere saporite, delicate, calde, senza eccesso di farina o olio.',
-  'description_en': 'Croquettes of dense b?chamel and jam?n, breaded and fried to achieve a thin exterior and creamy centre. In Madrid '
+  'description_en': 'Croquettes of dense béchamel and jamón, breaded and fried to achieve a thin exterior and creamy centre. In Madrid '
                     'bars they are a technical test: they should be savoury, delicate, hot and free from excess flour or oil.',
-  'ingredients': ['jam?n', 'besciamella', 'uova', 'pangrattato', 'noce moscata'],
-  'ingredients_en': ['jam?n', 'b?chamel', 'eggs', 'breadcrumbs', 'nutmeg'],
+  'ingredients': ['jamón', 'besciamella', 'uova', 'pangrattato', 'noce moscata'],
+  'ingredients_en': ['jamón', 'béchamel', 'eggs', 'breadcrumbs', 'nutmeg'],
   'places': [{'name': 'Casa Labra'}, {'name': 'Bodega de la Ardosa'}, {'name': 'Santerra'}]},
  {'name': 'Patatas bravas',
   'name_en': 'Patatas Bravas',
   'description': 'Patate fritte a cubi servite con salsa brava piccante, talvolta accompagnata da alioli, tapas fondamentale di Madrid. Il '
-                 'piatto sembra semplice ma vive di precisione: patate croccanti, interno morbido, salsa vivace e dosata bene. La qualit? '
+                 'piatto sembra semplice ma vive di precisione: patate croccanti, interno morbido, salsa vivace e dosata bene. La qualità '
                  'sta anche nel taglio regolare, che rende uniforme la frittura.',
   'description_en': 'Cubed fried potatoes served with spicy brava sauce, sometimes alongside alioli, a fundamental Madrid tapa. The dish '
                     'seems simple but depends on precision: crisp potatoes, soft interior and a lively sauce measured well. Quality also '
@@ -204,14 +204,14 @@ FOODS_BY_CITY = [{'name': 'Cocido madrile?o',
   'ingredients_en': ['potatoes', 'tomato', 'paprika', 'oil', 'garlic'],
   'places': [{'name': 'Docamar'}, {'name': 'Las Bravas'}, {'name': 'Bodega de la Ardosa'}]},
  {'name': 'Oreja a la plancha',
-  'name_en': 'Grilled Pig?s Ear',
+  'name_en': 'Grilled Pig’s Ear',
   'description': 'Orecchio di maiale cotto alla piastra fino a diventare croccante in superficie e gelatinoso dentro, spesso condito con '
-                 'aglio, prezzemolo e paprika. ? tapa da taverna autentica: intensa, testurale, perfetta per chi cerca Madrid meno '
+                 'aglio, prezzemolo e paprika. È tapa da taverna autentica: intensa, testurale, perfetta per chi cerca Madrid meno '
                  'turistica.',
-  'description_en': 'Pig?s ear grilled until crisp on the surface and gelatinous inside, often seasoned with garlic, parsley and paprika. '
+  'description_en': 'Pig’s ear grilled until crisp on the surface and gelatinous inside, often seasoned with garlic, parsley and paprika. '
                     'It is an authentic tavern tapa: intense, textural and perfect for anyone seeking a less touristy Madrid.',
   'ingredients': ['orecchio di maiale', 'aglio', 'prezzemolo', 'paprika', 'olio'],
-  'ingredients_en': ['pig?s ear', 'garlic', 'parsley', 'paprika', 'oil'],
+  'ingredients_en': ['pig’s ear', 'garlic', 'parsley', 'paprika', 'oil'],
   'places': [{'name': 'Casa Toni'}, {'name': 'La Oreja de Jaime'}, {'name': 'Taberna La Concha'}]}]
 
 CULTURE_FACTS = [

@@ -3,23 +3,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 
 // ─── QueryClient ────────────────────────────────────────────────────────────
-// staleTime: 10 min  → dati freschi per 10 min, nessuna re-fetch inutile
-// gcTime:    24 h    → le query scadute restano in cache per 24 h (offline)
-// retry:     2       → al massimo 2 tentativi extra prima di mostrare errore
+// Il catalogo e' incluso nell'app: non scade e non richiede tentativi di rete.
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 10,       // 10 minuti
-      gcTime: 1000 * 60 * 60 * 24,     // 24 ore (persistenza offline)
-      retry: 2,
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+      staleTime: Infinity,
+      gcTime: 1000 * 60 * 60 * 24,
+      retry: false,
     },
   },
 });
 
 // ─── AsyncStorage Persister ─────────────────────────────────────────────────
-// Serializza l'intera cache TanStack su AsyncStorage.
-// Al prossimo avvio, i dati sono disponibili immediatamente (senza spinner).
+// Solo le query marcate esplicitamente come persistenti vengono salvate.
+// Il catalogo bundled non va duplicato in AsyncStorage.
 export const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: "wayra_query_cache",

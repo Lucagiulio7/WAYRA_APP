@@ -36,27 +36,27 @@ ATTRACTIONS = [
  {'city': 'valencia', 'block_id': 307, 'zone': 'cabanyal_marina', 'category_level': 2, 'name': 'Barrio del Cabanyal', 'name_en': 'Cabanyal District', 'description': 'Quartiere marinaro storico con case basse, azulejos e un carattere urbano molto diverso dal centro monumentale.', 'description_en': 'A historic seafaring district with low houses, tiles and an urban character very different from the monumental centre.', 'latitude': 39.4639, 'longitude': -0.3322, 'estimated_visit_time': 45, 'tags': ['quartiere', 'mare', 'azulejos'], 'attraction_type': 'quartiere', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 307, 'zone': 'cabanyal_marina', 'category_level': 3, 'name': 'Mercado del Cabanyal', 'name_en': 'Cabanyal Market', 'description': 'Mercato locale molto utile per percepire il lato più quotidiano e popolare del fronte marittimo valenciano.', 'description_en': 'A local market very useful for feeling the everyday and popular side of Valencia\'s seafront.', 'latitude': 39.4651, 'longitude': -0.3342, 'estimated_visit_time': 25, 'tags': ['mercato', 'quartiere', 'vita locale'], 'attraction_type': 'mercato', 'ticket_url': None},
 
- {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 1, 'name': 'Playa de la Malvarrosa', 'name_en': 'Malvarrosa Beach', 'description': 'La spiaggia urbana più nota di Valencia, fondamentale per il rapporto tra città, tempo libero e Mediterraneo.', 'description_en': 'Valencia\'s best-known urban beach, essential for understanding the city\'s relationship with leisure and the Mediterranean.', 'latitude': 39.4748, 'longitude': -0.3239, 'estimated_visit_time': 60, 'tags': ['spiaggia', 'mare', 'relax'], 'attraction_type': 'spiaggia', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 1, 'name': 'Passeig Marítim', 'name_en': 'Seafront Promenade', 'description': 'Lungo asse sul mare tra passeggio, ristorazione e vita all\'aperto, molto importante per l\'uso quotidiano del litorale.', 'description_en': 'A long seafront axis of walking, dining and outdoor life, very important to the daily use of Valencia\'s coast.', 'latitude': 39.4707, 'longitude': -0.3258, 'estimated_visit_time': 35, 'tags': ['lungomare', 'mare', 'passeggiata'], 'attraction_type': 'lungomare', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 2, 'name': 'Parque Natural de la Albufera', 'name_en': 'Albufera Natural Park', 'description': 'Grande paesaggio lagunare legato all\'origine della paella e al lato più naturale del territorio valenciano.', 'description_en': 'A vast lagoon landscape tied to the origins of paella and to the more natural side of Valencian territory.', 'latitude': 39.3298, 'longitude': -0.3617, 'estimated_visit_time': 120, 'tags': ['natura', 'laguna', 'paesaggio'], 'attraction_type': 'parco naturale', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 3, 'name': 'El Palmar', 'name_en': 'El Palmar', 'description': 'Piccolo nucleo nell\'Albufera legato alla paella tradizionale, alle barche e al paesaggio d\'acqua e risaie.', 'description_en': 'A small settlement in the Albufera linked to traditional paella, boats and the landscape of water and rice fields.', 'latitude': 39.3188, 'longitude': -0.3345, 'estimated_visit_time': 45, 'tags': ['villaggio', 'paella', 'laguna'], 'attraction_type': 'villaggio', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 1, 'name': 'Centro visitatori Racó de l’Olla', 'name_en': 'Racó de l’Olla Visitor Centre', 'description': 'Il centro introduce gli ecosistemi dell’Albufera e orienta tra laguna, pineta, dune e zone umide protette.', 'description_en': 'The centre introduces the Albufera ecosystems and explains the lagoon, pine forest, dunes and protected wetlands.', 'latitude': 39.3474, 'longitude': -0.3195, 'estimated_visit_time': 60, 'tags': ['natura', 'laguna', 'centro visitatori'], 'attraction_type': 'centro visitatori', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 1, 'name': 'Osservatorio ornitologico Racó de l’Olla', 'name_en': 'Racó de l’Olla Bird Observatory', 'description': 'Un osservatorio sulle acque basse permette di leggere l’avifauna della laguna senza disturbare gli habitat sensibili.', 'description_en': 'An observatory over shallow waters allows visitors to watch lagoon birdlife without disturbing sensitive habitats.', 'latitude': 39.3478, 'longitude': -0.3187, 'estimated_visit_time': 50, 'tags': ['birdwatching', 'laguna', 'natura'], 'attraction_type': 'osservatorio naturalistico', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 2, 'name': 'Belvedere della Gola de Pujol', 'name_en': 'Gola de Pujol Viewpoint', 'description': 'Uno degli affacci più accessibili sulla laguna, particolarmente suggestivo nel tardo pomeriggio.', 'description_en': 'One of the lagoon’s most accessible viewpoints, especially atmospheric in late afternoon.', 'latitude': 39.35, 'longitude': -0.3204, 'estimated_visit_time': 50, 'tags': ['laguna', 'tramonto', 'panorama'], 'attraction_type': 'belvedere naturale', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 308, 'zone': 'malvarrosa_albufera', 'category_level': 3, 'name': 'Sendero de la Devesa', 'name_en': 'Devesa Nature Trail', 'description': 'Un percorso pianeggiante nella pineta costiera tra vegetazione mediterranea, dune e ambienti umidi.', 'description_en': 'A level trail through the coastal pine forest, Mediterranean vegetation, dunes and wetlands.', 'latitude': 39.3528, 'longitude': -0.3179, 'estimated_visit_time': 60, 'tags': ['sentiero', 'pineta', 'natura'], 'attraction_type': 'percorso naturalistico', 'ticket_url': None},
 
  {'city': 'valencia', 'block_id': 309, 'zone': 'ciutat_vella', 'category_level': 2, 'name': 'Palau dels Català de Valeriola', 'name_en': 'Palau dels Catala de Valeriola', 'description': 'Tappa utile per aggiungere una lettura nobiliare e museale al cuore antico della citta.', 'description_en': 'A useful stop for adding an aristocratic and museum-oriented reading to the old heart of the city.', 'latitude': 39.4760, 'longitude': -0.3769, 'estimated_visit_time': 20, 'tags': ['palazzo', 'storia', 'centro'], 'attraction_type': 'palazzo storico', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 309, 'zone': 'ciutat_vella', 'category_level': 3, 'name': 'Plaça del Mercat side lanes', 'name_en': 'Market Square Side Lanes', 'description': 'Vicoli utili per leggere il lato piu fitto e commerciale del centro storico.', 'description_en': 'Useful lanes for reading the denser and more commercial side of the old town.', 'latitude': 39.4741, 'longitude': -0.3778, 'estimated_visit_time': 20, 'tags': ['vicoli', 'mercato', 'centro'], 'attraction_type': 'strada storica', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 310, 'zone': 'cathedral_carmen', 'category_level': 2, 'name': 'Plaça de la Verge', 'name_en': 'Plaça de la Verge', 'description': 'Piazza molto utile per leggere il nucleo simbolico e monumentale della Valencia storica.', 'description_en': 'A very useful square for reading the symbolic and monumental core of historic Valencia.', 'latitude': 39.4761, 'longitude': -0.3750, 'estimated_visit_time': 20, 'tags': ['piazza', 'centro', 'monumentale'], 'attraction_type': 'piazza', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 310, 'zone': 'cathedral_carmen', 'category_level': 3, 'name': 'Portal de Valldigna', 'name_en': 'Valldigna Gate', 'description': 'Punto utile per legare il Carmen al tema delle soglie storiche della citta.', 'description_en': 'A useful point for linking El Carmen to the theme of the city\'s historic thresholds.', 'latitude': 39.4778, 'longitude': -0.3782, 'estimated_visit_time': 20, 'tags': ['porta', 'storia', 'quartiere'], 'attraction_type': 'porta storica', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 311, 'zone': 'xativa_colon', 'category_level': 2, 'name': 'Plaza del Ayuntamiento', 'name_en': 'City Hall Square', 'description': 'Grande spazio utile per leggere la Valencia civica, ottocentesca e commerciale.', 'description_en': 'A large space useful for reading civic, nineteenth-century and commercial Valencia.', 'latitude': 39.4699, 'longitude': -0.3763, 'estimated_visit_time': 20, 'tags': ['piazza', 'civico', 'centro'], 'attraction_type': 'piazza', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 311, 'zone': 'xativa_colon', 'category_level': 2, 'name': 'Mercado de Colón', 'name_en': 'Colón Market', 'description': 'Mercato modernista restaurato, oggi spazio gastronomico e sociale che mostra il volto borghese dell’Eixample valenciano.', 'description_en': 'A restored Modernist market, now a gastronomic and social venue showing the bourgeois character of Valencia’s Eixample.', 'latitude': 39.4708, 'longitude': -0.3644, 'estimated_visit_time': 40, 'tags': ['mercato', 'modernismo', 'gastronomia'], 'attraction_type': 'mercato modernista', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 311, 'zone': 'xativa_colon', 'category_level': 3, 'name': 'Estación del Norte exterior', 'name_en': 'North Station Exterior', 'description': 'Tappa utile per aggiungere una lettura modernista e ferroviaria al centro ampliato.', 'description_en': 'A useful stop for adding a modernist and railway reading to the wider centre.', 'latitude': 39.4667, 'longitude': -0.3772, 'estimated_visit_time': 20, 'tags': ['stazione', 'modernismo', 'centro'], 'attraction_type': 'edificio storico', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 312, 'zone': 'ruzafa', 'category_level': 2, 'name': 'Parroquia de San Valero exterior', 'name_en': 'San Valero Church Exterior', 'description': 'Tappa utile per aggiungere una lettura storica al quartiere piu creativo e conviviale.', 'description_en': 'A useful stop for adding a historic reading to the city\'s most creative and convivial district.', 'latitude': 39.4628, 'longitude': -0.3702, 'estimated_visit_time': 20, 'tags': ['chiesa', 'quartiere', 'storia'], 'attraction_type': 'chiesa', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 312, 'zone': 'ruzafa', 'category_level': 3, 'name': 'Passeggiata di Ruzafa centrale', 'name_en': 'Central Ruzafa Walk', 'description': 'Tratto utile per sentire il lato piu vivo, commerciale e serale del quartiere.', 'description_en': 'A useful stretch for feeling the liveliest, most commercial and evening side of the district.', 'latitude': 39.4622, 'longitude': -0.3726, 'estimated_visit_time': 20, 'tags': ['quartiere', 'vita urbana', 'passeggiata'], 'attraction_type': 'strada urbana', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 313, 'zone': 'turia_bioparc', 'category_level': 2, 'name': 'Jardín del Turia west paths', 'name_en': 'Turia Garden West Paths', 'description': 'Percorso utile per leggere la grande infrastruttura verde nel tratto occidentale.', 'description_en': 'A useful route for reading the great green infrastructure in its western stretch.', 'latitude': 39.4694, 'longitude': -0.4010, 'estimated_visit_time': 20, 'tags': ['parco', 'giardini', 'passeggiata'], 'attraction_type': 'percorso verde', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 313, 'zone': 'turia_bioparc', 'category_level': 3, 'name': 'Parque de Cabecera viewpoints', 'name_en': 'Cabecera Park Viewpoints', 'description': 'Affacci utili per aggiungere una lettura paesaggistica e piu ampia del margine ovest.', 'description_en': 'Useful viewpoints for adding a broader landscape reading of the western edge.', 'latitude': 39.4780, 'longitude': -0.4110, 'estimated_visit_time': 20, 'tags': ['panorama', 'parco', 'lago'], 'attraction_type': 'belvedere', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 314, 'zone': 'ciudad_artes', 'category_level': 2, 'name': 'L\'Umbracle', 'name_en': 'L\'Umbracle', 'description': 'Passeggiata sopraelevata molto utile per leggere l\'intero insieme contemporaneo della zona.', 'description_en': 'A very useful elevated walk for reading the entire contemporary complex of the district.', 'latitude': 39.4544, 'longitude': -0.3509, 'estimated_visit_time': 20, 'tags': ['architettura', 'passeggiata', 'moderno'], 'attraction_type': 'giardino contemporaneo', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 314, 'zone': 'ciudad_artes', 'category_level': 2, 'name': 'CaixaForum València', 'name_en': 'CaixaForum València', 'description': 'Centro culturale inserito nell’Àgora della Città delle Arti e delle Scienze, con mostre e installazioni contemporanee.', 'description_en': 'A cultural centre inside the Ágora at the City of Arts and Sciences, hosting contemporary exhibitions and installations.', 'latitude': 39.4547, 'longitude': -0.3493, 'estimated_visit_time': 60, 'tags': ['cultura', 'mostre', 'architettura'], 'attraction_type': 'centro culturale', 'ticket_url': 'https://caixaforum.org/es/valencia/home'},
  {'city': 'valencia', 'block_id': 314, 'zone': 'ciudad_artes', 'category_level': 3, 'name': 'Pont de l\'Assut de l\'Or', 'name_en': 'Assut de l\'Or Bridge', 'description': 'Punto utile per aggiungere una lettura infrastrutturale e scenografica del complesso.', 'description_en': 'A useful point for adding an infrastructural and scenic reading of the complex.', 'latitude': 39.4558, 'longitude': -0.3516, 'estimated_visit_time': 20, 'tags': ['ponte', 'architettura', 'moderno'], 'attraction_type': 'ponte', 'ticket_url': None},
  {'city': 'valencia', 'block_id': 315, 'zone': 'cabanyal_marina', 'category_level': 2, 'name': 'Las Arenas promenade', 'name_en': 'Las Arenas Promenade', 'description': 'Tratto utile per leggere il lato balneare e aperto della Valencia marittima.', 'description_en': 'A useful stretch for reading the beach-oriented and open side of maritime Valencia.', 'latitude': 39.4673, 'longitude': -0.3235, 'estimated_visit_time': 20, 'tags': ['mare', 'passeggiata', 'spiaggia'], 'attraction_type': 'lungomare', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 315, 'zone': 'cabanyal_marina', 'category_level': 3, 'name': 'Marina north docks', 'name_en': 'Marina North Docks', 'description': 'Punto utile per ampliare la lettura tra porto turistico, acqua e grandi aperture sul mare.', 'description_en': 'A useful point for broadening the reading between the marina, the water and broad openings onto the sea.', 'latitude': 39.4627, 'longitude': -0.3290, 'estimated_visit_time': 20, 'tags': ['marina', 'porto', 'mare'], 'attraction_type': 'molo', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 316, 'zone': 'malvarrosa_albufera', 'category_level': 2, 'name': 'Passeggiata della Malvarrosa nord', 'name_en': 'North Malvarrosa Walk', 'description': 'Tratto utile per sentire la scala lunga della spiaggia urbana valenciana.', 'description_en': 'A useful stretch for feeling the long scale of Valencia\'s urban beach.', 'latitude': 39.4782, 'longitude': -0.3228, 'estimated_visit_time': 20, 'tags': ['spiaggia', 'mare', 'passeggiata'], 'attraction_type': 'lungomare', 'ticket_url': None},
- {'city': 'valencia', 'block_id': 316, 'zone': 'malvarrosa_albufera', 'category_level': 3, 'name': 'Belvedere dei canali dell\'Albufera', 'name_en': 'Albufera Canal Viewpoint', 'description': 'Affaccio utile per aggiungere una lettura piu naturale e lagunare del margine sud.', 'description_en': 'A useful viewpoint for adding a more natural and lagoon-oriented reading of the southern edge.', 'latitude': 39.3188, 'longitude': -0.3486, 'estimated_visit_time': 20, 'tags': ['laguna', 'panorama', 'natura'], 'attraction_type': 'belvedere naturale', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 315, 'zone': 'cabanyal_marina', 'category_level': 3, 'name': 'Playa de la Malvarrosa', 'name_en': 'Malvarrosa Beach', 'description': 'La spiaggia urbana più nota di Valencia, ampia e collegata al Cabanyal da un lungo paseo marítimo.', 'description_en': 'Valencia’s best-known urban beach, broad and linked to Cabanyal by a long seafront promenade.', 'latitude': 39.4748, 'longitude': -0.3239, 'estimated_visit_time': 60, 'tags': ['spiaggia', 'mare', 'relax'], 'attraction_type': 'spiaggia', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 316, 'zone': 'malvarrosa_albufera', 'category_level': 2, 'name': 'Laguna dell’Albufera', 'name_en': 'Albufera Lagoon', 'description': 'Il grande specchio d’acqua dolce del parco, legato alla pesca, alle risaie e alla cultura della paella.', 'description_en': 'The park’s vast freshwater lagoon, closely linked to fishing, rice fields and paella culture.', 'latitude': 39.346, 'longitude': -0.322, 'estimated_visit_time': 60, 'tags': ['laguna', 'paesaggio', 'tradizioni'], 'attraction_type': 'paesaggio naturale', 'ticket_url': None},
+ {'city': 'valencia', 'block_id': 316, 'zone': 'malvarrosa_albufera', 'category_level': 3, 'name': 'Passerella della Devesa', 'name_en': 'Devesa Wetland Boardwalk', 'description': 'La passerella attraversa il margine umido tra canneti, dune e transizione verso la fascia costiera.', 'description_en': 'The boardwalk crosses the wetland edge among reed beds, dunes and the transition towards the coast.', 'latitude': 39.3491, 'longitude': -0.3176, 'estimated_visit_time': 50, 'tags': ['passerella', 'zona umida', 'natura'], 'attraction_type': 'percorso naturalistico', 'ticket_url': None},
 ]
 
 FOOD_SPOTS = [
@@ -136,17 +136,17 @@ FOOD_SPOTS = [
 # Normalized detailed food descriptions.
 FOODS_BY_CITY = [{'name': 'Paella Valenciana',
   'name_en': 'Valencian Paella',
-  'description': 'Riso cotto in padella larga con pollo, coniglio, fagiolini, garrof?, zafferano e brodo, nato nelle campagne valenciane. '
-                 '? il piatto identitario della citt?: conta il riso asciutto, il socarrat, la cottura uniforme e il rispetto degli '
+  'description': 'Riso cotto in padella larga con pollo, coniglio, fagiolini, garrofó, zafferano e brodo, nato nelle campagne valenciane. '
+                 'È il piatto identitario della città: conta il riso asciutto, il socarrat, la cottura uniforme e il rispetto degli '
                  'ingredienti tradizionali.',
-  'description_en': 'Rice cooked in a wide pan with chicken, rabbit, green beans, garrof?, saffron and broth, born in the Valencian '
-                    'countryside. It is the city?s identity dish: dry rice, socarrat, even cooking and respect for traditional ingredients '
+  'description_en': 'Rice cooked in a wide pan with chicken, rabbit, green beans, garrofó, saffron and broth, born in the Valencian '
+                    'countryside. It is the city’s identity dish: dry rice, socarrat, even cooking and respect for traditional ingredients '
                     'matter.',
-  'ingredients': ['riso', 'pollo', 'coniglio', 'garrof?', 'zafferano'],
-  'ingredients_en': ['rice', 'chicken', 'rabbit', 'garrof?', 'saffron'],
+  'ingredients': ['riso', 'pollo', 'coniglio', 'garrofó', 'zafferano'],
+  'ingredients_en': ['rice', 'chicken', 'rabbit', 'garrofó', 'saffron'],
   'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'Restaurante Levante Valencia']},
- {'name': 'Fideu?',
-  'name_en': 'Fideu? Noodle Paella',
+ {'name': 'Fideuà',
+  'name_en': 'Fideuà Noodle Paella',
   'description': 'Piatto marinaro simile alla paella ma preparato con pasta corta invece del riso, brodo di pesce, frutti di mare e spesso '
                  'alioli. Deve essere saporita e asciutta, con pasta ben tostata e gusto di mare netto.',
   'description_en': 'A seafood dish similar to paella but made with short noodles instead of rice, fish broth, seafood and often alioli. '
@@ -157,42 +157,42 @@ FOODS_BY_CITY = [{'name': 'Paella Valenciana',
   'places': ['Casa Carmela Valencia', 'La Pepica Valencia', 'El Coso del Mar Valencia']},
  {'name': 'Esgarraet',
   'name_en': 'Esgarraet Pepper and Cod Salad',
-  'description': 'Insalata valenciana di peperoni arrostiti, baccal? sfilacciato, aglio e olio d?oliva, servita fredda come tapa. ? '
-                 'semplice e intensa: dolcezza del peperone, sapidit? del pesce e olio buono devono restare in equilibrio. La qualit? '
-                 'dipende dalla dolcezza dei peperoni e dal baccal? ben dissalato.',
+  'description': 'Insalata valenciana di peperoni arrostiti, baccalà sfilacciato, aglio e olio d’oliva, servita fredda come tapa. È '
+                 'semplice e intensa: dolcezza del peperone, sapidità del pesce e olio buono devono restare in equilibrio. La qualità '
+                 'dipende dalla dolcezza dei peperoni e dal baccalà ben dissalato.',
   'description_en': 'A Valencian salad of roasted peppers, shredded salt cod, garlic and olive oil, served cold as a tapa. It is simple '
                     'and intense: pepper sweetness, fish saltiness and good oil should remain in balance. Quality depends on pepper '
                     'sweetness and salt cod that is properly desalinated.',
-  'ingredients': ['peperoni arrostiti', 'baccal?', 'aglio', 'olio d?oliva', 'sale'],
+  'ingredients': ['peperoni arrostiti', 'baccalà', 'aglio', 'olio d’oliva', 'sale'],
   'ingredients_en': ['roasted peppers', 'salt cod', 'garlic', 'olive oil', 'salt'],
   'places': ['Casa Montana Valencia', 'Palace Fesol Valencia', 'Taberna Alkazar Valencia']},
  {'name': 'All i Pebre',
   'name_en': 'All i Pebre Eel Stew',
-  'description': 'Stufato tradizionale dell?Albufera con anguilla, patate, aglio, paprika e peperoncino, dal nome che significa aglio e '
-                 'pepe. ? rustico e territoriale: brodo intenso, patate morbide, pesce saporito e piccantezza controllata. La qualit? si '
-                 'misura nella salsa legata e nella carne dell?anguilla tenera.',
+  'description': 'Stufato tradizionale dell’Albufera con anguilla, patate, aglio, paprika e peperoncino, dal nome che significa aglio e '
+                 'pepe. È rustico e territoriale: brodo intenso, patate morbide, pesce saporito e piccantezza controllata. La qualità si '
+                 'misura nella salsa legata e nella carne dell’anguilla tenera.',
   'description_en': 'A traditional Albufera stew with eel, potatoes, garlic, paprika and chilli, its name meaning garlic and pepper. It is '
                     'rustic and territorial: intense broth, soft potatoes, savoury fish and controlled heat. Quality is measured by a '
                     'bound sauce and eel flesh that stays tender and clean.',
   'ingredients': ['anguilla', 'patate', 'aglio', 'paprika', 'peperoncino'],
   'ingredients_en': ['eel', 'potatoes', 'garlic', 'paprika', 'chilli'],
   'places': ['Nou Raco Valencia', 'Bon Aire El Palmar Valencia', "L'Alqueria del Pou Valencia"]},
- {'name': 'Cl?chinas',
+ {'name': 'Clóchinas',
   'name_en': 'Valencian Mussels',
-  'description': 'Piccole cozze valenciane stagionali, pi? delicate di molte cozze comuni, servite spesso al vapore con limone o aromi '
-                 'leggeri. La qualit? sta nella freschezza, nella dimensione minuta e nel sapore marino pulito. La qualit? migliore evita '
+  'description': 'Piccole cozze valenciane stagionali, più delicate di molte cozze comuni, servite spesso al vapore con limone o aromi '
+                 'leggeri. La qualità sta nella freschezza, nella dimensione minuta e nel sapore marino pulito. La qualità migliore evita '
                  'cotture lunghe e conserva succo e delicatezza.',
   'description_en': 'Small seasonal Valencian mussels, more delicate than many common mussels, often steamed with lemon or light '
                     'aromatics. Quality lies in freshness, small size and clean marine flavour. The best quality avoids long cooking and '
                     'preserves juice, delicacy and clean aroma.',
-  'ingredients': ['cl?chinas', 'limone', 'alloro', 'olio', 'sale'],
-  'ingredients_en': ['cl?chinas mussels', 'lemon', 'bay leaf', 'oil', 'salt'],
+  'ingredients': ['clóchinas', 'limone', 'alloro', 'olio', 'sale'],
+  'ingredients_en': ['clóchinas mussels', 'lemon', 'bay leaf', 'oil', 'salt'],
   'places': ['Casa Montana Valencia', 'La Pilareta Valencia', 'Bar Pilar Valencia']},
  {'name': 'Bunyols de Carbassa',
   'name_en': 'Pumpkin Fritters',
   'description': 'Frittelle dolci di zucca, farina e lievito, tipiche delle Fallas e servite con zucchero o cioccolata calda. Devono '
-                 'essere leggere, dorate e profumate, con dolcezza vegetale evidente ma frittura asciutta. La qualit? sta nella zucca '
-                 'riconoscibile e nella leggerezza dell?impasto.',
+                 'essere leggere, dorate e profumate, con dolcezza vegetale evidente ma frittura asciutta. La qualità sta nella zucca '
+                 'riconoscibile e nella leggerezza dell’impasto.',
   'description_en': 'Sweet fritters made with pumpkin, flour and yeast, typical of Fallas and served with sugar or hot chocolate. They '
                     'should be light, golden and fragrant, with clear vegetable sweetness but dry frying. Quality lies in recognisable '
                     'pumpkin and the lightness of the dough.',
@@ -201,9 +201,9 @@ FOODS_BY_CITY = [{'name': 'Paella Valenciana',
   'places': ['Horchateria Fabian Valencia', 'Horchateria Santa Catalina Valencia', 'Bunoleria El Contraste Valencia']},
  {'name': 'Horchata con Fartons',
   'name_en': 'Horchata with Fartons',
-  'description': 'Bevanda fresca di chufa servita con fartons, dolci allungati e soffici da intingere, simbolo dell?estate valenciana. ? '
-                 'rinfrescante e lattiginosa senza latte: la qualit? sta nella chufa, nella dolcezza misurata e nel servizio freddo. La '
-                 'qualit? del farton conta perch? deve assorbire senza disfarsi.',
+  'description': 'Bevanda fresca di chufa servita con fartons, dolci allungati e soffici da intingere, simbolo dell’estate valenciana. È '
+                 'rinfrescante e lattiginosa senza latte: la qualità sta nella chufa, nella dolcezza misurata e nel servizio freddo. La '
+                 'qualità del farton conta perché deve assorbire senza disfarsi.',
   'description_en': 'A chilled tiger-nut drink served with fartons, long soft pastries made for dipping, a symbol of Valencian summer. It '
                     'is refreshing and milky without milk: quality lies in the tiger nut, measured sweetness and cold service.',
   'ingredients': ['chufa', 'acqua', 'zucchero', 'fartons'],
@@ -211,12 +211,12 @@ FOODS_BY_CITY = [{'name': 'Paella Valenciana',
   'places': ['Horchateria Daniel Valencia', 'Horchateria Santa Catalina Valencia', 'Horchateria Panach Valencia']},
  {'name': 'Agua de Valencia',
   'name_en': 'Agua de Valencia Cocktail',
-  'description': 'Cocktail nato a Valencia con succo d?arancia, cava, gin e vodka, servito in caraffa e legato alla vita serale. Deve '
-                 'essere fresco e agrumato, non solo alcolico: l?arancia locale deve restare protagonista. La qualit? dipende da succo '
+  'description': 'Cocktail nato a Valencia con succo d’arancia, cava, gin e vodka, servito in caraffa e legato alla vita serale. Deve '
+                 'essere fresco e agrumato, non solo alcolico: l’arancia locale deve restare protagonista. La qualità dipende da succo '
                  'fresco e bollicina ancora viva.',
   'description_en': 'A cocktail born in Valencia with orange juice, cava, gin and vodka, served in a jug and linked to evening social '
                     'life. It should be fresh and citrusy, not merely alcoholic: local orange should remain the protagonist.',
-  'ingredients': ['succo d?arancia', 'cava', 'gin', 'vodka', 'zucchero'],
+  'ingredients': ['succo d’arancia', 'cava', 'gin', 'vodka', 'zucchero'],
   'ingredients_en': ['orange juice', 'cava', 'gin', 'vodka', 'sugar'],
   'places': ['Cafe Madrid Valencia', 'Cafe de las Horas Valencia', 'Sant Jaume Valencia']}]
 

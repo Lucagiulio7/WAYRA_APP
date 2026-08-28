@@ -9,8 +9,10 @@ class Attraction(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
     name_en = Column(String(200))
+    name_fr = Column(String(200))
     description = Column(Text)
     description_en = Column(Text)
+    description_fr = Column(Text)
     category_level = Column(Integer, nullable=False)  # 1=iconic, 2=ricercato, 3=nascosto
     block_id = Column(Integer)   # geographic cluster id — 4 attractions per block = 1 potential day
     zone = Column(String(50))    # zone label for ordering blocks
@@ -39,8 +41,10 @@ class Attraction(Base):
             "id": self.id,
             "name": self.name,
             "name_en": getattr(self, "name_en", None),
+            "name_fr": getattr(self, "name_fr", None),
             "description": self.description,
             "description_en": getattr(self, "description_en", None),
+            "description_fr": getattr(self, "description_fr", None),
             "category_level": self.category_level,
             "block_id": self.block_id,
             "zone": self.zone,

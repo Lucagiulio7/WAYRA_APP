@@ -60,7 +60,7 @@ ATTRACTIONS = [
 
 FOOD_SPOTS = [
  {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 1, 'name': 'Nomad', 'name_en': 'Nomad', 'description': 'Ristorante molto noto con terrazza affacciata sulla medina e cucina marocchina rivisitata.', 'description_en': 'A very well known restaurant with a terrace over the medina and updated Moroccan cooking.', 'latitude': 31.6279, 'longitude': -7.9859, 'estimated_visit_time': 90, 'tags': ['ristorante', 'terrazza', 'medina'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.4},
- {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 1, 'name': 'Café des Ã‰pices', 'name_en': 'Café des Ã‰pices', 'description': 'Indirizzo piacevole per restare tra piazza e souk con vista sui tetti.', 'description_en': 'A pleasant address for staying between the square and the souk with rooftop views.', 'latitude': 31.6282, 'longitude': -7.9861, 'estimated_visit_time': 85, 'tags': ['ristorante', 'terrazza', 'souk'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
+ {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 1, 'name': 'Café des Épices', 'name_en': 'Café des Épices', 'description': 'Indirizzo piacevole per restare tra piazza e souk con vista sui tetti.', 'description_en': 'A pleasant address for staying between the square and the souk with rooftop views.', 'latitude': 31.6282, 'longitude': -7.9861, 'estimated_visit_time': 85, 'tags': ['ristorante', 'terrazza', 'souk'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
  {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 2, 'name': 'Zeitoun Café', 'name_en': 'Zeitoun Café', 'description': 'Tavola comoda per mangiare vicino a Jemaa el-Fna senza perdere il flusso della piazza.', 'description_en': 'A convenient table for eating near Jemaa el-Fna without losing the flow of the square.', 'latitude': 31.6252, 'longitude': -7.9882, 'estimated_visit_time': 80, 'tags': ['ristorante', 'piazza', 'centrale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 2, 'name': 'Le Salama', 'name_en': 'Le Salama', 'description': 'Ristorante più curato e serale a pochi passi dalla piazza.', 'description_en': 'A more polished evening restaurant just a few steps from the square.', 'latitude': 31.6248, 'longitude': -7.9870, 'estimated_visit_time': 100, 'tags': ['ristorante', 'elegante', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.4},
  {'city': 'marrakech', 'zone': 'jemaa_el_fna', 'category_level': 3, 'name': 'DarDar Rooftop', 'name_en': 'DarDar Rooftop', 'description': 'Opzione più scenografica per cena tra musica, terrazza e medina.', 'description_en': 'A more theatrical dinner option with music, terrace and medina atmosphere.', 'latitude': 31.6246, 'longitude': -7.9858, 'estimated_visit_time': 100, 'tags': ['ristorante', 'terrazza', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
@@ -77,7 +77,7 @@ FOOD_SPOTS = [
  {'city': 'marrakech', 'zone': 'koutoubia', 'category_level': 2, 'name': 'Mint Tea Corner', 'name_en': 'Mint Tea Corner', 'description': 'Fermata essenziale per tè alla menta e biscotti locali.', 'description_en': 'An essential stop for mint tea and local biscuits.', 'latitude': 31.6231, 'longitude': -7.9931, 'estimated_visit_time': 10, 'tags': ['snack', 'tè', 'biscotti'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
  {'city': 'marrakech', 'zone': 'koutoubia', 'category_level': 3, 'name': 'Harira Express', 'name_en': 'Harira Express', 'description': 'Zuppa rapida e locale ideale come piccolo spuntino salato.', 'description_en': 'A quick local soup ideal as a small savoury snack.', 'latitude': 31.6227, 'longitude': -7.9922, 'estimated_visit_time': 10, 'tags': ['snack', 'harira', 'locale'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.1},
 
- {'city': 'marrakech', 'zone': 'souks_medina', 'category_level': 1, 'name': 'Terrasse des Ã‰pices', 'name_en': 'Terrasse des Ã‰pices', 'description': 'Terrazza molto nota nel souk, comoda per fermarsi senza uscire dalla medina.', 'description_en': 'A well known rooftop in the souk, convenient for stopping without leaving the medina.', 'latitude': 31.6287, 'longitude': -7.9867, 'estimated_visit_time': 85, 'tags': ['ristorante', 'terrazza', 'souk'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
+ {'city': 'marrakech', 'zone': 'souks_medina', 'category_level': 1, 'name': 'Terrasse des Épices', 'name_en': 'Terrasse des Épices', 'description': 'Terrazza molto nota nel souk, comoda per fermarsi senza uscire dalla medina.', 'description_en': 'A well known rooftop in the souk, convenient for stopping without leaving the medina.', 'latitude': 31.6287, 'longitude': -7.9867, 'estimated_visit_time': 85, 'tags': ['ristorante', 'terrazza', 'souk'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
  {'city': 'marrakech', 'zone': 'souks_medina', 'category_level': 1, 'name': 'Souk Kafè', 'name_en': 'Souk Kafè', 'description': 'Piccolo indirizzo piacevole tra i vicoli del souk e il quartiere Mouassine.', 'description_en': 'A pleasant small address between the souk lanes and the Mouassine quarter.', 'latitude': 31.6291, 'longitude': -7.9871, 'estimated_visit_time': 80, 'tags': ['ristorante', 'medina', 'cortile'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'marrakech', 'zone': 'souks_medina', 'category_level': 2, 'name': 'Atay Cafè Food', 'name_en': 'Atay Cafè Food', 'description': 'Cucina semplice e terrazza utile per una pausa nel dedalo della medina.', 'description_en': 'Simple cooking and a useful rooftop break in the medina maze.', 'latitude': 31.6293, 'longitude': -7.9858, 'estimated_visit_time': 75, 'tags': ['ristorante', 'terrazza', 'medina'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'marrakech', 'zone': 'souks_medina', 'category_level': 2, 'name': 'L Mida', 'name_en': 'L Mida', 'description': 'Ristorante più curato e contemporaneo pur restando nel cuore della medina.', 'description_en': 'A more polished and contemporary restaurant while still in the heart of the medina.', 'latitude': 31.6297, 'longitude': -7.9856, 'estimated_visit_time': 100, 'tags': ['ristorante', 'contemporaneo', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.4},
@@ -136,7 +136,7 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Tagine',
   'name_en': 'Tagine',
   'description': 'Stufato cotto lentamente nel recipiente conico di terracotta, con carne, verdure, spezie, frutta secca o limone '
-                 'conservato. A Marrakech ? una grammatica culinaria pi? che un singolo piatto: profumato, morbido, stratificato, migliore '
+                 'conservato. A Marrakech è una grammatica culinaria più che un singolo piatto: profumato, morbido, stratificato, migliore '
                  'quando la salsa resta concentrata ma non pesante.',
   'description_en': 'A stew slowly cooked in the conical earthenware pot, with meat, vegetables, spices, dried fruit or preserved lemon. '
                     'In Marrakech it is more a culinary grammar than a single dish: fragrant, tender and layered, best when the sauce is '
@@ -147,7 +147,7 @@ FOODS_BY_CITY = [{'name': 'Tagine',
  {'name': 'Couscous',
   'name_en': 'Couscous',
   'description': 'Semola cotta a vapore e servita con verdure, ceci, brodo speziato e carne, tradizionalmente legata al pranzo del '
-                 'venerd?. Deve essere leggero e sgranato, non compatto: il valore sta nell?equilibrio tra cereale, brodo, dolcezza delle '
+                 'venerdì. Deve essere leggero e sgranato, non compatto: il valore sta nell’equilibrio tra cereale, brodo, dolcezza delle '
                  'verdure e spezie.',
   'description_en': 'Steamed semolina served with vegetables, chickpeas, spiced broth and meat, traditionally linked to Friday lunch. It '
                     'should be light and separate, not compact: value lies in the balance between grain, broth, vegetable sweetness and '
@@ -158,17 +158,17 @@ FOODS_BY_CITY = [{'name': 'Tagine',
  {'name': 'Pastilla',
   'name_en': 'Pastilla',
   'description': 'Torta salata-dolce di sfoglia sottilissima, tradizionalmente con piccione o pollo, mandorle, cannella e zucchero a velo. '
-                 '? uno dei piatti marocchini pi? eleganti: croccante, speziata, profumata, capace di tenere insieme dolcezza e sapidit?. '
-                 'La qualit? sta nel contrasto tra sfoglia asciutta e ripieno aromatico.',
+                 'È uno dei piatti marocchini più eleganti: croccante, speziata, profumata, capace di tenere insieme dolcezza e sapidità. '
+                 'La qualità sta nel contrasto tra sfoglia asciutta e ripieno aromatico.',
   'description_en': 'A sweet-savoury pie of very thin pastry, traditionally with pigeon or chicken, almonds, cinnamon and icing sugar. It '
-                    'is one of Morocco?s most elegant dishes: crisp, spiced and fragrant, able to hold sweetness and savouriness together.',
+                    'is one of Morocco’s most elegant dishes: crisp, spiced and fragrant, able to hold sweetness and savouriness together.',
   'ingredients': ['pasta warqa', 'pollo', 'mandorle', 'cannella', 'zucchero a velo'],
   'ingredients_en': ['warqa pastry', 'chicken', 'almonds', 'cinnamon', 'icing sugar'],
   'places': ['Al Fassia Marrakech', 'La Maison Arabe Marrakech', 'Dar Yacout Marrakech']},
  {'name': 'Harira',
   'name_en': 'Harira Soup',
-  'description': 'Zuppa marocchina di pomodoro, lenticchie, ceci, erbe, spezie e talvolta carne, molto legata al Ramadan. ? nutriente ma '
-                 'vivace: acidit?, coriandolo, legumi e spezie devono creare un brodo denso, aromatico e non monotono. La migliore lascia '
+  'description': 'Zuppa marocchina di pomodoro, lenticchie, ceci, erbe, spezie e talvolta carne, molto legata al Ramadan. È nutriente ma '
+                 'vivace: acidità, coriandolo, legumi e spezie devono creare un brodo denso, aromatico e non monotono. La migliore lascia '
                  'calore e freschezza insieme, senza coprire i legumi.',
   'description_en': 'A Moroccan soup of tomato, lentils, chickpeas, herbs, spices and sometimes meat, strongly linked to Ramadan. It is '
                     'nourishing yet lively: acidity, coriander, legumes and spices should create a dense, aromatic and never monotonous '
@@ -178,7 +178,7 @@ FOODS_BY_CITY = [{'name': 'Tagine',
   'places': ['Jemaa el Fna Food Stalls Marrakech', 'Amal Womens Training Center Marrakech', 'Cafe Clock Marrakech']},
  {'name': 'Msemen',
   'name_en': 'Msemen Flatbread',
-  'description': 'Sfoglia quadrata marocchina, piegata pi? volte e cotta su piastra, servita con miele, burro o ripieni salati. ? cibo da '
+  'description': 'Sfoglia quadrata marocchina, piegata più volte e cotta su piastra, servita con miele, burro o ripieni salati. È cibo da '
                  'colazione e strada: elastico, stratificato, leggermente croccante fuori, migliore quando arriva caldo e appena unto.',
   'description_en': 'A square Moroccan flatbread, folded several times and cooked on a griddle, served with honey, butter or savoury '
                     'fillings. It is breakfast and street food: elastic, layered and slightly crisp outside, best when hot and lightly '
@@ -188,9 +188,9 @@ FOODS_BY_CITY = [{'name': 'Tagine',
   'places': ['Jemaa el Fna Food Stalls Marrakech', 'Cafe des Epices Marrakech', 'Amal Womens Training Center Marrakech']},
  {'name': 'Baghrir',
   'name_en': 'Baghrir Pancakes',
-  'description': 'Cr?pe marocchina spugnosa piena di piccoli fori, preparata con semola e servita con burro fuso e miele. La texture ? '
-                 'tutto: deve assorbire il condimento senza rompersi, restando leggera, tiepida e piacevolmente porosa. La qualit? si vede '
-                 'dalla regolarit? dei fori e dalla leggerezza finale.',
+  'description': 'Crêpe marocchina spugnosa piena di piccoli fori, preparata con semola e servita con burro fuso e miele. La texture è '
+                 'tutto: deve assorbire il condimento senza rompersi, restando leggera, tiepida e piacevolmente porosa. La qualità si vede '
+                 'dalla regolarità dei fori e dalla leggerezza finale.',
   'description_en': 'A spongy Moroccan pancake full of tiny holes, made with semolina and served with melted butter and honey. Texture is '
                     'everything: it should absorb the topping without breaking, remaining light, warm and pleasantly porous. Quality shows '
                     'in the regularity of the holes and the final lightness.',
@@ -200,23 +200,23 @@ FOODS_BY_CITY = [{'name': 'Tagine',
  {'name': 'Chebakia',
   'name_en': 'Chebakia Sesame Pastry',
   'description': 'Dolce fritto intrecciato, immerso nel miele e ricoperto di sesamo, profumato con anice, cannella o acqua di fiori '
-                 'd?arancio. ? intenso e festivo: croccante, appiccicoso, speziato, spesso servito con harira durante il Ramadan. La '
-                 'qualit? evita l?eccesso di miele, mantenendo forma e croccantezza.',
+                 'd’arancio. È intenso e festivo: croccante, appiccicoso, speziato, spesso servito con harira durante il Ramadan. La '
+                 'qualità evita l’eccesso di miele, mantenendo forma e croccantezza.',
   'description_en': 'A braided fried pastry dipped in honey and covered with sesame, scented with anise, cinnamon or orange blossom water. '
                     'It is intense and festive: crisp, sticky and spiced, often served with harira during Ramadan. Quality avoids excess '
                     'honey while keeping shape and crunch.',
   'ingredients': ['farina', 'miele', 'sesamo', 'anice', 'cannella'],
   'ingredients_en': ['flour', 'honey', 'sesame', 'anise', 'cinnamon'],
   'places': ['Patisserie des Princes Marrakech', 'Jemaa el Fna Food Stalls Marrakech', 'Al Jawda Marrakech']},
- {'name': 'T? alla menta',
+ {'name': 'Tè alla menta',
   'name_en': 'Moroccan Mint Tea',
-  'description': 'T? verde con molta menta fresca e zucchero, versato dall?alto per ossigenarlo e creare schiuma. A Marrakech ? gesto di '
-                 'ospitalit? e pausa quotidiana: dolce, profumato, rituale, pi? importante come esperienza sociale che come semplice '
+  'description': 'Tè verde con molta menta fresca e zucchero, versato dall’alto per ossigenarlo e creare schiuma. A Marrakech è gesto di '
+                 'ospitalità e pausa quotidiana: dolce, profumato, rituale, più importante come esperienza sociale che come semplice '
                  'bevanda.',
   'description_en': 'Green tea with plenty of fresh mint and sugar, poured from above to aerate it and create foam. In Marrakech it is a '
                     'gesture of hospitality and daily pause: sweet, fragrant and ritualistic, more important as a social experience than '
                     'as a simple drink.',
-  'ingredients': ['t? verde', 'menta', 'zucchero', 'acqua'],
+  'ingredients': ['tè verde', 'menta', 'zucchero', 'acqua'],
   'ingredients_en': ['green tea', 'mint', 'sugar', 'water'],
   'places': ['Bacha Coffee Marrakech', 'Cafe des Epices Marrakech', 'Le Jardin Marrakech']}]
 

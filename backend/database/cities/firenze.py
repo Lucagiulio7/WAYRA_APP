@@ -80,9 +80,9 @@ FOOD_SPOTS = [
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 1, 'name': 'Gelateria Santa Trinita', 'name_en': 'Santa Trinita Gelateria', 'description': 'Gelato molto noto vicino al fiume e ai ponti del centro.', 'description_en': 'A well known gelato stop near the river and central bridges.', 'latitude': 43.7670, 'longitude': 11.2515, 'estimated_visit_time': 15, 'tags': ['gelato', 'fiume', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.5},
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 1, 'name': 'Ditta Artigianale Oltrarno', 'name_en': 'Ditta Artigianale Oltrarno', 'description': 'Pausa caffetteria molto coerente con il lato più creativo e artigiano dell\'Oltrarno.', 'description_en': 'A coffee stop highly coherent with the more creative and artisan side of Oltrarno.', 'latitude': 43.7662, 'longitude': 11.2482, 'estimated_visit_time': 20, 'tags': ['caffe', 'artigiano', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.3},
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 1, 'name': 'Panificio Oltrarno Snack Stop', 'name_en': 'Oltrarno Bakery Snack Stop', 'description': 'Focacce e piccoli spuntini comodi per restare nel quartiere.', 'description_en': 'Focacce and small bites convenient for staying within the district.', 'latitude': 43.7653, 'longitude': 11.2475, 'estimated_visit_time': 15, 'tags': ['bakery', 'snack', 'quartiere'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.1},
- {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 2, 'name': 'Trattoria 4 Leoni', 'name_en': 'Trattoria 4 Leoni', 'description': 'Classico indirizzo dell\'Oltrarno, molto amato per cucina toscana e posizione in piazza.', 'description_en': 'A classic Oltrarno address, much loved for Tuscan cooking and its square side position.', 'latitude': 43.7658, 'longitude': 11.2490, 'estimated_visit_time': 80, 'tags': ['trattoria', 'oltrarno', 'toscano'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.4},
+ {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 2, 'name': 'Osteria Santo Spirito', 'name_en': 'Osteria Santo Spirito', 'description': 'Osteria affacciata su Piazza Santo Spirito, apprezzata per cucina toscana sostanziosa, primi gratinati e atmosfera vivace dell’Oltrarno.', 'description_en': 'An osteria on Piazza Santo Spirito, appreciated for hearty Tuscan cooking, baked pasta dishes and the lively atmosphere of the Oltrarno.', 'latitude': 43.766, 'longitude': 11.247, 'estimated_visit_time': 80, 'tags': ['osteria', 'oltrarno', 'toscano'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 2, 'name': 'Gustapizza', 'name_en': 'Gustapizza', 'description': 'Indirizzo molto popolare per una sosta informale nel cuore dell\'Oltrarno.', 'description_en': 'A very popular address for an informal stop in the heart of Oltrarno.', 'latitude': 43.7649, 'longitude': 11.2478, 'estimated_visit_time': 60, 'tags': ['pizza', 'quartiere', 'informale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.4},
- {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 2, 'name': 'Trattoria La Casalinga', 'name_en': 'Trattoria La Casalinga', 'description': 'Cucina fiorentina semplice e molto radicata nel tono del quartiere.', 'description_en': 'Straightforward Florentine cooking strongly rooted in the district\'s tone.', 'latitude': 43.7646, 'longitude': 11.2470, 'estimated_visit_time': 75, 'tags': ['trattoria', 'fiorentino', 'locale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
+ {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 2, 'name': "I'Brindellone", 'name_en': "I'Brindellone", 'description': 'Trattoria popolare dell’Oltrarno nota per bistecca alla fiorentina, ribollita e porzioni generose in un ambiente semplice e tradizionale.', 'description_en': 'A popular Oltrarno trattoria known for Florentine steak, ribollita and generous portions in a simple, traditional setting.', 'latitude': 43.7687, 'longitude': 11.2435, 'estimated_visit_time': 80, 'tags': ['trattoria', 'oltrarno', 'tradizione'], 'food_type': 'trattoria', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.4},
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 3, 'name': 'Borgo San Jacopo', 'name_en': 'Borgo San Jacopo', 'description': 'Tavolo elegante e molto panoramico affacciato sul fiume e sul Ponte Vecchio.', 'description_en': 'An elegant and highly scenic table overlooking the river and Ponte Vecchio.', 'latitude': 43.7671, 'longitude': 11.2510, 'estimated_visit_time': 105, 'tags': ['elegante', 'ponte', 'fiume'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.6},
  {'city': 'firenze', 'zone': 'ponte_vecchio_oltrarno', 'category_level': 3, 'name': 'Il Santo Bevitore', 'name_en': 'Il Santo Bevitore', 'description': 'Scelta più curata e contemporanea per cena in Oltrarno.', 'description_en': 'A more polished contemporary choice for dinner in Oltrarno.', 'latitude': 43.7649, 'longitude': 11.2472, 'estimated_visit_time': 95, 'tags': ['contemporaneo', 'cena', 'oltrarno'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.5},
 
@@ -160,37 +160,37 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Bistecca alla Fiorentina',
   'name_en': 'Florentine Steak',
   'description': 'Taglio alto di chianina o vitellone, cotto alla brace e servito al sangue, con crosta esterna intensa e interno succoso. '
-                 '? il piatto pi? iconico di Firenze: essenziale, carnivoro, tecnico, da condividere e giudicare soprattutto su materia '
+                 'È il piatto più iconico di Firenze: essenziale, carnivoro, tecnico, da condividere e giudicare soprattutto su materia '
                  'prima e cottura.',
   'description_en': 'A thick cut of Chianina or young beef, grilled over embers and served rare, with an intense outer crust and juicy '
-                    'centre. It is Florence?s most iconic dish: essential, carnivorous, technical, meant to be shared and judged mainly by '
+                    'centre. It is Florence’s most iconic dish: essential, carnivorous, technical, meant to be shared and judged mainly by '
                     'meat quality and cooking.',
   'ingredients': ['bistecca di manzo', 'sale', 'pepe', 'olio extravergine', 'brace'],
   'ingredients_en': ['beef steak', 'salt', 'pepper', 'extra virgin olive oil', 'embers'],
   'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria Sostanza'}, {'name': 'Trattoria Mario'}]},
  {'name': 'Lampredotto',
   'name_en': 'Lampredotto Sandwich',
-  'description': 'Quarto stomaco del bovino bollito lentamente in brodo aromatico, servito nel panino con salsa verde e piccante. ? lo '
-                 'street food fiorentino per eccellenza: umile, succoso, saporito, molto pi? delicato di quanto possa sembrare. La qualit? '
+  'description': 'Quarto stomaco del bovino bollito lentamente in brodo aromatico, servito nel panino con salsa verde e piccante. È lo '
+                 'street food fiorentino per eccellenza: umile, succoso, saporito, molto più delicato di quanto possa sembrare. La qualità '
                  'dipende molto dal brodo e dal pane, che deve assorbire senza rompersi.',
   'description_en': 'The fourth stomach of cattle, slowly boiled in aromatic broth and served in a roll with green and spicy sauces. It is '
-                    'Florence?s street food par excellence: humble, juicy, savoury and far more delicate than it may sound.',
+                    'Florence’s street food par excellence: humble, juicy, savoury and far more delicate than it may sound.',
   'ingredients': ['lampredotto', 'pane', 'salsa verde', 'peperoncino', 'brodo'],
   'ingredients_en': ['lampredotto', 'bread', 'green sauce', 'chilli', 'broth'],
   'places': [{'name': 'Nerbone Mercato Centrale'}, {'name': 'Tripperia Pollini'}, {'name': 'Trippaio Nencioni'}]},
  {'name': 'Pappa al Pomodoro',
   'name_en': 'Tomato Bread Soup',
   'description': 'Zuppa densa di pane toscano raffermo, pomodoro, aglio, basilico e olio extravergine, nata dal recupero ma diventata '
-                 'classico. La qualit? sta nella dolcezza del pomodoro, nella consistenza cremosa e nel profumo finale dell?olio. Il '
-                 'risultato migliore ? rustico ma armonioso, mai liquido e mai pesante.',
+                 'classico. La qualità sta nella dolcezza del pomodoro, nella consistenza cremosa e nel profumo finale dell’olio. Il '
+                 'risultato migliore è rustico ma armonioso, mai liquido e mai pesante.',
   'description_en': 'A thick soup of stale Tuscan bread, tomato, garlic, basil and extra virgin olive oil, born from thrift and turned '
                     'into a classic. Quality lies in tomato sweetness, creamy texture and the final fragrance of the oil.',
   'ingredients': ['pane toscano', 'pomodoro', 'aglio', 'basilico', 'olio extravergine'],
   'ingredients_en': ['Tuscan bread', 'tomato', 'garlic', 'basil', 'extra virgin olive oil'],
-  'places': [{'name': 'Trattoria 4 Leoni'}, {'name': 'Trattoria Z? Z?'}, {'name': 'Trattoria Coco Lezzone'}]},
+  'places': [{'name': 'Trattoria 4 Leoni'}, {'name': 'Trattoria Zà Zà'}, {'name': 'Trattoria Coco Lezzone'}]},
  {'name': 'Ribollita',
   'name_en': 'Ribollita Tuscan Soup',
-  'description': 'Minestra toscana di pane, cavolo nero, fagioli e verdure, ribollita per concentrare sapore e consistenza. ? cucina '
+  'description': 'Minestra toscana di pane, cavolo nero, fagioli e verdure, ribollita per concentrare sapore e consistenza. È cucina '
                  'povera ma profondissima: vegetale, densa, nutriente, migliore quando il pane lega tutto senza diventare colla. Il '
                  'profumo del cavolo nero deve restare leggibile anche dopo la seconda cottura.',
   'description_en': 'A Tuscan soup of bread, black kale, beans and vegetables, reboiled to concentrate flavour and texture. It is humble '
@@ -201,20 +201,20 @@ FOODS_BY_CITY = [{'name': 'Bistecca alla Fiorentina',
   'places': [{'name': 'Trattoria Da Burde'}, {'name': 'Trattoria La Casalinga'}, {'name': 'Trattoria Da Ruggero'}]},
  {'name': 'Crostini Neri',
   'name_en': 'Tuscan Chicken Liver Crostini',
-  'description': 'Fette di pane tostato con pat? caldo di fegatini di pollo, capperi, acciughe e aromi, antipasto classico toscano. Sono '
-                 'intensi e sapidi: la qualit? sta nell?equilibrio tra fegato, acidit?, sale e pane croccante. Devono essere serviti '
-                 'caldi, con pat? morbido e pane ancora ben sostenuto.',
-  'description_en': 'Slices of toasted bread with warm chicken-liver p?t?, capers, anchovies and aromatics, a classic Tuscan starter. They '
+  'description': 'Fette di pane tostato con paté caldo di fegatini di pollo, capperi, acciughe e aromi, antipasto classico toscano. Sono '
+                 'intensi e sapidi: la qualità sta nell’equilibrio tra fegato, acidità, sale e pane croccante. Devono essere serviti '
+                 'caldi, con paté morbido e pane ancora ben sostenuto.',
+  'description_en': 'Slices of toasted bread with warm chicken-liver pâte, capers, anchovies and aromatics, a classic Tuscan starter. They '
                     'are intense and savoury: quality lies in the balance of liver, acidity, salt and crisp bread. They should be served '
-                    'warm, with soft p?t? and bread that still holds well.',
+                    'warm, with soft pâte and bread that still holds well.',
   'ingredients': ['fegatini di pollo', 'pane', 'capperi', 'acciughe', 'burro'],
   'ingredients_en': ['chicken livers', 'bread', 'capers', 'anchovies', 'butter'],
-  'places': [{'name': 'Buca Mario'}, {'name': 'Cibr?o Trattoria'}, {'name': 'Antico Ristoro di Cambi'}]},
+  'places': [{'name': 'Buca Mario'}, {'name': 'Cibrèo Trattoria'}, {'name': 'Antico Ristoro di Cambi'}]},
  {'name': 'Panzanella',
   'name_en': 'Panzanella Bread Salad',
-  'description': 'Insalata estiva di pane toscano ammollato, pomodori, cetriolo, cipolla rossa, basilico e olio. ? freschissima ma non '
-                 'banale: il pane deve assorbire i succhi senza disfarsi, creando una struttura rustica e profumata. La qualit? dipende da '
-                 'riposo, olio e acidit? dosata con attenzione.',
+  'description': 'Insalata estiva di pane toscano ammollato, pomodori, cetriolo, cipolla rossa, basilico e olio. È freschissima ma non '
+                 'banale: il pane deve assorbire i succhi senza disfarsi, creando una struttura rustica e profumata. La qualità dipende da '
+                 'riposo, olio e acidità dosata con attenzione.',
   'description_en': 'A summer salad of soaked Tuscan bread, tomatoes, cucumber, red onion, basil and oil. It is very fresh but not '
                     'trivial: the bread should absorb the juices without collapsing, creating a rustic fragrant structure. Quality depends '
                     'on resting time, oil and acidity measured with care.',
@@ -223,8 +223,8 @@ FOODS_BY_CITY = [{'name': 'Bistecca alla Fiorentina',
   'places': [{'name': 'Osteria del Porcellino'}, {'name': 'Trattoria Borgo Antico'}, {'name': 'Trattoria Sostanza'}]},
  {'name': 'Schiacciata Fiorentina',
   'name_en': 'Florentine Carnival Cake',
-  'description': 'Dolce soffice e basso profumato all?arancia, tipico del Carnevale, spolverato con zucchero a velo e spesso decorato con '
-                 'il giglio. ? semplice ma preciso: mollica leggera, aroma agrumato, dolcezza misurata e forte identit? cittadina. Non '
+  'description': 'Dolce soffice e basso profumato all’arancia, tipico del Carnevale, spolverato con zucchero a velo e spesso decorato con '
+                 'il giglio. È semplice ma preciso: mollica leggera, aroma agrumato, dolcezza misurata e forte identità cittadina. Non '
                  'deve sembrare un pan di Spagna generico, ma un dolce cittadino preciso.',
   'description_en': 'A soft low cake scented with orange, typical of Carnival, dusted with icing sugar and often decorated with the lily. '
                     'It is simple but precise: light crumb, citrus aroma, measured sweetness and strong civic identity.',
@@ -235,13 +235,13 @@ FOODS_BY_CITY = [{'name': 'Bistecca alla Fiorentina',
   'name_en': 'Cantucci with Vin Santo',
   'description': 'Biscotti secchi alle mandorle serviti con Vin Santo, da intingere lentamente nel vino dolce toscano. Il rito conta '
                  'quanto il gusto: croccantezza, mandorla tostata, alcol morbido e finale conviviale di trattoria. Il cantuccio deve '
-                 'resistere all?inzuppo senza sbriciolarsi subito.',
+                 'resistere all’inzuppo senza sbriciolarsi subito.',
   'description_en': 'Dry almond biscuits served with Vin Santo, slowly dipped into the Tuscan sweet wine. The ritual matters as much as '
                     'the taste: crunch, toasted almond, soft alcohol and a convivial trattoria-style ending. The biscuit should withstand '
                     'dipping without crumbling immediately into the glass.',
   'ingredients': ['farina', 'mandorle', 'zucchero', 'uova', 'Vin Santo'],
   'ingredients_en': ['flour', 'almonds', 'sugar', 'eggs', 'Vin Santo'],
-  'places': [{'name': 'Il Cantuccio di San Lorenzo'}, {'name': 'Caff? Gilli'}, {'name': 'Ristorante Boccanegra'}]}]
+  'places': [{'name': 'Il Cantuccio di San Lorenzo'}, {'name': 'Caffè Gilli'}, {'name': 'Ristorante Boccanegra'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🧱', 'title': 'Il centro storico sembra ancora una città di pietra compatta', 'title_en': 'The historic centre still feels like a compact stone city', 'body': 'La percezione urbana di Firenze nasce da strade strette, facciate sobrie, torri e palazzi che mantengono una continuità rara.', 'body_en': 'Florence\'s urban perception comes from narrow streets, sober facades, towers and palaces that maintain a rare continuity.'},

@@ -6,11 +6,16 @@ backend/venv/
 # Build outputs and local tool state
 dist/
 mobile/dist/
+mobile/dist-*/
 .expo/
 mobile/.expo/
 supabase/.temp/
+supabase/consolidated/
+supabase/sql_editor_ready/
 **/.temp/
 mobile/backups/
+_backups/
+._backups/
 
 # Environment and credentials
 .env
@@ -31,6 +36,16 @@ __pycache__/
 *.sqlite
 *.sqlite3
 *.log
+*.err
+
+# Local audits and visual test artifacts
+backend/reports/
+*_audit*.json
+*worklist*.json
+mobile/*.png
+mobile/*.xml
+/wayra-*.png
+/g*.png
 
 # OS/editor
 .DS_Store
@@ -38,3 +53,7 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/settings.local.json
+
+_android_build_temp/
+/splash-preview.jpg
+/adaptive-preview.jpg

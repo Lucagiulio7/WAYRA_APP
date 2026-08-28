@@ -47,14 +47,14 @@ ATTRACTIONS = [
  {'city': 'cracovia', 'block_id': 810, 'zone': 'wawel', 'category_level': 3, 'name': 'Belvedere sul fiume dal colle', 'name_en': 'Hilltop River Viewpoint', 'description': 'Affaccio utile per leggere meglio il rapporto tra Wawel, Vistola e citta bassa.', 'description_en': 'A useful viewpoint for better reading the relationship between Wawel, the Vistula and the lower city.', 'latitude': 50.0530, 'longitude': 19.9340, 'estimated_visit_time': 20, 'tags': ['panorama', 'fiume', 'castello'], 'attraction_type': 'belvedere', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 811, 'zone': 'kazimierz', 'category_level': 2, 'name': 'Plac Wolnica', 'name_en': 'Wolnica Square', 'description': 'Piazza molto utile per leggere la scala urbana e il lato piu civile di Kazimierz.', 'description_en': 'A very useful square for reading the urban scale and more civic side of Kazimierz.', 'latitude': 50.0486, 'longitude': 19.9445, 'estimated_visit_time': 20, 'tags': ['piazza', 'quartiere', 'storia'], 'attraction_type': 'piazza', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 811, 'zone': 'kazimierz', 'category_level': 3, 'name': 'Via Józefa', 'name_en': 'Jozefa Street', 'description': 'Tratto utile per sentire il lato creativo e quotidiano del quartiere storico ebraico.', 'description_en': 'A useful stretch for feeling the creative and everyday side of the historic Jewish district.', 'latitude': 50.0510, 'longitude': 19.9466, 'estimated_visit_time': 20, 'tags': ['strada', 'quartiere', 'vita urbana'], 'attraction_type': 'strada urbana', 'ticket_url': None},
- {'city': 'cracovia', 'block_id': 812, 'zone': 'podgorze_ghetto', 'category_level': 2, 'name': 'Plac Bohaterów Getta', 'name_en': 'Ghetto Heroes Square', 'description': 'Spazio molto utile per ampliare la lettura memoriale del quartiere di Podgórze.', 'description_en': 'A very useful space for broadening the memorial reading of the Podgorze district.', 'latitude': 50.0462, 'longitude': 19.9593, 'estimated_visit_time': 20, 'tags': ['memoria', 'piazza', 'storia'], 'attraction_type': 'piazza memoriale', 'ticket_url': None},
+ {'city': 'cracovia', 'block_id': 812, 'zone': 'podgorze_ghetto', 'category_level': 2, 'name': 'Chiesa di San Giuseppe a Podgórze', 'name_en': "St Joseph's Church in Podgórze", 'description': 'Chiesa neogotica che domina la piazza del mercato di Podgórze, utile per leggere il quartiere oltre alla sola memoria del ghetto.', 'description_en': 'A neo-Gothic church dominating Podgórze Market Square, useful for understanding the district beyond the memory of the ghetto.', 'latitude': 50.0446, 'longitude': 19.9496, 'estimated_visit_time': 40, 'tags': ['architettura', 'storia', 'quartiere'], 'attraction_type': 'chiesa', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 812, 'zone': 'podgorze_ghetto', 'category_level': 3, 'name': 'Scalinata verso il tumulo', 'name_en': 'Steps toward the Mound', 'description': 'Percorso utile per legare memoria urbana e paesaggio del versante sud.', 'description_en': 'A useful route for linking urban memory with the landscape of the southern slope.', 'latitude': 50.0433, 'longitude': 19.9544, 'estimated_visit_time': 20, 'tags': ['percorso', 'memoria', 'panorama'], 'attraction_type': 'percorso urbano', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 813, 'zone': 'uniwersytet_planty', 'category_level': 2, 'name': 'Collegium Maius courtyard', 'name_en': 'Collegium Maius Courtyard', 'description': 'Cortile molto utile per aggiungere il lato universitario e intellettuale del centro.', 'description_en': 'A very useful courtyard for adding the university and intellectual side of the centre.', 'latitude': 50.0612, 'longitude': 19.9337, 'estimated_visit_time': 20, 'tags': ['universita', 'cortile', 'storia'], 'attraction_type': 'cortile storico', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 813, 'zone': 'uniwersytet_planty', 'category_level': 3, 'name': 'Passeggiata dei Planty ovest', 'name_en': 'West Planty Walk', 'description': 'Tratto utile per leggere il bordo verde che avvolge il centro antico.', 'description_en': 'A useful stretch for reading the green belt that wraps around the old centre.', 'latitude': 50.0602, 'longitude': 19.9311, 'estimated_visit_time': 20, 'tags': ['parco', 'passeggiata', 'centro'], 'attraction_type': 'percorso verde', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 814, 'zone': 'vistola_debniki', 'category_level': 2, 'name': 'Bulwar Inflancki', 'name_en': 'Inflancki Boulevard', 'description': 'Lungofiume utile per allargare la lettura della Vistola nel tratto centrale di Cracovia.', 'description_en': 'A useful riverside boulevard for broadening the reading of the Vistula in central Krakow.', 'latitude': 50.0509, 'longitude': 19.9440, 'estimated_visit_time': 20, 'tags': ['fiume', 'passeggiata', 'panorama'], 'attraction_type': 'lungofiume', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 814, 'zone': 'vistola_debniki', 'category_level': 3, 'name': 'Affaccio da Dębniki', 'name_en': 'Debniki Riverside View', 'description': 'Punto utile per leggere il centro storico dalla riva opposta e piu calma.', 'description_en': 'A useful point for reading the old centre from the calmer opposite bank.', 'latitude': 50.0492, 'longitude': 19.9329, 'estimated_visit_time': 20, 'tags': ['panorama', 'fiume', 'quartiere'], 'attraction_type': 'belvedere', 'ticket_url': None},
- {'city': 'cracovia', 'block_id': 815, 'zone': 'nowa_huta', 'category_level': 2, 'name': 'Plac Centralny', 'name_en': 'Central Square', 'description': 'Piazza utile per leggere con chiarezza la grande impostazione urbanistica di Nowa Huta.', 'description_en': 'A useful square for clearly reading the grand urban plan of Nowa Huta.', 'latitude': 50.0720, 'longitude': 20.0378, 'estimated_visit_time': 20, 'tags': ['piazza', 'urbanistica', 'quartiere'], 'attraction_type': 'piazza', 'ticket_url': None},
- {'city': 'cracovia', 'block_id': 815, 'zone': 'nowa_huta', 'category_level': 3, 'name': 'Aleja Róż', 'name_en': 'Rose Avenue', 'description': 'Asse utile per sentire il lato monumentale e residenziale della citta socialista.', 'description_en': 'A useful axis for feeling the monumental and residential side of the socialist city.', 'latitude': 50.0710, 'longitude': 20.0354, 'estimated_visit_time': 20, 'tags': ['asse urbano', 'quartiere', 'storia'], 'attraction_type': 'viale', 'ticket_url': None},
+ {'city': 'cracovia', 'block_id': 815, 'zone': 'nowa_huta', 'category_level': 2, 'name': 'Chiesa Arka Pana', 'name_en': 'Arka Pana Church', 'description': 'Chiesa simbolo di Nowa Huta, costruita dopo una lunga mobilitazione degli abitanti e riconoscibile per la sua architettura moderna.', 'description_en': 'A landmark church of Nowa Huta, built after a long campaign by local residents and distinguished by its modern architecture.', 'latitude': 50.0809, 'longitude': 20.0369, 'estimated_visit_time': 40, 'tags': ['architettura', 'storia', 'quartiere'], 'attraction_type': 'chiesa', 'ticket_url': 'https://arkapana.pl/'},
+ {'city': 'cracovia', 'block_id': 815, 'zone': 'nowa_huta', 'category_level': 3, 'name': 'Abbazia cistercense di Mogiła', 'name_en': 'Cistercian Abbey in Mogiła', 'description': 'Complesso monastico medievale che aggiunge a Nowa Huta una prospettiva storica molto precedente alla città socialista.', 'description_en': 'A medieval monastic complex that adds to Nowa Huta a historical perspective far older than the socialist city.', 'latitude': 50.0648, 'longitude': 20.0525, 'estimated_visit_time': 45, 'tags': ['abbazia', 'storia', 'architettura'], 'attraction_type': 'abbazia', 'ticket_url': 'https://mogila.cystersi.pl/'},
  {'city': 'cracovia', 'block_id': 816, 'zone': 'zwierzyniec_kosciuszko', 'category_level': 2, 'name': 'Błonia di Cracovia', 'name_en': 'Krakow Blonia', 'description': 'Grande prato urbano utile per aggiungere respiro e paesaggio aperto alla lettura della citta.', 'description_en': 'A vast urban meadow useful for adding breath and open landscape to the reading of the city.', 'latitude': 50.0590, 'longitude': 19.9152, 'estimated_visit_time': 20, 'tags': ['prato', 'verde', 'panorama'], 'attraction_type': 'parco', 'ticket_url': None},
  {'city': 'cracovia', 'block_id': 816, 'zone': 'zwierzyniec_kosciuszko', 'category_level': 3, 'name': 'Sentiero verso il tumulo Kościuszko', 'name_en': 'Kosciuszko Mound Trail', 'description': 'Percorso utile per legare collina, verde e vedute ampie della citta.', 'description_en': 'A useful route linking hill, greenery and broad views over the city.', 'latitude': 50.0544, 'longitude': 19.8938, 'estimated_visit_time': 25, 'tags': ['sentiero', 'panorama', 'collina'], 'attraction_type': 'percorso panoramico', 'ticket_url': None},
 ]
@@ -147,17 +147,17 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
   'places': ['Przystanek Pierogarnia Krakow', 'Pierogi Mr Vincent Krakow', 'Starka Krakow']},
  {'name': 'Obwarzanek krakowski',
   'name_en': 'Krakow Obwarzanek',
-  'description': 'Anello di pane intrecciato, prima bollito e poi cotto al forno, cosparso di sale, semi di papavero o sesamo. ? lo street '
+  'description': 'Anello di pane intrecciato, prima bollito e poi cotto al forno, cosparso di sale, semi di papavero o sesamo. È lo street '
                  'food simbolo di Cracovia: crosta sottile, interno elastico, profumo tostato e una presenza quotidiana nei chioschi del '
                  'centro.',
-  'description_en': 'A braided bread ring, first boiled and then baked, sprinkled with salt, poppy seeds or sesame. It is Krakow?s '
+  'description_en': 'A braided bread ring, first boiled and then baked, sprinkled with salt, poppy seeds or sesame. It is Krakow’s '
                     'symbolic street food: thin crust, elastic interior, toasted aroma and a daily presence at city-centre stalls.',
   'ingredients': ['farina', 'lievito', 'sale', 'semi di papavero', 'sesamo'],
   'ingredients_en': ['flour', 'yeast', 'salt', 'poppy seeds', 'sesame'],
   'places': ['Obwarzanek Krakowski Main Square Krakow', 'Obwarzanek Museum Krakow', 'Stary Kleparz Krakow']},
- {'name': '?urek',
-  'name_en': '?urek Sour Rye Soup',
-  'description': 'Zuppa acidula a base di farina di segale fermentata, servita con salsiccia, uovo, patate e maggiorana. ? rustica e '
+ {'name': 'Żurek',
+  'name_en': 'Żurek Sour Rye Soup',
+  'description': 'Zuppa acidula a base di farina di segale fermentata, servita con salsiccia, uovo, patate e maggiorana. È rustica e '
                  'profondissima: il sapore aspro non deve essere aggressivo, ma bilanciare grasso, affumicato e calore da cucina '
                  'tradizionale polacca.',
   'description_en': 'A sour soup based on fermented rye flour, served with sausage, egg, potatoes and marjoram. It is rustic and deeply '
@@ -168,27 +168,27 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
  {'name': 'Zapiekanka',
   'name_en': 'Zapiekanka Open Baguette',
   'description': 'Mezza baguette gratinata con funghi, formaggio e salse, nata come cibo veloce popolare e diventata icona di Kazimierz. '
-                 'La migliore ? croccante sotto, filante sopra e generosa senza essere caotica, perfetta da mangiare camminando. La '
-                 'qualit? si sente quando il pane resta asciutto anche sotto il condimento.',
+                 'La migliore è croccante sotto, filante sopra e generosa senza essere caotica, perfetta da mangiare camminando. La '
+                 'qualità si sente quando il pane resta asciutto anche sotto il condimento.',
   'description_en': 'A half baguette baked with mushrooms, cheese and sauces, born as popular fast food and now an icon of Kazimierz. The '
                     'best version is crisp underneath, melting on top and generous without becoming chaotic, perfect to eat while walking.',
   'ingredients': ['baguette', 'funghi', 'formaggio', 'ketchup', 'erba cipollina'],
   'ingredients_en': ['baguette', 'mushrooms', 'cheese', 'ketchup', 'chives'],
   'places': ['Zapiekanki u Endziora Krakow', 'Okraglak Plac Nowy Krakow', 'Piecyk Zapiekanki Krakow']},
  {'name': 'Bigos',
-  'name_en': 'Bigos Hunter?s Stew',
+  'name_en': 'Bigos Hunter’s Stew',
   'description': 'Stufato di crauti, cavolo fresco, carni miste, salsiccia, funghi e spezie, cotto lentamente e spesso ancora migliore il '
-                 'giorno dopo. ? un piatto robusto e invernale: acidit?, affumicato e dolcezza del cavolo devono fondersi bene.',
+                 'giorno dopo. È un piatto robusto e invernale: acidità, affumicato e dolcezza del cavolo devono fondersi bene.',
   'description_en': 'A stew of sauerkraut, fresh cabbage, mixed meats, sausage, mushrooms and spices, slowly cooked and often even better '
                     'the next day. It is hearty winter food: acidity, smoke and cabbage sweetness should merge smoothly. Its best versions '
                     'taste layered, not merely heavy, after long patient cooking.',
   'ingredients': ['crauti', 'cavolo', 'salsiccia', 'carne', 'funghi'],
   'ingredients_en': ['sauerkraut', 'cabbage', 'sausage', 'meat', 'mushrooms'],
   'places': ['Kuchnia u Babci Maliny Krakow', 'Pod Baranem Krakow', 'Morskie Oko Krakow']},
- {'name': 'Kie?basa',
+ {'name': 'Kiełbasa',
   'name_en': 'Polish Sausage',
   'description': 'Salsiccia polacca affumicata o grigliata, servita con pane, senape, cetrioli o crauti, amatissima nei mercati e nei '
-                 'locali informali. A Cracovia conta la semplicit?: carne succosa, pelle ben rosolata, profumo di fumo e condimenti netti.',
+                 'locali informali. A Cracovia conta la semplicità: carne succosa, pelle ben rosolata, profumo di fumo e condimenti netti.',
   'description_en': 'Polish sausage, smoked or grilled, served with bread, mustard, pickles or sauerkraut, loved in markets and informal '
                     'places. In Krakow simplicity matters: juicy meat, well-browned casing, smoky aroma and clean condiments. The best '
                     'versions feel rustic but clean, with smoke supporting rather than dominating.',
@@ -197,19 +197,19 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
   'places': ['Kielbaski z Nyski Krakow', 'Hala Targowa Krakow', 'Pod Wawelem Krakow']},
  {'name': 'Sernik',
   'name_en': 'Polish Cheesecake',
-  'description': 'Cheesecake polacca a base di twar?g, formaggio fresco compatto e leggermente acidulo, spesso con uvetta, vaniglia o '
-                 'cioccolato. ? meno cremosa di molte versioni americane: pi? densa, profumata, elegante, con una dolcezza controllata. La '
-                 'qualit? si misura nella compattezza del formaggio e nel taglio pulito della fetta.',
-  'description_en': 'Polish cheesecake made with twar?g, a compact and gently tangy fresh cheese, often with raisins, vanilla or '
+  'description': 'Cheesecake polacca a base di twaróg, formaggio fresco compatto e leggermente acidulo, spesso con uvetta, vaniglia o '
+                 'cioccolato. È meno cremosa di molte versioni americane: più densa, profumata, elegante, con una dolcezza controllata. La '
+                 'qualità si misura nella compattezza del formaggio e nel taglio pulito della fetta.',
+  'description_en': 'Polish cheesecake made with twaróg, a compact and gently tangy fresh cheese, often with raisins, vanilla or '
                     'chocolate. It is less creamy than many American versions: denser, fragrant, elegant and controlled in sweetness. '
-                    'Quality is measured by the cheese?s compactness and the clean cut of each slice.',
-  'ingredients': ['twar?g', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
-  'ingredients_en': ['twar?g cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
+                    'Quality is measured by the cheese’s compactness and the clean cut of each slice.',
+  'ingredients': ['twaróg', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
+  'ingredients_en': ['twaróg cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
   'places': ['Cukiernia Cichowscy Krakow', 'Cukiernia Michalek Krakow', 'Massolit Bakery Krakow']},
  {'name': 'Kompot',
   'name_en': 'Kompot Fruit Drink',
   'description': 'Bevanda casalinga di frutta cotta in acqua con zucchero e spezie leggere, servita calda o fredda a seconda della '
-                 'stagione. Sembra semplice, ma accompagna bene la cucina polacca perch? rinfresca piatti robusti senza diventare troppo '
+                 'stagione. Sembra semplice, ma accompagna bene la cucina polacca perché rinfresca piatti robusti senza diventare troppo '
                  'dolce.',
   'description_en': 'A home-style drink made by simmering fruit in water with sugar and light spices, served warm or cold depending on the '
                     'season. It seems simple, but suits Polish cooking well because it refreshes hearty dishes without becoming too sweet.',

@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const REDIRECT_URI = makeRedirectUri({ scheme: "viaggio-ai", path: "auth-callback" });
+const OAUTH_REDIRECT_URI = makeRedirectUri({ scheme: "viaggio-ai", path: "auth-callback" });
+const PASSWORD_REDIRECT_URI = makeRedirectUri({ scheme: "viaggio-ai", path: "reset-password" });
 
 interface AuthContextValue {
   user: User | null;
@@ -19,6 +20,7 @@ interface AuthContextValue {
   signInWithApple: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -31,6 +33,7 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithApple: async () => ({ error: null }),
   resetPassword: async () => ({ error: null }),
   signOut: async () => {},
+  deleteAccount: async () => ({ error: null }),
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -72,13 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: REDIRECT_URI,
+          redirectTo: OAUTH_REDIRECT_URI,
           skipBrowserRedirect: true,
         },
       });
       if (error || !data.url) return { error: error?.message ?? "Errore OAuth Google" };
 
-      const result = await WebBrowser.openAuthSessionAsync(data.url, REDIRECT_URI);
+      const result = await WebBrowser.openAuthSessionAsync(data.url, OAUTH_REDIRECT_URI);
 
       if (result.type === "success") {
         // PKCE flow: il codice è nel query param
@@ -125,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string): Promise<{ error: string | null }> => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: REDIRECT_URI,
+      redirectTo: PASSWORD_REDIRECT_URI,
     });
     return { error: error?.message ?? null };
   };
@@ -142,8 +145,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteAccount = async (): Promise<{ error: string | null }> => {
+    try {
+      const { error } = await supabase.functions.invoke("delete-account", {
+        method: "POST",
+      });
+      if (error) return { error: error.message };
+
+      await supabase.auth.signOut({ scope: "local" });
+      setUser(null);
+      setSession(null);
+      return { error: null };
+    } catch (error: any) {
+      return { error: error?.message ?? "Unable to delete the account" };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signInWithApple, resetPassword, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signInWithApple, resetPassword, signOut, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

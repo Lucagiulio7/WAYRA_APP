@@ -10,7 +10,7 @@
  *   - tutto il resto                              → 0
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, PanResponder, Platform, StyleSheet, View } from "react-native";
+import { Animated, PanResponder, Platform, Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Stop } from "@/types";
@@ -31,6 +31,8 @@ interface Props {
   onDragStateChange?: (dragging: boolean) => void;
   lang: string;
   colors: any;
+  helpActive?: boolean;
+  onHelpRequest?: () => void;
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
@@ -42,6 +44,8 @@ export function DraggableStopList({
   onDragStateChange,
   lang,
   colors,
+  helpActive = false,
+  onHelpRequest,
 }: Props) {
   const [displayed, setDisplayed] = useState(stops);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
@@ -61,6 +65,8 @@ export function DraggableStopList({
   const activeDragIdx   = useRef<number | null>(null);
   const currentSlot     = useRef(0);
   const longPressTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const helpActiveRef   = useRef(helpActive);
+  helpActiveRef.current = helpActive;
 
   // ── Animated ──────────────────────────────────────────────────────────────
   const dragAnim  = useRef(new Animated.Value(0)).current;
@@ -113,7 +119,7 @@ export function DraggableStopList({
   const makePanResponder = useCallback(
     (orderIdx: number) =>
       PanResponder.create({
-        onStartShouldSetPanResponder:        () => displayedRef.current[orderIdx]?.type === "attraction",
+        onStartShouldSetPanResponder:        () => !helpActiveRef.current && displayedRef.current[orderIdx]?.type === "attraction",
         // Capture: ruba il responder ANCHE alla ScrollView se siamo già in drag mode
         onMoveShouldSetPanResponderCapture:  () => isDragging.current,
         onMoveShouldSetPanResponder:         () => isDragging.current,
@@ -260,6 +266,13 @@ export function DraggableStopList({
                   onNoteChange ? (note) => onNoteChange(orderIdx, note) : undefined
                 }
               />
+              {helpActive && (
+                <Pressable
+                  style={StyleSheet.absoluteFill}
+                  onPress={onHelpRequest}
+                  accessibilityRole="button"
+                />
+              )}
             </View>
           </Animated.View>
         );

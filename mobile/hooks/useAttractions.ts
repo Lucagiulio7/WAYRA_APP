@@ -1,12 +1,19 @@
+import type { TranslationMap } from "@/types";
+
 import { useQuery } from "@tanstack/react-query";
 import { fetchAttractions } from "@/lib/cityFetchers";
 
 export interface BuilderAttraction {
+  translations?: TranslationMap | null;
   id: number;
   name: string;
   name_en?: string | null;
+  name_fr?: string | null;
+  name_es?: string | null;
   description?: string | null;
   description_en?: string | null;
+  description_fr?: string | null;
+  description_es?: string | null;
   category_level: number;
   latitude: number;
   longitude: number;
@@ -22,6 +29,8 @@ export interface BuilderAttraction {
   rating?: number | null;
   recommended_dishes?: string[];
   recommended_dishes_en?: string[];
+  recommended_dishes_fr?: string[];
+  recommended_dishes_es?: string[];
   has_curated_dish_match?: boolean;
   must_see?: boolean;
   must_see_rank?: number | null;

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Linking,
   Modal,
   ScrollView,
   StyleSheet,
@@ -15,10 +14,19 @@ import { ItineraryDay, Stop } from "@/types";
 import { BuilderAttraction } from "@/hooks/useAttractions";
 import { DraggableStopList } from "./DraggableStopList";
 import { useTheme } from "@/contexts/ThemeContext";
+import { localizedDescription, localizedField, localizedName } from "@/utils/localization";
+import { translateAttractionType } from "@/utils/attractionType";
+import { localText } from "@/i18n";
+import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "./ContextHelp";
+import { useTransitNetwork } from "@/hooks/useTransitNetwork";
+import { transitBadgeForCity, transitModeForCity, transitPresentation, type TransitNetwork } from "@/data/transitNetworks";
+import { MapStatusOverlay } from "./MapStatusOverlay";
+import { openExternalLink } from "@/utils/externalLinks";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
+  city: string;
   day: ItineraryDay;
   allAttractions: BuilderAttraction[];
   allFoodSpots?: BuilderAttraction[];
@@ -38,7 +46,18 @@ interface Props {
 
 const DAY_ACCENTS = ["#e8c06a", "#7eb8f7", "#a78bfa", "#6ee7b7", "#f97316"];
 
-// ── Escape HTML ───────────────────────────────────────────────────────────────
+function dayMapHelp(lang: string): Record<string, ContextHelpContent> {
+  const tx = (values: Record<string, string>) => localText(lang, values);
+  return {
+    close: { icon: "close-outline", title: tx({ it: "Chiudi mappa", en: "Close map", fr: "Fermer la carte", es: "Cerrar mapa" }), body: tx({ it: "Torna all'itinerario mantenendo tutte le modifiche già effettuate.", en: "Return to the itinerary while keeping all changes.", fr: "Revenez à l'itinéraire en conservant les modifications.", es: "Vuelve al itinerario conservando los cambios." }) },
+    days: { icon: "calendar-outline", title: tx({ it: "Seleziona giorno", en: "Select day", fr: "Choisir le jour", es: "Elegir día" }), body: tx({ it: "Passa alla mappa di un'altra giornata senza chiudere questa schermata.", en: "Switch to another day's map without closing this screen.", fr: "Passez à la carte d'une autre journée sans fermer cet écran.", es: "Cambia al mapa de otro día sin cerrar esta pantalla." }) },
+    legend: { icon: "layers-outline", title: tx({ it: "Colori della mappa", en: "Map colors", fr: "Couleurs de la carte", es: "Colores del mapa" }), body: tx({ it: "Il colore del giorno indica le tappe odierne, il blu quelle già previste altrove e il grigio i luoghi ancora disponibili.", en: "The day color marks today's stops, blue marks stops planned on other days, and grey marks available places.", fr: "La couleur du jour indique les étapes du jour, le bleu celles des autres jours et le gris les lieux disponibles.", es: "El color del día marca las paradas de hoy, el azul las de otros días y el gris los lugares disponibles." }) },
+    map: { icon: "map-outline", title: tx({ it: "Mappa interattiva", en: "Interactive map", fr: "Carte interactive", es: "Mapa interactivo" }), body: tx({ it: "Tocca un marker per leggere i dettagli e aggiungere, spostare o rimuovere una tappa. Con il filtro Cucina puoi salvare o rimuovere un ristorante per il giorno visualizzato, senza modificare il percorso a piedi.", en: "Tap a marker for details and to add, move or remove a stop. With the Food filter, you can save or remove a restaurant for the displayed day without changing the walking route.", fr: "Touchez un marqueur pour consulter les détails et ajouter, déplacer ou retirer une étape. Le filtre Cuisine permet d'enregistrer ou de retirer un restaurant pour le jour affiché sans modifier le parcours à pied.", es: "Toca un marcador para ver detalles y añadir, mover o quitar una parada. Con el filtro Cocina puedes guardar o quitar un restaurante del día mostrado sin modificar la ruta a pie." }) },
+    reorder: { icon: "reorder-three-outline", title: tx({ it: "Riordina tappe", en: "Reorder stops", fr: "Réordonner les étapes", es: "Reordenar paradas" }), body: tx({ it: "Apre l'elenco del giorno: tieni premuta la maniglia e trascina una tappa nella posizione desiderata.", en: "Opens the day's list: hold the handle and drag a stop to the desired position.", fr: "Ouvre la liste du jour : maintenez la poignée puis déplacez une étape.", es: "Abre la lista del día: mantén pulsado el control y arrastra una parada." }) },
+  };
+}
+
+// â”€â”€ Escape HTML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function esc(str: unknown): string {
   return String(str ?? "")
@@ -48,10 +67,11 @@ function esc(str: unknown): string {
     .replace(/"/g, "&quot;");
 }
 
-// ── buildHtml — stessa versione full-featured del file nativo ─────────────────
+// â”€â”€ buildHtml â€” stessa versione full-featured del file nativo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function buildHtml(
+export function buildHtml(
   day: ItineraryDay,
+  city: string,
   allAttractions: BuilderAttraction[],
   allFoodSpots: BuilderAttraction[],
   foodSelection: { mealType?: string | null; origin?: { latitude: number; longitude: number; name?: string } } | null | undefined,
@@ -59,10 +79,15 @@ function buildHtml(
   lang: string,
   accent: string,
   isDark: boolean,
+  transitNetwork: TransitNetwork | null,
 ): string {
   const isEn = lang === "en";
+  const isFr = lang === "fr";
+  const isEs = lang === "es";
+  const labelsEs: Record<string, string> = {"La tua posizione":"Tu posición","Giorno":"Día","Già in programma":"Ya planificado","Non nell'itinerario":"Fuera del itinerario","Apri in Maps":"Abrir en Maps","Tutti":"Todos","Iconico":"Icónico","Ricercato":"Seleccionado","Nascosto":"Oculto","Cucina":"Cocina","Linee":"Líneas","A piedi ~":"A pie ~","dalle tappe di oggi":"desde las paradas de hoy","Misura distanza":"Medir distancia","Posto cibo":"Restaurante","Posto scelto":"Lugar elegido","Piatto tipico":"Plato típico","Scegli questo posto":"Elegir este lugar","Rimuovi questo posto":"Eliminar este lugar","Come arrivare con i mezzi":"Cómo llegar en transporte público","Fermata vicina":"Parada cercana","Trasporto pubblico":"Transporte público"};
+  const label = (it: string, en: string, fr: string) => isEs ? (labelsEs[it] ?? en) : isFr ? fr : isEn ? en : it;
 
-  const mapBg      = isDark ? "#0a0a1a"              : "#f0eff0";
+  const mapBg      = "#dfe8ec";
   const popupBg    = isDark ? "#161625"              : "#ffffff";
   const popupBdr   = isDark ? "#2a2a42"              : "#d0d0e0";
   const popupText  = isDark ? "#f0f0f0"              : "#1a1928";
@@ -73,9 +98,7 @@ function buildHtml(
   const inactiveC  = isDark ? "#666"                 : "#555";
   const rulerBg    = isDark ? "rgba(12,12,26,0.92)"  : "rgba(245,245,245,0.95)";
   const rulerColor = isDark ? "#aaa"                 : "#555";
-  const tileUrl    = isDark
-    ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
+  const tileUrl    = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
   const validCoords = (lat: unknown, lon: unknown): boolean =>
     typeof lat === "number" && isFinite(lat) &&
@@ -86,7 +109,7 @@ function buildHtml(
     ? {
         lat: foodSelection.origin.latitude,
         lon: foodSelection.origin.longitude,
-        name: esc(foodSelection.origin.name ?? (isEn ? "Your position" : "La tua posizione")),
+        name: esc(foodSelection.origin.name ?? label("La tua posizione", "Your position", "Votre position")),
       }
     : null;
   const contextStops = day.stops;
@@ -97,9 +120,9 @@ function buildHtml(
       id: s.id,
       lat: s.latitude,
       lon: s.longitude,
-      name: esc(isEn && s.name_en ? s.name_en : s.name),
-      desc: esc((isEn && s.description_en ? s.description_en : s.description) ?? ""),
-      type: esc(s.attraction_type ?? ""),
+      name: esc(localizedName(s, lang)),
+      desc: esc(localizedDescription(s, lang)),
+      type: esc(translateAttractionType(s.attraction_type, lang) ?? ""),
       mins: s.estimated_visit_time ?? 0,
       idx: idx + 1,
     }));
@@ -115,9 +138,9 @@ function buildHtml(
       id: a.id,
       lat: a.latitude,
       lon: a.longitude,
-      name: esc(isEn && a.name_en ? a.name_en : a.name),
-      desc: esc((isEn && a.description_en ? a.description_en : a.description) ?? ""),
-      type: esc(a.attraction_type ?? ""),
+      name: esc(localizedName(a, lang)),
+      desc: esc(localizedDescription(a, lang)),
+      type: esc(translateAttractionType(a.attraction_type, lang) ?? ""),
       mins: a.estimated_visit_time ?? 0,
       dayNum: assignedMap.get(a.id)!,
     }));
@@ -128,9 +151,9 @@ function buildHtml(
       id: a.id,
       lat: a.latitude,
       lon: a.longitude,
-      name: esc(isEn && a.name_en ? a.name_en : a.name),
-      desc: esc((isEn && a.description_en ? a.description_en : a.description) ?? ""),
-      type: esc(a.attraction_type ?? ""),
+      name: esc(localizedName(a, lang)),
+      desc: esc(localizedDescription(a, lang)),
+      type: esc(translateAttractionType(a.attraction_type, lang) ?? ""),
       mins: a.estimated_visit_time ?? 0,
       level: a.category_level ?? 1,
     }));
@@ -142,16 +165,19 @@ function buildHtml(
     .filter((r) => validCoords(r.latitude, r.longitude))
     .map((r) => {
       const source = allFoodSpots.find((spot) => spot.id === r.id);
-      const recommendedDishes = isEn && (r.recommended_dishes_en?.length || source?.recommended_dishes_en?.length)
-        ? (r.recommended_dishes_en ?? source?.recommended_dishes_en ?? [])
-        : (r.recommended_dishes ?? source?.recommended_dishes ?? []);
+      const recommendedDishes = localizedField<string[]>(
+        r,
+        "recommended_dishes",
+        lang,
+        localizedField<string[]>(source, "recommended_dishes", lang, []),
+      );
       return {
         id: r.id,
         lat: r.latitude,
         lon: r.longitude,
-        name: esc(isEn && r.name_en ? r.name_en : r.name),
-        desc: esc((isEn && r.description_en ? r.description_en : r.description) ?? ""),
-        type: esc(r.food_type ?? ""),
+        name: esc(localizedName(r, lang)),
+        desc: esc(localizedDescription(r, lang)),
+        type: esc(translateAttractionType(r.food_type, lang) ?? (r.food_type ?? "")),
         mealType: esc(r.meal_type ?? ""),
         rating: r.rating ?? null,
         mapsLink: r.maps_link,
@@ -170,36 +196,50 @@ function buildHtml(
       id: a.id,
       lat: a.latitude,
       lon: a.longitude,
-      name: esc(isEn && a.name_en ? a.name_en : a.name),
-      desc: esc((isEn && a.description_en ? a.description_en : a.description) ?? ""),
-      type: esc(a.food_type ?? a.attraction_type ?? ""),
+      name: esc(localizedName(a, lang)),
+      desc: esc(localizedDescription(a, lang)),
+      type: esc(translateAttractionType(a.food_type ?? a.attraction_type, lang) ?? ""),
       mins: a.estimated_visit_time ?? 60,
       rating: a.rating ?? null,
-      recommendedDishes: (isEn && a.recommended_dishes_en?.length ? a.recommended_dishes_en : a.recommended_dishes ?? []).map(esc),
+      recommendedDishes: localizedField<string[]>(a, "recommended_dishes", lang, []).map(esc),
       hasDishMatch: Boolean(a.has_curated_dish_match || a.recommended_dishes?.length),
     }));
 
+  const transitMode = transitNetwork?.mode ?? transitModeForCity(city);
+  const transitCopy = transitPresentation(transitMode, lang);
   const L = {
-    dayLabel:       isEn ? "Day" : "Giorno",
-    plannedLabel:   isEn ? "Already planned" : "Gia in programma",
-    minsLabel:      "min",
-    explLabel:      isEn ? "Not in itinerary" : "Non nell'itinerario",
-    mapsLabel:      isEn ? "Open in Maps ↗" : "Apri in Maps ↗",
-    addLabel:       isEn ? `＋ Add to Day ${day.day}` : `＋ Aggiungi al Giorno ${day.day}`,
-    moveLabel:      isEn ? `↗ Move to Day ${day.day}` : `↗ Sposta al Giorno ${day.day}`,
-    removeLabel:    isEn ? `✕ Remove from Day ${day.day}` : `✕ Rimuovi dal Giorno ${day.day}`,
-    filterAll:      isEn ? "All" : "Tutti",
-    filterIconic:   isEn ? "Iconic" : "Iconico",
-    filterCurated:  isEn ? "Curated" : "Ricercato",
-    filterHidden:   isEn ? "Hidden" : "Nascosto",
-    filterFood:     isEn ? "Food" : "Cucina",
-    distFromRoute:  isEn ? "from today's stops" : "dalle tappe di oggi",
-    rulerLabel:     isEn ? "Measure distance" : "Misura distanza",
-    foodLabel:      isEn ? "Food spot" : "Posto cibo",
-    selectedFoodLabel: isEn ? "Chosen food spot" : "Posto scelto",
-    typicalDishLabel: isEn ? "Typical dish" : "Piatto tipico",
-    selectFood:     isEn ? "Choose this place" : "Scegli questo posto",
-    removeFood:     isEn ? "Remove this place" : "Rimuovi questo posto",
+    dayLabel: label("Giorno", "Day", "Jour"),
+    plannedLabel: label("Già in programma", "Already planned", "Déjà prévu"),
+    minsLabel: "min",
+    explLabel: label("Non nell'itinerario", "Not in itinerary", "Hors itinéraire"),
+    mapsLabel: label("Apri in Maps", "Open in Maps", "Ouvrir dans Maps"),
+    addLabel: label(`Aggiungi al giorno ${day.day}`, `Add to Day ${day.day}`, `Ajouter au jour ${day.day}`),
+    moveLabel: label(`Sposta al giorno ${day.day}`, `Move to Day ${day.day}`, `Deplacer au jour ${day.day}`),
+    removeLabel: label(`Rimuovi dal giorno ${day.day}`, `Remove from Day ${day.day}`, `Retirer du jour ${day.day}`),
+    filterAll: label("Tutti", "All", "Tous"),
+    filterIconic: label("Iconico", "Iconic", "Iconique"),
+    filterCurated: label("Ricercato", "Curated", "Sélectionné"),
+    filterHidden: label("Nascosto", "Hidden", "Caché"),
+    filterFood: label("Cucina", "Food", "Cuisine"),
+    transitLabel: transitCopy.label,
+    stationLabel: transitCopy.station,
+    linesLabel: label("Linee", "Lines", "Lignes"),
+    transitDirectionsLabel: label("Come arrivare con i mezzi", "Public transport directions", "Itinéraire en transports"),
+    nearbyStopLabel: label("Fermata vicina", "Nearby stop", "Arrêt à proximité"),
+    publicTransitLabel: label("Trasporto pubblico", "Public transport", "Transports publics"),
+    recommendedTransitLabel: isEs ? "Recomendados" : label("Consigliati", "Recommended", "Conseillés"),
+    metroModeLabel: "Metro",
+    tramModeLabel: label("Tram", "Tram", "Tramway"),
+    trainModeLabel: label("Treno", "Train", "Train"),
+    waterModeLabel: isEs ? "Ferry" : label("Traghetto", "Ferry", "Bateau"),
+    walkPrefix: label("A piedi ~", "Walk ~", "À pied ~"),
+    distFromRoute: label("dalle tappe di oggi", "from today's stops", "des étapes du jour"),
+    rulerLabel: label("Misura distanza", "Measure distance", "Mesurer la distance"),
+    foodLabel: label("Posto cibo", "Food spot", "Restaurant"),
+    selectedFoodLabel: label("Posto scelto", "Chosen food spot", "Lieu choisi"),
+    typicalDishLabel: label("Piatto tipico", "Typical dish", "Plat typique"),
+    selectFood: label("Scegli questo posto", "Choose this place", "Choisir ce lieu"),
+    removeFood: label("Rimuovi questo posto", "Remove this place", "Retirer ce lieu"),
   };
 
   const stopsJson      = JSON.stringify(dayStops);
@@ -208,6 +248,7 @@ function buildHtml(
   const selectedFoodJson = JSON.stringify(selectedFoodSpots);
   const foodJson       = JSON.stringify(foodSpots);
   const originJson     = JSON.stringify(foodOrigin);
+  const transitJson    = JSON.stringify(transitNetwork).replace(/</g, "\\u003c");
 
   return `<!DOCTYPE html>
 <html>
@@ -221,19 +262,24 @@ function buildHtml(
 html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 #map{width:100%;height:100%}
 .leaflet-container{background:${mapBg}!important}
+.leaflet-control-attribution{background:rgba(255,255,255,.9)!important;color:#4b5563!important;font-size:9px!important;padding:2px 5px!important}
+.leaflet-control-attribution a{color:#2563eb!important}
 .leaflet-popup-content-wrapper{background:${popupBg};border:1px solid ${popupBdr};border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.25);color:${popupText}}
 .leaflet-popup-tip{background:${popupBg}}
-.leaflet-popup-content{margin:12px 14px;min-width:170px;max-width:230px}
+.leaflet-popup-content{box-sizing:border-box;margin:12px 14px;width:min(230px,calc(100vw - 72px))!important;min-width:0;max-width:230px;overflow:hidden}
 .leaflet-popup-close-button{color:${popupMeta}!important;top:8px!important;right:10px!important;font-size:18px!important}
 .pop-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px;margin-bottom:7px}
 .pop-badge-day{color:${accent};background:${accent}22;border:1px solid ${accent}55}
 .pop-badge-planned{color:#7eb8f7;background:#7eb8f722;border:1px solid #7eb8f766}
 .pop-badge-expl{color:#6ee7b7;background:#6ee7b722;border:1px solid #6ee7b755}
 .pop-name{font-size:13px;font-weight:700;color:${popupText};margin-bottom:3px;line-height:1.3}
+.pop-name,.pop-type,.pop-desc,.pop-meta,.transit-access{max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:normal}
 .pop-type{font-size:10px;color:${popupSub};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
 .pop-desc{font-size:11px;color:${popupSub};line-height:1.5;margin-bottom:5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .pop-meta{font-size:10px;color:${popupMeta};margin-bottom:5px}
 .pop-maps{display:block;text-align:center;margin-top:8px;font-size:11px;font-weight:700;color:#7eb8f7;background:#7eb8f714;border:1px solid #7eb8f740;border-radius:8px;padding:6px;cursor:pointer;text-decoration:none;width:100%;font-family:inherit}
+.pop-transit{display:block;text-align:center;margin-top:7px;font-size:11px;font-weight:800;color:#0891b2;background:#0891b214;border:1px solid #0891b250;border-radius:8px;padding:7px;cursor:pointer;width:100%;font-family:inherit}
+.transit-access{margin-top:8px;padding:7px 8px;border-radius:8px;background:#0891b212;border:1px solid #0891b235;color:${popupSub};font-size:10px;line-height:1.35}.transit-access strong{color:#0891b2}.transit-access-lines{font-weight:900;color:${popupText}}
 .pop-add{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#6ee7b7;background:#6ee7b714;border:1px solid #6ee7b750;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-move{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#e8c06a;background:#e8c06a14;border:1px solid #e8c06a50;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
 .pop-remove{display:block;text-align:center;margin-top:6px;font-size:11px;font-weight:700;color:#f97316;background:#f9731614;border:1px solid #f9731650;border-radius:8px;padding:6px;cursor:pointer;width:100%;font-family:inherit}
@@ -255,6 +301,12 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .dist-label{background:${rulerBg};border:1px solid #7eb8f755;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#7eb8f7;white-space:nowrap;pointer-events:none;transform:translateX(-50%) translateY(-50%)}
 #filter-bar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:4px;background:${filterBg};border:1px solid ${filterBdr};border-radius:999px;padding:5px 8px;backdrop-filter:blur(6px)}
 .filter-btn{border:none;border-radius:999px;outline:none;padding:5px 13px;font-size:11px;font-weight:700;letter-spacing:.3px;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,sans-serif;transition:background .15s,color .15s}
+.transit-toggle{position:absolute;top:12px;left:12px;z-index:1000;min-width:42px;height:38px;border-radius:10px;padding:0 11px;background:${filterBg};border:1px solid ${filterBdr};display:flex;align-items:center;justify-content:center;gap:6px;color:${inactiveC};font:800 11px -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.16)}
+.transit-toggle.active{color:${popupText};border-color:#0891b2;background:${isDark ? "rgba(8,145,178,.22)" : "rgba(207,250,254,.96)"}}
+.transit-badge{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;border-radius:6px;background:#0891b2;color:#fff;font-size:13px;font-weight:900}
+.transit-mode-panel{position:absolute;top:56px;left:12px;z-index:1000;display:flex;flex-wrap:wrap;gap:5px;max-width:min(360px,calc(100% - 24px));padding:6px;border-radius:10px;background:${filterBg};border:1px solid ${filterBdr};box-shadow:0 3px 12px rgba(0,0,0,.16)}
+.transit-mode-btn{border:1px solid ${filterBdr};border-radius:8px;padding:5px 8px;background:transparent;color:${inactiveC};font:800 10px -apple-system,BlinkMacSystemFont,sans-serif}.transit-mode-btn.active{border-color:#0891b2;background:#0891b222;color:${popupText}}
+.station-lines{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;max-width:100%}.station-line{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;max-width:100%;min-width:25px;min-height:22px;height:auto;padding:4px 7px;border-radius:6px;font-size:10px;font-weight:900;line-height:1.25;text-align:center;white-space:normal;overflow-wrap:anywhere;word-break:break-word;border:1px solid rgba(0,0,0,.16)}
 </style>
 </head>
 <body>
@@ -283,6 +335,7 @@ const SELECTED_FOOD = ${selectedFoodJson};
 const FOOD_SPOTS   = ${foodJson};
 const FOOD_ORIGIN  = ${originJson};
 const FOOD_MODE    = ${JSON.stringify(foodMode)};
+const TRANSIT      = ${transitJson};
 const ACCENT       = ${JSON.stringify(accent)};
 const DAY_NUM      = ${day.day};
 const DAY_LABEL    = ${JSON.stringify(L.dayLabel)};
@@ -298,6 +351,16 @@ const FILTER_ICONIC  = ${JSON.stringify(L.filterIconic)};
 const FILTER_CURATED = ${JSON.stringify(L.filterCurated)};
 const FILTER_HIDDEN  = ${JSON.stringify(L.filterHidden)};
 const FILTER_FOOD    = ${JSON.stringify(L.filterFood)};
+const TRANSIT_LABEL  = ${JSON.stringify(L.transitLabel)};
+const TRANSIT_BADGE  = ${JSON.stringify(transitNetwork?.badge ?? transitBadgeForCity(city))};
+const STATION_LABEL  = ${JSON.stringify(L.stationLabel)};
+const LINES_LABEL    = ${JSON.stringify(L.linesLabel)};
+const TRANSIT_DIRECTIONS_LABEL = ${JSON.stringify(L.transitDirectionsLabel)};
+const NEARBY_STOP_LABEL = ${JSON.stringify(L.nearbyStopLabel)};
+const PUBLIC_TRANSIT_LABEL = ${JSON.stringify(L.publicTransitLabel)};
+const TRANSIT_MODE_LABELS = ${JSON.stringify({ recommended: L.recommendedTransitLabel, metro: L.metroModeLabel, tram: L.tramModeLabel, train: L.trainModeLabel, water: L.waterModeLabel })};
+const CITY_NAME      = ${JSON.stringify(city)};
+const WALK_PREFIX     = ${JSON.stringify(L.walkPrefix)};
 const DIST_FROM_ROUTE = ${JSON.stringify(L.distFromRoute)};
 const RULER_LABEL    = ${JSON.stringify(L.rulerLabel)};
 const FOOD_LABEL       = ${JSON.stringify(L.foodLabel)};
@@ -309,20 +372,24 @@ const LEVEL_COLORS   = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa', 4:'#f97316'};
 
 function typeEmoji(t){
   t=(t||'').toLowerCase();
-  if(t.includes('museo')||t.includes('museum')) return '🏛';
-  if(t.includes('parco')||t.includes('giardino')||t.includes('park')||t.includes('garden')) return '🌳';
-  if(t.includes('piazza')||t.includes('plaza')||t.includes('square')) return '⛲';
-  if(t.includes('chiesa')||t.includes('cattedrale')||t.includes('basilica')||t.includes('church')||t.includes('cathedral')) return '⛪';
-  if(t.includes('castello')||t.includes('fortezza')||t.includes('torre')||t.includes('palazzo')||t.includes('castle')||t.includes('palace')) return '🏰';
-  if(t.includes('mercato')||t.includes('market')) return '🛒';
-  if(t.includes('teatro')||t.includes('opera')||t.includes('theatre')||t.includes('theater')) return '🎭';
-  if(t.includes('panorama')||t.includes('belvedere')||t.includes('terrazza')||t.includes('viewpoint')) return '🔭';
-  if(t.includes('fontana')||t.includes('fountain')) return '⛲';
-  if(t.includes('spiaggia')||t.includes('beach')) return '🏖';
-  if(t.includes('porto')||t.includes('harbour')||t.includes('marina')) return '⚓';
-  return '📍';
+  if(t.includes('museo')||t.includes('museum')||t.includes('musee')) return '&#127963;';
+  if(t.includes('parco')||t.includes('giardino')||t.includes('park')||t.includes('garden')||t.includes('parc')||t.includes('jardin')) return '&#127795;';
+  if(t.includes('piazza')||t.includes('plaza')||t.includes('square')||t.includes('place')) return '&#9968;';
+  if(t.includes('chiesa')||t.includes('cattedrale')||t.includes('basilica')||t.includes('church')||t.includes('cathedral')||t.includes('eglise')) return '&#9962;';
+  if(t.includes('castello')||t.includes('fortezza')||t.includes('torre')||t.includes('palazzo')||t.includes('castle')||t.includes('palace')||t.includes('tour')||t.includes('palais')||t.includes('mulino')||t.includes('windmill')||t.includes('moulin')) return '&#127984;';
+  if(t.includes('mercato')||t.includes('market')||t.includes('marche')) return '&#128722;';
+  if(t.includes('teatro')||t.includes('opera')||t.includes('theatre')||t.includes('theater')) return '&#127917;';
+  if(t.includes('panorama')||t.includes('belvedere')||t.includes('terrazza')||t.includes('viewpoint')||t.includes('point de vue')) return '&#128269;';
+  if(t.includes('fontana')||t.includes('fountain')) return '&#9968;';
+  if(t.includes('spiaggia')||t.includes('beach')||t.includes('plage')) return '&#127958;';
+  if(t.includes('porto')||t.includes('harbour')||t.includes('marina')||t.includes('port')) return '&#9875;';
+  if(t.includes('mura')||t.includes('murailles')||t.includes('walls')) return '&#128511;';
+  return '&#128205;';
 }
-function mapsUrl(lat,lon,name){ return 'https://www.google.com/maps/search/'+encodeURIComponent(name)+'/@'+lat+','+lon+',17z'; }
+function plainText(value){ var textarea=document.createElement('textarea');textarea.innerHTML=String(value||'');return textarea.value; }
+function mapsUrl(lat,lon,name){ return 'https://www.google.com/maps/search/'+encodeURIComponent(plainText(name))+'/@'+lat+','+lon+',17z'; }
+function transitDirectionsUrl(name){ return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(plainText(name)+', '+CITY_NAME)+'&travelmode=transit&dir_action=navigate'; }
+function htmlText(value){ return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function hKm(lat1,lon1,lat2,lon2){
   var R=6371,f1=lat1*Math.PI/180,f2=lat2*Math.PI/180;
   var df=(lat2-lat1)*Math.PI/180,dl=(lon2-lon1)*Math.PI/180;
@@ -341,12 +408,31 @@ function nearestDayDist(lat,lon){
   DAY_STOPS.forEach(function(s){ var k=wKm(lat,lon,s.lat,s.lon); if(k<best) best=k; });
   return best;
 }
+function transitAccess(lat,lon){
+  if(!TRANSIT||!TRANSIT.stations||!TRANSIT.stations.length) return '<div class="transit-access"><strong>'+PUBLIC_TRANSIT_LABEL+'</strong></div>';
+  var nearest=null,best=Infinity;
+  TRANSIT.stations.forEach(function(station){var km=hKm(lat,lon,station.latitude,station.longitude);if(km<best){best=km;nearest=station;}});
+  if(!nearest||best>1.2) return '<div class="transit-access"><strong>'+PUBLIC_TRANSIT_LABEL+'</strong></div>';
+  var lines=(nearest.lineIds||[]).join(' · ');
+  return '<div class="transit-access"><strong>'+NEARBY_STOP_LABEL+':</strong> '+htmlText(nearest.name)+' · '+fDist(best)+(lines?' <span class="transit-access-lines">'+htmlText(lines)+'</span>':'')+'</div>';
+}
+function transitFocusPoints(){ if(DAY_STOPS.length)return DAY_STOPS; return OTHER_DAY.concat(UNASSIGNED); }
+function isTransitPointRelevant(point,maxKm){
+  var focus=transitFocusPoints();if(!focus.length)return true;
+  for(var i=0;i<focus.length;i++){if(hKm(point[0],point[1],focus[i].lat,focus[i].lon)<=maxKm)return true;}return false;
+}
+function isTransitEdgeRelevant(a,b){
+  var aRelevant=isTransitPointRelevant(a,3),bRelevant=isTransitPointRelevant(b,3);
+  return aRelevant&&bRelevant;
+}
 
 document.addEventListener('click', function(e){
   var btn = e.target && e.target.closest ? e.target.closest('button[data-action]') : null;
   if (!btn || !btn.dataset) return;
   var action = btn.dataset.action;
   if (action === 'filter') { setFilter(Number(btn.dataset.level)); return; }
+  if (action === 'transit') { toggleTransit(); return; }
+  if (action === 'transitMode') { setTransitMode(btn.dataset.mode||'recommended'); return; }
   if (action === 'ruler')  { toggleMeasure(); return; }
   if (action === 'maps')   sendMessage({type:'openMaps',        url: btn.dataset.url});
   if (action === 'add')    sendMessage({type:'addAttraction',   id: Number(btn.dataset.id)});
@@ -355,10 +441,26 @@ document.addEventListener('click', function(e){
   if (action === 'selectFood') sendMessage({type:'selectFood', id: Number(btn.dataset.id)});
   if (action === 'removeFood') sendMessage({type:'removeFood', id: Number(btn.dataset.id)});
 });
-
 var unassLayers = {};
 var foodLayer = null;
 var currentFilter = 0;
+var transitLayer = null;
+var transitVisible = true;
+var transitItems = [];
+var selectedTransitMode = 'recommended';
+function renderTransitLayer(){if(!transitLayer)return;transitLayer.clearLayers();transitItems.forEach(function(item){if(selectedTransitMode==='recommended'||item.modes.indexOf(selectedTransitMode)>=0)item.layer.addTo(transitLayer);});}
+function setTransitMode(mode){selectedTransitMode=mode;renderTransitLayer();document.querySelectorAll('.transit-mode-btn').forEach(function(button){button.classList.toggle('active',button.dataset.mode===mode);});}
+function toggleTransit() {
+  if (!transitLayer) return;
+  transitVisible = !transitVisible;
+  if (transitVisible) transitLayer.addTo(map); else map.removeLayer(transitLayer);
+  var button = document.getElementById('transit-toggle');
+  if (button) {
+    button.classList.toggle('active', transitVisible);
+    button.setAttribute('aria-pressed', transitVisible ? 'true' : 'false');
+  }
+  var modePanel=document.querySelector('.transit-mode-panel');if(modePanel)modePanel.style.display=transitVisible?'flex':'none';
+}
 function setFilter(level) {
   currentFilter = level;
   [1,2,3].forEach(function(lv){
@@ -458,14 +560,15 @@ function toggleMeasure(){
 }
 
 function mapsButton(url){ return '<button type="button" class="pop-maps" data-action="maps" data-url="'+url.replace(/"/g,'&quot;')+'">'+MAPS_LABEL+'</button>'; }
+function transitDirectionsButton(name){ var url=transitDirectionsUrl(name); return '<button type="button" class="pop-transit" data-action="maps" data-url="'+url.replace(/"/g,'&quot;')+'">'+TRANSIT_DIRECTIONS_LABEL+'</button>'; }
 function addButton(id)  { return '<button type="button" class="pop-add"  data-action="add"  data-id="'+id+'">'+ADD_LABEL+'</button>'; }
 function moveButton(id,from){ return '<button type="button" class="pop-move" data-action="move" data-id="'+id+'" data-from="'+from+'">'+MOVE_LABEL+'</button>'; }
 function removeButton(id){ return '<button type="button" class="pop-remove" data-action="remove" data-id="'+id+'">'+REMOVE_LABEL+'</button>'; }
 function selectFoodButton(id){ return '<button type="button" class="pop-food" data-action="selectFood" data-id="'+id+'">'+SELECT_FOOD_LABEL+'</button>'; }
 function removeFoodButton(id){ return '<button type="button" class="pop-food remove" data-action="removeFood" data-id="'+id+'">'+REMOVE_FOOD_LABEL+'</button>'; }
 
-var map = L.map('map',{zoomControl:false,attributionControl:false,minZoom:12,maxZoom:19});
-L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
+var map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:3,maxZoom:19});
+L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
 measureLayer = L.layerGroup().addTo(map);
 foodLayer = L.layerGroup();
 
@@ -478,45 +581,45 @@ UNASSIGNED.forEach(function(a){
   var popup='<div class="pop-badge pop-badge-expl">'+EXPL_LABEL+'</div>'+
     '<div class="pop-name">'+a.name+'</div>'+
     (a.type?'<div class="pop-type">'+a.type+'</div>':'')+
-    (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (nd!==null?'<div class="pop-dist">'+WALK_PREFIX+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
     (a.desc?'<div class="pop-desc">'+a.desc+'</div>':'')+
     (a.mins?'<div class="pop-meta">~'+a.mins+' '+MINS_LABEL+'</div>':'')+
-    addButton(a.id)+mapsButton(url);
+    transitAccess(a.lat,a.lon)+addButton(a.id)+transitDirectionsButton(a.name)+mapsButton(url);
   attachMarker(L.marker([a.lat,a.lon],{icon:icon,zIndexOffset:100}), popup).addTo(unassLayers[lv]);
 });
 [1,2,3].forEach(function(lv){ unassLayers[lv].addTo(map); });
 
 FOOD_SPOTS.forEach(function(f){
   var isTypical=!!f.hasDishMatch;
-  var icon=L.divIcon({html:'<div class="food-dot '+(isTypical?'typical':'')+'">🍽</div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-17]});
+  var icon=L.divIcon({html:'<div class="food-dot '+(isTypical?'typical':'')+'">&#127869;&#65039;</div>',className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-17]});
   var url=mapsUrl(f.lat,f.lon,f.name);
   var nd=nearestDayDist(f.lat,f.lon);
   var dishes=(f.recommendedDishes||[]).join(', ');
   var popup='<div class="pop-badge pop-badge-expl">'+FOOD_LABEL+'</div>'+
     '<div class="pop-name">'+f.name+'</div>'+
     (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
-    (dishes?'<div class="pop-meta">🍝 '+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
-    (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
-    (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
+    (dishes?'<div class="pop-meta">'+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
+    (nd!==null?'<div class="pop-dist">'+WALK_PREFIX+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (f.rating?'<div class="pop-meta">&#9733; '+f.rating+'</div>':'')+
     (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
-    (FOOD_MODE ? selectFoodButton(f.id) : '')+mapsButton(url);
+    selectFoodButton(f.id)+mapsButton(url);
   foodLayer.addLayer(attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:900}), popup));
 });
 if (FOOD_MODE && foodLayer) foodLayer.addTo(map);
 
 SELECTED_FOOD.forEach(function(f){
-  var icon=L.divIcon({html:'<div class="food-dot selected">🍽</div>',className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-19]});
+  var icon=L.divIcon({html:'<div class="food-dot selected">&#127869;&#65039;</div>',className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-19]});
   var url=f.mapsLink || mapsUrl(f.lat,f.lon,f.name);
   var nd=nearestDayDist(f.lat,f.lon);
   var dishes=(f.recommendedDishes||[]).join(', ');
   var popup='<div class="pop-badge pop-badge-expl">'+SELECTED_FOOD_LABEL+'</div>'+
     '<div class="pop-name">'+f.name+'</div>'+
     (f.type?'<div class="pop-type">'+f.type+'</div>':'')+
-    (dishes?'<div class="pop-meta">🍝 '+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
-    (nd!==null?'<div class="pop-dist">🚶 ~'+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
-    (f.rating?'<div class="pop-meta">★ '+f.rating+'</div>':'')+
+    (dishes?'<div class="pop-meta">'+TYPICAL_DISH_LABEL+': '+dishes+'</div>':'')+
+    (nd!==null?'<div class="pop-dist">'+WALK_PREFIX+fDist(nd)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (f.rating?'<div class="pop-meta">&#9733; '+f.rating+'</div>':'')+
     (f.desc?'<div class="pop-desc">'+f.desc+'</div>':'')+
-    (FOOD_MODE ? removeFoodButton(f.id) : '')+
+    removeFoodButton(f.id)+
     mapsButton(url);
   attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:950}), popup).addTo(map);
 });
@@ -528,6 +631,54 @@ if(FOOD_ORIGIN){
     '<div class="pop-badge pop-badge-day">'+FOOD_ORIGIN.name+'</div>',
     {maxWidth:220}
   ).addTo(map);
+}
+
+if (TRANSIT && TRANSIT.lines && TRANSIT.lines.length) {
+  map.createPane('transit-lines');
+  map.getPane('transit-lines').style.zIndex = 320;
+  map.createPane('transit-stations');
+  map.getPane('transit-stations').style.zIndex = 610;
+  transitLayer = L.layerGroup();
+  var transitColors = {};
+  TRANSIT.lines.forEach(function(line) {
+    transitColors[line.id] = line.color;
+    (line.paths || []).forEach(function(path) {
+      for(var pathIndex=0;pathIndex<path.length-1;pathIndex++){
+        var from=path[pathIndex],to=path[pathIndex+1];
+        if(isTransitEdgeRelevant(from,to))transitItems.push({layer:L.polyline([from,to],{pane:'transit-lines',color:line.color,weight:4,opacity:.82,lineCap:'round',lineJoin:'round'}),modes:[line.mode||TRANSIT.mode||'metro']});
+      }
+    });
+  });
+  TRANSIT.stations.forEach(function(station) {
+    if(!isTransitPointRelevant([station.latitude,station.longitude],3))return;
+    var interchange = station.lineIds.length > 1;
+    var color = transitColors[station.lineIds[0]] || '#0891b2';
+    var marker = L.circleMarker([station.latitude, station.longitude], {pane:'transit-stations',radius:interchange?6:4,color:interchange?'#111827':color,weight:interchange?2.5:2,fillColor:'#ffffff',fillOpacity:1,opacity:1});
+    var chips = station.lineIds.map(function(id) {
+      var line = TRANSIT.lines.find(function(item){return item.id===id;});
+      var bg = line ? line.color : '#64748b';
+      var fg = line ? line.textColor : '#ffffff';
+      return '<span class="station-line" style="background:'+bg+';color:'+fg+'">'+htmlText(id)+'</span>';
+    }).join('');
+    marker.bindPopup('<div class="pop-type">'+STATION_LABEL+'</div><div class="pop-name">'+htmlText(station.name)+'</div><div class="pop-meta">'+LINES_LABEL+'</div><div class="station-lines">'+chips+'</div>');
+    var stationModes=station.lineIds.map(function(id){var item=TRANSIT.lines.find(function(line){return line.id===id;});return(item&&item.mode)||TRANSIT.mode||'metro';}).filter(function(mode,index,modes){return modes.indexOf(mode)===index;});
+    transitItems.push({layer:marker,modes:stationModes});
+  });
+  renderTransitLayer();
+  transitLayer.addTo(map);
+  var transitButton = document.createElement('button');
+  transitButton.id = 'transit-toggle';
+  transitButton.className = 'transit-toggle active';
+  transitButton.dataset.action = 'transit';
+  transitButton.setAttribute('aria-pressed','true');
+  transitButton.innerHTML = '<span class="transit-badge">'+TRANSIT_BADGE+'</span><span>'+TRANSIT_LABEL+'</span>';
+  document.getElementById('map').appendChild(transitButton);
+  if(TRANSIT.mode==='mixed'){
+    var availableModes=TRANSIT.lines.map(function(line){return line.mode||'metro';}).filter(function(mode,index,modes){return mode!=='mixed'&&modes.indexOf(mode)===index;});
+    var modePanel=document.createElement('div');modePanel.className='transit-mode-panel';
+    ['recommended'].concat(availableModes).forEach(function(mode){var button=document.createElement('button');button.className='transit-mode-btn'+(mode==='recommended'?' active':'');button.dataset.action='transitMode';button.dataset.mode=mode;button.textContent=TRANSIT_MODE_LABELS[mode]||mode;modePanel.appendChild(button);});
+    document.getElementById('map').appendChild(modePanel);
+  }
 }
 
 (function(){
@@ -544,7 +695,7 @@ if(FOOD_ORIGIN){
 })();
 
 (function(){
-  var btn=document.createElement('button'); btn.id='ruler-btn'; btn.innerHTML='📏';
+  var btn=document.createElement('button'); btn.id='ruler-btn'; btn.innerHTML='&#128207;';
   btn.title=RULER_LABEL; btn.dataset.action='ruler'; btn.dataset.active='0';
   document.getElementById('map').appendChild(btn);
 })();
@@ -552,7 +703,7 @@ if(FOOD_ORIGIN){
 map.on('click', function(e){
   if(!isRulerActive()) return;
   var tgt=e.originalEvent&&e.originalEvent.target;
-  if(tgt&&tgt.closest&&(tgt.closest('#filter-bar')||tgt.closest('#ruler-btn'))) return;
+  if(tgt&&tgt.closest&&(tgt.closest('#filter-bar')||tgt.closest('#ruler-btn')||tgt.closest('#transit-toggle'))) return;
   handleMeasureClick(e.latlng);
 });
 
@@ -563,10 +714,10 @@ OTHER_DAY.forEach(function(s){
   var popup='<div class="pop-badge pop-badge-planned">'+PLANNED_LABEL+' - '+DAY_LABEL+' '+s.dayNum+'</div>'+
     '<div class="pop-name">'+s.name+'</div>'+
     (s.type?'<div class="pop-type">'+s.type+'</div>':'')+
-    (nd2!==null?'<div class="pop-dist">🚶 ~'+fDist(nd2)+' '+DIST_FROM_ROUTE+'</div>':'')+
+    (nd2!==null?'<div class="pop-dist">'+WALK_PREFIX+fDist(nd2)+' '+DIST_FROM_ROUTE+'</div>':'')+
     (s.desc?'<div class="pop-desc">'+s.desc+'</div>':'')+
     (s.mins?'<div class="pop-meta">~'+s.mins+' '+MINS_LABEL+'</div>':'')+
-    moveButton(s.id,s.dayNum)+mapsButton(url);
+    transitAccess(s.lat,s.lon)+moveButton(s.id,s.dayNum)+transitDirectionsButton(s.name)+mapsButton(url);
   attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:200}), popup).addTo(map);
 });
 
@@ -580,7 +731,7 @@ DAY_STOPS.forEach(function(s){
     (s.type?'<div class="pop-type">'+s.type+'</div>':'')+
     (s.desc?'<div class="pop-desc">'+s.desc+'</div>':'')+
     (s.mins?'<div class="pop-meta">~'+s.mins+' '+MINS_LABEL+'</div>':'')+
-    removeButton(s.id)+mapsButton(url);
+    transitAccess(s.lat,s.lon)+removeButton(s.id)+transitDirectionsButton(s.name)+mapsButton(url);
   attachMarker(L.marker([s.lat,s.lon],{icon:icon,zIndexOffset:1000}), popup).addTo(map);
 });
 
@@ -608,18 +759,26 @@ setTimeout(function(){
 </html>`;
 }
 
-// ── Componente ────────────────────────────────────────────────────────────────
+// â”€â”€ Componente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function DayMap({
-  visible, onClose, day, allAttractions, allFoodSpots = [], foodSelection, assignedMap, lang, accent,
+  visible, onClose, city, day, allAttractions, allFoodSpots = [], foodSelection, assignedMap, lang, accent,
   onAddAttraction, onMoveAttraction, onRemoveAttraction, onReorderStops, onSelectFood, onRemoveFood,
   allDays, onDayChange,
 }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [mapReloadKey, setMapReloadKey] = useState(0);
   const [showStopsSheet, setShowStopsSheet] = useState(false);
   const [isDraggingStop, setIsDraggingStop] = useState(false);
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
+  const isEn = lang === "en";
+  const isFr = lang === "fr";
+  const isEs = lang === "es";
+  const contextHelp = useContextHelpController();
+  const mapHelp = dayMapHelp(lang);
+  const { network: transitNetwork, loading: transitLoading, supported: transitSupported } = useTransitNetwork(city, visible);
+  const cityTransitMode = transitNetwork?.mode ?? transitModeForCity(city);
 
   useEffect(() => { setShowStopsSheet(false); setIsDraggingStop(false); }, [day.day, visible]);
   const stopOrderSignature = useMemo(
@@ -632,9 +791,9 @@ export function DayMap({
   );
 
   const html = useMemo(
-    () => buildHtml(day, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark),
+    () => buildHtml(day, city, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark, transitNetwork),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day.day, stopOrderSignature, restaurantSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark],
+    [day.day, city, stopOrderSignature, restaurantSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark, transitNetwork],
   );
 
   useEffect(() => {
@@ -648,7 +807,7 @@ export function DayMap({
         const msg = JSON.parse(event.data);
         if (msg.type === "ready")    setStatus("ready");
         if (msg.type === "error")    setStatus("error");
-        if (msg.type === "openMaps") Linking.openURL(msg.url).catch(() => {});
+        if (msg.type === "openMaps") void openExternalLink(msg.url, lang);
         if (msg.type === "addAttraction"    && onAddAttraction)    onAddAttraction(msg.id);
         if (msg.type === "moveAttraction"   && onMoveAttraction)   onMoveAttraction(msg.id, msg.fromDay);
         if (msg.type === "removeAttraction" && onRemoveAttraction) onRemoveAttraction(msg.id);
@@ -659,9 +818,7 @@ export function DayMap({
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onAddAttraction, onMoveAttraction, onRemoveAttraction, onSelectFood, onRemoveFood]);
-
-  const isEn = lang === "en";
+  }, [lang, onAddAttraction, onMoveAttraction, onRemoveAttraction, onSelectFood, onRemoveFood]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -669,7 +826,14 @@ export function DayMap({
 
         {/* Header con day picker */}
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.card2 }]} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={contextHelp.guard(mapHelp.close, onClose)}
+            style={[styles.closeBtn, { backgroundColor: colors.card2 }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={mapHelp.close.title}
+            hitSlop={6}
+          >
             <Ionicons name="close" size={22} color={colors.textMuted} />
           </TouchableOpacity>
           {allDays && allDays.length > 1 && onDayChange ? (
@@ -685,12 +849,12 @@ export function DayMap({
                 return (
                   <TouchableOpacity
                     key={d.day}
-                    onPress={() => onDayChange(d.day)}
+                     onPress={contextHelp.guard(mapHelp.days, () => onDayChange(d.day))}
                     style={[styles.dayPill, { borderColor: colors.border, backgroundColor: colors.card2 }, active && { borderColor: da, backgroundColor: da + "22" }]}
                     activeOpacity={0.75}
                   >
                     <Text style={[styles.dayPillText, { color: active ? da : colors.textMuted }]}>
-                      {isEn ? `Day ${d.day}` : `Giorno ${d.day}`}
+                      {isEs ? `Día ${d.day}` : isFr ? `Jour ${d.day}` : isEn ? `Day ${d.day}` : `Giorno ${d.day}`}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -698,61 +862,81 @@ export function DayMap({
             </ScrollView>
           ) : (
             <Text style={[styles.title, { color: accent }]}>
-              {isEn ? `Day ${day.day}` : `Giorno ${day.day}`}
+              {isEs ? `Día ${day.day}` : isFr ? `Jour ${day.day}` : isEn ? `Day ${day.day}` : `Giorno ${day.day}`}
             </Text>
           )}
+          <TouchableOpacity
+            onPress={contextHelp.toggle}
+            style={[styles.closeBtn, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "70", borderWidth: 1 }]}
+            accessibilityRole="button"
+            accessibilityLabel={isEs ? "Ayuda del mapa" : isFr ? "Aide de la carte" : isEn ? "Map help" : "Guida della mappa"}
+            accessibilityState={{ expanded: contextHelp.active }}
+            hitSlop={6}
+          >
+            <Ionicons name={contextHelp.active ? "close" : "help-circle-outline"} size={21} color={colors.accentGold} />
+          </TouchableOpacity>
         </View>
 
         {/* Legenda */}
-        <View style={[styles.legend, { borderBottomColor: colors.border }]}>
+        <TouchableOpacity activeOpacity={1} onPress={contextHelp.guard(mapHelp.legend, () => {})} style={[styles.legend, { borderBottomColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: accent }]} />
-            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Today's stops" : "Tappe di oggi"}</Text>
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEs ? "Paradas de hoy" : isFr ? "Étapes du jour" : isEn ? "Today's stops" : "Tappe di oggi"}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: colors.accentBlue }]} />
-            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Planned in other days" : "Gia in altri giorni"}</Text>
+            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEs ? "Planificado en otros días" : isFr ? "Prévu les autres jours" : isEn ? "Planned in other days" : "Già previsti in altri giorni"}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: isDark ? "#3a3a5a" : "#b0b0c8", borderWidth: 1, borderColor: isDark ? "#5a5a7a" : "#9090a8" }]} />
-            <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEn ? "Explore" : "Da esplorare"}</Text>
+             <Text style={[styles.legendLabel, { color: colors.textSub }]}>{isEs ? "Por explorar" : isFr ? "À explorer" : isEn ? "Explore" : "Da esplorare"}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Mappa */}
         <View style={styles.mapWrap}>
           <iframe
-            key={stopOrderSignature}
+            key={`${stopOrderSignature}:${mapReloadKey}`}
             srcDoc={html}
             style={{ width: "100%", height: "100%", border: "none", backgroundColor: colors.bg } as any}
             sandbox="allow-scripts allow-same-origin"
           />
+          {contextHelp.active && (
+            <TouchableOpacity activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.map)} style={[StyleSheet.absoluteFill, { zIndex: 20 }]} />
+          )}
 
           {status === "loading" && (
-            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
-              <ActivityIndicator color={accent} size="large" />
-              <Text style={[styles.overlayText, { color: colors.textSub }]}>{isEn ? "Loading map…" : "Caricamento mappa…"}</Text>
-            </View>
+            <MapStatusOverlay status="loading" lang={lang} accent={accent} />
           )}
           {status === "error" && (
-            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
-              <Ionicons name="wifi-outline" size={44} color={colors.textMuted} />
-              <Text style={[styles.overlayText, { color: colors.textSub }]}>
-                {isEn ? "Internet connection required for the map" : "Connessione internet necessaria per la mappa"}
+            <MapStatusOverlay
+              status="error"
+              lang={lang}
+              accent={accent}
+              onRetry={() => {
+                setStatus("loading");
+                setMapReloadKey((value) => value + 1);
+              }}
+            />
+          )}
+
+          {status === "ready" && transitSupported && transitLoading && (
+            <View style={[styles.transitLoadingBadge, { backgroundColor: colors.card2, borderColor: colors.border }]}>
+              <ActivityIndicator color="#0891b2" size="small" />
+              <Text style={[styles.transitLoadingText, { color: colors.textSub }]}>
+                {transitPresentation(cityTransitMode, lang).loading}
               </Text>
-              <TouchableOpacity onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.card2, borderColor: colors.border }]} activeOpacity={0.8}>
-                <Text style={[styles.retryText, { color: colors.textSub }]}>{isEn ? "Close" : "Chiudi"}</Text>
-              </TouchableOpacity>
             </View>
           )}
 
-          {/* FAB riordino — in basso a sinistra accanto al filtro */}
+          {/* FAB riordino â€” in basso a sinistra accanto al filtro */}
           {status === "ready" && !!onReorderStops && day.stops.length > 1 && (
             <TouchableOpacity
-              onPress={() => setShowStopsSheet(true)}
+               onPress={contextHelp.guard(mapHelp.reorder, () => setShowStopsSheet(true))}
               activeOpacity={0.8}
               style={[styles.reorderFab, { backgroundColor: colors.card2, borderColor: accent + "55" }]}
-              accessibilityLabel={isEn ? "Reorder stops" : "Riordina tappe"}
+              accessibilityLabel={isEs ? "Reordenar paradas" : isFr ? "Réordonner les étapes" : isEn ? "Reorder stops" : "Riordina tappe"}
+              accessibilityRole="button"
             >
               <Ionicons name="reorder-three-outline" size={22} color={accent} />
             </TouchableOpacity>
@@ -777,14 +961,21 @@ export function DayMap({
                 <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
                 <View style={styles.sheetHeader}>
                   <Text style={[styles.sheetTitle, { color: accent }]}>
-                    {isEn ? `Day ${day.day} · Reorder stops` : `Giorno ${day.day} · Riordina tappe`}
+                    {isEs ? `Día ${day.day} · Reordenar paradas` : isFr ? `Jour ${day.day} · Réordonner les étapes` : isEn ? `Day ${day.day} · Reorder stops` : `Giorno ${day.day} · Riordina tappe`}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowStopsSheet(false)} style={[styles.closeBtn, { backgroundColor: colors.card2 }]} activeOpacity={0.7}>
+                  <TouchableOpacity
+                    onPress={() => setShowStopsSheet(false)}
+                    style={[styles.closeBtn, { backgroundColor: colors.card2 }]}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={mapHelp.close.title}
+                    hitSlop={6}
+                  >
                     <Ionicons name="close" size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
                 <Text style={[styles.sheetHint, { color: colors.textMuted }]}>
-                  {isEn ? "Long-press the ≡ handle on a stop and drag up or down to reorder." : "Tieni premuto l'icona ≡ a sinistra di una tappa e trascina per riordinare."}
+                   {isEs ? "Mantén pulsado el control de una parada y arrástrala para reordenarla." : isFr ? "Maintenez la poignée de déplacement d’une étape, puis faites-la glisser pour la réordonner." : isEn ? "Long-press a stop’s reorder handle, then drag it up or down." : "Tieni premuta la maniglia di una tappa e trascinala per riordinarla."}
                 </Text>
                 <ScrollView
                   style={styles.sheetScroll}
@@ -804,12 +995,13 @@ export function DayMap({
             </View>
           </Modal>
         )}
+        <ContextHelpUI controller={contextHelp} lang={lang} />
       </View>
     </Modal>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// â”€â”€ Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
@@ -849,6 +1041,21 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     gap: 16, paddingHorizontal: 40,
   },
+  transitLoadingBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    zIndex: 15,
+    minHeight: 38,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+  },
+  transitLoadingText: { fontSize: 11, lineHeight: 15, fontWeight: "800" },
   overlayText: { fontSize: 14, textAlign: "center", lineHeight: 20 },
   retryBtn: {
     marginTop: 8,

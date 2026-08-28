@@ -1,32 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Itinerary } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import {
+  loadSavedItineraries,
+  MAX_SAVED_ITINERARIES,
+  mergeSavedItineraries,
+  mutateSavedItineraries,
+  normalizeSavedItinerary,
+  type SavedItinerary,
+} from "@/services/savedItineraryStorage";
 
-const LOCAL_KEY = "wayra_saved_itineraries";
-const MAX_SAVED = 30;
-
-export interface SavedItinerary {
-  id: string;
-  savedAt: string;
-  itinerary: Itinerary;
-}
-
-// ── Helpers locale ─────────────────────────────────────────────────────────────
-
-async function localLoad(): Promise<SavedItinerary[]> {
-  try {
-    const raw = await AsyncStorage.getItem(LOCAL_KEY);
-    return raw ? (JSON.parse(raw) as SavedItinerary[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function localPersist(list: SavedItinerary[]) {
-  await AsyncStorage.setItem(LOCAL_KEY, JSON.stringify(list));
-}
+export type { SavedItinerary } from "@/services/savedItineraryStorage";
 
 // ── Helpers Supabase ────────────────────────────────────────────────────────────
 
@@ -36,14 +21,17 @@ async function remoteLoad(userId: string): Promise<SavedItinerary[]> {
     .select("id, saved_at, itinerary")
     .eq("user_id", userId)
     .order("saved_at", { ascending: false })
-    .limit(MAX_SAVED);
+    .limit(MAX_SAVED_ITINERARIES);
 
   if (error || !data) return [];
-  return data.map((row: any) => ({
-    id: row.id,
-    savedAt: row.saved_at,
-    itinerary: row.itinerary as Itinerary,
-  }));
+  return data.flatMap((row: any) => {
+    const entry = normalizeSavedItinerary({
+      id: row.id,
+      savedAt: row.saved_at,
+      itinerary: row.itinerary,
+    });
+    return entry ? [entry] : [];
+  });
 }
 
 async function remoteSave(userId: string, entry: SavedItinerary) {
@@ -57,8 +45,8 @@ async function remoteSave(userId: string, entry: SavedItinerary) {
   });
 }
 
-async function remoteRemove(id: string) {
-  await supabase.from("saved_itineraries").delete().eq("id", id);
+async function remoteRemove(userId: string, id: string) {
+  await supabase.from("saved_itineraries").delete().eq("user_id", userId).eq("id", id);
 }
 
 // ── Fingerprint itinerario ─────────────────────────────────────────────────────
@@ -84,14 +72,22 @@ export function useSavedItineraries() {
   const [saved, setSaved] = useState<SavedItinerary[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Ricarica ogni volta che cambia l'utente (login / logout)
+  // La copia locale e sempre primaria; l'account aggiunge solo la sincronizzazione.
   useEffect(() => {
+    let active = true;
     setLoading(true);
-    const load = user ? remoteLoad(user.id) : localLoad();
-    load.then((list) => {
-      setSaved(list);
+    void loadSavedItineraries().then(async (local) => {
+      if (!active) return;
+      setSaved(local);
       setLoading(false);
+
+      if (!user) return;
+      const remote = await remoteLoad(user.id);
+      if (!active) return;
+      const merged = await mutateSavedItineraries((current) => mergeSavedItineraries(current, remote));
+      if (active) setSaved(merged);
     });
+    return () => { active = false; };
   }, [user?.id]);
 
   /** Salva un nuovo itinerario. */
@@ -103,30 +99,22 @@ export function useSavedItineraries() {
         savedAt: new Date().toISOString(),
         itinerary,
       };
-      const updated = [entry, ...saved].slice(0, MAX_SAVED);
+      const updated = await mutateSavedItineraries((current) => [entry, ...current]);
       setSaved(updated);
-      if (user) {
-        await remoteSave(user.id, entry);
-      } else {
-        await localPersist(updated);
-      }
+      if (user) void remoteSave(user.id, entry);
       return id;
     },
-    [saved, user],
+    [user],
   );
 
   /** Elimina un itinerario per id. */
   const remove = useCallback(
     async (id: string) => {
-      const updated = saved.filter((s) => s.id !== id);
+      const updated = await mutateSavedItineraries((current) => current.filter((s) => s.id !== id));
       setSaved(updated);
-      if (user) {
-        await remoteRemove(id);
-      } else {
-        await localPersist(updated);
-      }
+      if (user) void remoteRemove(user.id, id);
     },
-    [saved, user],
+    [user],
   );
 
   /** Restituisce l'id se già salvato, altrimenti null. */

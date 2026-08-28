@@ -17,6 +17,8 @@ import { useSavedItineraries, SavedItinerary } from "@/hooks/useSavedItineraries
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { localText } from "@/i18n";
+import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
 
 const CITY_EMOJIS: Record<string, string> = {
   roma: "🏛️",
@@ -28,6 +30,7 @@ const CITY_EMOJIS: Record<string, string> = {
   madrid: "🎨",
   siviglia: "💃",
   valencia: "🍊",
+  valletta: "⚔️",
   parigi: "🗼",
   berlino: "🐻",
   monaco_di_baviera: "🍺",
@@ -49,9 +52,12 @@ const CITY_EMOJIS: Record<string, string> = {
   francoforte: "🏦",
   marrakech: "🌴",
   copenaghen: "🚲",
+  helsinki: "🧭",
   stoccolma: "🌊",
   bruges: "🚤",
   dublino: "🍀",
+  dubrovnik: "🏰",
+  reykjavik: "🌋",
   marsiglia: "⚓",
   cracovia: "🦅",
   bucarest: "🌹",
@@ -61,7 +67,7 @@ const CITY_EMOJIS: Record<string, string> = {
 
 function formatDate(iso: string, lang: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString(lang === "it" ? "it-IT" : "en-GB", {
+  return d.toLocaleDateString(lang === "es" ? "es-ES" : lang === "fr" ? "fr-FR" : lang === "it" ? "it-IT" : "en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -74,6 +80,16 @@ export default function SavedScreen() {
   const { user, signOut } = useAuth();
   const { saved, loading, remove } = useSavedItineraries();
   const { colors } = useTheme();
+  const contextHelp = useContextHelpController();
+  const tx = (values: Record<string, string>) => localText(lang, values);
+  const help = (icon: keyof typeof Ionicons.glyphMap, title: Record<string, string>, body: Record<string, string>): ContextHelpContent => ({ icon, title: tx(title), body: tx(body) });
+  const savedHelp = {
+    back: help("arrow-back-outline", { it: "Indietro", en: "Back", fr: "Retour", es: "Atrás" }, { it: "Torna alla schermata principale.", en: "Return to the main screen.", fr: "Revenez à l'écran principal.", es: "Vuelve a la pantalla principal." }),
+    account: help("person-circle-outline", { it: "Account", en: "Account", fr: "Compte", es: "Cuenta" }, { it: "Accedi per sincronizzare i viaggi oppure, se sei già connesso, gestisci la disconnessione.", en: "Sign in to sync trips or, when connected, manage sign-out.", fr: "Connectez-vous pour synchroniser les voyages ou gérez la déconnexion.", es: "Inicia sesión para sincronizar los viajes o gestiona el cierre de sesión." }),
+    sync: help("cloud-upload-outline", { it: "Sincronizzazione", en: "Sync", fr: "Synchronisation", es: "Sincronización" }, { it: "Con un account, i viaggi salvati possono essere ritrovati sugli altri dispositivi.", en: "With an account, saved trips can be restored on your other devices.", fr: "Avec un compte, les voyages enregistrés sont disponibles sur vos autres appareils.", es: "Con una cuenta, los viajes guardados están disponibles en otros dispositivos." }),
+    trip: help("map-outline", { it: "Apri viaggio", en: "Open trip", fr: "Ouvrir le voyage", es: "Abrir viaje" }, { it: "Apre l'itinerario salvato con giornate, mappe e informazioni della città.", en: "Opens the saved itinerary with days, maps and city information.", fr: "Ouvre l'itinéraire enregistré avec les journées, cartes et informations de la ville.", es: "Abre el itinerario guardado con días, mapas e información de la ciudad." }),
+    remove: help("trash-outline", { it: "Elimina viaggio", en: "Delete trip", fr: "Supprimer le voyage", es: "Eliminar viaje" }, { it: "Rimuove questo itinerario dopo una richiesta di conferma.", en: "Removes this itinerary after confirmation.", fr: "Supprime cet itinéraire après confirmation.", es: "Elimina este itinerario después de confirmar." }),
+  };
 
   const handleOpen = async (entry: SavedItinerary) => {
     await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(entry.itinerary));
@@ -82,14 +98,18 @@ export default function SavedScreen() {
 
   const handleDelete = (entry: SavedItinerary) => {
     Alert.alert(
-      lang === "it" ? "Elimina viaggio" : "Delete trip",
-      lang === "it"
-        ? `Vuoi eliminare l'itinerario di ${entry.itinerary.city}?`
-        : `Delete the itinerary for ${entry.itinerary.city}?`,
+      lang === "es" ? "Eliminar viaje" : lang === "fr" ? "Supprimer le voyage" : lang === "it" ? "Elimina viaggio" : "Delete trip",
+      lang === "es"
+        ? `Quieres eliminar el itinerario de ${entry.itinerary.city}?`
+        : lang === "fr"
+        ? `Voulez-vous supprimer l'itinéraire de ${entry.itinerary.city} ?`
+        : lang === "it"
+          ? `Vuoi eliminare l'itinerario di ${entry.itinerary.city}?`
+          : `Delete the itinerary for ${entry.itinerary.city}?`,
       [
-        { text: lang === "it" ? "Annulla" : "Cancel", style: "cancel" },
+        { text: lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : lang === "it" ? "Annulla" : "Cancel", style: "cancel" },
         {
-          text: lang === "it" ? "Elimina" : "Delete",
+          text: lang === "es" ? "Eliminar" : lang === "fr" ? "Supprimer" : lang === "it" ? "Elimina" : "Delete",
           style: "destructive",
           onPress: () => remove(entry.id),
         },
@@ -107,19 +127,23 @@ export default function SavedScreen() {
       // Alert.alert su web usa window.confirm che può essere bloccato;
       // usiamo direttamente window.confirm
       const ok = window.confirm(
-        lang === "it"
-          ? "Vuoi uscire dal tuo account?"
-          : "Sign out of your account?"
+        lang === "es"
+          ? "¿Quieres cerrar la sesión de tu cuenta?"
+          : lang === "fr"
+          ? "Voulez-vous vous déconnecter de votre compte ?"
+          : lang === "it"
+            ? "Vuoi uscire dal tuo account?"
+            : "Sign out of your account?"
       );
       if (ok) doSignOut();
     } else {
       Alert.alert(
-        lang === "it" ? "Disconnetti" : "Sign out",
-        lang === "it" ? "Vuoi uscire dal tuo account?" : "Sign out of your account?",
+        lang === "es" ? "Cerrar sesión" : lang === "fr" ? "Déconnexion" : lang === "it" ? "Disconnetti" : "Sign out",
+        lang === "es" ? "¿Quieres cerrar la sesión de tu cuenta?" : lang === "fr" ? "Voulez-vous vous déconnecter de votre compte ?" : lang === "it" ? "Vuoi uscire dal tuo account?" : "Sign out of your account?",
         [
-          { text: lang === "it" ? "Annulla" : "Cancel", style: "cancel" },
+          { text: lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : lang === "it" ? "Annulla" : "Cancel", style: "cancel" },
           {
-            text: lang === "it" ? "Esci" : "Sign out",
+            text: lang === "es" ? "Cerrar sesión" : lang === "fr" ? "Se déconnecter" : lang === "it" ? "Esci" : "Sign out",
             style: "destructive",
             onPress: doSignOut,
           },
@@ -133,8 +157,8 @@ export default function SavedScreen() {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border2 }]}>
         <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.backBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={contextHelp.guard(savedHelp.back, () => router.back())}
+          style={[styles.backBtn, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
@@ -143,19 +167,27 @@ export default function SavedScreen() {
 
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { color: colors.text }]}>
-            {lang === "it" ? "I tuoi viaggi" : "Your trips"}
+            {lang === "es" ? "Tus viajes" : lang === "fr" ? "Vos voyages" : lang === "it" ? "I tuoi viaggi" : "Your trips"}
           </Text>
           {saved.length > 0 && (
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {saved.length} {lang === "it" ? "salvati" : "saved"}
+              {saved.length} {lang === "es" ? "guardados" : lang === "fr" ? "enregistrés" : lang === "it" ? "salvati" : "saved"}
             </Text>
           )}
         </View>
 
+        <TouchableOpacity
+          onPress={contextHelp.toggle}
+          style={[styles.backBtn, { backgroundColor: colors.card, borderColor: colors.accentGold + "70" }]}
+          accessibilityLabel={tx({ it: "Guida contestuale", en: "Context help", fr: "Aide contextuelle", es: "Ayuda contextual" })}
+        >
+          <Ionicons name={contextHelp.active ? "close" : "help-circle-outline"} size={21} color={colors.accentGold} />
+        </TouchableOpacity>
+
         {user ? (
           <TouchableOpacity
-            onPress={handleLogout}
-            style={[styles.accountBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={contextHelp.guard(savedHelp.account, handleLogout)}
+            style={[styles.accountBtn, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
             activeOpacity={0.8}
           >
             <Ionicons name="person-circle-outline" size={18} color={colors.accentGold} />
@@ -166,13 +198,13 @@ export default function SavedScreen() {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            onPress={() => router.push("/auth")}
-            style={[styles.loginBtn, { backgroundColor: colors.accentGold }]}
+            onPress={contextHelp.guard(savedHelp.account, () => router.push("/auth"))}
+            style={[styles.loginBtn, { backgroundColor: colors.accentGold }, contextHelpOutline(contextHelp.active, colors.text)]}
             activeOpacity={0.8}
           >
             <Ionicons name="log-in-outline" size={16} color={colors.bg} />
             <Text style={[styles.loginBtnText, { color: colors.bg }]}>
-              {lang === "it" ? "Accedi" : "Sign in"}
+              {lang === "es" ? "Iniciar sesión" : lang === "fr" ? "Connexion" : lang === "it" ? "Accedi" : "Sign in"}
             </Text>
           </TouchableOpacity>
         )}
@@ -182,14 +214,18 @@ export default function SavedScreen() {
       {!user && saved.length > 0 && (
         <TouchableOpacity
           style={[styles.syncBanner, { backgroundColor: colors.card, borderBottomColor: colors.border }]}
-          onPress={() => router.push("/auth")}
+          onPress={contextHelp.guard(savedHelp.sync, () => router.push("/auth"))}
           activeOpacity={0.85}
         >
           <Ionicons name="cloud-upload-outline" size={16} color={colors.accentBlue} />
           <Text style={[styles.syncText, { color: colors.accentBlue }]}>
-            {lang === "it"
-              ? "Accedi per sincronizzare i viaggi su tutti i dispositivi"
-              : "Sign in to sync your trips across all devices"}
+            {lang === "es"
+              ? "Inicia sesion para sincronizar tus viajes en todos tus dispositivos"
+              : lang === "fr"
+              ? "Connectez-vous pour synchroniser vos voyages sur tous vos appareils"
+              : lang === "it"
+                ? "Accedi per sincronizzare i viaggi su tutti i dispositivi"
+                : "Sign in to sync your trips across all devices"}
           </Text>
           <Ionicons name="chevron-forward" size={14} color={colors.accentBlue} />
         </TouchableOpacity>
@@ -201,22 +237,26 @@ export default function SavedScreen() {
         <View style={styles.empty}>
           <Ionicons name="bookmark-outline" size={48} color={colors.border} />
           <Text style={[styles.emptyTitle, { color: colors.textSub }]}>
-            {lang === "it" ? "Nessun viaggio salvato" : "No saved trips"}
+            {lang === "es" ? "No hay viajes guardados" : lang === "fr" ? "Aucun voyage enregistré" : lang === "it" ? "Nessun viaggio salvato" : "No saved trips"}
           </Text>
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-            {lang === "it"
-              ? "Genera o crea un itinerario e premi 🔖 per salvarlo"
-              : "Generate or build an itinerary and tap 🔖 to save it"}
+            {lang === "es"
+              ? "Genera o crea un itinerario y toca el marcador para guardarlo"
+              : lang === "fr"
+              ? "Générez ou créez un itinéraire puis appuyez sur le signet pour l'enregistrer"
+              : lang === "it"
+                ? "Genera o crea un itinerario e premi 🔖 per salvarlo"
+                : "Generate or build an itinerary and tap 🔖 to save it"}
           </Text>
           {!user && (
             <TouchableOpacity
               style={[styles.emptyLoginBtn, { backgroundColor: colors.accentGold }]}
-              onPress={() => router.push("/auth")}
+              onPress={contextHelp.guard(savedHelp.account, () => router.push("/auth"))}
               activeOpacity={0.85}
             >
               <Ionicons name="person-outline" size={16} color={colors.bg} />
               <Text style={[styles.emptyLoginText, { color: colors.bg }]}>
-                {lang === "it" ? "Accedi al tuo account" : "Sign in to your account"}
+                {lang === "es" ? "Inicia sesión en tu cuenta" : lang === "fr" ? "Connectez-vous à votre compte" : lang === "it" ? "Accedi al tuo account" : "Sign in to your account"}
               </Text>
             </TouchableOpacity>
           )}
@@ -235,14 +275,14 @@ export default function SavedScreen() {
             const level = Array.isArray(entry.itinerary.level)
               ? "Mix"
               : entry.itinerary.level === 1
-                ? (lang === "it" ? "Iconico" : "Iconic")
-                : (lang === "it" ? "Esploratore" : "Explorer");
+                ? (lang === "es" ? "Icónico" : lang === "fr" ? "Iconique" : lang === "it" ? "Iconico" : "Iconic")
+                : (lang === "es" ? "Explorador" : lang === "fr" ? "Explorateur" : lang === "it" ? "Esploratore" : "Explorer");
 
             return (
               <TouchableOpacity
                 key={entry.id}
                 style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => handleOpen(entry)}
+                onPress={contextHelp.guard(savedHelp.trip, () => handleOpen(entry))}
                 activeOpacity={0.85}
               >
                 <Text style={styles.cardEmoji}>{emoji}</Text>
@@ -253,7 +293,7 @@ export default function SavedScreen() {
                     <View style={[styles.metaBadge, { backgroundColor: colors.card2 }]}>
                       <Ionicons name="calendar-outline" size={11} color={colors.textMuted} />
                       <Text style={[styles.metaText, { color: colors.textSub }]}>
-                        {days} {lang === "it" ? "giorni" : "days"}
+                        {days} {lang === "es" ? "días" : lang === "fr" ? "jours" : lang === "it" ? "giorni" : "days"}
                       </Text>
                     </View>
                     <View style={[styles.metaBadge, { backgroundColor: colors.card2 }]}>
@@ -267,7 +307,7 @@ export default function SavedScreen() {
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => handleDelete(entry)}
+                  onPress={contextHelp.guard(savedHelp.remove, () => handleDelete(entry))}
                   style={styles.deleteBtn}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   activeOpacity={0.7}
@@ -279,6 +319,7 @@ export default function SavedScreen() {
           })}
         </ScrollView>
       )}
+      <ContextHelpUI controller={contextHelp} lang={lang} />
     </SafeAreaView>
   );
 }

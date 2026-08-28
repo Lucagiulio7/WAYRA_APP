@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isSupportedLang, Lang, nextLang, translations, TranslationSet } from "@/i18n";
+import { DEFAULT_LANG, isSupportedLang, Lang, nextLang, translations, TranslationSet } from "@/i18n";
 
 const LANG_KEY = "wayra_lang";
 
@@ -12,14 +12,14 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  lang: "it",
-  t: translations.it,
+  lang: DEFAULT_LANG,
+  t: translations[DEFAULT_LANG],
   setLang: () => {},
   toggle: () => {},
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("it");
+  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
 
   useEffect(() => {
     AsyncStorage.getItem(LANG_KEY)
@@ -37,7 +37,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => ({
     lang,
-    t: translations[lang],
+    t: translations[lang] ?? translations[DEFAULT_LANG],
     setLang,
     toggle,
   }), [lang]);

@@ -68,7 +68,9 @@ def migrate_db():
             ("block_id",        "INTEGER"),
             ("attraction_type", "TEXT"),
             ("name_en",         "TEXT"),
+            ("name_fr",         "TEXT"),
             ("description_en",  "TEXT"),
+            ("description_fr",  "TEXT"),
             ("ticket_url",      "TEXT"),
         ]:
             if col_name not in existing_attr:
@@ -141,14 +143,18 @@ def seed():
                 row.tags              = json.dumps(data["tags"], ensure_ascii=False)
                 row.attraction_type   = data.get("attraction_type")
                 row.name_en           = data.get("name_en")
+                row.name_fr           = data.get("name_fr")
                 row.description_en    = data.get("description_en")
+                row.description_fr    = data.get("description_fr")
                 row.ticket_url        = data.get("ticket_url")
             else:
                 db.add(Attraction(
                     name=data["name"],
                     name_en=data.get("name_en"),
+                    name_fr=data.get("name_fr"),
                     description=data["description"],
                     description_en=data.get("description_en"),
+                    description_fr=data.get("description_fr"),
                     category_level=data["category_level"],
                     block_id=data["block_id"],
                     zone=data["zone"],
@@ -167,8 +173,10 @@ def seed():
             if data["name"] in existing:
                 row = existing[data["name"]]
                 row.name_en = data.get("name_en")
+                row.name_fr = data.get("name_fr")
                 row.description = data["description"]
                 row.description_en = data.get("description_en")
+                row.description_fr = data.get("description_fr")
                 row.category_level = data["category_level"]
                 row.zone = data.get("zone")
                 row.latitude = data["latitude"]
@@ -181,7 +189,11 @@ def seed():
             else:
                 db.add(Attraction(
                     name=data["name"],
+                    name_en=data.get("name_en"),
+                    name_fr=data.get("name_fr"),
                     description=data["description"],
+                    description_en=data.get("description_en"),
+                    description_fr=data.get("description_fr"),
                     category_level=data["category_level"],
                     zone=data.get("zone"),
                     latitude=data["latitude"],

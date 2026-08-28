@@ -21,12 +21,20 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const COPY = {
   en: {
-    offline: "No connection — showing cached data",
-    back:    "Back online",
+    offline: "Offline",
+    back:    "Online",
   },
   it: {
-    offline: "Nessuna connessione — dati in cache",
-    back:    "Connessione ripristinata",
+    offline: "Offline",
+    back:    "Online",
+  },
+  fr: {
+    offline: "Hors ligne",
+    back:    "En ligne",
+  },
+  es: {
+    offline: "Sin conexión",
+    back:    "Conectado",
   },
 } as const;
 

@@ -137,9 +137,9 @@ FOOD_SPOTS = [
 # Normalized detailed food descriptions.
 FOODS_BY_CITY = [{'name': 'Mulgipuder',
   'name_en': 'Mulgipuder Barley and Potato Mash',
-  'description': 'Piatto estone di patate e orzo schiacciati insieme, spesso servito con pancetta, cipolle o salsa. ? cucina rurale molto '
-                 'concreta: cremosa, sostanziosa, leggermente rustica, migliore quando l?orzo resta percepibile e non diventa poltiglia. '
-                 'La qualit? dipende da burro, sale e rapporto corretto tra patata e cereale.',
+  'description': 'Piatto estone di patate e orzo schiacciati insieme, spesso servito con pancetta, cipolle o salsa. È cucina rurale molto '
+                 'concreta: cremosa, sostanziosa, leggermente rustica, migliore quando l’orzo resta percepibile e non diventa poltiglia. '
+                 'La qualità dipende da burro, sale e rapporto corretto tra patata e cereale.',
   'description_en': 'An Estonian dish of potatoes and barley mashed together, often served with bacon, onions or sauce. It is very '
                     'concrete rural cooking: creamy, substantial and slightly rustic, best when the barley remains perceptible and does '
                     'not turn mushy.',
@@ -149,28 +149,28 @@ FOODS_BY_CITY = [{'name': 'Mulgipuder',
  {'name': 'Verivorst',
   'name_en': 'Estonian Blood Sausage',
   'description': 'Salsiccia di sangue e orzo, tipica soprattutto del periodo natalizio, servita con crauti, patate e confettura di '
-                 'mirtilli rossi. ? intensa ma tradizionale: speziata, scura, morbida, da bilanciare con acidit? e dolcezza dei contorni. '
-                 'La qualit? migliore mantiene grana morbida e spezie presenti ma non aggressive.',
+                 'mirtilli rossi. È intensa ma tradizionale: speziata, scura, morbida, da bilanciare con acidità e dolcezza dei contorni. '
+                 'La qualità migliore mantiene grana morbida e spezie presenti ma non aggressive.',
   'description_en': 'A blood and barley sausage, especially typical of Christmas, served with sauerkraut, potatoes and lingonberry jam. It '
                     'is intense but traditional: spiced, dark and soft, to be balanced by acidity and sweetness from the sides.',
   'ingredients': ['sangue', 'orzo', 'maiale', 'spezie', 'crauti'],
   'ingredients_en': ['blood', 'barley', 'pork', 'spices', 'sauerkraut'],
   'places': ['Kuldse Notsu Korts Tallinn', 'Olde Hansa Tallinn', 'Vanaema Juures Tallinn']},
- {'name': 'S?lt',
+ {'name': 'Sült',
   'name_en': 'Jellied Meat',
   'description': 'Carne cotta e servita in gelatina naturale, spesso maiale, con spezie e verdure, piatto freddo della tradizione estone. '
-                 'Pu? sembrare austero, ma la qualit? sta in limpidezza, taglio pulito e sapore delicato ma riconoscibile. La qualit? '
+                 'Può sembrare austero, ma la qualità sta in limpidezza, taglio pulito e sapore delicato ma riconoscibile. La qualità '
                  'dipende da gelatina leggera e carne tagliata con ordine.',
   'description_en': 'Meat cooked and served in natural jelly, often pork, with spices and vegetables, a cold dish of Estonian tradition. '
                     'It may seem austere, but quality lies in clarity, clean cutting and flavour that is delicate yet recognisable.',
   'ingredients': ['maiale', 'gelatina naturale', 'verdure', 'spezie', 'sale'],
   'ingredients_en': ['pork', 'natural jelly', 'vegetables', 'spices', 'salt'],
   'places': ['Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn', 'Farm Restaurant Tallinn']},
- {'name': 'Kiluv?ileib',
+ {'name': 'Kiluvõileib',
   'name_en': 'Sprat Sandwich',
-  'description': 'Sandwich aperto con pane nero, spratti speziati, uovo, cipolla o erbe, molto legato alla cucina quotidiana estone. ? '
+  'description': 'Sandwich aperto con pane nero, spratti speziati, uovo, cipolla o erbe, molto legato alla cucina quotidiana estone. È '
                  'piccolo ma identitario: pane scuro, pesce sapido, grasso delicato e freschezza degli aromi devono equilibrarsi. La '
-                 'qualit? sta nel pane compatto e nel pesce ben scolato.',
+                 'qualità sta nel pane compatto e nel pesce ben scolato.',
   'description_en': 'An open sandwich with black bread, spiced sprats, egg, onion or herbs, strongly tied to everyday Estonian cooking. It '
                     'is small but identity-rich: dark bread, savoury fish, delicate fat and fresh aromatics should balance. Quality lies '
                     'in compact bread and fish that is properly drained.',
@@ -179,9 +179,9 @@ FOODS_BY_CITY = [{'name': 'Mulgipuder',
   'places': ['Komeet Cafe Tallinn', 'Rataskaevu 16 Tallinn', 'Leib Resto ja Aed Tallinn']},
  {'name': 'Kama',
   'name_en': 'Kama Flour Dessert',
-  'description': 'Miscela tradizionale di farine tostate di cereali e legumi, spesso mescolata con kefir, yogurt o panna acida. ? semplice '
-                 'e molto estone: leggermente nocciolata, acidula, fresca, pi? legata alla memoria domestica che alla pasticceria. La '
-                 'qualit? migliore evita polverosit? e mantiene una piacevole freschezza lattica.',
+  'description': 'Miscela tradizionale di farine tostate di cereali e legumi, spesso mescolata con kefir, yogurt o panna acida. È semplice '
+                 'e molto estone: leggermente nocciolata, acidula, fresca, più legata alla memoria domestica che alla pasticceria. La '
+                 'qualità migliore evita polverosità e mantiene una piacevole freschezza lattica.',
   'description_en': 'A traditional mix of toasted grain and legume flours, often mixed with kefir, yoghurt or sour cream. It is simple and '
                     'very Estonian: slightly nutty, tangy and fresh, tied more to home memory than to pastry.',
   'ingredients': ['farine tostate', 'kefir', 'yogurt', 'zucchero', 'frutti di bosco'],
@@ -189,8 +189,8 @@ FOODS_BY_CITY = [{'name': 'Mulgipuder',
   'places': ['Farm Restaurant Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
  {'name': 'Hapukapsas',
   'name_en': 'Estonian Sauerkraut',
-  'description': 'Crauti estoni cotti o marinati, serviti con maiale, salsicce, patate o piatti invernali. La qualit? sta nell?acidit? '
-                 'viva ma non aggressiva, nella consistenza ancora presente e nella capacit? di alleggerire cibi robusti. La qualit? '
+  'description': 'Crauti estoni cotti o marinati, serviti con maiale, salsicce, patate o piatti invernali. La qualità sta nell’acidità '
+                 'viva ma non aggressiva, nella consistenza ancora presente e nella capacità di alleggerire cibi robusti. La qualità '
                  'migliore mantiene profumo pulito e accompagna senza coprire.',
   'description_en': 'Estonian sauerkraut, cooked or marinated, served with pork, sausages, potatoes or winter dishes. Quality lies in '
                     'lively but not aggressive acidity, texture that remains present and the ability to lighten hearty food. The best '
@@ -200,10 +200,10 @@ FOODS_BY_CITY = [{'name': 'Mulgipuder',
   'places': ['Olde Hansa Tallinn', 'Kuldse Notsu Korts Tallinn', 'Vanaema Juures Tallinn']},
  {'name': 'Vastlakukkel',
   'name_en': 'Estonian Cream Bun',
-  'description': 'Panino dolce soffice, tagliato e riempito con panna montata e spesso confettura, tipico del periodo di Vastlap?ev. Deve '
-                 'essere leggero, profumato e generoso, con panna fresca e mollica capace di restare morbida. La qualit? sta nel contrasto '
+  'description': 'Panino dolce soffice, tagliato e riempito con panna montata e spesso confettura, tipico del periodo di Vastlapäev. Deve '
+                 'essere leggero, profumato e generoso, con panna fresca e mollica capace di restare morbida. La qualità sta nel contrasto '
                  'tra pane soffice e panna stabile.',
-  'description_en': 'A soft sweet bun, split and filled with whipped cream and often jam, typical of the Vastlap?ev season. It should be '
+  'description_en': 'A soft sweet bun, split and filled with whipped cream and often jam, typical of the Vastlapäev season. It should be '
                     'light, fragrant and generous, with fresh cream and crumb able to stay soft. Quality lies in the contrast between soft '
                     'bun and stable cream.',
   'ingredients': ['farina', 'panna', 'zucchero', 'confettura', 'lievito'],
@@ -212,7 +212,7 @@ FOODS_BY_CITY = [{'name': 'Mulgipuder',
  {'name': 'Kohuke',
   'name_en': 'Kohuke Curd Snack',
   'description': 'Snack dolce di cagliata o formaggio fresco ricoperto di cioccolato, amatissimo nei paesi baltici come merenda '
-                 'quotidiana. ? piccolo ma nostalgico: lattico, fresco, dolce il giusto, migliore quando il ripieno resta compatto e '
+                 'quotidiana. È piccolo ma nostalgico: lattico, fresco, dolce il giusto, migliore quando il ripieno resta compatto e '
                  'cremoso. La copertura deve spezzarsi bene senza rendere il morso stucchevole.',
   'description_en': 'A sweet snack of curd or fresh cheese covered in chocolate, loved across the Baltics as an everyday treat. It is '
                     'small but nostalgic: milky, fresh and moderately sweet, best when the filling stays compact and creamy.',

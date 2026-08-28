@@ -1,0 +1,63 @@
+﻿CITY_ID = "example_city"
+
+ATTRACTIONS = [
+    {
+        "city": CITY_ID,
+        "block_id": 1,
+        "zone": "historic_center",
+        "category_level": 1,
+        "name": "Nome italiano",
+        "name_en": "English name",
+        "description": "Descrizione italiana dettagliata.",
+        "description_en": "Detailed English description.",
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "estimated_visit_time": 60,
+        "tags": ["storia"],
+        "attraction_type": "monumento",
+        "ticket_url": None,
+    }
+]
+
+FOOD_SPOTS = [
+    {
+        "city": CITY_ID,
+        "zone": "historic_center",
+        "category_level": 1,
+        "name": "Ristorante",
+        "name_en": "Restaurant",
+        "description": "Descrizione italiana.",
+        "description_en": "English description.",
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "estimated_visit_time": 60,
+        "tags": ["gastronomia"],
+        "food_type": "ristorante",
+        "meal_type": "both",
+        "rating": 4.5,
+    }
+]
+
+FOODS_BY_CITY = [
+    {
+        "city": CITY_ID,
+        "name": "Piatto tipico",
+        "name_en": "Typical dish",
+        "description": "Descrizione italiana dettagliata.",
+        "description_en": "Detailed English description.",
+        "ingredients": ["ingrediente"],
+        "ingredients_en": ["ingredient"],
+        "icon": "restaurant-outline",
+        "places": [],
+    }
+]
+
+CULTURE_FACTS = [
+    {
+        "icon": "sparkles-outline",
+        "title": "Titolo italiano",
+        "title_en": "English title",
+        "body": "Testo italiano dettagliato.",
+        "body_en": "Detailed English text.",
+    }
+]

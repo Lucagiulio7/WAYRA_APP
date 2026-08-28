@@ -2,7 +2,7 @@
 seed_supabase.py
 ================
 Script one-shot: carica tutti i dati delle 11 città su Supabase PostgreSQL.
-Supporta campi multilingua (name_en, description_en, title_en, body_en).
+Supporta campi multilingua (name_en/name_fr, description_en/description_fr, title_en/title_fr, body_en/body_fr).
 
 Utilizzo:
     cd backend
@@ -15,7 +15,9 @@ Variabile d'ambiente richiesta (in backend/.env):
 
 import json
 import os
+import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -26,6 +28,52 @@ import psycopg2
 import psycopg2.extras
 
 from database.cities import ALL_CITIES
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+def load_culture_fr_overrides() -> dict[tuple[str, str], tuple[str, str]]:
+    """Load curated French culture translations from migration 015."""
+    migration = ROOT_DIR / "supabase" / "migrations" / "015_populate_french_culture_core.sql"
+    if not migration.exists():
+        return {}
+    text = migration.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r"UPDATE culture_facts SET title_fr = \$\$(?P<title_fr>.*?)\$\$, "
+        r"body_fr = \$\$(?P<body_fr>.*?)\$\$ WHERE city = '(?P<city>.*?)' "
+        r"AND title = \$\$(?P<title>.*?)\$\$;",
+        re.DOTALL,
+    )
+    return {
+        (match.group("city"), match.group("title")): (
+            match.group("title_fr"),
+            match.group("body_fr"),
+        )
+        for match in pattern.finditer(text)
+    }
+
+CULTURE_FR_OVERRIDES = load_culture_fr_overrides()
+
+def load_attraction_fr_overrides() -> dict[tuple[str, str], tuple[str, str]]:
+    """Load curated French attraction translations from attraction migrations."""
+    migrations_dir = ROOT_DIR / "supabase" / "migrations"
+    migration_paths = sorted(migrations_dir.glob("*_populate_french_*attractions_*.sql"))
+    pattern = re.compile(
+        r"UPDATE attractions SET name_fr = \$\$(?P<name_fr>.*?)\$\$, "
+        r"description_fr = \$\$(?P<description_fr>.*?)\$\$ WHERE city = '(?P<city>.*?)' "
+        r"AND name = \$\$(?P<name>.*?)\$\$ AND is_food_spot = false;",
+        re.DOTALL,
+    )
+    overrides: dict[tuple[str, str], tuple[str, str]] = {}
+    for migration in migration_paths:
+        text = migration.read_text(encoding="utf-8")
+        for match in pattern.finditer(text):
+            overrides[(match.group("city"), match.group("name"))] = (
+                match.group("name_fr"),
+                match.group("description_fr"),
+            )
+    return overrides
+
+ATTRACTION_FR_OVERRIDES = load_attraction_fr_overrides()
 
 # ── Connessione ──────────────────────────────────────────────────────────────
 
@@ -57,11 +105,17 @@ for city in ALL_CITIES:
     for a in city.ATTRACTIONS:
         if "name" not in a:   # salta culture facts finite per errore in ATTRACTIONS
             continue
+        name_fr, description_fr = ATTRACTION_FR_OVERRIDES.get(
+            (a["city"], a["name"]),
+            (a.get("name_fr"), a.get("description_fr")),
+        )
         attraction_rows.append((
             a["name"],
             a.get("name_en"),
+            name_fr,
             a.get("description"),
             a.get("description_en"),
+            description_fr,
             a["category_level"],
             a.get("block_id"),
             a.get("zone"),
@@ -77,7 +131,7 @@ for city in ALL_CITIES:
 
 psycopg2.extras.execute_values(cur, """
     INSERT INTO public.attractions
-        (name, name_en, description, description_en,
+        (name, name_en, name_fr, description, description_en, description_fr,
          category_level, block_id, zone,
          latitude, longitude, estimated_visit_time, tags,
          city, is_food_spot, food_type, meal_type, rating,
@@ -96,8 +150,10 @@ for city in ALL_CITIES:
         food_spot_rows.append((
             f["name"],
             f.get("name_en"),
+            f.get("name_fr"),
             f.get("description"),
             f.get("description_en"),
+            f.get("description_fr"),
             f.get("category_level", 1),
             f.get("block_id"),
             f.get("zone"),
@@ -114,7 +170,7 @@ for city in ALL_CITIES:
 
 psycopg2.extras.execute_values(cur, """
     INSERT INTO public.attractions
-        (name, name_en, description, description_en,
+        (name, name_en, name_fr, description, description_en, description_fr,
          category_level, block_id, zone,
          latitude, longitude, estimated_visit_time, tags,
          city, is_food_spot, food_type, meal_type, rating)
@@ -155,18 +211,24 @@ print("📚  Inserimento culture facts...")
 fact_rows = []
 for city in ALL_CITIES:
     for i, fact in enumerate(city.CULTURE_FACTS):
+        title_fr, body_fr = CULTURE_FR_OVERRIDES.get(
+            (city.CITY_ID, fact.get("title", "")),
+            (fact.get("title_fr"), fact.get("body_fr")),
+        )
         fact_rows.append((
             city.CITY_ID,
             fact.get("icon", ""),
             fact.get("title", ""),
             fact.get("title_en"),
+            title_fr,
             fact.get("body", ""),
             fact.get("body_en"),
+            body_fr,
             i,
         ))
 
 psycopg2.extras.execute_values(cur, """
-    INSERT INTO public.culture_facts (city, icon, title, title_en, body, body_en, sort_order)
+    INSERT INTO public.culture_facts (city, icon, title, title_en, title_fr, body, body_en, body_fr, sort_order)
     VALUES %s
 """, fact_rows)
 conn.commit()

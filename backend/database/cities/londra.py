@@ -45,7 +45,7 @@ ATTRACTIONS = [
     {'city': 'londra', 'block_id': 13, 'zone': 'southwark', 'category_level': 2, 'name': 'Southwark Cathedral', 'name_en': 'Southwark Cathedral', 'description': 'Chiesa molto importante per leggere il lato medievale e religioso della riva sud accanto a Borough Market.', 'description_en': 'A very important church for reading the medieval and religious side of the South Bank next to Borough Market.', 'latitude': 51.5053, 'longitude': -0.0878, 'estimated_visit_time': 45, 'tags': ['chiesa', 'storia', 'quartiere'], 'attraction_type': 'chiesa', 'ticket_url': None},
     {'city': 'londra', 'block_id': 13, 'zone': 'southwark', 'category_level': 2, 'name': 'The Clink Prison Museum', 'name_en': 'The Clink Prison Museum', 'description': 'Piccolo museo curioso che aiuta a leggere il lato più ruvido, criminale e teatrale della South Bank storica.', 'description_en': 'A curious small museum that helps read the rougher, criminal and theatrical side of the historic South Bank.', 'latitude': 51.5061, 'longitude': -0.0891, 'estimated_visit_time': 50, 'tags': ['storia', 'curiosita', 'museo'], 'attraction_type': 'museo', 'ticket_url': 'https://www.clink.co.uk/'},
     {'city': 'londra', 'block_id': 14, 'zone': 'city', 'category_level': 2, 'name': 'Guildhall', 'name_en': 'Guildhall', 'description': 'Edificio civico fondamentale per capire l\'autonomia storica della City e la sua identità istituzionale.', 'description_en': "A fundamental civic building for understanding the City's historic autonomy and institutional identity.", 'latitude': 51.5155, 'longitude': -0.0921, 'estimated_visit_time': 55, 'tags': ['storia', 'politica', 'architettura'], 'attraction_type': 'palazzo', 'ticket_url': None},
-    {'city': 'londra', 'block_id': 14, 'zone': 'city', 'category_level': 2, 'name': 'Leadenhall Market', 'name_en': 'Leadenhall Market', 'description': 'Mercato coperto vittoriano molto utile per leggere la City non solo come finanza ma anche come spazio commerciale storico.', 'description_en': 'A Victorian covered market very useful for reading the City not only as finance but also as historic commercial space.', 'latitude': 51.5128, 'longitude': -0.0831, 'estimated_visit_time': 45, 'tags': ['mercato', 'architettura', 'storia'], 'attraction_type': 'mercato', 'ticket_url': None},
+    {'city': 'londra', 'block_id': 14, 'zone': 'city', 'category_level': 2, 'name': 'Giardino di St Dunstan in the East', 'name_en': 'St Dunstan in the East Church Garden', 'description': 'Giardino pubblico ricavato tra le rovine di una chiesa della City danneggiata durante la guerra, raccolto e sorprendente tra gli edifici finanziari.', 'description_en': 'A public garden created among the ruins of a City church damaged during the war, intimate and surprising amid the financial district.', 'latitude': 51.5097, 'longitude': -0.0825, 'estimated_visit_time': 30, 'tags': ['giardino', 'rovine', 'storia'], 'attraction_type': 'giardino storico', 'ticket_url': None},
     {'city': 'londra', 'block_id': 15, 'zone': 'kensington', 'category_level': 2, 'name': 'Science Museum', 'name_en': 'Science Museum', 'description': 'Museo molto importante per completare la lettura di South Kensington come distretto scientifico e culturale.', 'description_en': 'A very important museum for completing the reading of South Kensington as a scientific and cultural district.', 'latitude': 51.4978, 'longitude': -0.1745, 'estimated_visit_time': 90, 'tags': ['scienza', 'museo', 'cultura'], 'attraction_type': 'museo', 'ticket_url': 'https://www.sciencemuseum.org.uk/visit'},
     {'city': 'londra', 'block_id': 15, 'zone': 'kensington', 'category_level': 2, 'name': 'Royal Albert Hall', 'name_en': 'Royal Albert Hall', 'description': 'Sala da concerto iconica che rafforza il profilo monumentale e culturale dell\'area di Kensington.', 'description_en': 'An iconic concert hall that reinforces the monumental and cultural profile of the Kensington area.', 'latitude': 51.5009, 'longitude': -0.1774, 'estimated_visit_time': 40, 'tags': ['musica', 'architettura', 'cultura'], 'attraction_type': 'teatro', 'ticket_url': 'https://www.royalalberthall.com/'},
     {'city': 'londra', 'block_id': 16, 'zone': 'camden', 'category_level': 2, 'name': 'Camden Lock', 'name_en': 'Camden Lock', 'description': 'Snodo fondamentale per leggere il quartiere tra canale, mercato, folla creativa e paesaggio urbano alternativo.', 'description_en': 'A fundamental node for reading the district through canal, market, creative crowds and alternative urban scenery.', 'latitude': 51.5412, 'longitude': -0.1457, 'estimated_visit_time': 25, 'tags': ['canale', 'mercato', 'quartiere'], 'attraction_type': 'quartiere', 'ticket_url': None},
@@ -90,7 +90,7 @@ FOOD_SPOTS = [
     {'city': 'londra', 'zone': 'tower', 'category_level': 3, 'name': 'Le Pont de la Tour', 'name_en': 'Le Pont de la Tour', 'description': 'Indirizzo più elegante accanto a Tower Bridge, adatto a una cena più raffinata.', 'description_en': 'A more elegant address by Tower Bridge, suited to a more refined dinner.', 'latitude': 51.5047, 'longitude': -0.0748, 'estimated_visit_time': 95, 'tags': ['gastronomia'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'rating': 4.4},
 
     {'city': 'londra', 'zone': 'southwark', 'category_level': 1, 'name': 'Bread Ahead Bakery School', 'name_en': 'Bread Ahead Bakery School', 'description': 'Bakery molto comoda per un coffee break o snack dolce nella zona Southwark.', 'description_en': 'A very convenient bakery for a coffee break or sweet snack in Southwark.', 'latitude': 51.5054, 'longitude': -0.0908, 'estimated_visit_time': 15, 'tags': ['gastronomia', 'dolci'], 'food_type': 'bakery', 'meal_type': 'both', 'rating': 4.5},
-    {'city': 'londra', 'zone': 'southwark', 'category_level': 1, 'name': 'Monmouth Coffee Borough', 'name_en': 'Monmouth Coffee Borough', 'description': 'Caffe e piccoli dolci in uno dei coffee stop più noti del quartiere.', 'description_en': "Coffee and small pastries in one of the district's best known coffee stops.", 'latitude': 51.5056, 'longitude': -0.0910, 'estimated_visit_time': 15, 'tags': ['gastronomia', 'caffe'], 'food_type': 'caffe', 'meal_type': 'both', 'rating': 4.5},
+    {'city': 'londra', 'zone': 'southwark', 'category_level': 1, 'name': 'Monmouth Coffee Borough', 'name_en': 'Monmouth Coffee Borough', 'description': 'Caffe e piccoli dolci in uno dei coffee stop più noti del quartiere.', 'description_en': "Coffee and small pastries in one of the district's best known coffee stops.", 'latitude': 51.5055, 'longitude': -0.0917, 'estimated_visit_time': 15, 'tags': ['gastronomia', 'caffe'], 'food_type': 'caffe', 'meal_type': 'both', 'rating': 4.5},
     {'city': 'londra', 'zone': 'southwark', 'category_level': 1, 'name': 'Kappacasein Dairy', 'name_en': 'Kappacasein Dairy', 'description': 'Toast al formaggio fuso e piccoli snack da mercato, molto tipici di Borough Market.', 'description_en': 'Toasted cheese sandwiches and market snacks, a Borough Market staple.', 'latitude': 51.5058, 'longitude': -0.0911, 'estimated_visit_time': 20, 'tags': ['gastronomia', 'street food'], 'food_type': 'street food', 'meal_type': 'lunch', 'rating': 4.6},
     {'city': 'londra', 'zone': 'southwark', 'category_level': 2, 'name': 'Padella Borough Market', 'name_en': 'Padella Borough Market', 'description': 'Pasta fresca artigianale e code leggendarie, uno dei tavoli più amati del quartiere.', 'description_en': "Fresh handmade pasta and legendary queues, one of the district's most loved tables.", 'latitude': 51.5053, 'longitude': -0.0905, 'estimated_visit_time': 60, 'tags': ['gastronomia', 'pasta'], 'food_type': 'ristorante', 'meal_type': 'lunch', 'rating': 4.8},
     {'city': 'londra', 'zone': 'southwark', 'category_level': 2, 'name': 'Swan at the Globe', 'name_en': 'Swan at the Globe', 'description': 'Brasserie teatrale molto adatta per pranzo o cena dopo il Globe.', 'description_en': 'A theatrical brasserie very well suited to lunch or dinner after the Globe.', 'latitude': 51.5080, 'longitude': -0.0972, 'estimated_visit_time': 75, 'tags': ['gastronomia'], 'food_type': 'brasserie', 'meal_type': 'both', 'rating': 4.3},
@@ -130,7 +130,7 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Fish and Chips',
   'name_en': 'Fish and Chips',
   'description': 'Filetto di merluzzo o eglefino fritto in pastella, servito con patatine spesse, sale, aceto e talvolta mushy peas. A '
-                 'Londra ? un classico popolare: deve avere crosta asciutta, pesce succoso e patate robuste, senza odore di olio stanco.',
+                 'Londra è un classico popolare: deve avere crosta asciutta, pesce succoso e patate robuste, senza odore di olio stanco.',
   'description_en': 'Cod or haddock fried in batter, served with thick chips, salt, vinegar and sometimes mushy peas. In London it is a '
                     'popular classic: it should have dry crust, juicy fish and sturdy chips, without the smell of tired oil.',
   'ingredients': ['merluzzo', 'farina', 'birra', 'patate', 'aceto'],
@@ -138,20 +138,20 @@ FOODS_BY_CITY = [{'name': 'Fish and Chips',
   'places': [{'name': 'The Mayfair Chippy'}, {'name': 'Poppies Fish and Chips Spitalfields'}, {'name': 'Sutton and Sons Islington'}]},
  {'name': 'Full English Breakfast',
   'name_en': 'Full English Breakfast',
-  'description': 'Colazione sostanziosa con uova, bacon, salsicce, fagioli, pomodoro, funghi, toast e spesso black pudding. ? quasi un '
-                 'manifesto della cucina da caf? britannico: generosa, salata, rituale, migliore quando ogni elemento ? cotto '
+  'description': 'Colazione sostanziosa con uova, bacon, salsicce, fagioli, pomodoro, funghi, toast e spesso black pudding. È quasi un '
+                 'manifesto della cucina da café britannico: generosa, salata, rituale, migliore quando ogni elemento è cotto '
                  'separatamente e resta riconoscibile.',
   'description_en': 'A substantial breakfast with eggs, bacon, sausages, beans, tomato, mushrooms, toast and often black pudding. It is '
-                    'almost a manifesto of British caf? cooking: generous, savoury and ritualistic, best when each element is cooked '
+                    'almost a manifesto of British café cooking: generous, savoury and ritualistic, best when each element is cooked '
                     'separately and remains recognisable.',
   'ingredients': ['uova', 'bacon', 'salsicce', 'fagioli', 'toast'],
   'ingredients_en': ['eggs', 'bacon', 'sausages', 'beans', 'toast'],
   'places': [{'name': 'Regency Cafe'}, {'name': "St James's Cafe"}, {'name': 'The Cafe in the Crypt'}]},
  {'name': 'Sunday Roast',
   'name_en': 'Sunday Roast',
-  'description': 'Arrosto domenicale di manzo, pollo, agnello o maiale con patate, verdure, gravy e Yorkshire pudding. Nei pub londinesi ? '
-                 'rito sociale: conta l?equilibrio tra carne succosa, salsa profonda, patate croccanti e verdure non trascurate. La '
-                 'qualit? emerge soprattutto nel gravy, che deve unire il piatto.',
+  'description': 'Arrosto domenicale di manzo, pollo, agnello o maiale con patate, verdure, gravy e Yorkshire pudding. Nei pub londinesi è '
+                 'rito sociale: conta l’equilibrio tra carne succosa, salsa profonda, patate croccanti e verdure non trascurate. La '
+                 'qualità emerge soprattutto nel gravy, che deve unire il piatto.',
   'description_en': 'A Sunday roast of beef, chicken, lamb or pork with potatoes, vegetables, gravy and Yorkshire pudding. In London pubs '
                     'it is a social ritual: balance matters between juicy meat, deep gravy, crisp potatoes and vegetables that are not '
                     'neglected.',
@@ -161,8 +161,8 @@ FOODS_BY_CITY = [{'name': 'Fish and Chips',
  {'name': 'Chicken Tikka Masala',
   'name_en': 'Chicken Tikka Masala',
   'description': 'Pollo marinato e cotto al tandoor, servito in salsa cremosa speziata al pomodoro, simbolo della cucina '
-                 'britannico-indiana. A Londra racconta multiculturalit? pi? che tradizione antica: deve essere profumato, morbido, ricco '
-                 'ma non dolciastro. La qualit? sta nella salsa, speziata ma non piatta, e nel pollo ancora succoso.',
+                 'britannico-indiana. A Londra racconta multiculturalità più che tradizione antica: deve essere profumato, morbido, ricco '
+                 'ma non dolciastro. La qualità sta nella salsa, speziata ma non piatta, e nel pollo ancora succoso.',
   'description_en': 'Tandoor-cooked marinated chicken served in a creamy spiced tomato sauce, a symbol of British-Indian cooking. In '
                     'London it speaks of multicultural identity more than ancient tradition: it should be fragrant, tender, rich but not '
                     'sugary.',
@@ -171,17 +171,17 @@ FOODS_BY_CITY = [{'name': 'Fish and Chips',
   'places': [{'name': 'Dishoom Covent Garden'}, {'name': 'The Cinnamon Club'}, {'name': 'Brigadiers'}]},
  {'name': 'Afternoon Tea',
   'name_en': 'Afternoon Tea',
-  'description': 'Rito pomeridiano con t?, sandwich, scones con clotted cream e confettura, dolci e piccoli pasticcini. A Londra pu? '
-                 'essere turistico o raffinatissimo: il valore sta nel ritmo del servizio, nella qualit? del t? e nella precisione dei '
+  'description': 'Rito pomeridiano con tè, sandwich, scones con clotted cream e confettura, dolci e piccoli pasticcini. A Londra può '
+                 'essere turistico o raffinatissimo: il valore sta nel ritmo del servizio, nella qualità del tè e nella precisione dei '
                  'bocconi.',
   'description_en': 'An afternoon ritual with tea, sandwiches, scones with clotted cream and jam, cakes and small pastries. In London it '
                     'can be touristy or very refined: value lies in service rhythm, tea quality and the precision of each bite.',
-  'ingredients': ['t?', 'scones', 'clotted cream', 'confettura', 'sandwich'],
+  'ingredients': ['tè', 'scones', 'clotted cream', 'confettura', 'sandwich'],
   'ingredients_en': ['tea', 'scones', 'clotted cream', 'jam', 'sandwiches'],
-  'places': [{'name': 'The Ritz London'}, {'name': 'Claridge?s'}, {'name': 'Fortnum and Mason Diamond Jubilee Tea Salon'}]},
+  'places': [{'name': 'The Ritz London'}, {'name': 'Claridge’s'}, {'name': 'Fortnum and Mason Diamond Jubilee Tea Salon'}]},
  {'name': 'Pie and Mash',
   'name_en': 'Pie and Mash',
-  'description': 'Torta salata ripiena di carne con pur? di patate e liquor, salsa verde al prezzemolo tipica dell?East End. ? cucina '
+  'description': 'Torta salata ripiena di carne con purè di patate e liquor, salsa verde al prezzemolo tipica dell’East End. È cucina '
                  'operaia londinese: semplice, calda, economica, con il contrasto tra guscio croccante, ripieno umido e salsa erbacea.',
   'description_en': 'A savoury meat pie with mashed potatoes and liquor, a green parsley sauce typical of the East End. It is '
                     'working-class London cooking: simple, warm and economical, with contrast between crisp shell, moist filling and '
@@ -191,8 +191,8 @@ FOODS_BY_CITY = [{'name': 'Fish and Chips',
   'places': [{'name': 'M Manze Tower Bridge'}, {'name': 'Goddards at Greenwich'}, {'name': 'F Cooke Hoxton'}]},
  {'name': 'Eton Mess',
   'name_en': 'Eton Mess',
-  'description': 'Dessert di meringa spezzata, panna montata e fragole, volutamente disordinato ma molto equilibrato se ben fatto. ? '
-                 'dolce, fresco e leggero: la qualit? sta nel contrasto tra croccantezza, crema morbida e frutta non troppo zuccherata.',
+  'description': 'Dessert di meringa spezzata, panna montata e fragole, volutamente disordinato ma molto equilibrato se ben fatto. È '
+                 'dolce, fresco e leggero: la qualità sta nel contrasto tra croccantezza, crema morbida e frutta non troppo zuccherata.',
   'description_en': 'A dessert of broken meringue, whipped cream and strawberries, deliberately messy but very balanced when well made. It '
                     'is sweet, fresh and light: quality lies in the contrast between crunch, soft cream and fruit that is not '
                     'over-sweetened.',

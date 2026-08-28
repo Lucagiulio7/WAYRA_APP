@@ -13,6 +13,14 @@ jest.mock("react", () => ({
   useCallback: (fn: any) => fn,
 }));
 
+jest.mock("@/services/AnalyticsService", () => ({
+  track: jest.fn(),
+}));
+
+jest.mock("@/constants/api", () => ({
+  API_BASE_URL: "http://localhost:8000",
+}));
+
 jest.mock("@/constants/supabase", () => ({
   SUPABASE_URL: "https://fake.supabase.co",
   SUPABASE_ANON_KEY: "fakekey",
@@ -218,6 +226,41 @@ describe("useItinerary", () => {
     expect(mockUseQuery).not.toHaveBeenCalled();
   });
 
+  it("ritenta una sola volta soltanto gli errori temporanei", () => {
+    useItinerary();
+    const options = mockUseMutation.mock.calls[0][0] as any;
+    expect(options.retry(0, new Error("Network timeout"))).toBe(true);
+    expect(options.retry(1, new Error("Network timeout"))).toBe(false);
+    expect(options.retry(0, new Error("Piano locale non disponibile"))).toBe(false);
+  });
+
+  it("riutilizza la stessa generazione se arrivano due richieste identiche", async () => {
+    let resolveMutation: (value: any) => void = () => {};
+    const mutateAsync = jest.fn(() => new Promise((resolve) => { resolveMutation = resolve; }));
+    mockUseMutation.mockReturnValue({ ...defaultMutationResult, mutateAsync } as any);
+    const hook = useItinerary();
+    const params = { city: "roma", num_days: 3, level: 1, max_walk_km: 5 };
+
+    const first = hook.generate(params);
+    const second = hook.generate(params);
+    resolveMutation({ ...params, days: [], food_recommendations: [], culture_facts: [] });
+    await Promise.all([first, second]);
+
+    expect(mutateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignora una risposta completata dopo l'annullamento", async () => {
+    let resolveMutation: (value: any) => void = () => {};
+    const mutateAsync = jest.fn(() => new Promise((resolve) => { resolveMutation = resolve; }));
+    mockUseMutation.mockReturnValue({ ...defaultMutationResult, mutateAsync } as any);
+    const hook = useItinerary();
+    const pending = hook.generate({ city: "roma", num_days: 3, level: 1 });
+    hook.cancel();
+    resolveMutation({ city: "roma", days: [], food_recommendations: [], culture_facts: [] });
+
+    await expect(pending).resolves.toBeNull();
+  });
+
   it("espone l'interfaccia pubblica corretta", () => {
     const result = useItinerary();
     expect(typeof result.generate).toBe("function");
@@ -234,12 +277,13 @@ describe("useItinerary", () => {
     expect(result.loading).toBe(true);
   });
 
-  it("mappa AbortError al messaggio di timeout", () => {
-    const abortErr = new Error("aborted");
-    abortErr.name = "AbortError";
-    mockUseMutation.mockReturnValue({ ...defaultMutationResult, error: abortErr } as any);
+  it("espone gli errori del catalogo locale", () => {
+    mockUseMutation.mockReturnValue({
+      ...defaultMutationResult,
+      error: new Error("Piano locale non disponibile"),
+    } as any);
     const result = useItinerary();
-    expect(result.error).toMatch(/Timeout/);
+    expect(result.error).toBe("Piano locale non disponibile");
   });
 
   it("mappa errore generico al messaggio", () => {

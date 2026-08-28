@@ -61,7 +61,6 @@ ATTRACTIONS = [
 ]
 
 FOOD_SPOTS = [
- {'city': 'praga', 'zone': 'stare_mesto', 'category_level': 1, 'name': 'Lokal Dlouha', 'name_en': 'Lokal Dlouha', 'description': 'Birreria molto amata per cucina ceca classica e ottima Pilsner spillata come si deve.', 'description_en': 'A much loved beer hall for classic Czech cuisine and properly poured Pilsner.', 'latitude': 50.0893, 'longitude': 14.4167, 'estimated_visit_time': 90, 'tags': ['ristorante', 'birra ceca', 'tradizione'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.6},
  {'city': 'praga', 'zone': 'stare_mesto', 'category_level': 1, 'name': 'Old Town Kitchen', 'name_en': 'Old Town Kitchen', 'description': 'Ristorante comodo per restare vicino alla piazza principale senza rinunciare alla cucina locale.', 'description_en': 'A convenient restaurant near the main square without giving up local cooking.', 'latitude': 50.0879, 'longitude': 14.4206, 'estimated_visit_time': 85, 'tags': ['ristorante', 'centrale', 'ceco'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'praga', 'zone': 'stare_mesto', 'category_level': 2, 'name': 'Clock Tower Table', 'name_en': 'Clock Tower Table', 'description': 'Indirizzo cittadino affidabile nel centro più visitato di Praga.', 'description_en': "A reliable city address in Prague's most visited centre.", 'latitude': 50.0872, 'longitude': 14.4200, 'estimated_visit_time': 85, 'tags': ['ristorante', 'centro storico', 'locale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.2},
  {'city': 'praga', 'zone': 'stare_mesto', 'category_level': 2, 'name': 'Square Dining Room', 'name_en': 'Square Dining Room', 'description': 'Sala più curata per la sera nel quadrante più monumentale e turistico.', 'description_en': 'A more polished evening room in the most monumental and tourist heavy district.', 'latitude': 50.0874, 'longitude': 14.4210, 'estimated_visit_time': 95, 'tags': ['ristorante', 'elegante', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
@@ -155,89 +154,89 @@ FOOD_SPOTS = [
 ]
 
 # Normalized detailed food descriptions.
-FOODS_BY_CITY = [{'name': 'Sv??kov? na smetan?',
-  'name_en': 'Sv??kov? Cream Sauce Beef',
-  'description': 'Manzo arrosto servito con salsa cremosa di verdure, panna, spezie, mirtilli rossi e knedl?ky, uno dei piatti cechi pi? '
-                 'rappresentativi. ? ricco e dolce-sapido: la qualit? sta nella salsa liscia, nella carne tenera e nell?equilibrio con '
-                 'l?acidit?.',
+FOODS_BY_CITY = [{'name': 'Svíčková na smetaně',
+  'name_en': 'Svíčková Cream Sauce Beef',
+  'description': 'Manzo arrosto servito con salsa cremosa di verdure, panna, spezie, mirtilli rossi e knedlíky, uno dei piatti cechi più '
+                 'rappresentativi. È ricco e dolce-sapido: la qualità sta nella salsa liscia, nella carne tenera e nell’equilibrio con '
+                 'l’acidità.',
   'description_en': 'Roast beef served with a creamy sauce of vegetables, cream, spices, cranberries and dumplings, one of the most '
                     'representative Czech dishes. It is rich and sweet-savoury: quality lies in smooth sauce, tender meat and balance with '
                     'acidity.',
-  'ingredients': ['manzo', 'panna', 'verdure', 'knedl?ky', 'mirtilli rossi'],
+  'ingredients': ['manzo', 'panna', 'verdure', 'knedlíky', 'mirtilli rossi'],
   'ingredients_en': ['beef', 'cream', 'vegetables', 'dumplings', 'cranberries'],
-  'places': [{'name': 'U Modr? Kachni?ky'}, {'name': 'Kuchy? Prague'}, {'name': 'Vinohradsk? Parlament'}]},
- {'name': 'Vep?o knedlo zelo',
+  'places': [{'name': 'U Modré Kachničky'}, {'name': 'Kuchyň Prague'}, {'name': 'Vinohradský Parlament'}]},
+ {'name': 'Vepřo knedlo zelo',
   'name_en': 'Roast Pork with Dumplings and Cabbage',
-  'description': 'Arrosto di maiale con knedl?ky e cavolo, spesso crauti o cavolo rosso, considerato un classico ceco assoluto. ? cucina '
-                 'da birreria: carne saporita, salsa, pane al vapore e acidit? del cavolo devono funzionare insieme. La qualit? migliore '
+  'description': 'Arrosto di maiale con knedlíky e cavolo, spesso crauti o cavolo rosso, considerato un classico ceco assoluto. È cucina '
+                 'da birreria: carne saporita, salsa, pane al vapore e acidità del cavolo devono funzionare insieme. La qualità migliore '
                  'evita pesantezza inutile e mantiene il cavolo brillante.',
   'description_en': 'Roast pork with dumplings and cabbage, often sauerkraut or red cabbage, considered an absolute Czech classic. It is '
                     'beer-hall cooking: savoury meat, sauce, steamed bread and cabbage acidity must work together. The best version avoids '
                     'unnecessary heaviness and keeps the cabbage bright and expressive.',
-  'ingredients': ['maiale', 'knedl?ky', 'cavolo', 'crauti', 'salsa'],
+  'ingredients': ['maiale', 'knedlíky', 'cavolo', 'crauti', 'salsa'],
   'ingredients_en': ['pork', 'dumplings', 'cabbage', 'sauerkraut', 'sauce'],
-  'places': [{'name': 'U Parlamentu'}, {'name': 'U Medv?dk?'}, {'name': 'Lok?l Dlouh?'}]},
+  'places': [{'name': 'U Parlamentu'}, {'name': 'U Medvídků'}, {'name': 'Lokál Dlouhá'}]},
  {'name': 'Pilsner Urquell',
   'name_en': 'Pilsner Urquell',
-  'description': 'Lager chiara nata a Plze? ma fondamentale anche a Praga, con schiuma cremosa, amaro elegante e grande bevibilit?. Non ? '
-                 'solo birra: ? cultura da pub, servizio al banco, bicchieri ben spillati e ritmo sociale ceco.',
-  'description_en': 'A pale lager born in Plze? but fundamental in Prague too, with creamy foam, elegant bitterness and great '
+  'description': 'Lager chiara nata a Plzeň ma fondamentale anche a Praga, con schiuma cremosa, amaro elegante e grande bevibilità. Non è '
+                 'solo birra: è cultura da pub, servizio al banco, bicchieri ben spillati e ritmo sociale ceco.',
+  'description_en': 'A pale lager born in Plzeň but fundamental in Prague too, with creamy foam, elegant bitterness and great '
                     'drinkability. It is not just beer: it is pub culture, bar service, well-poured glasses and Czech social rhythm.',
-  'ingredients': ['acqua', 'malto d?orzo', 'luppolo Saaz', 'lievito'],
+  'ingredients': ['acqua', 'malto d’orzo', 'luppolo Saaz', 'lievito'],
   'ingredients_en': ['water', 'barley malt', 'Saaz hops', 'yeast'],
-  'places': [{'name': 'U Pinkas?'}, {'name': 'U Flek?'}, {'name': 'Lok?l Dlouh?'}]},
- {'name': 'Trdeln?k',
-  'name_en': 'Trdeln?k Chimney Pastry',
-  'description': 'Dolce cilindrico cotto su rullo e ricoperto di zucchero e cannella, molto visibile nelle zone turistiche di Praga. Non ? '
-                 'il piatto pi? antico della citt?, ma funziona come snack caldo, profumato e scenografico. La qualit? dipende dalla '
+  'places': [{'name': 'U Pinkasů'}, {'name': 'U Fleků'}, {'name': 'Lokál Dlouhá'}]},
+ {'name': 'Trdelník',
+  'name_en': 'Trdelník Chimney Pastry',
+  'description': 'Dolce cilindrico cotto su rullo e ricoperto di zucchero e cannella, molto visibile nelle zone turistiche di Praga. Non è '
+                 'il piatto più antico della città, ma funziona come snack caldo, profumato e scenografico. La qualità dipende dalla '
                  'cottura uniforme e dallo zucchero non bruciato.',
-  'description_en': 'A cylindrical pastry cooked on a roller and coated with sugar and cinnamon, highly visible in Prague?s tourist areas. '
-                    'It is not the city?s most ancient dish, but works as a warm, fragrant and theatrical snack.',
+  'description_en': 'A cylindrical pastry cooked on a roller and coated with sugar and cinnamon, highly visible in Prague’s tourist areas. '
+                    'It is not the city’s most ancient dish, but works as a warm, fragrant and theatrical snack.',
   'ingredients': ['farina', 'zucchero', 'cannella', 'lievito', 'burro'],
   'ingredients_en': ['flour', 'sugar', 'cinnamon', 'yeast', 'butter'],
   'places': [{'name': 'Good Food Coffee Bakery Karlova'}, {'name': 'Original Trdelnik Praha'}, {'name': 'Trdlokafe'}]},
- {'name': 'Gul?? ceco',
+ {'name': 'Guláš ceco',
   'name_en': 'Czech Goulash',
-  'description': 'Stufato ceco di manzo, cipolla, paprika e spezie, servito con knedl?ky per raccogliere la salsa. Rispetto ad altre '
-                 'versioni centroeuropee ? denso e da pub: saporito, caldo, perfetto con birra e cottura lenta. La qualit? sta nella carne '
+  'description': 'Stufato ceco di manzo, cipolla, paprika e spezie, servito con knedlíky per raccogliere la salsa. Rispetto ad altre '
+                 'versioni centroeuropee è denso e da pub: saporito, caldo, perfetto con birra e cottura lenta. La qualità sta nella carne '
                  'tenera e nella salsa lucida ma non grassa.',
   'description_en': 'A Czech stew of beef, onion, paprika and spices, served with dumplings to collect the sauce. Compared with other '
                     'Central European versions it is dense and pub-friendly: savoury, warm, perfect with beer and slow cooking.',
-  'ingredients': ['manzo', 'cipolla', 'paprika', 'knedl?ky', 'spezie'],
+  'ingredients': ['manzo', 'cipolla', 'paprika', 'knedlíky', 'spezie'],
   'ingredients_en': ['beef', 'onion', 'paprika', 'dumplings', 'spices'],
-  'places': [{'name': 'Lok?l Dlouh?'}, {'name': 'U Pinkas?'}, {'name': 'Ml?nec'}]},
- {'name': 'Sma?en? s?r',
+  'places': [{'name': 'Lokál Dlouhá'}, {'name': 'U Pinkasů'}, {'name': 'Mlýnec'}]},
+ {'name': 'Smažený sýr',
   'name_en': 'Fried Cheese',
-  'description': 'Formaggio impanato e fritto, spesso servito con patatine e salsa tartara, amatissimo come comfort food ceco. ? semplice '
-                 'e diretto: crosta asciutta, interno filante, sapore lattico e una certa nostalgia da mensa e birreria. La qualit? sta '
+  'description': 'Formaggio impanato e fritto, spesso servito con patatine e salsa tartara, amatissimo come comfort food ceco. È semplice '
+                 'e diretto: crosta asciutta, interno filante, sapore lattico e una certa nostalgia da mensa e birreria. La qualità sta '
                  'nella frittura asciutta e nel formaggio filante ma stabile.',
   'description_en': 'Breaded and fried cheese, often served with chips and tartar sauce, much loved as Czech comfort food. It is simple '
                     'and direct: dry crust, melting interior, milky flavour and a certain cafeteria-and-beer-hall nostalgia. Quality lies '
                     'in dry frying and cheese that melts while still holding together.',
   'ingredients': ['formaggio', 'uova', 'pangrattato', 'patate', 'salsa tartara'],
   'ingredients_en': ['cheese', 'eggs', 'breadcrumbs', 'potatoes', 'tartar sauce'],
-  'places': [{'name': 'Sisters Bistro Prague'}, {'name': 'Lok?l Dlouh?'}, {'name': 'Caf? Imperial Prague'}]},
- {'name': 'Bramborov? knedl?ky',
+  'places': [{'name': 'Sisters Bistro Prague'}, {'name': 'Lokál Dlouhá'}, {'name': 'Café Imperial Prague'}]},
+ {'name': 'Bramborové knedlíky',
   'name_en': 'Potato Dumplings',
   'description': 'Gnocchi cechi di patate, farina e uova, tagliati a fette e serviti come contorno a carni e salse. Sembrano neutri, ma '
-                 'sono essenziali: devono essere compatti, morbidi e capaci di assorbire il sugo. La qualit? dipende da cottura precisa e '
+                 'sono essenziali: devono essere compatti, morbidi e capaci di assorbire il sugo. La qualità dipende da cottura precisa e '
                  'sapore pulito di patata.',
   'description_en': 'Czech potato dumplings made with potatoes, flour and eggs, sliced and served as a side to meats and sauces. They seem '
                     'neutral, but are essential: they should be compact, soft and able to absorb the sauce.',
   'ingredients': ['patate', 'farina', 'uova', 'sale'],
   'ingredients_en': ['potatoes', 'flour', 'eggs', 'salt'],
-  'places': [{'name': 'Caf? Savoy Praha'}, {'name': 'U Kalicha'}, {'name': 'Vinohradsk? Parlament'}]},
+  'places': [{'name': 'Café Savoy Praha'}, {'name': 'U Kalicha'}, {'name': 'Vinohradský Parlament'}]},
  {'name': 'Utopenci',
   'name_en': 'Pickled Sausages',
   'description': 'Salsicce ceche marinate in aceto con cipolle, spezie e peperoni, servite fredde come snack da pub. Il nome significa '
-                 '?annegati?: il gusto ? acidulo, sapido, pungente, perfetto per accompagnare birra e conversazioni lunghe. Devono essere '
+                 '‘annegati’: il gusto è acidulo, sapido, pungente, perfetto per accompagnare birra e conversazioni lunghe. Devono essere '
                  'marinati abbastanza da risultare vivaci ma non aggressivi.',
   'description_en': 'Czech sausages marinated in vinegar with onions, spices and peppers, served cold as a pub snack. The name means '
-                    '?drowned men?: the taste is tangy, savoury and pungent, perfect with beer and long conversations. They should be '
+                    '‘drowned’: the taste is tangy, savoury and pungent, perfect with beer and long conversations. They should be '
                     'marinated enough to feel lively but not aggressive.',
   'ingredients': ['salsicce', 'aceto', 'cipolle', 'spezie', 'peperoni'],
   'ingredients_en': ['sausages', 'vinegar', 'onions', 'spices', 'peppers'],
-  'places': [{'name': 'U ?ern?ho Vola'}, {'name': 'U Medv?dk?'}, {'name': 'U T?? R???'}]}]
+  'places': [{'name': 'U Černého Vola'}, {'name': 'U Medvídků'}, {'name': 'U Tří Růží'}]}]
 
 CULTURE_FACTS = [
  {'icon': '🏰', 'title': 'Il Castello di Praga è uno dei complessi storici più grandi al mondo', 'title_en': 'Prague Castle is one of the largest historic complexes in the world', 'body': 'Non è un solo edificio ma un insieme di corti, chiese, palazzi e strade che raccontano secoli di potere boemo.', 'body_en': 'It is not a single building but a whole set of courtyards, churches, palaces and streets telling centuries of Bohemian power.'},
@@ -253,4 +252,3 @@ CULTURE_FACTS = [
  {'icon': '🎨', 'title': "L'art nouveau è molto più presente di quanto sembri", 'title_en': 'Art Nouveau is more present than it first appears', 'body': 'Mucha, facciate, dettagli decorativi e interni rivelano una città anche fin de siecle, non solo medievale.', 'body_en': 'Mucha, facades, decorative details and interiors reveal a city that is also fin de siecle, not only medieval.'},
  {'icon': '🚶', 'title': 'Praga si capisce molto bene camminando', 'title_en': 'Prague is especially easy to understand on foot', 'body': 'La distanza tra quartieri chiave è relativamente breve e permette di cogliere i passaggi di tono in modo molto diretto.', 'body_en': 'The distance between key districts is relatively short and lets you feel tonal shifts in a very direct way.'},
 ]
-

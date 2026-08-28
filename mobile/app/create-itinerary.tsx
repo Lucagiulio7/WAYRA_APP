@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Linking,
   LayoutAnimation,
   Modal,
   PanResponder,
@@ -19,309 +18,169 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import CountryFlag from "react-native-country-flag";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { cacheCityForOffline } from "@/services/cityOfflineCache";
+import { normalizeItineraryStructure } from "@/utils/itineraryStructure";
+import { openExternalLink as openSafeExternalLink } from "@/utils/externalLinks";
 import { useAttractions, BuilderAttraction } from "@/hooks/useAttractions";
 import { useFoodSpots } from "@/hooks/useFoodSpots";
 import { useCityExtras } from "@/hooks/useCityExtras";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { languageOption } from "@/i18n";
 import { BuilderMap, MapSlot } from "@/components/BuilderMap";
+import { SettingsModal } from "@/components/SettingsModal";
 import { useBuilderStore } from "@/store/builderStore";
 import { SkeletonList } from "@/components/Skeleton";
+import { cityLabel as localizedCityLabel } from "@/utils/cityLabels";
+import { localizedDescription, localizedName } from "@/utils/localization";
+import { translateAttractionType } from "@/utils/attractionType";
+import { isMuseumType, routeWalkingKm, walkingKm } from "@/utils/routeMetrics";
+import { MANUAL_MAX_WALK_KM, MAX_ACTIVITY_MINUTES, MAX_MUSEUMS_PER_DAY } from "@/utils/itineraryRules";
+import { measureGuideTarget } from "@/utils/guideMeasurement";
+import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
+import {
+  loadManualBuilderDraft,
+  removeManualBuilderDraft,
+  saveManualBuilderDraft,
+} from "@/services/manualBuilderDraftStorage";
 
-// ── Costanti visive ───────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Costanti visive Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const ATTRACTION_EMOJI: Record<string, string> = {
-  // Già presenti
-  museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
-  archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
-  panorama: "🌅", mercato: "🛒", palazzo: "🏰",
-  // Edifici religiosi
-  basilica: "⛪", cattedrale: "⛪", abbazia: "⛪", convento: "⛪",
-  monastero: "⛪", cappella: "⛪", santuario: "⛪",
-  sinagoga: "🕍", moschea: "🕌", tempio: "🛕",
-  // Strutture e monumenti
-  castello: "🏰", fortezza: "🏯", torre: "🗼",
-  ponte: "🌉", fontana: "⛲", villa: "🏡",
-  anfiteatro: "🏟️", statua: "🗿", arco: "🏛️",
-  obelisco: "🗿", mausoleo: "🏛️",
-  // Arte e cultura
-  teatro: "🎭", opera: "🎭", auditorium: "🎭",
-  galleria: "🖼️", arte: "🎨", biblioteca: "📚",
-  // Natura e outdoor
-  giardino: "🌸", orto: "🌱", lago: "🏞️",
-  spiaggia: "🏖️", costa: "🌊", fiordo: "🌊",
-  collina: "⛰️", montagna: "🏔️",
-  // Strade e percorsi
-  viale: "🌳", strada: "🛤️", passeggiata: "🚶",
-  // Infrastrutture
-  porto: "⚓", stazione: "🚉", terme: "♨️",
-  acquario: "🐠", zoo: "🦁", stadio: "🏟️",
-  // Belvedere / punti panoramici
-  belvedere: "🌅", miradouro: "🌅",
-  // Murales e arte di strada
-  murales: "🎨",
-  // Attrazione generica (esplicita)
-  attrazione: "📌",
-};
-
-const ATTRACTION_TYPE_EN: Record<string, string> = {
-  museo: "Museum", chiesa: "Church", parco: "Park", piazza: "Square",
-  archeologia: "Archaeology", monumento: "Monument", quartiere: "District",
-  panorama: "Viewpoint", mercato: "Market", palazzo: "Palace",
-  viale: "Avenue", strada: "Street", ponte: "Bridge", teatro: "Theatre",
-  fontana: "Fountain", giardino: "Garden", castello: "Castle",
-  basilica: "Basilica", attrazione: "Attraction",
-  ristorante: "Restaurant", pizzeria: "Pizzeria", bar: "Bar",
-  gelateria: "Gelateria", osteria: "Inn", trattoria: "Trattoria",
-  friggitoria: "Fried food", "street food": "Street food",
+  museo: "\u{1F3DB}\u{FE0F}", chiesa: "\u{26EA}", parco: "\u{1F33F}", piazza: "\u{1F3DF}\u{FE0F}",
+  archeologia: "\u{2692}\u{FE0F}", monumento: "\u{1F5FF}", quartiere: "\u{1F3D8}\u{FE0F}",
+  panorama: "\u{1F305}", mercato: "\u{1F6D2}", palazzo: "\u{1F3F0}",
+  basilica: "\u{26EA}", cattedrale: "\u{26EA}", abbazia: "\u{26EA}", convento: "\u{26EA}",
+  monastero: "\u{26EA}", cappella: "\u{26EA}", santuario: "\u{26EA}",
+  sinagoga: "\u{1F54D}", moschea: "\u{1F54C}", tempio: "\u{1F6D5}",
+  castello: "\u{1F3F0}", fortezza: "\u{1F3EF}", torre: "\u{1F5FC}",
+  ponte: "\u{1F309}", fontana: "\u{26F2}", villa: "\u{1F3E1}",
+  anfiteatro: "\u{1F3DF}\u{FE0F}", statua: "\u{1F5FF}", arco: "\u{1F3DB}\u{FE0F}",
+  obelisco: "\u{1F5FF}", mausoleo: "\u{1F3DB}\u{FE0F}",
+  teatro: "\u{1F3AD}", opera: "\u{1F3AD}", auditorium: "\u{1F3AD}",
+  galleria: "\u{1F5BC}\u{FE0F}", arte: "\u{1F3A8}", biblioteca: "\u{1F4DA}",
+  giardino: "\u{1F338}", orto: "\u{1F331}", lago: "\u{1F3DE}\u{FE0F}",
+  spiaggia: "\u{1F3D6}\u{FE0F}", costa: "\u{1F30A}", fiordo: "\u{1F30A}",
+  collina: "\u{26F0}\u{FE0F}", montagna: "\u{1F3D4}\u{FE0F}",
+  viale: "\u{1F333}", strada: "\u{1F6E4}\u{FE0F}", passeggiata: "\u{1F6B6}",
+  porto: "\u{2693}", stazione: "\u{1F689}", terme: "\u{2668}\u{FE0F}",
+  acquario: "\u{1F420}", zoo: "\u{1F981}", stadio: "\u{1F3DF}\u{FE0F}",
+  belvedere: "\u{1F305}", miradouro: "\u{1F305}",
+  murales: "\u{1F3A8}",
+  attrazione: "\u{1F4CC}",
 };
 
 const FOOD_EMOJI: Record<string, string> = {
-  ristorante: "🍽️", trattoria: "🍝", osteria: "🫕", pizzeria: "🍕",
-  gelateria: "🍦", "street food": "🥪", bar: "☕", friggitoria: "🍟",
+  ristorante: "\u{1F37D}\u{FE0F}", trattoria: "\u{1F35D}", osteria: "\u{1FAD5}", pizzeria: "\u{1F355}",
+  gelateria: "\u{1F366}", "street food": "\u{1F96A}", bar: "\u{2615}", friggitoria: "\u{1F35F}",
 };
 
 const LEVEL_COLORS: Record<number, string> = {
   1: "#e8c06a", 2: "#7eb8f7", 3: "#a78bfa",
 };
 
-const MANUAL_GUIDE_KEY = "wayra_manual_guide_v1";
+const MANUAL_GUIDE_KEY = "wayra_manual_guide_v2";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const MANUAL_GUIDE_SLIDES_IT = [
-  {
-    icon: "🧭",
-    target: "header",
-    title: "Barra superiore",
-    body: "In alto vedi la città, il numero di giorni e le tappe già inserite. Il libro riapre questa guida, la bandiera cambia lingua e Vedi apre il riepilogo quando hai aggiunto almeno una tappa.",
-  },
-  {
-    icon: "📌",
-    target: "tabs",
-    title: "Tab di lavoro",
-    body: "Attrazioni mostra i luoghi da visitare, Pasti mostra ristoranti e locali, Piano mostra solo il riepilogo dei giorni. I numeri indicano quanti elementi sono ancora disponibili o già inseriti.",
-  },
-  {
-    icon: "🔎",
-    target: "search",
-    title: "Ricerca e filtro",
-    body: "La barra Cerca restringe la lista in tempo reale. Il pulsante con gli slider apre i filtri per categoria, utile quando vuoi vedere solo musei, piazze, monumenti o tipi specifici di cibo.",
-  },
-  {
-    icon: "📅",
-    target: "plan",
-    title: "Pannello giorni",
-    body: "La sezione a sinistra contiene i giorni dell'itinerario. Apri un giorno per vedere gli slot: quelli con il monumento sono per le attrazioni, quelli con il piatto sono per i pasti.",
-  },
-  {
-    icon: "🚦",
-    target: "plan",
-    title: "Metriche del giorno",
-    body: "Sotto ogni giorno trovi tempo totale, distanza a piedi e musei. Verde significa che sei nei limiti consigliati; rosso segnala che stai superando il limite e l'app chiederà conferma.",
-  },
-  {
-    icon: "👆",
-    target: "list",
-    title: "Lista a destra",
-    body: "La lista a destra è il database disponibile. Trascina una scheda nello slot corretto per inserirla; premi una scheda senza trascinarla per aprire descrizione, Maps e biglietti se presenti.",
-  },
-  {
-    icon: "🧹",
-    target: "plan",
-    title: "Azioni sugli slot",
-    body: "Il cestino rosso elimina uno slot o una tappa. I pulsanti in fondo al giorno aggiungono un nuovo slot attrazione o pasto. Il pulsante ottimizza riordina le tappe del giorno.",
-  },
-  {
-    icon: "🗺️",
-    target: "view",
-    title: "Riepilogo finale",
-    body: "Quando il piano ti convince, premi Vedi. Si apre la schermata itinerario con le giornate organizzate e i link Google Maps costruiti usando i nomi delle tappe e la città.",
-  },
+  { icon: "\u{1F9ED}", target: "header", title: "Intestazione", body: "Qui controlli la città e la durata del viaggio. La freccia torna alla schermata precedente; sotto il nome vedi quante tappe hai già inserito." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Guida della sezione", body: "Il pulsante con il punto interrogativo riapre questa spiegazione in qualsiasi momento, senza modificare il tuo itinerario." },
+  { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema e preferenze dell'app. Le modifiche vengono applicate anche al riepilogo finale." },
+  { icon: "\u{1F4CC}", target: "tabs", title: "Attrazioni, pasti e piano", body: "Attrazioni mostra i luoghi da visitare, Pasti ristoranti e locali, Piano il riepilogo dei giorni. I numeri indicano gli elementi disponibili o già inseriti." },
+  { icon: "\u{1F50E}", target: "search", title: "Ricerca e filtri", body: "Cerca restringe la lista in tempo reale. Il pulsante con gli slider filtra per categoria, per esempio musei, piazze, monumenti o tipi di cucina." },
+  { icon: "\u{1F4C6}", target: "plan", title: "Giorni e slot", body: "Il pannello a sinistra contiene i giorni. Aprine uno per vedere gli slot: il monumento identifica un'attrazione, il piatto un pasto. Trascina qui le schede della lista." },
+  { icon: "\u{1F6A6}", target: "plan", title: "Controlli del giorno", body: "Tempo, distanza a piedi e musei diventano rossi oltre i limiti consigliati. Puoi superarli, ma l'app ti chiederà conferma prima dell'inserimento." },
+  { icon: "\u{1F446}", target: "list", title: "Schede disponibili", body: "La lista a destra contiene i luoghi ancora disponibili. Trascina una scheda nello slot oppure premila per leggere descrizione, posizione su Maps e biglietti, se presenti." },
+  { icon: "\u{1F9F9}", target: "plan", title: "Modifica del piano", body: "Il cestino rosso elimina una tappa o uno slot. I pulsanti in fondo aggiungono slot attrazione o pasto; Ottimizza riordina il percorso del giorno." },
+  { icon: "\u{1F5FA}\u{FE0F}", target: "view", title: "Apri il riepilogo", body: "Vedi si attiva dopo la prima attrazione. Apre l'itinerario completo con giornate, metriche, mappe e tutte le informazioni della città." },
 ];
 
 const MANUAL_GUIDE_SLIDES_EN = [
-  {
-    icon: "🧭",
-    target: "header",
-    title: "Top bar",
-    body: "At the top you see the city, number of days and inserted stops. The book reopens this guide, the flag changes language and View opens the summary once you have added at least one stop.",
-  },
-  {
-    icon: "📌",
-    target: "tabs",
-    title: "Work tabs",
-    body: "Places shows visitable locations, Food shows restaurants and local spots, Plan shows only the day summary. The numbers show how many items are still available or already inserted.",
-  },
-  {
-    icon: "🔎",
-    target: "search",
-    title: "Search and filter",
-    body: "The Search bar narrows the list in real time. The slider button opens category filters, useful when you only want museums, squares, monuments or specific food types.",
-  },
-  {
-    icon: "📅",
-    target: "plan",
-    title: "Day panel",
-    body: "The left section contains the itinerary days. Open a day to see its slots: monument slots are for attractions, plate slots are for meals.",
-  },
-  {
-    icon: "🚦",
-    target: "plan",
-    title: "Day metrics",
-    body: "Under each day you see total time, walking distance and museum count. Green means you are within the suggested limits; red means you are exceeding a limit and the app will ask for confirmation.",
-  },
-  {
-    icon: "👆",
-    target: "list",
-    title: "Right list",
-    body: "The right list is the available database. Drag a card into the correct slot to insert it; tap a card without dragging to open description, Maps and tickets when available.",
-  },
-  {
-    icon: "🧹",
-    target: "plan",
-    title: "Slot actions",
-    body: "The red trash button removes a slot or stop. The buttons at the bottom of a day add a new attraction or meal slot. The optimize button reorders the day stops.",
-  },
-  {
-    icon: "🗺️",
-    target: "view",
-    title: "Final summary",
-    body: "When the plan feels right, tap View. The itinerary screen opens with organized day cards and Google Maps links built from the stop names and the city.",
-  },
+  { icon: "\u{1F9ED}", target: "header", title: "Header", body: "Check the city and trip length here. The arrow returns to the previous screen; below the city name you can see how many stops have already been added." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Section guide", body: "The question-mark button reopens this walkthrough at any time without changing your itinerary." },
+  { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Settings", body: "The gear opens the app language, theme and preferences. Changes also apply to the final itinerary." },
+  { icon: "\u{1F4CC}", target: "tabs", title: "Places, food and plan", body: "Places lists attractions, Food lists restaurants and local spots, and Plan summarizes the days. Badges show available or inserted items." },
+  { icon: "\u{1F50E}", target: "search", title: "Search and filters", body: "Search narrows the list in real time. The sliders button filters by category, such as museums, squares, monuments or food types." },
+  { icon: "\u{1F4C6}", target: "plan", title: "Days and slots", body: "The left panel contains your days. Open one to see its slots: the monument means attraction and the plate means meal. Drag cards here from the list." },
+  { icon: "\u{1F6A6}", target: "plan", title: "Day checks", body: "Time, walking distance and museum count turn red beyond the suggested limits. You may exceed them, but the app asks for confirmation first." },
+  { icon: "\u{1F446}", target: "list", title: "Available cards", body: "The right list contains places not yet used. Drag a card into a slot or tap it to read its description, Maps location and ticket link when available." },
+  { icon: "\u{1F9F9}", target: "plan", title: "Edit the plan", body: "The red trash button removes a stop or slot. Bottom buttons add attraction or meal slots; Optimize reorders the day's route." },
+  { icon: "\u{1F5FA}\u{FE0F}", target: "view", title: "Open the summary", body: "View becomes available after the first attraction. It opens the full itinerary with days, metrics, maps and city information." },
+];
+
+const MANUAL_GUIDE_SLIDES_FR = [
+  { icon: "\u{1F9ED}", target: "header", title: "En-tête", body: "Contrôlez ici la ville et la durée du voyage. La flèche revient à l'écran précédent ; sous le nom, vous voyez combien d'étapes sont déjà ajoutées." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Guide de la section", body: "Le bouton avec le point d'interrogation rouvre cette visite à tout moment sans modifier votre itinéraire." },
+  { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Paramètres", body: "L'engrenage ouvre la langue, le thème et les préférences. Les changements s'appliquent aussi au récapitulatif final." },
+  { icon: "\u{1F4CC}", target: "tabs", title: "Attractions, repas et plan", body: "Attractions affiche les lieux, Repas les restaurants, et Plan le résumé des jours. Les nombres indiquent les éléments disponibles ou déjà ajoutés." },
+  { icon: "\u{1F50E}", target: "search", title: "Recherche et filtres", body: "La recherche réduit la liste en temps réel. Le bouton avec les curseurs filtre par catégorie : musées, places, monuments ou types de cuisine." },
+  { icon: "\u{1F4C6}", target: "plan", title: "Jours et emplacements", body: "Le panneau de gauche contient les jours. Ouvrez-en un : le monument indique une attraction et l'assiette un repas. Faites glisser ici les cartes de la liste." },
+  { icon: "\u{1F6A6}", target: "plan", title: "Contrôles du jour", body: "Le temps, la marche et les musées passent au rouge au-delà des limites conseillées. Vous pouvez les dépasser après confirmation." },
+  { icon: "\u{1F446}", target: "list", title: "Cartes disponibles", body: "La liste de droite contient les lieux encore disponibles. Glissez une carte ou touchez-la pour lire sa description, sa position Maps et le lien de billetterie." },
+  { icon: "\u{1F9F9}", target: "plan", title: "Modifier le plan", body: "La corbeille rouge supprime une étape ou un emplacement. Les boutons du bas ajoutent des emplacements ; Optimiser réordonne le parcours." },
+  { icon: "\u{1F5FA}\u{FE0F}", target: "view", title: "Ouvrir le récapitulatif", body: "Voir devient actif après la première attraction. Il ouvre l'itinéraire complet avec journées, métriques, cartes et informations sur la ville." },
+];
+
+const MANUAL_GUIDE_SLIDES_ES = [
+  { icon: "\u{1F9ED}", target: "header", title: "Encabezado", body: "Aquí controlas la ciudad y la duración del viaje. La flecha vuelve a la pantalla anterior; debajo ves cuántas paradas has añadido." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Guía de la sección", body: "El botón con el signo de interrogación vuelve a abrir esta explicación sin modificar el itinerario." },
+  { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Configuración", body: "El engranaje abre el idioma, el tema y las preferencias. Los cambios también se aplican al resumen final." },
+  { icon: "\u{1F4CC}", target: "tabs", title: "Lugares, comida y plan", body: "Lugares muestra atracciones, Comida restaurantes y Plan el resumen de los días. Los números indican elementos disponibles o añadidos." },
+  { icon: "\u{1F50E}", target: "search", title: "Búsqueda y filtros", body: "La búsqueda filtra la lista en tiempo real. El botón de controles filtra por categoría: museos, plazas, monumentos o tipos de comida." },
+  { icon: "\u{1F4C6}", target: "plan", title: "Días y espacios", body: "El panel izquierdo contiene los días. Abre uno: el monumento indica una atracción y el plato una comida. Arrastra aquí las tarjetas." },
+  { icon: "\u{1F6A6}", target: "plan", title: "Controles del día", body: "El tiempo, la distancia a pie y los museos se vuelven rojos al superar los límites. Puedes hacerlo, pero la app pide confirmación." },
+  { icon: "\u{1F446}", target: "list", title: "Tarjetas disponibles", body: "La lista derecha contiene lugares aún disponibles. Arrastra una tarjeta o tócala para leer la descripción, la posición en Maps y las entradas." },
+  { icon: "\u{1F9F9}", target: "plan", title: "Modificar el plan", body: "La papelera roja elimina una parada o espacio. Los botones inferiores añaden espacios; Optimizar reordena la ruta." },
+  { icon: "\u{1F5FA}\u{FE0F}", target: "view", title: "Abrir el resumen", body: "Ver se activa tras la primera atracción. Abre el itinerario completo con días, métricas, mapas e información de la ciudad." },
 ];
 
 function getEmoji(type?: string | null, isFood = false): string {
   const key = (type ?? "").toLowerCase();
-  if (isFood) return FOOD_EMOJI[key] ?? "🍴";
+  if (isFood) return FOOD_EMOJI[key] ?? "\u{1F374}";
   if (ATTRACTION_EMOJI[key]) return ATTRACTION_EMOJI[key];
-  // Substring fallback for compound types (e.g. "parco storico" → 🌿)
+  // Substring fallback for compound types (e.g. "parco storico" Ã¢â€ â€™ Ã°Å¸Å’Â¿)
   const match = Object.keys(ATTRACTION_EMOJI).find(
     (k) => k.length >= 4 && key.includes(k)
   );
-  return match ? ATTRACTION_EMOJI[match] : "📍";
+  return match ? ATTRACTION_EMOJI[match] : "\u{1F4CC}";
 }
 
 function translateType(type?: string | null, lang = "it"): string | null {
-  if (!type) return null;
-  const key = type.toLowerCase();
-  if (lang === "en") return ATTRACTION_TYPE_EN[key] ?? (type.charAt(0).toUpperCase() + type.slice(1));
-  return type.charAt(0).toUpperCase() + type.slice(1);
+  return translateAttractionType(type, lang);
 }
 
 function priceLabel(level: number): string {
-  if (level === 1) return "€";
-  if (level === 2) return "€€";
-  return "€€€";
+  if (level === 1) return "\u20AC";
+  if (level === 2) return "\u20AC\u20AC";
+  return "\u20AC\u20AC\u20AC";
 }
 
-// ── Geo ───────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Geo Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-function mapsWaypoint(stop: BuilderAttraction, _city: string): string {
-  // Use coordinates — unambiguous and language-independent
-  return encodeURIComponent(`${stop.latitude},${stop.longitude}`);
+function mapsWaypoint(stop: BuilderAttraction, city: string, lang: string): string {
+  return encodeURIComponent(`${localizedName(stop, lang)} ${localizedCityLabel(city, lang)}`.trim());
 }
 
-function mapsSearchUrl(stop: BuilderAttraction, _city: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
+function mapsSearchUrl(stop: BuilderAttraction, city: string, lang: string): string {
+  const query = `${localizedName(stop, lang)} ${localizedCityLabel(city, lang)}`.trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
 function isMuseum(stop: BuilderAttraction): boolean {
-  return (stop.attraction_type ?? "").toLowerCase() === "museo";
+  return isMuseumType(stop.attraction_type);
 }
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const f1 = (lat1 * Math.PI) / 180;
-  const f2 = (lat2 * Math.PI) / 180;
-  const df = ((lat2 - lat1) * Math.PI) / 180;
-  const dl = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 function fmtDist(km: number): string {
   return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
 
-// ── Ottimizzazione percorso ───────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Ottimizzazione percorso Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-type GeoRef = { latitude: number; longitude: number };
 
-function walkingKm(a: GeoRef, b: GeoRef): number {
-  const straightKm = haversineKm(a.latitude, a.longitude, b.latitude, b.longitude);
-  return straightKm * walkingDistanceFactor(straightKm);
-}
-
-function walkingDistanceFactor(straightKm: number): number {
-  if (straightKm > 2) return 1.1;
-  if (straightKm > 1) return 1.15;
-  if (straightKm > 0.5) return 1.3;
-  if (straightKm > 0.3) return 1.4;
-  return 1.5;
-}
-
-function routeWalkingKm(stops: GeoRef[]): number {
-  let total = 0;
-  for (let i = 0; i < stops.length - 1; i++) {
-    total += walkingKm(stops[i], stops[i + 1]);
-  }
-  return total;
-}
-
-function optimizeSegment(attrSlots: SlotData[], startRef: GeoRef | null, endRef: GeoRef | null): SlotData[] {
-  if (attrSlots.length < 2) return attrSlots;
-  const segCost = (route: SlotData[]): number => {
-    let cost = 0;
-    for (let i = 0; i < route.length - 1; i++) {
-      cost += walkingKm(route[i].attraction!, route[i + 1].attraction!);
-    }
-    if (startRef) cost += walkingKm(startRef, route[0].attraction!);
-    if (endRef) cost += walkingKm(route[route.length - 1].attraction!, endRef);
-    return cost;
-  };
-  let best = [...attrSlots];
-  let bestCost = segCost(best);
-  let improved = true;
-  while (improved) {
-    improved = false;
-    for (let i = 0; i < best.length - 1; i++) {
-      for (let j = i + 1; j < best.length; j++) {
-        const candidate = [...best.slice(0, i), ...best.slice(i, j + 1).reverse(), ...best.slice(j + 1)];
-        const c = segCost(candidate);
-        if (c < bestCost - 1e-9) { best = candidate; bestCost = c; improved = true; }
-      }
-    }
-  }
-  return best;
-}
-
-function optimizeSlots(slots: SlotData[]): SlotData[] {
-  const filled = slots.filter((s) => s.attraction !== null);
-  const empty = slots.filter((s) => s.attraction === null);
-  const result: SlotData[] = [];
-  let segment: SlotData[] = [];
-  let prevMealRef: GeoRef | null = null;
-  for (const slot of filled) {
-    if (slot.kind === "meal") {
-      const endRef: GeoRef = { latitude: slot.attraction!.latitude, longitude: slot.attraction!.longitude };
-      result.push(...optimizeSegment(segment, prevMealRef, endRef));
-      result.push(slot);
-      prevMealRef = endRef;
-      segment = [];
-    } else {
-      segment.push(slot);
-    }
-  }
-  result.push(...optimizeSegment(segment, prevMealRef, null));
-  return [...result, ...empty];
-}
-
-// ── Tipi ─────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Tipi Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 type SlotKind = "attraction" | "meal";
 type SlotData = { id: string; kind: SlotKind; attraction: BuilderAttraction | null; note?: string };
@@ -347,39 +206,51 @@ function getDayStats(day: DayPlan | undefined): DayStats {
   if (!day) return EMPTY_STATS;
   const filledSlots = day.slots.filter((s) => s.attraction !== null);
   const attractionSlots = filledSlots.filter((s) => s.kind === "attraction");
-  const route = filledSlots.map((s) => s.attraction!);
+  const route = attractionSlots.map((s) => s.attraction!);
   return {
     minutes: attractionSlots.reduce((sum, s) => sum + (s.attraction?.estimated_visit_time ?? 0), 0),
     distanceKm: routeWalkingKm(route),
-    museums: attractionSlots.filter((s) => (s.attraction?.attraction_type ?? "").toLowerCase() === "museo").length,
+    museums: attractionSlots.filter((s) => isMuseumType(s.attraction?.attraction_type)).length,
     attractions: attractionSlots.length,
     filled: filledSlots.length,
   };
 }
 
-function dayDistanceWith(day: DayPlan | undefined, slotId: string, attraction: BuilderAttraction): number {
-  if (!day) return 0;
+function dayStatsWith(day: DayPlan | undefined, slotId: string, attraction: BuilderAttraction): DayStats {
+  if (!day) return EMPTY_STATS;
   const nextSlots = day.slots.map((s) => s.id === slotId ? { ...s, attraction } : s);
-  return getDayStats({ ...day, slots: nextSlots }).distanceKm;
+  return getDayStats({ ...day, slots: nextSlots });
 }
 
-// ── Schermata principale ──────────────────────────────────────────────────────
+function matchesSearch(item: BuilderAttraction, search: string, lang: string): boolean {
+  const query = search.trim().toLocaleLowerCase();
+  if (!query) return true;
+  return [
+    localizedName(item, lang),
+    item.name,
+    item.name_en,
+    item.name_fr,
+    item.name_es,
+  ].some((value) => value?.toLocaleLowerCase().includes(query));
+}
+
+// Ã¢â€â‚¬Ã¢â€â‚¬ Schermata principale Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 export default function CreateItineraryScreen() {
   const router = useRouter();
   const { city = "roma", numDays: ndStr = "1", cityLabel = "" } =
     useLocalSearchParams<{ city: string; numDays: string; cityLabel: string }>();
   const numDays = Math.max(1, parseInt(ndStr, 10) || 1);
-  const { lang, toggle } = useLanguage();
+  const { lang } = useLanguage();
   const { colors } = useTheme();
-  const currentLanguage = languageOption(lang);
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const [builderHydrated, setBuilderHydrated] = useState(false);
 
   const { attractions, loading, error } = useAttractions(city);
-  const { foodSpots, loading: foodLoading } = useFoodSpots(city);
+  const { foodSpots, loading: foodLoading, error: foodError } = useFoodSpots(city);
   const { foods, cultureFacts } = useCityExtras(city);
 
-  // ── Zustand builder store ─────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Zustand builder store Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   const {
     days,
     expandedDay,
@@ -395,15 +266,41 @@ export default function CreateItineraryScreen() {
     mapReorderSlots,
     addDay: storeAddDay,
     init: initBuilder,
+    restore: restoreBuilder,
   } = useBuilderStore();
 
-  // Inizializza il builder (o lo resetta) ogni volta che cambia numDays
+  // Ripristina soltanto la bozza appartenente alla stessa citta e durata.
   useEffect(() => {
-    initBuilder(numDays);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numDays]);
+    let active = true;
+    setBuilderHydrated(false);
+    void loadManualBuilderDraft(city, numDays)
+      .then((draft) => {
+        if (!active) return;
+        if (draft) restoreBuilder(draft.days, draft.expandedDay);
+        else initBuilder(numDays);
+        setBuilderHydrated(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        initBuilder(numDays);
+        setBuilderHydrated(true);
+      });
+    return () => { active = false; };
+  }, [city, initBuilder, numDays, restoreBuilder]);
 
-  // ── State UI (locale) ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!builderHydrated || days.length !== numDays) return;
+    void saveManualBuilderDraft({
+      version: 1,
+      city: city.trim().toLowerCase(),
+      numDays,
+      expandedDay,
+      updatedAt: new Date().toISOString(),
+      days,
+    }).catch(() => {});
+  }, [builderHydrated, city, days, expandedDay, numDays]);
+
+  // Ã¢â€â‚¬Ã¢â€â‚¬ State UI (locale) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   const [selected, setSelected] = useState<BuilderAttraction | null>(null);
   const [selectedKind, setSelectedKind] = useState<SlotKind>("attraction");
   const [activeTab, setActiveTab] = useState<ActiveTab>("attractions");
@@ -413,7 +310,7 @@ export default function CreateItineraryScreen() {
   const [search, setSearch] = useState("");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [dragging, setDragging] = useState<DragState>(null);
   const [mapVisible, setMapVisible] = useState(false);
 
@@ -422,11 +319,13 @@ export default function CreateItineraryScreen() {
   const slotTargets        = useRef<Map<string, SlotTarget>>(new Map());
   const draggingRef        = useRef<DragState>(null);
   const guideTargets       = useRef<Map<string, View>>(new Map());
+  const guideRootRef       = useRef<View>(null);
+  const contextHelp        = useContextHelpController();
   const dragPosition       = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const attrListRef        = useRef<any>(null);
   const foodListRef        = useRef<any>(null);
 
-  // ── Derivati ──────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Derivati Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const placedAttractionIds = useMemo(() => {
     const s = new Set<number>();
@@ -455,7 +354,7 @@ export default function CreateItineraryScreen() {
   }, [attractions, foodSpots, lastInExpanded]);
 
   // Quando cambia l'ultima tappa posizionata (e quindi si ricalcolano le distanze),
-  // riporta entrambe le liste all'inizio in modo che la più vicina sia sempre visibile
+  // riporta entrambe le liste all'inizio in modo che la piÃƒÂ¹ vicina sia sempre visibile
   useEffect(() => {
     attrListRef.current?.scrollToOffset({ offset: 0, animated: false });
     foodListRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -471,24 +370,26 @@ export default function CreateItineraryScreen() {
 
   const available = useMemo(() => {
     let list = attractions.filter((a) => !placedAttractionIds.has(a.id));
-    if (search.trim()) list = list.filter((a) => a.name.toLowerCase().includes(search.toLowerCase()) || (a.name_en ?? "").toLowerCase().includes(search.toLowerCase()));
+    if (search.trim()) list = list.filter((a) => matchesSearch(a, search, lang));
     if (activeCategories.length > 0) list = list.filter((a) => a.attraction_type && activeCategories.includes(a.attraction_type));
     if (distanceMap.size === 0) return list;
     return [...list].sort((a, b) => (distanceMap.get(a.id) ?? 9999) - (distanceMap.get(b.id) ?? 9999));
-  }, [attractions, placedAttractionIds, distanceMap, search, activeCategories]);
+  }, [attractions, placedAttractionIds, distanceMap, search, activeCategories, lang]);
 
   const availableFood = useMemo(() => {
     let list = foodSpots.filter((a) => !placedFoodIds.has(a.id));
-    if (search.trim()) list = list.filter((a) => a.name.toLowerCase().includes(search.toLowerCase()) || (a.name_en ?? "").toLowerCase().includes(search.toLowerCase()));
+    if (search.trim()) list = list.filter((a) => matchesSearch(a, search, lang));
     if (activeCategories.length > 0) list = list.filter((a) => a.attraction_type && activeCategories.includes(a.attraction_type));
     if (distanceMap.size === 0) return list;
     return [...list].sort((a, b) => (distanceMap.get(a.id) ?? 9999) - (distanceMap.get(b.id) ?? 9999));
-  }, [foodSpots, placedFoodIds, distanceMap, search, activeCategories]);
+  }, [foodSpots, placedFoodIds, distanceMap, search, activeCategories, lang]);
 
-  const totalPlaced = useMemo(() => {
-    let n = 0;
-    days.forEach((d) => d.slots.forEach((s) => { if (s.attraction) n++; }));
-    return n;
+  const totalAttractionsPlaced = useMemo(() => {
+    let count = 0;
+    days.forEach((day) => day.slots.forEach((slot) => {
+      if (slot.kind === "attraction" && slot.attraction) count += 1;
+    }));
+    return count;
   }, [days]);
 
   const activeDayIndex = useMemo(() =>
@@ -498,7 +399,7 @@ export default function CreateItineraryScreen() {
   const activeDay: DayPlan | undefined = days[activeDayIndex] ?? days[0];
   const activeDayStats = useMemo(() => getDayStats(activeDay), [activeDay]);
 
-  // ── Dati per BuilderMap ────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Dati per BuilderMap Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const currentMapSlots = useMemo((): MapSlot[] =>
     (activeDay?.slots ?? [])
@@ -506,7 +407,7 @@ export default function CreateItineraryScreen() {
       .map((s) => ({ slotId: s.id, kind: s.kind, attraction: s.attraction! })),
   [activeDay]);
 
-  // Mostra sulla mappa solo attrazioni non piazzate in altri giorni + quelle già nel giorno corrente
+  // Mostra sulla mappa solo attrazioni non piazzate in altri giorni + quelle giÃƒÂ  nel giorno corrente
   const mapAttractions = useMemo(() => {
     const currentIds = new Set(activeDay?.slots.filter((s) => s.kind === "attraction" && s.attraction).map((s) => s.attraction!.id) ?? []);
     return attractions.filter((a) => !placedAttractionIds.has(a.id) || currentIds.has(a.id));
@@ -517,13 +418,7 @@ export default function CreateItineraryScreen() {
     return foodSpots.filter((f) => !placedFoodIds.has(f.id) || currentIds.has(f.id));
   }, [foodSpots, placedFoodIds, activeDay]);
 
-  useEffect(() => {
-    AsyncStorage.getItem(MANUAL_GUIDE_KEY)
-      .then((val) => { if (!val) setShowGuide(true); })
-      .catch((e) => { if (__DEV__) console.warn("[create-itinerary] AsyncStorage read failed:", e); });
-  }, []);
-
-  // ── Azioni ────────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Azioni Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const showMessage = useCallback((title: string, message: string) => {
     if (Platform.OS === "web") {
@@ -539,15 +434,10 @@ export default function CreateItineraryScreen() {
       return;
     }
     Alert.alert(title, message, [
-      { text: lang === "en" ? "Cancel" : "Annulla", style: "cancel" },
-      { text: lang === "en" ? "Continue" : "Continua", style: "default", onPress: onConfirm },
+      { text: lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : lang === "en" ? "Cancel" : "Annulla", style: "cancel" },
+      { text: lang === "es" ? "Continuar" : lang === "fr" ? "Continuer" : lang === "en" ? "Continue" : "Continua", style: "default", onPress: onConfirm },
     ]);
   }, [lang]);
-
-  const dismissGuide = useCallback(async () => {
-    await AsyncStorage.setItem(MANUAL_GUIDE_KEY, "done");
-    setShowGuide(false);
-  }, []);
 
   const setGuideTarget = useCallback((key: string, ref: View | null) => {
     if (ref) guideTargets.current.set(key, ref);
@@ -556,36 +446,54 @@ export default function CreateItineraryScreen() {
 
   const validatePlacement = useCallback((day: DayPlan, slot: SlotData, item: BuilderAttraction, kind: SlotKind): PlacementCheck => {
     if (slot.attraction) {
-      return { blocked: lang === "en" ? "This slot is already occupied." : "Questo slot e gia occupato." };
+      return { blocked: lang === "es" ? "Este espacio ya está ocupado." : lang === "fr" ? "Cet emplacement est déjà occupé." : lang === "en" ? "This slot is already occupied." : "Questo slot è già occupato." };
     }
     if (slot.kind !== kind) {
       return {
         blocked: kind === "meal"
-          ? (lang === "en" ? "Select a meal slot." : "Seleziona uno slot pasto.")
-          : (lang === "en" ? "Select an attraction slot." : "Seleziona uno slot attrazione."),
+          ? (lang === "es" ? "Selecciona un espacio de comida." : lang === "fr" ? "Selectionnez un emplacement repas." : lang === "en" ? "Select a meal slot." : "Seleziona uno slot pasto.")
+          : (lang === "es" ? "Selecciona un espacio de atraccion." : lang === "fr" ? "Selectionnez un emplacement attraction." : lang === "en" ? "Select an attraction slot." : "Seleziona uno slot attrazione."),
       };
     }
     const warnings: string[] = [];
-    const itemIsMuseum = (item.attraction_type ?? "").toLowerCase() === "museo";
-    const alreadyHasMuseum = day.slots.some(
-      (s) => s.kind === "attraction" && (s.attraction?.attraction_type ?? "").toLowerCase() === "museo",
-    );
-    if (kind === "attraction" && itemIsMuseum && alreadyHasMuseum) {
-      warnings.push(lang === "en"
-        ? "This day already has one museum."
-        : "Questo giorno ha gia un museo.");
+    const currentStats = getDayStats(day);
+    const nextStats = dayStatsWith(day, slot.id, item);
+    const itemIsMuseum = isMuseumType(item.attraction_type);
+
+    if (kind === "attraction" && itemIsMuseum && currentStats.museums >= MAX_MUSEUMS_PER_DAY) {
+      warnings.push(lang === "es"
+        ? "Este día ya tiene dos museos."
+        : lang === "fr"
+          ? "Cette journée a déjà deux musées."
+          : lang === "en"
+            ? "This day already has two museums."
+            : "Questo giorno ha già due musei.");
     }
 
-    const distanceKm = dayDistanceWith(day, slot.id, item);
-    if (distanceKm > 4) {
-      warnings.push(lang === "en"
-        ? `This would bring the day to ${distanceKm.toFixed(1)} km on foot.`
-        : `Questa scelta porterebbe il giorno a ${distanceKm.toFixed(1)} km a piedi.`);
+    if (kind === "attraction" && nextStats.minutes > MAX_ACTIVITY_MINUTES) {
+      const hours = (nextStats.minutes / 60).toFixed(1);
+      warnings.push(lang === "es"
+        ? "Esta elección llevaría el día a " + hours + " horas de actividades."
+        : lang === "fr"
+          ? "Ce choix porterait la journee a " + hours + " heures d'activites."
+          : lang === "en"
+            ? "This would bring the day to " + hours + " hours of activities."
+            : "Questa scelta porterebbe il giorno a " + hours + " ore di attività.");
     }
 
+    if (nextStats.distanceKm > MANUAL_MAX_WALK_KM) {
+      const distance = nextStats.distanceKm.toFixed(1);
+      warnings.push(lang === "es"
+        ? "Esta elección llevaría el día a " + distance + " km a pie."
+        : lang === "fr"
+          ? "Ce choix porterait la journee a " + distance + " km a pied."
+          : lang === "en"
+            ? "This would bring the day to " + distance + " km on foot."
+            : "Questa scelta porterebbe il giorno a " + distance + " km a piedi.");
+    }
     if (warnings.length > 0) {
       return {
-        warning: `${warnings.join("\n")}\n${lang === "en" ? "Do you want to add it anyway?" : "Vuoi inserirla comunque?"}`,
+        warning: `${warnings.join("\n")}\n${lang === "es" ? "Quieres anadirla de todos modos?" : lang === "fr" ? "Voulez-vous l'ajouter quand meme ?" : lang === "en" ? "Do you want to add it anyway?" : "Vuoi inserirla comunque?"}`,
       };
     }
 
@@ -607,14 +515,14 @@ export default function CreateItineraryScreen() {
     const validation = validatePlacement(day, slot, item, kind);
     if (validation.blocked) {
       showMessage(
-        lang === "en" ? "Cannot add here" : "Non posso inserirla qui",
+        lang === "es" ? "No se puede añadir aquí" : lang === "fr" ? "Ajout impossible ici" : lang === "en" ? "Cannot add here" : "Non posso inserirla qui",
         validation.blocked,
       );
       return false;
     }
     if (validation.warning) {
       confirmAction(
-        lang === "en" ? "Confirm addition" : "Conferma inserimento",
+        lang === "es" ? "Confirmar adicion" : lang === "fr" ? "Confirmer l'ajout" : lang === "en" ? "Confirm addition" : "Conferma inserimento",
         validation.warning,
         () => commitPlacement(dayIdx, slotId, item),
       );
@@ -644,7 +552,7 @@ export default function CreateItineraryScreen() {
     const validation = validatePlacement(day, newSlot, item, kind);
     if (validation.blocked) {
       showMessage(
-        lang === "en" ? "Cannot add here" : "Non posso inserirla qui",
+        lang === "es" ? "No se puede añadir aquí" : lang === "fr" ? "Ajout impossible ici" : lang === "en" ? "Cannot add here" : "Non posso inserirla qui",
         validation.blocked,
       );
       return;
@@ -659,7 +567,7 @@ export default function CreateItineraryScreen() {
 
     if (validation.warning) {
       confirmAction(
-        lang === "en" ? "Confirm addition" : "Conferma inserimento",
+        lang === "es" ? "Confirmar adicion" : lang === "fr" ? "Confirmer l'ajout" : lang === "en" ? "Confirm addition" : "Conferma inserimento",
         validation.warning,
         commitNewSlot,
       );
@@ -673,11 +581,6 @@ export default function CreateItineraryScreen() {
     setAttractionDetail({ item: a, kind });
   }, []);
 
-  const handleAddFromDetail = useCallback(() => {
-    if (!attractionDetail) return;
-    placeItemFromList(attractionDetail.item, attractionDetail.kind);
-    setAttractionDetail(null);
-  }, [attractionDetail, placeItemFromList]);
 
   const handleSwitchTab = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);
@@ -689,14 +592,8 @@ export default function CreateItineraryScreen() {
   }, [activeTab]);
 
   const handleTapSlot = useCallback((dayIdx: number, slot: SlotData) => {
-    if (slot.attraction !== null) {
-      setDockDetail({ dayIdx, slot });
-      return;
-    }
-    if (!selected) return;
-    if (slot.kind !== selectedKind) return;
-    placeItemInSlot(dayIdx, slot.id, selected, selectedKind);
-  }, [placeItemInSlot, selected, selectedKind]);
+    if (slot.attraction !== null) setDockDetail({ dayIdx, slot });
+  }, []);
 
   const handleSlotRef = useCallback((dayIdx: number, slot: SlotData, ref: View | null) => {
     if (ref) {
@@ -720,15 +617,8 @@ export default function CreateItineraryScreen() {
   }, []);
 
   const openExternalLink = useCallback(async (url: string) => {
-    try {
-      await Linking.openURL(url);
-    } catch {
-      showMessage(
-        lang === "en" ? "Cannot open link" : "Impossibile aprire il link",
-        lang === "en" ? "Try again later." : "Riprova più tardi.",
-      );
-    }
-  }, [lang, showMessage]);
+    await openSafeExternalLink(url, lang);
+  }, [lang]);
 
   const handleDragMove = useCallback((x: number, y: number) => {
     dragPosition.setValue({ x, y });
@@ -798,12 +688,8 @@ export default function CreateItineraryScreen() {
       setDockDetail({ dayIdx: activeDayIndex, slot });
       return;
     }
-    if (selected && selectedKind === slot.kind) {
-      placeItemInSlot(activeDayIndex, slot.id, selected, selectedKind);
-      return;
-    }
     setActiveSlotId((current) => current === slot.id ? null : slot.id);
-  }, [activeDayIndex, placeItemInSlot, selected, selectedKind]);
+  }, [activeDayIndex]);
 
   const handleDockDayChange = useCallback((direction: -1 | 1) => {
     const current = activeDayIndex >= 0 ? activeDayIndex : 0;
@@ -840,15 +726,44 @@ export default function CreateItineraryScreen() {
     storeOptimizeDay(dayIdx);
   }, [storeOptimizeDay]);
 
-  // ── Handler BuilderMap ────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Handler BuilderMap Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   const handleMapAddAttraction = useCallback((a: BuilderAttraction) => {
     placeItemFromList(a, "attraction");
   }, [placeItemFromList]);
 
-  const handleMapAddFood = useCallback((f: BuilderAttraction, afterSlotId: string | null) => {
-    storeMapAddFood(activeDayIndex, f, afterSlotId);
-  }, [activeDayIndex, storeMapAddFood]);
+  const handleMapAddFood = useCallback((food: BuilderAttraction, afterSlotId: string | null) => {
+    const day = days[activeDayIndex];
+    if (!day) return;
+
+    const candidate: SlotData = { id: "__map_food_candidate__", kind: "meal", attraction: food };
+    const nextSlots = [...day.slots];
+    const afterIndex = afterSlotId === null ? -1 : nextSlots.findIndex((slot) => slot.id === afterSlotId);
+    const insertIndex = afterSlotId === null ? 0 : afterIndex >= 0 ? afterIndex + 1 : nextSlots.length;
+    nextSlots.splice(insertIndex, 0, candidate);
+    const distanceKm = getDayStats({ ...day, slots: nextSlots }).distanceKm;
+
+    const commit = () => storeMapAddFood(activeDayIndex, food, afterSlotId);
+    if (distanceKm <= MANUAL_MAX_WALK_KM) {
+      commit();
+      return;
+    }
+
+    const distance = distanceKm.toFixed(1);
+    confirmAction(
+      lang === "es" ? "Confirmar adicion" : lang === "fr" ? "Confirmer l'ajout" : lang === "en" ? "Confirm addition" : "Conferma inserimento",
+      (lang === "es"
+        ? "Este restaurante llevaría el día a " + distance + " km a pie."
+        : lang === "fr"
+          ? "Ce restaurant porterait la journee a " + distance + " km a pied."
+          : lang === "en"
+            ? "This restaurant would bring the day to " + distance + " km on foot."
+            : "Questo ristorante porterebbe il giorno a " + distance + " km a piedi.")
+        + "\n"
+        + (lang === "es" ? "Quieres anadirlo de todos modos?" : lang === "fr" ? "Voulez-vous l'ajouter quand meme ?" : lang === "en" ? "Do you want to add it anyway?" : "Vuoi inserirlo comunque?"),
+      commit,
+    );
+  }, [activeDayIndex, confirmAction, days, lang, storeMapAddFood]);
 
   const handleMapRemove = useCallback((slotId: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -861,13 +776,13 @@ export default function CreateItineraryScreen() {
   }, [activeDayIndex, mapReorderSlots]);
 
   const handleView = async () => {
-    if (totalPlaced === 0) {
+    if (totalAttractionsPlaced === 0) {
       if (Platform.OS === "web") {
-        window.alert(lang === "en" ? "Add at least one attraction to view the itinerary." : "Aggiungi almeno un'attrazione per visualizzare l'itinerario.");
+        window.alert(lang === "es" ? "Añade al menos una atracción para ver el itinerario." : lang === "fr" ? "Ajoutez au moins une attraction pour afficher l'itinéraire." : lang === "en" ? "Add at least one attraction to view the itinerary." : "Aggiungi almeno un'attrazione per visualizzare l'itinerario.");
       } else {
         Alert.alert(
-          lang === "en" ? "No attractions" : "Nessuna attrazione",
-          lang === "en" ? "Add at least one attraction to view the itinerary." : "Aggiungi almeno un'attrazione per visualizzare l'itinerario.",
+          lang === "es" ? "Ninguna atraccion" : lang === "fr" ? "Aucune attraction" : lang === "en" ? "No attractions" : "Nessuna attrazione",
+          lang === "es" ? "Añade al menos una atracción para ver el itinerario." : lang === "fr" ? "Ajoutez au moins une attraction pour afficher l'itinéraire." : lang === "en" ? "Add at least one attraction to view the itinerary." : "Aggiungi almeno un'attrazione per visualizzare l'itinerario.",
         );
       }
       return;
@@ -875,31 +790,63 @@ export default function CreateItineraryScreen() {
     const itineraryDays = days
       .map((d) => {
         const stops = d.slots
-          .filter((s) => s.attraction !== null)
+          .filter((s) => s.kind === "attraction" && s.attraction !== null)
           .map((s) => ({
             ...s.attraction!,
-            type: s.kind === "meal" ? ("food" as const) : ("attraction" as const),
+            type: "attraction" as const,
             tags: s.attraction!.tags ?? [],
-            is_food_spot: s.kind === "meal",
+            is_food_spot: false,
+            notes: s.note?.trim() || undefined,
           }));
+        const restaurants = d.slots
+          .filter((s) => s.kind === "meal" && s.attraction !== null)
+          .map((s) => {
+            const food = s.attraction!;
+            const displayName = localizedName(food, lang) || food.name;
+            const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${displayName} ${localizedCityLabel(city, lang)}`)}`;
+            return {
+              id: food.id,
+              name: food.name,
+              name_en: food.name_en,
+              name_fr: food.name_fr,
+              name_es: food.name_es,
+              description: s.note?.trim() || undefined,
+              food_type: food.food_type ?? food.attraction_type ?? undefined,
+              meal_type: food.meal_type ?? "both",
+              rating: food.rating ?? undefined,
+              latitude: food.latitude,
+              longitude: food.longitude,
+              maps_link: mapsLink,
+            };
+          });
         const mapsLink = stops.length >= 2
-          ? "https://www.google.com/maps/dir/" + stops.map((s) => mapsWaypoint(s, city)).join("/") + "?travelmode=walking"
+          ? "https://www.google.com/maps/dir/" + stops.map((s) => mapsWaypoint(s, city, lang)).join("/") + "?travelmode=walking"
           : "";
-        return { day: d.day, stops, maps_link: mapsLink, restaurants: [] };
+        return { day: d.day, stops, maps_link: mapsLink, restaurants };
       })
 
     const itinerary = {
-      city, num_days: days.length, level: 1,
+      city, num_days: days.length, level: [1, 2, 3], creation_mode: "manual" as const, max_walk_km: MANUAL_MAX_WALK_KM,
       days: itineraryDays, food_recommendations: foods, culture_facts: cultureFacts,
     };
-    await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(itinerary));
+    const validated = normalizeItineraryStructure(itinerary, lang);
+    if (!validated.itinerary) {
+      showMessage(
+        lang === "es" ? "Itinerario incompleto" : lang === "fr" ? "Itinéraire incomplet" : lang === "en" ? "Incomplete itinerary" : "Itinerario incompleto",
+        lang === "es" ? "Añade al menos una etapa válida a cada día." : lang === "fr" ? "Ajoutez au moins une étape valide à chaque journée." : lang === "en" ? "Add at least one valid stop to every day." : "Aggiungi almeno una tappa valida a ogni giorno.",
+      );
+      return;
+    }
+    await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(validated.itinerary));
+    await removeManualBuilderDraft().catch(() => undefined);
+    void cacheCityForOffline(city).catch(() => {});
     router.push({ pathname: "/itinerary" });
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Render Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-  // Guard: mostra loading finché il builder store non ha inizializzato i giorni
-  if (days.length === 0) {
+  // Guard: mostra loading finchÃƒÂ© il builder store non ha inizializzato i giorni
+  if (!builderHydrated || days.length === 0) {
     return (
       <SafeAreaView style={[styles.safe, { justifyContent: "center", alignItems: "center" }]} edges={["top", "bottom"]}>
         <ActivityIndicator color={colors.accentGold} size="large" />
@@ -908,16 +855,53 @@ export default function CreateItineraryScreen() {
   }
 
   const currentCategories = activeTab === "food" ? foodCategories : attractionCategories;
+  const selectedGuide = lang === "es"
+    ? MANUAL_GUIDE_SLIDES_ES
+    : lang === "fr"
+      ? MANUAL_GUIDE_SLIDES_FR
+      : lang === "en"
+        ? MANUAL_GUIDE_SLIDES_EN
+        : MANUAL_GUIDE_SLIDES_IT;
+  const helpIconByTarget: Record<string, keyof typeof Ionicons.glyphMap> = {
+    header: "compass-outline",
+    guide: "help-circle-outline",
+    settings: "settings-outline",
+    tabs: "albums-outline",
+    search: "search-outline",
+    plan: "calendar-outline",
+    list: "list-outline",
+    view: "eye-outline",
+  };
+  const manualHelp = selectedGuide.reduce<Record<string, ContextHelpContent>>((result, { target, title, body }) => {
+    const previous = result[target];
+    result[target] = {
+      icon: helpIconByTarget[target] ?? "help-circle-outline",
+      title: previous?.title ?? title,
+      body: previous ? `${previous.body}\n\n${body}` : body,
+    };
+    return result;
+  }, {});
+  const headerHelp = manualHelp.header;
+  const tabsHelp = manualHelp.tabs;
+  const searchHelp = manualHelp.search;
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+    <SafeAreaView ref={guideRootRef} style={styles.safe} edges={["top", "bottom"]}>
 
-      {/* ── Header ── */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Header Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <View
+        collapsable={false}
         ref={(ref) => setGuideTarget("header", ref)}
-        style={styles.header}
+        style={[styles.header, contextHelpOutline(contextHelp.active, colors.accentGold)]}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={contextHelp.guard({ ...headerHelp, title: lang === "es" ? "Volver" : lang === "fr" ? "Retour" : lang === "en" ? "Back" : "Indietro" }, () => router.back())}
+          style={[styles.backBtn, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={lang === "es" ? "Volver" : lang === "fr" ? "Retour" : lang === "en" ? "Back" : "Indietro"}
+        >
           <Ionicons name="chevron-back" size={22} color={colors.accentGold} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -925,45 +909,60 @@ export default function CreateItineraryScreen() {
             {cityLabel || city.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </Text>
           <Text style={styles.headerSub}>
-            {days.length} {days.length === 1 ? (lang === "en" ? "day" : "giorno") : (lang === "en" ? "days" : "giorni")}
-            {totalPlaced > 0 ? ` · ${totalPlaced} ${lang === "en" ? "placed" : "inserite"}` : ""}
+            {days.length} {days.length === 1 ? (lang === "es" ? "día" : lang === "fr" ? "jour" : lang === "en" ? "day" : "giorno") : (lang === "es" ? "días" : lang === "fr" ? "jours" : lang === "en" ? "days" : "giorni")}
+            {totalAttractionsPlaced > 0 ? ` \u00B7 ${totalAttractionsPlaced} ${lang === "es" ? "añadidas" : lang === "fr" ? "ajoutées" : lang === "en" ? "placed" : "inserite"}` : ""}
           </Text>
         </View>
         <TouchableOpacity
-          onPress={() => setShowGuide(true)}
+          ref={(ref) => setGuideTarget("guide", ref)}
+          onPress={contextHelp.toggle}
           activeOpacity={0.7}
           style={[styles.flagBtn, styles.guideBtn]}
-          accessibilityLabel={lang === "en" ? "Open guide" : "Apri guida"}
+          accessibilityLabel={lang === "es" ? "Abrir la guía" : lang === "fr" ? "Ouvrir le guide" : lang === "en" ? "Open guide" : "Apri guida"}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: contextHelp.active }}
+          hitSlop={6}
         >
-          <Ionicons name="help-circle-outline" size={22} color={colors.accentGold} />
+          <Ionicons name={contextHelp.active ? "close" : "help-circle-outline"} size={22} color={colors.accentGold} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggle} activeOpacity={0.7} style={styles.flagBtn}>
-          <CountryFlag isoCode={currentLanguage.flagIso} size={14} />
+        <TouchableOpacity
+          ref={(ref) => setGuideTarget("settings", ref)}
+          onPress={contextHelp.guard(manualHelp.settings, () => setShowSettings(true))}
+          activeOpacity={0.7}
+          style={[styles.flagBtn, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          accessibilityLabel={lang === "es" ? "Configuración" : lang === "fr" ? "Paramètres" : lang === "en" ? "Settings" : "Impostazioni"}
+          accessibilityRole="button"
+          hitSlop={6}
+        >
+          <Ionicons name="settings-outline" size={19} color={colors.textMuted} />
         </TouchableOpacity>
         <TouchableOpacity
           ref={(ref) => setGuideTarget("view", ref)}
-          style={[styles.viewBtn, totalPlaced === 0 && styles.viewBtnDisabled]}
-          onPress={handleView}
+          style={[styles.viewBtn, totalAttractionsPlaced === 0 && styles.viewBtnDisabled, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          onPress={contextHelp.guard(manualHelp.view, handleView)}
           activeOpacity={0.8}
-          disabled={totalPlaced === 0}
+          disabled={!contextHelp.active && totalAttractionsPlaced === 0}
+          accessibilityRole="button"
+          accessibilityLabel={lang === "es" ? "Ver itinerario" : lang === "fr" ? "Voir l'itinéraire" : lang === "en" ? "View itinerary" : "Vedi itinerario"}
+          accessibilityState={{ disabled: !contextHelp.active && totalAttractionsPlaced === 0 }}
         >
-          <Ionicons name="eye-outline" size={15} color={totalPlaced > 0 ? colors.bg : colors.textMuted} />
-          <Text style={[styles.viewBtnText, totalPlaced === 0 && { color: colors.textMuted }]}>
-            {lang === "en" ? "View" : "Vedi"}
+          <Ionicons name="eye-outline" size={15} color={totalAttractionsPlaced > 0 ? colors.bg : colors.textMuted} />
+          <Text style={[styles.viewBtnText, totalAttractionsPlaced === 0 && { color: colors.textMuted }]}>
+            {lang === "es" ? "Ver" : lang === "fr" ? "Voir" : lang === "en" ? "View" : "Vedi"}
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* ── Tab bar ── */}
-      <View ref={(ref) => setGuideTarget("tabs", ref)} style={styles.tabBar}>
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Tab bar Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      <View collapsable={false} ref={(ref) => setGuideTarget("tabs", ref)} style={[styles.tabBar, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "attractions" && styles.tabActive]}
-          onPress={() => handleSwitchTab("attractions")}
+          style={[styles.tab, activeTab === "attractions" && styles.tabActive, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          onPress={contextHelp.guard({ ...tabsHelp, title: lang === "es" ? "Lugares" : lang === "fr" ? "Attractions" : lang === "en" ? "Places" : "Attrazioni" }, () => handleSwitchTab("attractions"))}
           activeOpacity={0.8}
         >
-          <Text style={styles.tabEmoji}>📍</Text>
+          <Text style={styles.tabEmoji}>{"\u{1F4CC}"}</Text>
           <Text style={[styles.tabLabel, activeTab === "attractions" && styles.tabLabelActive]}>
-            {lang === "en" ? "Places" : "Attrazioni"}
+            {lang === "es" ? "Lugares" : lang === "fr" ? "Attractions" : lang === "en" ? "Places" : "Attrazioni"}
           </Text>
           {available.length > 0 && (
             <View style={styles.tabBadge}>
@@ -973,13 +972,13 @@ export default function CreateItineraryScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === "food" && styles.tabActiveFood]}
-          onPress={() => handleSwitchTab("food")}
+          style={[styles.tab, activeTab === "food" && styles.tabActiveFood, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          onPress={contextHelp.guard({ ...tabsHelp, icon: "restaurant-outline", title: lang === "es" ? "Comida" : lang === "fr" ? "Repas" : lang === "en" ? "Food" : "Pasti" }, () => handleSwitchTab("food"))}
           activeOpacity={0.8}
         >
-          <Text style={styles.tabEmoji}>🍽️</Text>
+          <Text style={styles.tabEmoji}>{"\u{1F37D}\u{FE0F}"}</Text>
           <Text style={[styles.tabLabel, activeTab === "food" && styles.tabLabelActiveFood]}>
-            {lang === "en" ? "Food" : "Pasti"}
+            {lang === "es" ? "Comida" : lang === "fr" ? "Repas" : lang === "en" ? "Food" : "Pasti"}
           </Text>
           {availableFood.length > 0 && (
             <View style={[styles.tabBadge, styles.tabBadgeFood]}>
@@ -989,50 +988,52 @@ export default function CreateItineraryScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.tab, activeTab === "piano" && styles.tabActivePiano]}
-          onPress={() => setActiveTab("piano")}
+          style={[styles.tab, activeTab === "piano" && styles.tabActivePiano, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          onPress={contextHelp.guard({ ...tabsHelp, icon: "calendar-outline", title: lang === "es" ? "Plan" : lang === "fr" ? "Plan" : lang === "en" ? "Plan" : "Piano" }, () => setActiveTab("piano"))}
           activeOpacity={0.8}
         >
-          <Text style={styles.tabEmoji}>📅</Text>
+          <Text style={styles.tabEmoji}>{"\u{1F4C6}"}</Text>
           <Text style={[styles.tabLabel, activeTab === "piano" && styles.tabLabelActivePiano]}>
-            {lang === "en" ? "Plan" : "Piano"}
+            {lang === "es" ? "Plan" : lang === "fr" ? "Plan" : lang === "en" ? "Plan" : "Piano"}
           </Text>
-          {totalPlaced > 0 && (
+          {totalAttractionsPlaced > 0 && (
             <View style={[styles.tabBadge, styles.tabBadgePiano]}>
-              <Text style={styles.tabBadgeText}>{totalPlaced}</Text>
+              <Text style={styles.tabBadgeText}>{totalAttractionsPlaced}</Text>
             </View>
           )}
         </TouchableOpacity>
       </View>
 
-      {/* ── Contenuto tab ── */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Contenuto tab Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <View style={styles.tabContent}>
 
-        {/* ── TAB ATTRAZIONI ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ TAB ATTRAZIONI Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {(activeTab === "attractions" || activeTab === "food") && (
           <>
             {/* Barra ricerca + filtro */}
-            <View ref={(ref) => setGuideTarget("search", ref)} style={styles.searchRow}>
-              <View style={styles.searchBar}>
+            <View collapsable={false} ref={(ref) => setGuideTarget("search", ref)} style={[styles.searchRow, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
+              <View style={[styles.searchBar, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
                 <Ionicons name="search-outline" size={15} color={colors.textMuted} />
                 <TextInput
                   style={styles.searchInput}
                   value={search}
                   onChangeText={(v) => { setSearch(v); setActiveCategories([]); }}
-                  placeholder={lang === "en" ? "Search..." : "Cerca..."}
+                  placeholder={lang === "es" ? "Buscar..." : lang === "fr" ? "Rechercher..." : lang === "en" ? "Search..." : "Cerca..."}
                   placeholderTextColor={colors.textMuted}
                   selectionColor={colors.accentGold}
                   returnKeyType="search"
+                  editable={!contextHelp.active}
+                  onPressIn={() => { if (contextHelp.active) contextHelp.explain(searchHelp); }}
                 />
                 {search.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearch("")} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <TouchableOpacity onPress={contextHelp.guard(searchHelp, () => setSearch(""))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                     <Ionicons name="close-circle" size={16} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
               </View>
               <TouchableOpacity
-                style={[styles.filterBtn, activeCategories.length > 0 && styles.filterBtnActive]}
-                onPress={() => setShowFilterModal(true)}
+                style={[styles.filterBtn, activeCategories.length > 0 && styles.filterBtnActive, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+                onPress={contextHelp.guard({ ...searchHelp, icon: "options-outline" }, () => setShowFilterModal(true))}
                 activeOpacity={0.8}
               >
                 <Ionicons name="options-outline" size={16} color={activeCategories.length > 0 ? colors.accentGold : colors.textMuted} />
@@ -1043,8 +1044,8 @@ export default function CreateItineraryScreen() {
                 )}
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.mapToggleBtn}
-                onPress={() => setMapVisible(true)}
+                style={[styles.mapToggleBtn, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+                onPress={contextHelp.guard({ ...manualHelp.list, icon: "map-outline", title: lang === "es" ? "Mapa" : lang === "fr" ? "Carte" : lang === "en" ? "Map" : "Mappa" }, () => setMapVisible(true))}
                 activeOpacity={0.8}
               >
                 <Ionicons name="map-outline" size={16} color={colors.accentGold} />
@@ -1055,20 +1056,20 @@ export default function CreateItineraryScreen() {
             {activeTab === "attractions" && attractions.length > 0 && (
               <Text style={styles.totalCount}>
                 {available.length < attractions.length ? `${available.length} / ${attractions.length}` : `${attractions.length}`}
-                {" "}{lang === "en" ? "places available" : "attrazioni disponibili"}
+                {" "}{lang === "es" ? "lugares disponibles" : lang === "fr" ? "attractions disponibles" : lang === "en" ? "places available" : "attrazioni disponibili"}
               </Text>
             )}
             {activeTab === "food" && foodSpots.length > 0 && (
               <Text style={styles.totalCount}>
                 {availableFood.length < foodSpots.length ? `${availableFood.length} / ${foodSpots.length}` : `${foodSpots.length}`}
-                {" "}{lang === "en" ? "spots available" : "posti disponibili"}
+                {" "}{lang === "es" ? "sitios disponibles" : lang === "fr" ? "adresses disponibles" : lang === "en" ? "spots available" : "posti disponibili"}
               </Text>
             )}
 
             <View style={styles.builderWorkspace}>
-              <View ref={(ref) => setGuideTarget("plan", ref)} style={styles.builderPlanPane}>
+              <View collapsable={false} ref={(ref) => setGuideTarget("plan", ref)} style={[styles.builderPlanPane, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
                 <Text style={styles.builderPaneTitle}>
-                  {lang === "en" ? "Daily slots" : "Slot giornalieri"}
+                  {lang === "es" ? "Espacios del día" : lang === "fr" ? "Emplacements du jour" : lang === "en" ? "Daily slots" : "Slot giornalieri"}
                 </Text>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.builderPlanScroll}>
                   {days.map((d, dayIdx) => (
@@ -1081,29 +1082,29 @@ export default function CreateItineraryScreen() {
                       placementKind={selectedKind}
                       lang={lang}
                       showAddControls
-                      onToggle={() => handleToggleDay(d.day)}
-                      onTapSlot={(slot) => handleTapSlot(dayIdx, slot)}
-                      onRemove={(slotId) => handleRemove(dayIdx, slotId)}
-                      onDeleteSlot={(slotId) => handleDeleteSlot(dayIdx, slotId)}
-                      onAddSlot={() => handleAddSlot(dayIdx)}
-                      onAddMealSlot={() => handleAddMealSlot(dayIdx)}
+                       onToggle={contextHelp.guard(manualHelp.plan, () => handleToggleDay(d.day))}
+                       onTapSlot={(slot) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleTapSlot(dayIdx, slot)}
+                       onRemove={(slotId) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleRemove(dayIdx, slotId)}
+                       onDeleteSlot={(slotId) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleDeleteSlot(dayIdx, slotId)}
+                       onAddSlot={contextHelp.guard(manualHelp.plan, () => handleAddSlot(dayIdx))}
+                       onAddMealSlot={contextHelp.guard(manualHelp.plan, () => handleAddMealSlot(dayIdx))}
                       onSlotRef={(slot, ref) => handleSlotRef(dayIdx, slot, ref)}
-                      onSetNote={(slotId, note) => handleSetNote(dayIdx, slotId, note)}
-                      onOptimize={() => handleOptimizeDay(dayIdx)}
+                       onSetNote={(slotId, note) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleSetNote(dayIdx, slotId, note)}
+                       onOptimize={contextHelp.guard(manualHelp.plan, () => handleOptimizeDay(dayIdx))}
                     />
                   ))}
                   {days.length < 15 && (
-                    <TouchableOpacity style={styles.addDayBtn} onPress={handleAddDay} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.addDayBtn, contextHelpOutline(contextHelp.active, colors.accentGold)]} onPress={contextHelp.guard(manualHelp.plan, handleAddDay)} activeOpacity={0.7}>
                       <Ionicons name="add" size={15} color={colors.accentGold} />
                       <Text style={styles.addDayBtnText}>
-                        {lang === "en" ? "Add day" : "Aggiungi giorno"}
+                        {lang === "es" ? "Añadir día" : lang === "fr" ? "Ajouter un jour" : lang === "en" ? "Add day" : "Aggiungi giorno"}
                       </Text>
                     </TouchableOpacity>
                   )}
                 </ScrollView>
               </View>
 
-              <View ref={(ref) => setGuideTarget("list", ref)} style={styles.builderListPane}>
+              <View collapsable={false} ref={(ref) => setGuideTarget("list", ref)} style={[styles.builderListPane, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
             {/* Lista */}
             {activeTab === "attractions" ? (
               loading ? (
@@ -1124,17 +1125,17 @@ export default function CreateItineraryScreen() {
                       selected={selected?.id === a.id}
                       distance={distanceMap.get(a.id)}
                       lang={lang}
-                      onPress={() => handleSelectAttraction(a, "attraction")}
-                      onDragStart={(x, y) => handleDragStart(a, "attraction", x, y)}
-                      onDragMove={handleDragMove}
-                      onDragEnd={handleDragEnd}
+                       onPress={contextHelp.guard(manualHelp.list, () => handleSelectAttraction(a, "attraction"))}
+                       onDragStart={(x, y) => contextHelp.active ? contextHelp.explain(manualHelp.list) : handleDragStart(a, "attraction", x, y)}
+                       onDragMove={contextHelp.active ? () => {} : handleDragMove}
+                       onDragEnd={contextHelp.active ? () => {} : handleDragEnd}
                     />
                   )}
                   ListEmptyComponent={
                     <Text style={styles.emptyText}>
                       {search || activeCategories.length > 0
-                        ? (lang === "en" ? "No results" : "Nessun risultato")
-                        : (lang === "en" ? "All placed! 🎉" : "Tutte inserite! 🎉")}
+                        ? (lang === "es" ? "Sin resultados" : lang === "fr" ? "Aucun résultat" : lang === "en" ? "No results" : "Nessun risultato")
+                        : (lang === "es" ? "¡Todas añadidas! \u{1F389}" : lang === "fr" ? "Toutes ajoutées ! \u{1F389}" : lang === "en" ? "All placed! \u{1F389}" : "Tutte inserite! \u{1F389}")}
                     </Text>
                   }
                 />
@@ -1142,6 +1143,8 @@ export default function CreateItineraryScreen() {
             ) : (
               foodLoading ? (
                 <SkeletonList count={5} />
+              ) : foodError ? (
+                <Text style={styles.errorText}>{foodError}</Text>
               ) : (
                 <FlashList
                   ref={foodListRef}
@@ -1156,17 +1159,17 @@ export default function CreateItineraryScreen() {
                       selected={selected?.id === a.id}
                       distance={distanceMap.get(a.id)}
                       lang={lang}
-                      onPress={() => handleSelectAttraction(a, "meal")}
-                      onDragStart={(x, y) => handleDragStart(a, "meal", x, y)}
-                      onDragMove={handleDragMove}
-                      onDragEnd={handleDragEnd}
+                       onPress={contextHelp.guard(manualHelp.list, () => handleSelectAttraction(a, "meal"))}
+                       onDragStart={(x, y) => contextHelp.active ? contextHelp.explain(manualHelp.list) : handleDragStart(a, "meal", x, y)}
+                       onDragMove={contextHelp.active ? () => {} : handleDragMove}
+                       onDragEnd={contextHelp.active ? () => {} : handleDragEnd}
                     />
                   )}
                   ListEmptyComponent={
                     <Text style={styles.emptyText}>
                       {search || activeCategories.length > 0
-                        ? (lang === "en" ? "No results" : "Nessun risultato")
-                        : (lang === "en" ? "All placed! 🎉" : "Tutti inseriti! 🎉")}
+                        ? (lang === "es" ? "Sin resultados" : lang === "fr" ? "Aucun résultat" : lang === "en" ? "No results" : "Nessun risultato")
+                        : (lang === "es" ? "¡Todos añadidos! \u{1F389}" : lang === "fr" ? "Tous ajoutés ! \u{1F389}" : lang === "en" ? "All placed! \u{1F389}" : "Tutti inseriti! \u{1F389}")}
                     </Text>
                   }
                 />
@@ -1177,7 +1180,7 @@ export default function CreateItineraryScreen() {
           </>
         )}
 
-        {/* ── TAB PIANO ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ TAB PIANO Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {activeTab === "piano" && (
           <ScrollView
             ref={pianoScrollRef}
@@ -1196,21 +1199,21 @@ export default function CreateItineraryScreen() {
                   placementMode={selected !== null}
                   placementKind={selectedKind}
                   lang={lang}
-                  onToggle={() => handleToggleDay(d.day)}
-                  onTapSlot={(slot) => handleTapSlot(dayIdx, slot)}
-                  onRemove={(slotId) => handleRemove(dayIdx, slotId)}
-                  onDeleteSlot={(slotId) => handleDeleteSlot(dayIdx, slotId)}
+                  onToggle={contextHelp.guard(manualHelp.plan, () => handleToggleDay(d.day))}
+                  onTapSlot={(slot) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleTapSlot(dayIdx, slot)}
+                  onRemove={(slotId) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleRemove(dayIdx, slotId)}
+                  onDeleteSlot={(slotId) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleDeleteSlot(dayIdx, slotId)}
                   onSlotRef={(slot, ref) => handleSlotRef(dayIdx, slot, ref)}
-                  onSetNote={(slotId, note) => handleSetNote(dayIdx, slotId, note)}
-                  onOptimize={() => handleOptimizeDay(dayIdx)}
+                  onSetNote={(slotId, note) => contextHelp.active ? contextHelp.explain(manualHelp.plan) : handleSetNote(dayIdx, slotId, note)}
+                  onOptimize={contextHelp.guard(manualHelp.plan, () => handleOptimizeDay(dayIdx))}
                 />
               </View>
             ))}
             {days.length < 15 && (
-              <TouchableOpacity style={[styles.addDayBtn, styles.addDayBtnPiano]} onPress={handleAddDay} activeOpacity={0.7}>
+              <TouchableOpacity style={[styles.addDayBtn, styles.addDayBtnPiano, contextHelpOutline(contextHelp.active, colors.accentGold)]} onPress={contextHelp.guard(manualHelp.plan, handleAddDay)} activeOpacity={0.7}>
                 <Ionicons name="add" size={15} color={colors.accentGold} />
                 <Text style={styles.addDayBtnText}>
-                  {lang === "en" ? "Add day" : "Aggiungi giorno"}
+                  {lang === "es" ? "Añadir día" : lang === "fr" ? "Ajouter un jour" : lang === "en" ? "Add day" : "Aggiungi giorno"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -1218,14 +1221,14 @@ export default function CreateItineraryScreen() {
         )}
       </View>
 
-      {/* ── Modal filtro categorie ── */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Modal filtro categorie Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <Modal visible={showFilterModal} transparent animationType="fade" onRequestClose={() => setShowFilterModal(false)}>
         <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowFilterModal(false)}>
           <TouchableOpacity activeOpacity={1} style={styles.filterModal} onPress={() => {}}>
             <View style={styles.filterModalHeader}>
-              <Text style={styles.filterModalTitle}>{lang === "en" ? "Filter by type" : "Filtra per tipo"}</Text>
+              <Text style={styles.filterModalTitle}>{lang === "es" ? "Filtrar por tipo" : lang === "fr" ? "Filtrer par type" : lang === "en" ? "Filter by type" : "Filtra per tipo"}</Text>
               <TouchableOpacity onPress={() => setActiveCategories([])} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Text style={styles.filterModalReset}>{lang === "en" ? "Reset" : "Azzera"}</Text>
+                <Text style={styles.filterModalReset}>{lang === "es" ? "Restablecer" : lang === "fr" ? "Reinitialiser" : lang === "en" ? "Reset" : "Azzera"}</Text>
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.filterModalList}>
@@ -1242,7 +1245,7 @@ export default function CreateItineraryScreen() {
                       {checked && <Ionicons name="checkmark" size={11} color={colors.bg} />}
                     </View>
                     <Text style={[styles.filterModalItemText, checked && styles.filterModalItemTextChecked]}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      {translateType(cat, lang) ?? cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -1250,14 +1253,14 @@ export default function CreateItineraryScreen() {
             </ScrollView>
             <TouchableOpacity style={styles.filterModalDone} onPress={() => setShowFilterModal(false)} activeOpacity={0.8}>
               <Text style={styles.filterModalDoneText}>
-                {lang === "en" ? "Apply" : "Applica"}{activeCategories.length > 0 ? ` (${activeCategories.length})` : ""}
+                {lang === "es" ? "Aplicar" : lang === "fr" ? "Appliquer" : lang === "en" ? "Apply" : "Applica"}{activeCategories.length > 0 ? ` (${activeCategories.length})` : ""}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
-      {/* ── Barra selezione attiva ── */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Barra selezione attiva Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <Modal visible={dockDetail !== null} transparent animationType="fade" onRequestClose={() => setDockDetail(null)}>
         <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setDockDetail(null)}>
           <TouchableOpacity activeOpacity={1} style={styles.detailModal} onPress={() => {}}>
@@ -1269,14 +1272,12 @@ export default function CreateItineraryScreen() {
                   </Text>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.detailTitle} numberOfLines={2}>
-                      {(lang === "en" && dockDetail.slot.attraction.name_en)
-                        ? dockDetail.slot.attraction.name_en
-                        : dockDetail.slot.attraction.name}
+                      {localizedName(dockDetail.slot.attraction, lang)}
                     </Text>
                     <Text style={styles.detailMeta}>
                       {dockDetail.slot.kind === "meal"
-                        ? (lang === "en" ? "Meal slot" : "Slot pasto")
-                        : (dockDetail.slot.attraction.attraction_type ?? (lang === "en" ? "Attraction" : "Attrazione"))}
+                        ? (lang === "es" ? "Espacio de comida" : lang === "fr" ? "Etape repas" : lang === "en" ? "Meal slot" : "Slot pasto")
+                        : (translateType(dockDetail.slot.attraction.attraction_type, lang) ?? (lang === "es" ? "Atraccion" : lang === "fr" ? "Attraction" : lang === "en" ? "Attraction" : "Attrazione"))}
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setDockDetail(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -1284,18 +1285,16 @@ export default function CreateItineraryScreen() {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.detailDescription}>
-                  {(lang === "en" && dockDetail.slot.attraction.description_en)
-                    ? dockDetail.slot.attraction.description_en
-                    : (dockDetail.slot.attraction.description || "")}
+                  {localizedDescription(dockDetail.slot.attraction, lang)}
                 </Text>
                 <View style={styles.detailActionsRow}>
                   <TouchableOpacity
                     style={styles.detailMapBtn}
-                    onPress={() => openExternalLink(mapsSearchUrl(dockDetail.slot.attraction!, city))}
+                    onPress={() => openExternalLink(mapsSearchUrl(dockDetail.slot.attraction!, city, lang))}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="map-outline" size={16} color={colors.bg} />
-                    <Text style={styles.detailMapText}>Maps</Text>
+                    <Text style={styles.detailMapText}>{lang === "es" ? "Mapa" : lang === "fr" ? "Carte" : lang === "en" ? "Maps" : "Mappe"}</Text>
                   </TouchableOpacity>
                   {isMuseum(dockDetail.slot.attraction) && !!dockDetail.slot.attraction.ticket_url && (
                     <TouchableOpacity
@@ -1305,7 +1304,7 @@ export default function CreateItineraryScreen() {
                     >
                       <Ionicons name="ticket-outline" size={16} color={colors.text} />
                       <Text style={styles.detailTicketText}>
-                        {lang === "en" ? "Tickets" : "Biglietti"}
+                        {lang === "es" ? "Entradas" : lang === "fr" ? "Billets" : lang === "en" ? "Tickets" : "Biglietti"}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -1327,14 +1326,12 @@ export default function CreateItineraryScreen() {
                   </Text>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.detailTitle} numberOfLines={3}>
-                      {(lang === "en" && attractionDetail.item.name_en)
-                        ? attractionDetail.item.name_en
-                        : attractionDetail.item.name}
+                      {localizedName(attractionDetail.item, lang)}
                     </Text>
                     <Text style={[styles.detailMeta, attractionDetail.kind === "meal" && styles.detailMetaMeal]}>
                       {attractionDetail.kind === "meal"
                         ? priceLabel(attractionDetail.item.category_level)
-                        : (translateType(attractionDetail.item.attraction_type, lang) ?? (lang === "en" ? "Attraction" : "Attrazione"))}
+                        : (translateType(attractionDetail.item.attraction_type, lang) ?? (lang === "es" ? "Atraccion" : lang === "fr" ? "Attraction" : lang === "en" ? "Attraction" : "Attrazione"))}
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setAttractionDetail(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -1343,31 +1340,17 @@ export default function CreateItineraryScreen() {
                 </View>
                 <ScrollView style={styles.detailDescriptionScroll} showsVerticalScrollIndicator={false}>
                   <Text style={styles.detailDescription}>
-                    {(lang === "en" && attractionDetail.item.description_en)
-                      ? attractionDetail.item.description_en
-                      : (attractionDetail.item.description || (lang === "en" ? "No description available." : "Descrizione non disponibile."))}
+                    {localizedDescription(attractionDetail.item, lang) || (lang === "es" ? "Descripción no disponible." : lang === "fr" ? "Description non disponible." : lang === "en" ? "No description available." : "Descrizione non disponibile.")}
                   </Text>
                 </ScrollView>
-                <TouchableOpacity
-                  style={styles.detailAddBtn}
-                  onPress={handleAddFromDetail}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="add-circle-outline" size={16} color={colors.bg} />
-                  <Text style={styles.detailAddText}>
-                    {lang === "en"
-                      ? `Add to Day ${days[activeDayIndex]?.day ?? 1}`
-                      : `Aggiungi al Giorno ${days[activeDayIndex]?.day ?? 1}`}
-                  </Text>
-                </TouchableOpacity>
                 <View style={styles.detailActionsRow}>
                   <TouchableOpacity
                     style={styles.detailMapBtn}
-                    onPress={() => openExternalLink(mapsSearchUrl(attractionDetail.item, city))}
+                    onPress={() => openExternalLink(mapsSearchUrl(attractionDetail.item, city, lang))}
                     activeOpacity={0.8}
                   >
                     <Ionicons name="map-outline" size={16} color={colors.bg} />
-                    <Text style={styles.detailMapText}>Maps</Text>
+                    <Text style={styles.detailMapText}>{lang === "es" ? "Mapa" : lang === "fr" ? "Carte" : lang === "en" ? "Maps" : "Mappe"}</Text>
                   </TouchableOpacity>
                   {isMuseum(attractionDetail.item) && !!attractionDetail.item.ticket_url && (
                     <TouchableOpacity
@@ -1377,7 +1360,7 @@ export default function CreateItineraryScreen() {
                     >
                       <Ionicons name="ticket-outline" size={16} color={colors.text} />
                       <Text style={styles.detailTicketText}>
-                        {lang === "en" ? "Tickets" : "Biglietti"}
+                        {lang === "es" ? "Entradas" : lang === "fr" ? "Billets" : lang === "en" ? "Tickets" : "Biglietti"}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -1406,19 +1389,12 @@ export default function CreateItineraryScreen() {
         >
           <Text style={styles.dragPreviewEmoji}>{getEmoji(dragging.item.attraction_type, dragging.kind === "meal")}</Text>
           <Text style={styles.dragPreviewName} numberOfLines={1}>
-            {(lang === "en" && dragging.item.name_en) ? dragging.item.name_en : dragging.item.name}
+            {localizedName(dragging.item, lang)}
           </Text>
         </Animated.View>
       )}
 
-      {showGuide && (
-        <GuideModal
-          lang={lang}
-          slides={lang === "en" ? MANUAL_GUIDE_SLIDES_EN : MANUAL_GUIDE_SLIDES_IT}
-          targetRefs={guideTargets.current}
-          onDone={dismissGuide}
-        />
-      )}
+      <ContextHelpUI controller={contextHelp} lang={lang} />
 
       {selected && (
         <View style={styles.selectionBar}>
@@ -1427,12 +1403,12 @@ export default function CreateItineraryScreen() {
           </Text>
           <View style={{ flex: 1 }}>
             <Text style={styles.selectionName} numberOfLines={1}>
-              {(lang === "en" && selected.name_en) ? selected.name_en : selected.name}
+              {localizedName(selected, lang)}
             </Text>
             <Text style={styles.selectionHint}>
               {activeTab === "piano"
-                ? (lang === "en" ? "Tap an empty slot to place it" : "Tocca uno slot vuoto per inserirla")
-                : (lang === "en" ? "Tap a slot on the left to place it" : "Tocca uno slot a sinistra per inserirla")}
+                ? (lang === "es" ? "Toca un espacio vacio para anadirla" : lang === "fr" ? "Touchez un emplacement vide pour l'ajouter" : lang === "en" ? "Tap an empty slot to place it" : "Tocca uno slot vuoto per inserirla")
+                : (lang === "es" ? "Toca un espacio de la izquierda para anadirla" : lang === "fr" ? "Touchez un emplacement a gauche pour l'ajouter" : lang === "en" ? "Tap a slot on the left to place it" : "Tocca uno slot a sinistra per inserirla")}
             </Text>
           </View>
           <TouchableOpacity onPress={handleCancelSelection} style={styles.cancelBtn} activeOpacity={0.7} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -1441,11 +1417,16 @@ export default function CreateItineraryScreen() {
         </View>
       )}
 
+      <SettingsModal
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
+
       <BuilderMap
         visible={mapVisible}
         onClose={() => setMapVisible(false)}
         lang={lang}
-        dayLabel={lang === "en" ? `Day ${activeDay?.day ?? 1}` : `Giorno ${activeDay?.day ?? 1}`}
+        dayLabel={lang === "es" ? `Día ${activeDay?.day ?? 1}` : lang === "fr" ? `Jour ${activeDay?.day ?? 1}` : lang === "en" ? `Day ${activeDay?.day ?? 1}` : `Giorno ${activeDay?.day ?? 1}`}
         attractions={mapAttractions}
         foodSpots={mapFoodSpots}
         currentSlots={currentMapSlots}
@@ -1459,21 +1440,24 @@ export default function CreateItineraryScreen() {
 }
 
 function GuideModal({
-  lang, slides, targetRefs, onDone,
+  lang, slides, targetRefs, rootRef, onDone,
 }: {
   lang: string;
   slides: GuideStep[];
   targetRefs: Map<string, View>;
+  rootRef: React.RefObject<View | null>;
   onDone: () => void;
 }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [slide, setSlide] = useState(0);
   const [rect, setRect] = useState<GuideRect | null>(null);
+  const [cardHeight, setCardHeight] = useState(300);
   const isLast = slide === slides.length - 1;
   const current = slides[slide];
   const tooltipWidth = Math.min(300, SCREEN_WIDTH - 32);
-  const tooltipHeight = 258;
+  const tooltipHeight = cardHeight;
   const tooltipTop = rect
     ? Math.max(16, Math.min(SCREEN_HEIGHT - tooltipHeight - 16,
         rect.y + rect.height + tooltipHeight + 24 > SCREEN_HEIGHT
@@ -1481,37 +1465,36 @@ function GuideModal({
           : rect.y + rect.height + 16))
     : Math.max(16, Math.min(SCREEN_HEIGHT - tooltipHeight - 16, SCREEN_HEIGHT * 0.46));
   const tooltipLeft = Math.max(16, Math.min(SCREEN_WIDTH - tooltipWidth - 16, rect ? rect.x + rect.width / 2 - tooltipWidth / 2 : 16));
+  const pad = 6;
+  const cutoutTop = rect ? Math.max(0, rect.y - pad) : 0;
+  const cutoutBottom = rect ? Math.min(SCREEN_HEIGHT, rect.y + rect.height + pad) : 0;
+  const cutoutLeft = rect ? Math.max(0, rect.x - pad) : 0;
+  const cutoutRight = rect ? Math.min(SCREEN_WIDTH, rect.x + rect.width + pad) : SCREEN_WIDTH;
+  const overlayColor = "#000000d0";
 
   useEffect(() => {
+    setRect(null);
     const target = targetRefs.get(current.target);
-    if (!target) {
-      setRect(null);
-      return;
-    }
+    if (!target) return;
     const id = setTimeout(() => {
-      target.measureInWindow((x, y, width, height) => {
-        setRect({ x, y, width, height });
-      });
-    }, 80);
+      measureGuideTarget(target, rootRef.current, insets.top, setRect);
+    }, 120);
     return () => clearTimeout(id);
-  }, [current.target, targetRefs]);
+  }, [current.target, insets.top, rootRef, targetRefs]);
 
   return (
-    <Modal visible transparent animationType="fade">
+    <Modal visible transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
       <View style={styles.tourOverlay}>
-        {rect && (
-          <View
-            pointerEvents="none"
-            style={[
-              styles.tourHighlight,
-              {
-                left: Math.max(6, rect.x - 6),
-                top: Math.max(6, rect.y - 6),
-                width: Math.min(SCREEN_WIDTH - 12, rect.width + 12),
-                height: rect.height + 12,
-              },
-            ]}
-          />
+        {rect ? (
+          <>
+            <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: cutoutTop, backgroundColor: overlayColor }} />
+            <View pointerEvents="none" style={{ position: "absolute", top: cutoutTop, left: 0, width: cutoutLeft, height: cutoutBottom - cutoutTop, backgroundColor: overlayColor }} />
+            <View pointerEvents="none" style={{ position: "absolute", top: cutoutTop, left: cutoutRight, right: 0, height: cutoutBottom - cutoutTop, backgroundColor: overlayColor }} />
+            <View pointerEvents="none" style={{ position: "absolute", top: cutoutBottom, left: 0, right: 0, bottom: 0, backgroundColor: overlayColor }} />
+            <View pointerEvents="none" style={[styles.tourHighlight, { left: cutoutLeft, top: cutoutTop, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop }]} />
+          </>
+        ) : (
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: overlayColor }]} />
         )}
         {rect && (
           <View
@@ -1526,7 +1509,7 @@ function GuideModal({
             ]}
           />
         )}
-        <View style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth }]}>
+        <View onLayout={(event) => setCardHeight(event.nativeEvent.layout.height)} style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth }]}>
           <Text style={styles.tourEyebrow}>{slide + 1} / {slides.length}</Text>
           <Text style={styles.guideIcon}>{current.icon}</Text>
           <Text style={styles.guideTitle}>{current.title}</Text>
@@ -1543,13 +1526,13 @@ function GuideModal({
           >
             <Text style={styles.guideCtaText}>
               {isLast
-                ? (lang === "en" ? "Start building" : "Inizia a creare")
-                : (lang === "en" ? "Next" : "Avanti")}
+                ? (lang === "es" ? "Empezar a crear" : lang === "fr" ? "Commencer la creation" : lang === "en" ? "Start building" : "Inizia a creare")
+                : (lang === "es" ? "Siguiente" : lang === "fr" ? "Suivant" : lang === "en" ? "Next" : "Avanti")}
             </Text>
           </TouchableOpacity>
           {!isLast && (
             <TouchableOpacity onPress={onDone} style={styles.guideSkip} activeOpacity={0.7}>
-              <Text style={styles.guideSkipText}>{lang === "en" ? "Skip" : "Salta"}</Text>
+              <Text style={styles.guideSkipText}>{lang === "es" ? "Saltar" : lang === "fr" ? "Passer" : lang === "en" ? "Skip" : "Salta"}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1578,9 +1561,9 @@ function DaySlotDock({
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const compatibleSlots = day.slots.filter((s) => s.kind === mode);
-  const timeColor = stats.minutes >= 240 && stats.minutes <= 420 ? colors.accentGreen : colors.accentGold;
-  const kmColor = stats.distanceKm <= 4 ? colors.accentGreen : colors.danger;
-  const museumColor = stats.museums <= 1 ? colors.accentGreen : colors.danger;
+  const timeColor = stats.minutes >= 240 && stats.minutes <= MAX_ACTIVITY_MINUTES ? colors.accentGreen : colors.accentGold;
+  const kmColor = stats.distanceKm <= MANUAL_MAX_WALK_KM ? colors.accentGreen : colors.danger;
+  const museumColor = stats.museums <= MAX_MUSEUMS_PER_DAY ? colors.accentGreen : colors.danger;
 
   return (
     <View style={styles.dayDock}>
@@ -1595,12 +1578,12 @@ function DaySlotDock({
         </TouchableOpacity>
         <View style={styles.dayDockTitleWrap}>
           <Text style={styles.dayDockTitle}>
-            {lang === "en" ? "Day" : "Giorno"} {day.day}
+            {lang === "es" ? "Día" : lang === "fr" ? "Jour" : lang === "en" ? "Day" : "Giorno"} {day.day}
           </Text>
           <Text style={styles.dayDockSubtitle}>
             {mode === "meal"
-              ? (lang === "en" ? "Tap a meal to add it" : "Tocca un pasto per inserirlo")
-              : (lang === "en" ? "Tap a place to add it" : "Tocca un'attrazione per inserirla")}
+              ? (lang === "es" ? "Toca una comida para añadirla" : lang === "fr" ? "Touchez un repas pour l'ajouter" : lang === "en" ? "Tap a meal to add it" : "Tocca un pasto per inserirlo")
+              : (lang === "es" ? "Toca un lugar para añadirlo" : lang === "fr" ? "Touchez une attraction pour l'ajouter" : lang === "en" ? "Tap a place to add it" : "Tocca un'attrazione per inserirla")}
           </Text>
         </View>
         <TouchableOpacity
@@ -1619,8 +1602,8 @@ function DaySlotDock({
       <View style={styles.dayDockMetrics}>
         <Text style={[styles.dayDockMetric, { color: timeColor }]}>{Math.floor(stats.minutes / 60)}h{stats.minutes % 60 ? ` ${stats.minutes % 60}m` : ""}</Text>
         <Text style={[styles.dayDockMetric, { color: kmColor }]}>{stats.distanceKm.toFixed(1)} / 4 km</Text>
-        <Text style={[styles.dayDockMetric, { color: museumColor }]}>{stats.museums} / 1 museo</Text>
-        <Text style={styles.dayDockMetricMuted}>{stats.filled} slot</Text>
+        <Text style={[styles.dayDockMetric, { color: museumColor }]}>{stats.museums} / {MAX_MUSEUMS_PER_DAY} {lang === "es" ? "museos" : lang === "fr" ? "musées" : lang === "en" ? "museums" : "musei"}</Text>
+        <Text style={styles.dayDockMetricMuted}>{stats.filled} {lang === "es" ? "espacios" : lang === "fr" ? "slots" : lang === "en" ? "slots" : "slot"}</Text>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayDockSlots}>
@@ -1628,10 +1611,10 @@ function DaySlotDock({
           const filled = slot.attraction !== null;
           const active = activeSlotId === slot.id;
           const label = filled
-            ? ((lang === "en" && slot.attraction?.name_en) ? slot.attraction.name_en : slot.attraction?.name)
+            ? localizedName(slot.attraction!, lang)
             : mode === "meal"
-              ? (lang === "en" ? "Meal" : "Pasto")
-              : (lang === "en" ? "Place" : "Attrazione");
+              ? (lang === "es" ? "Comida" : lang === "fr" ? "Repas" : lang === "en" ? "Meal" : "Pasto")
+              : (lang === "es" ? "Lugar" : lang === "fr" ? "Lieu" : lang === "en" ? "Place" : "Attrazione");
           return (
             <TouchableOpacity
               key={slot.id}
@@ -1659,7 +1642,7 @@ function DaySlotDock({
   );
 }
 
-// ── AttractionCard (full-width, più spaziosa) ─────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ AttractionCard (full-width, piÃƒÂ¹ spaziosa) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function AttractionCard({
   attraction, isFood, selected, distance, lang, onPress, onDragStart, onDragMove, onDragEnd,
@@ -1702,15 +1685,15 @@ function AttractionCard({
     onShouldBlockNativeResponder: () => true,
   }), [onDragEnd, onDragMove, onDragStart]);
   const color = isFood ? colors.accentGreen : (LEVEL_COLORS[attraction.category_level] ?? "#ccc");
-  const isMuseum = !isFood && (attraction.attraction_type ?? "").toLowerCase() === "museo";
-  const name = lang === "en" && attraction.name_en ? attraction.name_en : attraction.name;
+  const isMuseum = !isFood && isMuseumType(attraction.attraction_type);
+  const name = localizedName(attraction, lang);
   const emoji = getEmoji(attraction.attraction_type, isFood);
   const typeLabel = translateType(attraction.attraction_type, lang);
 
   return (
     <View
       {...panResponder.panHandlers}
-      // @ts-ignore — cursor è proprietà web non tipizzata in RN
+      // @ts-ignore Ã¢â‚¬â€ cursor ÃƒÂ¨ proprietÃƒÂ  web non tipizzata in RN
       style={Platform.OS === "web" ? { cursor: "grab" } : undefined}
     >
       <TouchableOpacity
@@ -1722,7 +1705,7 @@ function AttractionCard({
         onPress={() => { if (!dragStarted.current) onPress(); }}
         activeOpacity={0.8}
       >
-        {/* Drag handle — visibile solo su web come affordance */}
+        {/* Drag handle Ã¢â‚¬â€ visibile solo su web come affordance */}
         {Platform.OS === "web" && (
           <Ionicons
             name="reorder-three-outline"
@@ -1768,7 +1751,7 @@ function AttractionCard({
   );
 }
 
-// ── DayRow ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ DayRow Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function DayRow({
   day, dayIdx, expanded, placementMode, placementKind, lang,
@@ -1803,9 +1786,9 @@ function DayRow({
   const mm = totalMins % 60;
   const timeLabel = totalMins > 0 ? (hh > 0 ? `${hh}h${mm > 0 ? ` ${mm}min` : ""}` : `${mm}min`) : null;
   const metricTimeLabel = totalMins > 0 ? (hh > 0 ? `${hh}h${mm > 0 ? `${mm}` : ""}` : `${mm}m`) : "0m";
-  const timeColor = stats.minutes > 420 ? colors.danger : colors.accentGreen;
-  const kmColor = stats.distanceKm > 4 ? colors.danger : colors.accentGreen;
-  const museumColor = stats.museums > 1 ? colors.danger : colors.accentGreen;
+  const timeColor = stats.minutes > MAX_ACTIVITY_MINUTES ? colors.danger : stats.minutes >= 240 ? colors.accentGreen : colors.accentGold;
+  const kmColor = stats.distanceKm > MANUAL_MAX_WALK_KM ? colors.danger : colors.accentGreen;
+  const museumColor = stats.museums > MAX_MUSEUMS_PER_DAY ? colors.danger : colors.accentGreen;
 
   return (
     <View style={styles.dayRow}>
@@ -1814,8 +1797,8 @@ function DayRow({
           <Text style={[styles.dayBadgeText, expanded && styles.dayBadgeTextActive]}>{day.day}</Text>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={styles.dayTitle} numberOfLines={1}>{lang === "en" ? "Day" : "Giorno"} {day.day}</Text>
-          {timeLabel && <Text style={styles.dayTimeMeta}>⏱ {timeLabel}</Text>}
+          <Text style={styles.dayTitle} numberOfLines={1}>{lang === "es" ? "Día" : lang === "fr" ? "Jour" : lang === "en" ? "Day" : "Giorno"} {day.day}</Text>
+          {timeLabel && <Text style={styles.dayTimeMeta}>{lang === "es" ? "Tiempo" : lang === "fr" ? "Temps" : lang === "en" ? "Time" : "Tempo"} {timeLabel}</Text>}
         </View>
         {filledCount > 0 && (
           <View style={styles.filledBadge}>
@@ -1830,7 +1813,7 @@ function DayRow({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons name="shuffle-outline" size={15} color={colors.accentBlue} />
-            <Text style={styles.optimizeBtnText}>{lang === "en" ? "Opt." : "Ottim."}</Text>
+            <Text style={styles.optimizeBtnText}>{lang === "es" ? "Opt." : lang === "fr" ? "Opt." : lang === "en" ? "Opt." : "Ottim."}</Text>
           </TouchableOpacity>
         )}
         <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
@@ -1840,13 +1823,13 @@ function DayRow({
         <View style={styles.dayBody}>
           <View style={styles.dayMetricsColumn}>
             <View style={styles.dayMetricChip}>
-              <Text style={[styles.dayMetricText, { color: timeColor }]} numberOfLines={1}>⏱ {metricTimeLabel} / 7h</Text>
+              <Text style={[styles.dayMetricText, { color: timeColor }]} numberOfLines={1}>{lang === "es" ? "Tiempo" : lang === "fr" ? "Temps" : lang === "en" ? "Time" : "Tempo"} {metricTimeLabel} / 7h</Text>
             </View>
             <View style={styles.dayMetricChip}>
-              <Text style={[styles.dayMetricText, { color: kmColor }]} numberOfLines={1}>🚶 {stats.distanceKm.toFixed(1)} / 4 km</Text>
+              <Text style={[styles.dayMetricText, { color: kmColor }]} numberOfLines={1}>Km {stats.distanceKm.toFixed(1)} / 4</Text>
             </View>
             <View style={styles.dayMetricChip}>
-              <Text style={[styles.dayMetricText, { color: museumColor }]} numberOfLines={1}>🏛 {stats.museums} / 1 museo</Text>
+              <Text style={[styles.dayMetricText, { color: museumColor }]} numberOfLines={1}>{lang === "es" ? "Museos" : lang === "fr" ? "Musées" : lang === "en" ? "Museums" : "Musei"} {stats.museums} / {MAX_MUSEUMS_PER_DAY}</Text>
             </View>
           </View>
           {day.slots.map((slot, idx) => (
@@ -1868,11 +1851,11 @@ function DayRow({
             <View style={styles.addSlotRow}>
               <TouchableOpacity style={styles.addSlotBtn} onPress={onAddSlot} activeOpacity={0.7}>
                 <Ionicons name="add" size={14} color={colors.accentBlue} />
-                <Text style={styles.addSlotText}>🏛️</Text>
+                <Text style={styles.addSlotText}>{"\u{1F3DB}\u{FE0F}"}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.addMealBtn} onPress={onAddMealSlot} activeOpacity={0.7}>
                 <Ionicons name="add" size={14} color={colors.accentGreen} />
-                <Text style={styles.addMealText}>🍝</Text>
+                <Text style={styles.addMealText}>{"\u{1F35D}"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -1882,7 +1865,7 @@ function DayRow({
   );
 }
 
-// ── SlotCard ──────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ SlotCard Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function SlotCard({
   slot, index, placementMode, placementKind, lang,
@@ -1899,7 +1882,7 @@ function SlotCard({
   const isFilled = slot.attraction !== null;
   const isMeal = slot.kind === "meal";
   const name = isFilled
-    ? (lang === "en" && slot.attraction!.name_en ? slot.attraction!.name_en : slot.attraction!.name)
+    ? localizedName(slot.attraction!, lang)
     : null;
   const canReceive = placementMode && placementKind === slot.kind;
 
@@ -1909,7 +1892,7 @@ function SlotCard({
         style={[
           styles.slotFilled,
           isMeal && styles.slotFilledMeal,
-          !isMeal && (slot.attraction?.attraction_type ?? "").toLowerCase() === "museo" && styles.slotFilledMuseum,
+          !isMeal && isMuseumType(slot.attraction?.attraction_type) && styles.slotFilledMuseum,
         ]}
         onPress={onTap}
         activeOpacity={0.82}
@@ -1966,13 +1949,13 @@ function SlotCard({
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Styles Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function makeStyles(colors: any) {
   return StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.bg },
 
-    // ── Header ──────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Header Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     header: {
       flexDirection: "row", alignItems: "center",
       paddingHorizontal: 14, paddingVertical: 10,
@@ -2002,7 +1985,7 @@ function makeStyles(colors: any) {
     },
     flagEmoji: { fontSize: 14 },
 
-    // ── Tab bar ─────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Tab bar Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     tabBar: {
       flexDirection: "row",
       backgroundColor: colors.card2,
@@ -2032,7 +2015,7 @@ function makeStyles(colors: any) {
     tabBadgePiano: { backgroundColor: colors.accentBlue },
     tabBadgeText: { color: colors.bg, fontSize: 10, fontWeight: "800" },
 
-    // ── Tab content ─────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Tab content Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     tabContent: { flex: 1 },
 
     // Search
@@ -2105,7 +2088,7 @@ function makeStyles(colors: any) {
     errorText: { color: colors.danger, fontSize: 13, padding: 16, lineHeight: 19 },
     emptyText: { color: colors.textMuted, fontSize: 13, textAlign: "center", marginTop: 32 },
 
-    // ── Attraction card (full-width) ─────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Attraction card (full-width) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     attrCard: {
       flexDirection: "row", alignItems: "flex-start",
       backgroundColor: colors.card, borderRadius: 14,
@@ -2241,7 +2224,7 @@ function makeStyles(colors: any) {
       justifyContent: "center",
     },
 
-    // ── Day row ─────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Day row Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     dayRow: {
       backgroundColor: colors.card, borderRadius: 16,
       borderWidth: 1, borderColor: colors.border2, marginBottom: 12, overflow: "hidden",
@@ -2289,7 +2272,7 @@ function makeStyles(colors: any) {
       fontWeight: "800",
     },
 
-    // ── Slot filled ─────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Slot filled Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     slotFilled: {
       minHeight: 72,
       flexDirection: "row", alignItems: "center", gap: 10,
@@ -2333,7 +2316,7 @@ function makeStyles(colors: any) {
       borderColor: colors.danger + "40",
     },
 
-    // ── Slot empty ──────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Slot empty Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     slotEmpty: {
       height: 56,
       flexDirection: "row", alignItems: "center", gap: 10,
@@ -2376,7 +2359,7 @@ function makeStyles(colors: any) {
     dragPreviewEmoji: { fontSize: 22 },
     dragPreviewName: { flex: 1, color: colors.text, fontSize: 13, fontWeight: "800" },
 
-    // ── Add slot ────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Add slot Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     addSlotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
     addSlotBtn: {
       flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
@@ -2409,7 +2392,7 @@ function makeStyles(colors: any) {
     },
     addDayBtnText: { color: colors.accentGold, fontSize: 12, fontWeight: "800" as const },
 
-    // ── Selection bar ────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Selection bar Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     selectionBar: {
       flexDirection: "row", alignItems: "center", gap: 12,
       backgroundColor: colors.card2,
@@ -2427,7 +2410,7 @@ function makeStyles(colors: any) {
     goToPianoBtnText: { fontSize: 14 },
     cancelBtn: { flexShrink: 0, padding: 4 },
 
-    // ── Modal filtro ─────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Modal filtro Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     modalBackdrop: {
       flex: 1, backgroundColor: "#00000088",
       justifyContent: "center", alignItems: "center", paddingHorizontal: 24,
@@ -2509,7 +2492,7 @@ function makeStyles(colors: any) {
     detailDeleteText: { color: "#fff", fontSize: 14, fontWeight: "800" },
     tourOverlay: {
       flex: 1,
-      backgroundColor: "#000000cc",
+      backgroundColor: "transparent",
     },
     tourHighlight: {
       position: "absolute",

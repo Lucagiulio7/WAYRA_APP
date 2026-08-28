@@ -47,7 +47,7 @@ ATTRACTIONS = [
  {'city': 'napoli', 'block_id': 122, 'zone': 'duomo_tribunali', 'category_level': 2, 'name': 'Museo del Tesoro di San Gennaro', 'name_en': 'Museum of the Treasure of San Gennaro', 'description': 'Tappa molto utile per approfondire il lato devozionale e simbolico della zona del duomo.', 'description_en': 'A very useful stop for deepening the devotional and symbolic side of the cathedral district.', 'latitude': 40.8530, 'longitude': 14.2612, 'estimated_visit_time': 45, 'tags': ['museo', 'duomo', 'devozione'], 'attraction_type': 'museo', 'ticket_url': 'https://www.museosangennaro.it/en/'},
  {'city': 'napoli', 'block_id': 122, 'zone': 'duomo_tribunali', 'category_level': 3, 'name': 'Via Duomo', 'name_en': 'Duomo Street', 'description': 'Asse molto leggibile per connettere la grande cattedrale con il resto del centro antico.', 'description_en': 'A very legible axis connecting the great cathedral with the rest of the old centre.', 'latitude': 40.8523, 'longitude': 14.2607, 'estimated_visit_time': 20, 'tags': ['strada', 'duomo', 'centro'], 'attraction_type': 'strada storica', 'ticket_url': None},
  {'city': 'napoli', 'block_id': 123, 'zone': 'museo_nazionale', 'category_level': 2, 'name': 'Galleria dell\'Accademia di Belle Arti', 'name_en': 'Academy of Fine Arts Gallery', 'description': 'Spazio utile per completare il lato culturale e studentesco del quadrante del museo.', 'description_en': 'A useful space for completing the cultural and student side of the museum district.', 'latitude': 40.8529, 'longitude': 14.2514, 'estimated_visit_time': 35, 'tags': ['arte', 'accademia', 'quartiere'], 'attraction_type': 'galleria', 'ticket_url': None},
- {'city': 'napoli', 'block_id': 123, 'zone': 'museo_nazionale', 'category_level': 3, 'name': 'Port\'Alba', 'name_en': 'Port\'Alba', 'description': 'Porta e tratto librario molto utili per leggere il lato universitario del centro.', 'description_en': 'A gate and bookish stretch very useful for reading the centre\'s university side.', 'latitude': 40.8500, 'longitude': 14.2492, 'estimated_visit_time': 20, 'tags': ['porta', 'libri', 'università'], 'attraction_type': 'porta monumentale', 'ticket_url': None},
+ {'city': 'napoli', 'block_id': 123, 'zone': 'museo_nazionale', 'category_level': 3, 'name': 'Via Port\'Alba e librerie', 'name_en': 'Port Alba Bookshop Street', 'name_fr': 'Via Port\'Alba et ses librairies', 'name_es': 'Via Port\'Alba y sus librerías', 'description': 'Il tratto pedonale oltre la porta concentra librerie storiche e bancarelle, raccontando il lato universitario e letterario del centro.', 'description_en': 'The pedestrian stretch beyond the gate concentrates historic bookshops and stalls, revealing the university and literary side of the centre.', 'description_fr': 'La rue piétonne au-delà de la porte rassemble des librairies historiques et des étals, révélant le visage universitaire et littéraire du centre.', 'description_es': 'El tramo peatonal tras la puerta reúne librerías históricas y puestos, y muestra el lado universitario y literario del centro.', 'latitude': 40.8500, 'longitude': 14.2492, 'estimated_visit_time': 20, 'tags': ['via', 'libri', 'università'], 'attraction_type': 'via storica', 'ticket_url': None},
  {'city': 'napoli', 'block_id': 124, 'zone': 'quartieri_spagnoli_toledo', 'category_level': 2, 'name': 'Pedamentina di San Martino access', 'name_en': 'Pedamentina access', 'description': 'Collegamento molto utile per leggere la verticalità tra quartieri bassi e collina.', 'description_en': 'A very useful link for reading the vertical relationship between lower quarters and the hill.', 'latitude': 40.8419, 'longitude': 14.2449, 'estimated_visit_time': 25, 'tags': ['scalinata', 'quartieri', 'passeggiata'], 'attraction_type': 'scalinata storica', 'ticket_url': None},
  {'city': 'napoli', 'block_id': 124, 'zone': 'quartieri_spagnoli_toledo', 'category_level': 3, 'name': 'Montecalvario lanes', 'name_en': 'Montecalvario lanes', 'description': 'Reticolo molto utile per sentire il lato più fitto e popolare della zona.', 'description_en': 'A very useful network of lanes for feeling the district\'s densest and most popular side.', 'latitude': 40.8411, 'longitude': 14.2460, 'estimated_visit_time': 25, 'tags': ['vicoli', 'quartiere', 'vita locale'], 'attraction_type': 'strade storiche', 'ticket_url': None},
  {'city': 'napoli', 'block_id': 125, 'zone': 'piazza_plebiscito_chiaia', 'category_level': 2, 'name': 'Galleria Umberto I', 'name_en': 'Umberto I Gallery', 'description': 'Grande passaggio monumentale utile per leggere il lato ottocentesco e teatrale della zona.', 'description_en': 'A grand monumental passage useful for reading the area\'s nineteenth century and theatrical side.', 'latitude': 40.8386, 'longitude': 14.2480, 'estimated_visit_time': 25, 'tags': ['galleria', 'ottocento', 'architettura'], 'attraction_type': 'galleria storica', 'ticket_url': None},
@@ -138,27 +138,27 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Pizza napoletana',
   'name_en': 'Neapolitan Pizza',
   'description': 'Pizza con impasto lievitato a lungo, cornicione alto, centro sottile, pomodoro, mozzarella, basilico e olio, cotta '
-                 'rapidamente in forno a legna. ? il simbolo gastronomico di Napoli: tecnica, materia prima e cottura devono creare '
-                 'leggerezza, elasticit? e profumo.',
+                 'rapidamente in forno a legna. È il simbolo gastronomico di Napoli: tecnica, materia prima e cottura devono creare '
+                 'leggerezza, elasticità e profumo.',
   'description_en': 'Pizza with long-fermented dough, high cornicione, thin centre, tomato, mozzarella, basil and oil, quickly baked in a '
-                    'wood-fired oven. It is Naples? gastronomic symbol: technique, ingredients and baking should create lightness, '
+                    'wood-fired oven. It is Naples’ gastronomic symbol: technique, ingredients and baking should create lightness, '
                     'elasticity and aroma. The best version feels fragrant and digestible, not merely soft or wet.',
   'ingredients': ['farina', 'pomodoro', 'mozzarella', 'basilico', 'olio extravergine'],
   'ingredients_en': ['flour', 'tomato', 'mozzarella', 'basil', 'extra virgin olive oil'],
-  'places': [{'name': 'L?Antica Pizzeria da Michele'}, {'name': 'Sorbillo ai Tribunali'}, {'name': '50 Kal?'}]},
- {'name': 'Rag? napoletano',
-  'name_en': 'Neapolitan Rag?',
+  'places': [{'name': 'L’Antica Pizzeria da Michele'}, {'name': 'Sorbillo ai Tribunali'}, {'name': '50 Kalò'}]},
+ {'name': 'Ragù napoletano',
+  'name_en': 'Neapolitan Ragù',
   'description': 'Sugo lento di carne e pomodoro, cotto per ore fino a diventare scuro, denso e profondo, spesso servito con pasta o come '
-                 'piatto della domenica. Non ? solo condimento: ? rito familiare, pazienza, profumo di casa e stratificazione di sapore.',
+                 'piatto della domenica. Non è solo condimento: è rito familiare, pazienza, profumo di casa e stratificazione di sapore.',
   'description_en': 'A slow sauce of meat and tomato, cooked for hours until dark, dense and deep, often served with pasta or as Sunday '
                     'food. It is not merely a condiment: it is family ritual, patience, home aroma and layered flavour.',
   'ingredients': ['pomodoro', 'manzo', 'maiale', 'cipolla', 'vino'],
   'ingredients_en': ['tomato', 'beef', 'pork', 'onion', 'wine'],
-  'places': [{'name': 'Tandem Rag?'}, {'name': 'La Locanda del Grifo'}, {'name': 'Nennella'}]},
+  'places': [{'name': 'Tandem Ragù'}, {'name': 'La Locanda del Grifo'}, {'name': 'Nennella'}]},
  {'name': 'Genovese',
-  'name_en': 'Genovese Onion Rag?',
+  'name_en': 'Genovese Onion Ragù',
   'description': 'Sugo napoletano di cipolle cotte lentissimamente con carne fino a diventare dolci, cremose e brunite, nonostante il nome '
-                 'richiami Genova. ? intenso ma morbido: la qualit? sta nella pazienza della cottura e nell?equilibrio tra carne e '
+                 'richiami Genova. È intenso ma morbido: la qualità sta nella pazienza della cottura e nell’equilibrio tra carne e '
                  'cipolla.',
   'description_en': 'A Neapolitan sauce of onions cooked very slowly with meat until sweet, creamy and browned, despite the name recalling '
                     'Genoa. It is intense yet soft: quality lies in patient cooking and the balance between meat and onion.',
@@ -167,10 +167,10 @@ FOODS_BY_CITY = [{'name': 'Pizza napoletana',
   'places': [{'name': 'La Campagnola'}, {'name': 'Antica Capri'}, {'name': 'Cantina del Gallo'}]},
  {'name': 'Cuoppo',
   'name_en': 'Neapolitan Fried Cone',
-  'description': 'Cono di carta pieno di fritti napoletani, spesso zeppoline, crocch?, arancini, pesce o verdure, pensato per essere '
-                 'mangiato camminando. La qualit? sta nella frittura asciutta, nel ritmo dei bocconi e nella variet? senza eccesso di '
+  'description': 'Cono di carta pieno di fritti napoletani, spesso zeppoline, crocchè, arancini, pesce o verdure, pensato per essere '
+                 'mangiato camminando. La qualità sta nella frittura asciutta, nel ritmo dei bocconi e nella varietà senza eccesso di '
                  'unto.',
-  'description_en': 'A paper cone filled with Neapolitan fried bites, often zeppoline, crocch?, arancini, fish or vegetables, made to be '
+  'description_en': 'A paper cone filled with Neapolitan fried bites, often zeppoline, crocchè, arancini, fish or vegetables, made to be '
                     'eaten while walking. Quality lies in dry frying, the rhythm of small bites and variety without excess grease.',
   'ingredients': ['pastella', 'patate', 'riso', 'pesce', 'olio'],
   'ingredients_en': ['batter', 'potatoes', 'rice', 'fish', 'oil'],
@@ -178,18 +178,18 @@ FOODS_BY_CITY = [{'name': 'Pizza napoletana',
  {'name': 'Pizza a portafoglio',
   'name_en': 'Wallet Pizza',
   'description': 'Pizza piccola e morbida piegata in quattro, venduta come street food economico e velocissimo. Deve mantenere profumo e '
-                 'identit? della pizza napoletana in formato da passeggio: elastica, calda, succosa, facile da mangiare senza perdere il '
+                 'identità della pizza napoletana in formato da passeggio: elastica, calda, succosa, facile da mangiare senza perdere il '
                  'condimento.',
   'description_en': 'A small soft pizza folded into quarters, sold as cheap and very quick street food. It should keep the aroma and '
                     'identity of Neapolitan pizza in walking format: elastic, hot, juicy and easy to eat without losing the topping.',
   'ingredients': ['farina', 'pomodoro', 'mozzarella', 'basilico', 'olio'],
   'ingredients_en': ['flour', 'tomato', 'mozzarella', 'basil', 'oil'],
-  'places': [{'name': 'Di Matteo Napoli'}, {'name': 'Antica Pizzeria Port?Alba'}, {'name': 'Pizzeria Tutino'}]},
+  'places': [{'name': 'Di Matteo Napoli'}, {'name': 'Antica Pizzeria Port’Alba'}, {'name': 'Pizzeria Tutino'}]},
  {'name': 'Tarallo nzogna e pepe',
   'name_en': 'Lard and Pepper Tarallo',
-  'description': 'Tarallo salato con sugna, pepe e mandorle, friabile e molto profumato, tipico di forni e passeggiate sul lungomare. ? '
-                 'semplice ma potente: grasso, pepe e mandorla devono fondersi senza rendere il morso pesante. La qualit? si riconosce '
-                 'nella friabilit? netta e nel pepe persistente.',
+  'description': 'Tarallo salato con sugna, pepe e mandorle, friabile e molto profumato, tipico di forni e passeggiate sul lungomare. È '
+                 'semplice ma potente: grasso, pepe e mandorla devono fondersi senza rendere il morso pesante. La qualità si riconosce '
+                 'nella friabilità netta e nel pepe persistente.',
   'description_en': 'A savoury tarallo with lard, pepper and almonds, crumbly and highly fragrant, typical of bakeries and seaside walks. '
                     'It is simple but powerful: fat, pepper and almond should merge without making the bite heavy. Quality is recognised '
                     'in clean crumbliness and persistent pepper.',
@@ -199,17 +199,17 @@ FOODS_BY_CITY = [{'name': 'Pizza napoletana',
  {'name': 'Sfogliatella',
   'name_en': 'Sfogliatella Pastry',
   'description': 'Dolce napoletano in versione riccia o frolla, ripieno di ricotta, semolino, canditi e aromi, servito idealmente caldo. '
-                 'La riccia deve essere croccante e stratificata, la frolla pi? morbida: entrambe devono profumare di agrumi e crema.',
+                 'La riccia deve essere croccante e stratificata, la frolla più morbida: entrambe devono profumare di agrumi e crema.',
   'description_en': 'A Neapolitan pastry in riccia or frolla form, filled with ricotta, semolina, candied fruit and aromas, ideally served '
                     'warm. Riccia should be crisp and layered, frolla softer: both should smell of citrus and cream. The filling should be '
                     'creamy but structured, never heavy or overly sweet.',
   'ingredients': ['ricotta', 'semolino', 'canditi', 'pasta sfoglia', 'arancia'],
   'ingredients_en': ['ricotta', 'semolina', 'candied fruit', 'pastry', 'orange'],
   'places': [{'name': 'Sfogliatelle Attanasio'}, {'name': 'Antica Pasticceria Pintauro'}, {'name': 'Sfogliatella Mary Napoli'}]},
- {'name': 'Bab?',
-  'name_en': 'Rum Bab?',
-  'description': 'Dolce lievitato imbevuto di sciroppo al rum, soffice, elastico e lucido, spesso servito semplice o con crema. A Napoli ? '
-                 'un?icona di pasticceria: deve essere molto umido ma non sfatto, profumato e leggero al morso.',
+ {'name': 'Babà',
+  'name_en': 'Rum Babà',
+  'description': 'Dolce lievitato imbevuto di sciroppo al rum, soffice, elastico e lucido, spesso servito semplice o con crema. A Napoli è '
+                 'un’icona di pasticceria: deve essere molto umido ma non sfatto, profumato e leggero al morso.',
   'description_en': 'A yeasted cake soaked in rum syrup, soft, elastic and glossy, often served plain or with cream. In Naples it is a '
                     'pastry icon: it should be very moist but not collapsed, fragrant and light to the bite.',
   'ingredients': ['farina', 'uova', 'rum', 'zucchero', 'lievito'],

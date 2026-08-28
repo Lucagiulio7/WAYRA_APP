@@ -1,4 +1,4 @@
-export type Lang = "it" | "en" | "fr";
+export type Lang = string;
 
 export type TranslationSet = {
   destination: string;
@@ -15,6 +15,11 @@ export type TranslationSet = {
   tabNeighborhoods: string;
   tabFood: string;
   tabCulture: string;
+  tabActivities: string;
+  activitiesIntro: (city: string) => string;
+  activitiesProvider: string;
+  activitiesAll: string;
+  activitiesOpenError: string;
   day: string;
   days: string;
   fullMix: string;
@@ -31,8 +36,16 @@ export type TranslationSet = {
   goBack: string;
   dayLabel: string;
   places: string;
+  openMap: string;
+  openLodgingMap: string;
   openRouteMaps: string;
   wantToEat: string;
+  lodgingMapTitle: string;
+  lodgingMapHint: string;
+  loadingLodgingMap: string;
+  mapConnectionRequired: string;
+  prosLabel: string;
+  consLabel: string;
   freeTimeLabel: string;
   levelIconicBadge: string;
   levelCuratedBadge: string;

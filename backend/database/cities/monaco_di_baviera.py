@@ -133,8 +133,8 @@ FOOD_SPOTS = [
 ]
 
 # Normalized detailed food descriptions.
-FOODS_BY_CITY = [{'name': 'Wei?wurst',
-  'name_en': 'Wei?wurst White Sausage',
+FOODS_BY_CITY = [{'name': 'Weißwurst',
+  'name_en': 'Weißwurst White Sausage',
   'description': 'Salsiccia bianca bavarese di vitello e maiale, profumata con prezzemolo, limone e spezie, tradizionalmente mangiata al '
                  'mattino. Si serve con senape dolce e brezel: deve essere delicata, succosa e tolta dalla pelle con gesto corretto.',
   'description_en': 'A Bavarian white sausage of veal and pork, scented with parsley, lemon and spices, traditionally eaten in the '
@@ -146,7 +146,7 @@ FOODS_BY_CITY = [{'name': 'Wei?wurst',
  {'name': 'Brezel',
   'name_en': 'Bavarian Pretzel',
   'description': 'Pane intrecciato bavarese con crosta scura, lucida e salata, interno morbido e profumo di malto. A Monaco accompagna '
-                 'birra, salsicce e formaggi: la qualit? sta nel contrasto tra superficie sapida e mollica ancora elastica. Deve arrivare '
+                 'birra, salsicce e formaggi: la qualità sta nel contrasto tra superficie sapida e mollica ancora elastica. Deve arrivare '
                  'fresco, non secco, con sale ben distribuito.',
   'description_en': 'A Bavarian twisted bread with dark glossy salty crust, soft interior and malt aroma. In Munich it accompanies beer, '
                     'sausages and cheeses: quality lies in the contrast between savoury surface and crumb that remains elastic.',
@@ -155,17 +155,17 @@ FOODS_BY_CITY = [{'name': 'Wei?wurst',
   'places': ['Rischart Munich', 'Hofbraeuhaus Munich', 'Viktualienmarkt Munich']},
  {'name': 'Schweinshaxe',
   'name_en': 'Roast Pork Knuckle',
-  'description': 'Stinco di maiale arrosto con cotenna croccante, carne morbida e spesso contorno di crauti, canederli o patate. ? cucina '
-                 'bavarese scenografica: ricca, carnosa, da birreria, migliore quando la pelle scrocchia e l?interno resta succoso. La '
-                 'qualit? si misura nella separazione netta tra cotenna e carne.',
+  'description': 'Stinco di maiale arrosto con cotenna croccante, carne morbida e spesso contorno di crauti, canederli o patate. È cucina '
+                 'bavarese scenografica: ricca, carnosa, da birreria, migliore quando la pelle scrocchia e l’interno resta succoso. La '
+                 'qualità si misura nella separazione netta tra cotenna e carne.',
   'description_en': 'Roast pork knuckle with crisp crackling, tender meat and often sauerkraut, dumplings or potatoes on the side. It is '
                     'theatrical Bavarian cooking: rich, meaty and beer-hall friendly, best when the skin crackles and the inside stays '
                     'juicy.',
   'ingredients': ['stinco di maiale', 'crauti', 'spezie', 'birra', 'patate'],
   'ingredients_en': ['pork knuckle', 'sauerkraut', 'spices', 'beer', 'potatoes'],
   'places': ['Haxnbauer Munich', 'Augustiner-Keller Munich', 'Hofbraeuhaus Munich']},
- {'name': 'Leberk?se',
-  'name_en': 'Leberk?se Meat Loaf',
+ {'name': 'Leberkäse',
+  'name_en': 'Leberkäse Meat Loaf',
   'description': 'Sformato caldo di carne finemente macinata, cotto in stampo e servito a fette nel pane o con uovo e patate. Nonostante '
                  'il nome, spesso non contiene fegato: deve essere morbido, sapido e leggermente rosolato ai bordi.',
   'description_en': 'A hot loaf of finely minced meat, baked in a mould and served sliced in bread or with egg and potatoes. Despite the '
@@ -175,17 +175,17 @@ FOODS_BY_CITY = [{'name': 'Wei?wurst',
   'places': ['Leberkas-Pepi Munich', 'Viktualienmarkt Munich', 'Vinzenzmurr Munich']},
  {'name': 'Obatzda',
   'name_en': 'Obatzda Cheese Spread',
-  'description': 'Crema bavarese di formaggi maturi, burro, paprika, cipolla e birra, servita con brezel nei Biergarten. ? intensa ma '
+  'description': 'Crema bavarese di formaggi maturi, burro, paprika, cipolla e birra, servita con brezel nei Biergarten. È intensa ma '
                  'conviviale: cremosa, speziata, leggermente pungente, perfetta per accompagnare una Helles senza diventare troppo '
-                 'pesante. La qualit? dipende dal formaggio maturo ma non eccessivamente aggressivo.',
+                 'pesante. La qualità dipende dal formaggio maturo ma non eccessivamente aggressivo.',
   'description_en': 'A Bavarian spread of ripe cheeses, butter, paprika, onion and beer, served with pretzels in beer gardens. It is '
                     'intense but convivial: creamy, spiced and slightly pungent, perfect with a Helles without becoming too heavy.',
   'ingredients': ['Camembert', 'burro', 'paprika', 'cipolla', 'birra'],
   'ingredients_en': ['Camembert', 'butter', 'paprika', 'onion', 'beer'],
   'places': ['Augustiner-Keller Munich', 'Schneider Braeuhaus Munich', 'Hofbraeuhaus Munich']},
- {'name': 'K?sesp?tzle',
-  'name_en': 'Cheese Sp?tzle',
-  'description': 'Piccoli gnocchetti di farina e uova con formaggio fuso e cipolle croccanti, diffusi nell?area alpina e amatissimi anche '
+ {'name': 'Käsespätzle',
+  'name_en': 'Cheese Spätzle',
+  'description': 'Piccoli gnocchetti di farina e uova con formaggio fuso e cipolle croccanti, diffusi nell’area alpina e amatissimi anche '
                  'a Monaco. Sono comfort food puro: filanti, morbidi, saporiti, migliori quando il formaggio resta ricco ma non gommoso.',
   'description_en': 'Small flour-and-egg dumplings with melted cheese and crisp onions, widespread in the Alpine area and loved in Munich '
                     'too. They are pure comfort food: stretchy, soft and savoury, best when the cheese stays rich but not rubbery.',
@@ -196,7 +196,7 @@ FOODS_BY_CITY = [{'name': 'Wei?wurst',
   'name_en': 'Apple Strudel',
   'description': 'Dolce di pasta sottile ripiena di mele, uvetta, cannella e pangrattato, servito con panna, gelato o salsa alla vaniglia. '
                  'A Monaco richiama la tradizione austro-bavarese: sfoglia elastica, frutta morbida, spezie misurate e profumo domestico. '
-                 'La qualit? sta nel taglio pulito e nella frutta non acquosa.',
+                 'La qualità sta nel taglio pulito e nella frutta non acquosa.',
   'description_en': 'A dessert of thin pastry filled with apples, raisins, cinnamon and breadcrumbs, served with cream, ice cream or '
                     'vanilla sauce. In Munich it evokes Austro-Bavarian tradition: elastic pastry, soft fruit, measured spices and '
                     'home-style aroma.',
@@ -206,12 +206,12 @@ FOODS_BY_CITY = [{'name': 'Wei?wurst',
  {'name': 'Helles',
   'name_en': 'Helles Lager',
   'description': 'Birra chiara bavarese a bassa fermentazione, morbida, maltata e molto beverina, pilastro dei Biergarten di Monaco. La '
-                 'qualit? sta nell?equilibrio: fresca e pulita, con amaro discreto e corpo sufficiente per accompagnare piatti robusti. '
+                 'qualità sta nell’equilibrio: fresca e pulita, con amaro discreto e corpo sufficiente per accompagnare piatti robusti. '
                  'Deve essere bevuta fresca, con finale secco e mai metallico.',
   'description_en': 'A pale Bavarian bottom-fermented beer, soft, malty and highly drinkable, a pillar of Munich beer gardens. Quality '
                     'lies in balance: fresh and clean, with discreet bitterness and enough body to accompany hearty dishes. It should be '
                     'drunk fresh, with a dry finish and never metallic notes.',
-  'ingredients': ['acqua', 'malto d?orzo', 'luppolo', 'lievito'],
+  'ingredients': ['acqua', 'malto d’orzo', 'luppolo', 'lievito'],
   'ingredients_en': ['water', 'barley malt', 'hops', 'yeast'],
   'places': ['Augustiner-Keller Munich', 'Hofbraeuhaus Munich', 'Paulaner Braeuhaus Munich']}]
 

@@ -1,33 +1,17 @@
 /**
  * useCityDownload — gestione pacchetti città offline
  *
- * Scarica e pre-cacha in TanStack Query tutti i dati di una città
- * (attrazioni, ristoranti, city info, extras, quartieri) così che
- * siano disponibili senza rete al prossimo accesso.
- *
- * La lista delle città scaricate è persistita su AsyncStorage e
- * sopravvive ai riavvii dell'app.
+ * Prepara i contenuti dinamici (in particolare i trasporti) e registra
+ * la versione del pacchetto locale già incluso nell'app.
  */
 
-import { useState, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Alert } from "react-native";
-import { queryClient } from "@/lib/queryClient";
 import {
-  fetchAttractions,
-  fetchFoodSpots,
-  fetchCityInfo,
-  fetchCityExtras,
-  fetchNeighborhoods,
-} from "@/lib/cityFetchers";
-
-// ─── Costanti ─────────────────────────────────────────────────────────────────
-
-const STORAGE_KEY = "wayra_downloaded_cities_v1";
-
-// staleTime lungo per i pacchetti offline: 7 giorni
-// (l'utente può forzare un aggiornamento re-scaricando)
-const OFFLINE_STALE = 1000 * 60 * 60 * 24 * 7;
+  cacheCityForOffline,
+  listCachedCities,
+  removeCityOfflineCache,
+} from "@/services/cityOfflineCache";
 
 // ─── Tipi ─────────────────────────────────────────────────────────────────────
 
@@ -40,21 +24,18 @@ export function useCityDownload() {
   const [downloaded, setDownloaded] = useState<ReadonlySet<string>>(new Set());
   // Stato download per città: idle | downloading | done | error
   const [statuses, setStatuses] = useState<Record<string, DownloadStatus>>({});
+  const inFlight = useRef(new Set<string>());
 
   // Carica la lista dal disco all'avvio
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (raw) {
-          const arr: string[] = JSON.parse(raw);
-          setDownloaded(new Set(arr));
-          // Segna tutte le città già scaricate come "done"
-          setStatuses((prev) => {
-            const next = { ...prev };
-            arr.forEach((c) => { next[c] = "done"; });
-            return next;
-          });
-        }
+    listCachedCities()
+      .then((cities) => {
+        setDownloaded(cities);
+        setStatuses((prev) => {
+          const next = { ...prev };
+          cities.forEach((city) => { next[city] = "done"; });
+          return next;
+        });
       })
       .catch(() => {/* ignora errori di lettura */});
   }, []);
@@ -65,95 +46,91 @@ export function useCityDownload() {
     setStatuses((prev) => ({ ...prev, [city]: status }));
   }
 
-  async function persistDownloaded(updated: Set<string>) {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([...updated]));
-  }
-
   // ── Download ───────────────────────────────────────────────────────────────
 
   const downloadCity = useCallback(async (city: string) => {
-    if (statuses[city] === "downloading") return; // già in corso
+    const cityKey = city.trim().toLowerCase();
+    if (!cityKey || inFlight.current.has(cityKey)) return;
 
-    setStatus(city, "downloading");
+    inFlight.current.add(cityKey);
+    setStatus(cityKey, "downloading");
 
     try {
-      // prefetchQuery: se i dati sono già in cache freschi, non ri-fetcha
-      await Promise.all([
-        queryClient.prefetchQuery({
-          queryKey: ["attractions", city],
-          queryFn: () => fetchAttractions(city),
-          staleTime: OFFLINE_STALE,
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["foodSpots", city],
-          queryFn: () => fetchFoodSpots(city),
-          staleTime: OFFLINE_STALE,
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["cityInfo", city],
-          queryFn: () => fetchCityInfo(city),
-          staleTime: OFFLINE_STALE,
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["cityExtras", city],
-          queryFn: () => fetchCityExtras(city),
-          staleTime: OFFLINE_STALE,
-        }),
-        queryClient.prefetchQuery({
-          queryKey: ["neighborhoods", city],
-          queryFn: () => fetchNeighborhoods(city),
-          staleTime: OFFLINE_STALE,
-        }),
-      ]);
-
-      const updated = new Set([...downloaded, city]);
-      setDownloaded(updated);
-      setStatus(city, "done");
-      await persistDownloaded(updated);
+      await cacheCityForOffline(cityKey);
+      setDownloaded((previous) => new Set(previous).add(cityKey));
+      setStatus(cityKey, "done");
     } catch {
-      setStatus(city, "error");
+      setStatus(cityKey, "error");
+    } finally {
+      inFlight.current.delete(cityKey);
     }
-  }, [downloaded, statuses]);
+  }, []);
 
   // ── Elimina pacchetto ──────────────────────────────────────────────────────
 
   const deleteCity = useCallback(async (city: string) => {
-    // Rimuove dalla cache TanStack Query
-    queryClient.removeQueries({ queryKey: ["attractions",   city] });
-    queryClient.removeQueries({ queryKey: ["foodSpots",     city] });
-    queryClient.removeQueries({ queryKey: ["cityInfo",      city] });
-    queryClient.removeQueries({ queryKey: ["cityExtras",    city] });
-    queryClient.removeQueries({ queryKey: ["neighborhoods", city] });
-
-    const updated = new Set([...downloaded].filter((c) => c !== city));
-    setDownloaded(updated);
-    setStatus(city, "idle");
-    await persistDownloaded(updated);
-  }, [downloaded]);
+    const cityKey = city.trim().toLowerCase();
+    await removeCityOfflineCache(cityKey);
+    setDownloaded((previous) => {
+      const next = new Set(previous);
+      next.delete(cityKey);
+      return next;
+    });
+    setStatus(cityKey, "idle");
+  }, []);
 
   // ── Helpers pubblici ───────────────────────────────────────────────────────
 
   const getStatus = useCallback(
-    (city: string): DownloadStatus => statuses[city] ?? "idle",
+    (city: string): DownloadStatus => statuses[city.trim().toLowerCase()] ?? "idle",
     [statuses],
   );
 
   const isDownloaded = useCallback(
-    (city: string) => downloaded.has(city),
+    (city: string) => downloaded.has(city.trim().toLowerCase()),
     [downloaded],
   );
 
   /** Chiede conferma e poi cancella il pacchetto */
   const confirmDelete = useCallback((city: string, cityLabel: string, lang: string) => {
+    const copy = {
+      it: {
+        title: "Rimuovere i dati offline?",
+        body: `I dati offline di ${cityLabel} verranno rimossi dal dispositivo.`,
+        cancel: "Annulla",
+        remove: "Rimuovi",
+      },
+      en: {
+        title: "Remove offline data?",
+        body: `Offline data for ${cityLabel} will be removed from this device.`,
+        cancel: "Cancel",
+        remove: "Remove",
+      },
+      fr: {
+        title: "Supprimer les données hors ligne ?",
+        body: `Les données hors ligne de ${cityLabel} seront supprimées de cet appareil.`,
+        cancel: "Annuler",
+        remove: "Supprimer",
+      },
+      es: {
+        title: "¿Eliminar los datos sin conexión?",
+        body: `Los datos sin conexión de ${cityLabel} se eliminarán de este dispositivo.`,
+        cancel: "Cancelar",
+        remove: "Eliminar",
+      },
+    }[lang as "it" | "en" | "fr" | "es"] ?? {
+      title: "Remove offline data?",
+      body: `Offline data for ${cityLabel} will be removed from this device.`,
+      cancel: "Cancel",
+      remove: "Remove",
+    };
     Alert.alert(
-      lang === "en" ? "Delete offline package?" : "Eliminare pacchetto offline?",
-      lang === "en"
-        ? `All offline data for ${cityLabel} will be removed from this device.`
-        : `Tutti i dati offline di ${cityLabel} verranno rimossi dal dispositivo.`,
+      copy.title,
+      copy.body,
       [
-        { text: lang === "en" ? "Cancel" : "Annulla", style: "cancel" },
+        { text: copy.cancel, style: "cancel" },
         {
-          text: lang === "en" ? "Delete" : "Elimina",
+          text: copy.remove,
           style: "destructive",
           onPress: () => deleteCity(city),
         },

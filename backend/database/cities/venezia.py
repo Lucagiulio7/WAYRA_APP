@@ -45,11 +45,11 @@ ATTRACTIONS = [
  {'city': 'venezia', 'block_id': 1209, 'zone': 'san_marco', 'category_level': 3, 'name': 'Riva degli Schiavoni lato ovest', 'name_en': 'Western Riva degli Schiavoni', 'description': 'Passeggiata utile per leggere la relazione tra piazza, laguna e flussi turistici.', 'description_en': 'A useful promenade for reading the relationship between the square, the lagoon and visitor flows.', 'latitude': 45.4346, 'longitude': 12.3415, 'estimated_visit_time': 20, 'tags': ['laguna', 'passeggiata', 'centro'], 'attraction_type': 'lungolaguna', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1210, 'zone': 'rialto_san_polo', 'category_level': 2, 'name': 'Riva del Vin', 'name_en': 'Riva del Vin', 'description': 'Tratto utile per leggere il Canal Grande da una soglia molto viva del centro commerciale.', 'description_en': 'A useful stretch for reading the Grand Canal from a lively threshold of the commercial centre.', 'latitude': 45.4385, 'longitude': 12.3368, 'estimated_visit_time': 20, 'tags': ['canale', 'centro', 'passeggiata'], 'attraction_type': 'fondamenta', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1210, 'zone': 'rialto_san_polo', 'category_level': 3, 'name': 'Campo San Giacometto', 'name_en': 'San Giacometto Square', 'description': 'Piccolo spazio utile per aggiungere una lettura piu minuta del nucleo di Rialto.', 'description_en': 'A small space useful for adding a more detailed reading of the Rialto core.', 'latitude': 45.4389, 'longitude': 12.3364, 'estimated_visit_time': 20, 'tags': ['campo', 'mercato', 'storia'], 'attraction_type': 'piazza', 'ticket_url': None},
- {'city': 'venezia', 'block_id': 1211, 'zone': 'accademia_dorsoduro', 'category_level': 2, 'name': 'Campo Santa Margherita', 'name_en': 'Santa Margherita Square', 'description': 'Piazza utile per sentire il lato universitario e quotidiano di Dorsoduro.', 'description_en': 'A useful square for feeling the student-oriented and everyday side of Dorsoduro.', 'latitude': 45.4343, 'longitude': 12.3259, 'estimated_visit_time': 20, 'tags': ['campo', 'quartiere', 'vita urbana'], 'attraction_type': 'piazza', 'ticket_url': None},
+ {'city': 'venezia', 'block_id': 1211, 'zone': 'accademia_dorsoduro', 'category_level': 2, 'name': 'Chiesa di San Pantalon', 'name_en': 'Church of San Pantalon', 'description': 'Chiesa di Dorsoduro celebre per l’enorme soffitto dipinto da Fumiani, una scenografia barocca sorprendente dietro una facciata sobria.', 'description_en': 'A Dorsoduro church renowned for Fumiani’s immense painted ceiling, a surprising Baroque spectacle behind a restrained façade.', 'latitude': 45.4358, 'longitude': 12.3211, 'estimated_visit_time': 40, 'tags': ['chiesa', 'barocco', 'arte'], 'attraction_type': 'chiesa', 'ticket_url': 'https://www.sanpantalon.it/'},
  {'city': 'venezia', 'block_id': 1211, 'zone': 'accademia_dorsoduro', 'category_level': 3, 'name': 'Fondamenta delle Zattere east stretch', 'name_en': 'Zattere East Stretch', 'description': 'Tratto utile per aggiungere una lettura ampia della laguna meridionale.', 'description_en': 'A useful stretch for adding a broad reading of the southern lagoon.', 'latitude': 45.4296, 'longitude': 12.3260, 'estimated_visit_time': 20, 'tags': ['laguna', 'passeggiata', 'panorama'], 'attraction_type': 'lungolaguna', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1212, 'zone': 'arsenale_castello', 'category_level': 2, 'name': 'Via Garibaldi', 'name_en': 'Via Garibaldi', 'description': 'Strada utile per sentire il lato piu locale e lineare del sestiere di Castello.', 'description_en': 'A useful street for feeling the more local and linear side of the Castello district.', 'latitude': 45.4328, 'longitude': 12.3578, 'estimated_visit_time': 20, 'tags': ['strada', 'quartiere', 'vita locale'], 'attraction_type': 'strada urbana', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1212, 'zone': 'arsenale_castello', 'category_level': 3, 'name': 'Riva dei Sette Martiri', 'name_en': 'Riva dei Sette Martiri', 'description': 'Passeggiata utile per leggere l\'apertura della laguna orientale accanto all\'Arsenale.', 'description_en': 'A useful promenade for reading the openness of the eastern lagoon beside the Arsenale.', 'latitude': 45.4313, 'longitude': 12.3535, 'estimated_visit_time': 20, 'tags': ['laguna', 'passeggiata', 'arsenale'], 'attraction_type': 'lungolaguna', 'ticket_url': None},
- {'city': 'venezia', 'block_id': 1213, 'zone': 'cannaregio_ghetto', 'category_level': 2, 'name': 'Fondamenta della Misericordia', 'name_en': 'Misericordia Canal Walk', 'description': 'Tratto utile per aggiungere una lettura conviviale e lunga di Cannaregio.', 'description_en': 'A useful stretch for adding a convivial and extended reading of Cannaregio.', 'latitude': 45.4440, 'longitude': 12.3280, 'estimated_visit_time': 20, 'tags': ['canale', 'quartiere', 'passeggiata'], 'attraction_type': 'fondamenta', 'ticket_url': None},
+ {'city': 'venezia', 'block_id': 1213, 'zone': 'cannaregio_ghetto', 'category_level': 2, 'name': "Chiesa della Madonna dell'Orto", 'name_en': 'Church of Madonna dell’Orto', 'description': 'Chiesa gotica appartata di Cannaregio, legata a Tintoretto e ricca di opere conservate nel loro contesto originario.', 'description_en': 'A secluded Gothic church in Cannaregio, closely linked to Tintoretto and rich in works preserved in their original setting.', 'latitude': 45.4465, 'longitude': 12.3329, 'estimated_visit_time': 50, 'tags': ['chiesa', 'tintoretto', 'gotico'], 'attraction_type': 'chiesa', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1213, 'zone': 'cannaregio_ghetto', 'category_level': 3, 'name': 'Ponte delle Guglie area', 'name_en': 'Guglie Bridge Area', 'description': 'Punto utile per leggere una soglia molto viva tra stazione, canale e quartiere.', 'description_en': 'A useful point for reading a lively threshold between station, canal and neighbourhood.', 'latitude': 45.4412, 'longitude': 12.3231, 'estimated_visit_time': 20, 'tags': ['ponte', 'canale', 'quartiere'], 'attraction_type': 'ponte', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1214, 'zone': 'giudecca_zattere', 'category_level': 2, 'name': 'Belvedere della Giudecca nord', 'name_en': 'North Giudecca Viewpoint', 'description': 'Affaccio utile per leggere San Marco e Dorsoduro dall\'acqua opposta.', 'description_en': 'A useful viewpoint for reading San Marco and Dorsoduro from across the water.', 'latitude': 45.4269, 'longitude': 12.3290, 'estimated_visit_time': 20, 'tags': ['panorama', 'acqua', 'isola'], 'attraction_type': 'belvedere', 'ticket_url': None},
  {'city': 'venezia', 'block_id': 1214, 'zone': 'giudecca_zattere', 'category_level': 3, 'name': 'Fondamenta delle Zattere west stretch', 'name_en': 'Zattere West Stretch', 'description': 'Tratto utile per aggiungere una lettura lineare e luminosa del margine sud.', 'description_en': 'A useful stretch for adding a linear and luminous reading of the southern edge.', 'latitude': 45.4294, 'longitude': 12.3178, 'estimated_visit_time': 20, 'tags': ['laguna', 'passeggiata', 'panorama'], 'attraction_type': 'lungolaguna', 'ticket_url': None},
@@ -64,7 +64,7 @@ FOOD_SPOTS = [
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 1, 'name': 'Caffè San Marco', 'name_en': 'St Mark\'s Coffee', 'description': 'Pausa caffe nel cuore piu scenografico di Venezia.', 'description_en': 'A coffee break in Venice\'s most scenic heart.', 'latitude': 45.4342, 'longitude': 12.3391, 'estimated_visit_time': 15, 'tags': ['caffe', 'piazza', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 1, 'name': 'Gelato Ducale', 'name_en': 'Ducal Gelato', 'description': 'Pausa fresca tra basilica, palazzo e flussi del centro.', 'description_en': 'A cool break among basilica, palace and the centre\'s heavy flows.', 'latitude': 45.4340, 'longitude': 12.3400, 'estimated_visit_time': 15, 'tags': ['gelato', 'centro', 'snack'], 'food_type': 'snack', 'meal_type': 'snack', 'price_range': '€', 'rating': 4.0},
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 2, 'name': 'San Marco Table', 'name_en': 'St Mark\'s Table', 'description': 'Pranzo lineare nel quadrante piu monumentale di Venezia.', 'description_en': 'A straightforward lunch in Venice\'s most monumental district.', 'latitude': 45.4341, 'longitude': 12.3395, 'estimated_visit_time': 75, 'tags': ['centro', 'pranzo', 'locale'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.0},
- {'city': 'venezia', 'zone': 'san_marco', 'category_level': 2, 'name': 'Basilica Kitchen', 'name_en': 'Basilica Kitchen', 'description': 'Tavola comoda nel quadrante piu visitato del centro storico.', 'description_en': 'A convenient table in the old centre\'s most visited district.', 'latitude': 45.4344, 'longitude': 12.3398, 'estimated_visit_time': 75, 'tags': ['basilica', 'pranzo', 'centro'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.0},
+ {'city': 'venezia', 'zone': 'san_marco', 'category_level': 2, 'name': 'Rosa Salva San Marco', 'name_en': 'Rosa Salva San Marco', 'description': 'Storica pasticceria veneziana vicino a San Marco, adatta a colazione, tramezzini e una pausa dolce lontano dai tavoli più formali.', 'description_en': 'A historic Venetian pastry shop near St Mark\'s, suited to breakfast, tramezzini and a sweet break away from more formal tables.', 'description_fr': 'Une pâtisserie vénitienne historique près de Saint-Marc, adaptée au petit-déjeuner, aux tramezzini et à une pause sucrée loin des tables plus formelles.', 'description_es': 'Una pastelería veneciana histórica cerca de San Marcos, adecuada para desayunar, tomar tramezzini y hacer una pausa dulce lejos de las mesas más formales.', 'latitude': 45.4350, 'longitude': 12.3379, 'estimated_visit_time': 30, 'tags': ['pasticceria', 'colazione', 'centro'], 'food_type': 'pasticceria', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.3},
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 2, 'name': 'Doge Square Kitchen', 'name_en': 'Doge Square Kitchen', 'description': 'Indirizzo semplice tra palazzo, campanile e piazza principale.', 'description_en': 'A simple address between palace, bell tower and the main square.', 'latitude': 45.4339, 'longitude': 12.3402, 'estimated_visit_time': 75, 'tags': ['piazza', 'centro', 'pranzo'], 'food_type': 'ristorante', 'meal_type': 'both', 'price_range': '€€', 'rating': 4.0},
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 3, 'name': 'San Marco Fine Dining', 'name_en': 'St Mark\'s Fine Dining', 'description': 'Cena piu curata nel cuore piu iconico di Venezia.', 'description_en': 'A more refined dinner in Venice\'s most iconic heart.', 'latitude': 45.4340, 'longitude': 12.3403, 'estimated_visit_time': 95, 'tags': ['elegante', 'centro', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.2},
  {'city': 'venezia', 'zone': 'san_marco', 'category_level': 3, 'name': 'Lagoon Palace Table', 'name_en': 'Lagoon Palace Table', 'description': 'Scelta piu elegante tra la basilica e il fronte sull\'acqua.', 'description_en': 'A more elegant choice between the basilica and the waterfront edge.', 'latitude': 45.4338, 'longitude': 12.3406, 'estimated_visit_time': 95, 'tags': ['fine dining', 'laguna', 'cena'], 'food_type': 'ristorante', 'meal_type': 'dinner', 'price_range': '€€€', 'rating': 4.3},
@@ -160,7 +160,7 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Sarde in saor',
   'name_en': 'Sardines in Saor',
   'description': 'Sarde fritte e marinate con cipolle, aceto, pinoli e uvetta, nate come preparazione di conservazione della tradizione '
-                 'veneziana. Il piatto vive di equilibrio: pesce sapido, cipolla dolce, acidit? misurata e riposo sufficiente a legare i '
+                 'veneziana. Il piatto vive di equilibrio: pesce sapido, cipolla dolce, acidità misurata e riposo sufficiente a legare i '
                  'sapori.',
   'description_en': 'Fried sardines marinated with onions, vinegar, pine nuts and raisins, born as a preservation dish in Venetian '
                     'tradition. The dish depends on balance: savoury fish, sweet onion, measured acidity and enough resting time to bind '
@@ -168,31 +168,31 @@ FOODS_BY_CITY = [{'name': 'Sarde in saor',
   'ingredients': ['sarde', 'cipolle', 'aceto', 'pinoli', 'uvetta'],
   'ingredients_en': ['sardines', 'onions', 'vinegar', 'pine nuts', 'raisins'],
   'places': [{'name': 'Cantina Do Spade'}, {'name': "All'Arco"}, {'name': 'Osteria Alla Vedova'}]},
- {'name': 'Baccal? mantecato',
+ {'name': 'Baccalà mantecato',
   'name_en': 'Creamed Salt Cod',
-  'description': 'Baccal? montato con olio fino a diventare una crema soffice e sapida, servita su polenta o crostini nei bacari. Deve '
-                 'essere arioso, non fibroso, con sale controllato e gusto di pesce pulito ma presente. La qualit? migliore lascia la '
+  'description': 'Baccalà montato con olio fino a diventare una crema soffice e sapida, servita su polenta o crostini nei bacari. Deve '
+                 'essere arioso, non fibroso, con sale controllato e gusto di pesce pulito ma presente. La qualità migliore lascia la '
                  'crema leggera e persistente al palato.',
   'description_en': 'Salt cod whipped with oil until it becomes a soft savoury cream, served on polenta or crostini in bacari. It should '
                     'be airy, not fibrous, with controlled salt and clean but present fish flavour. The best quality leaves the cream '
                     'light and persistent on the palate.',
-  'ingredients': ['baccal?', 'olio', 'aglio', 'polenta', 'prezzemolo'],
+  'ingredients': ['baccalà', 'olio', 'aglio', 'polenta', 'prezzemolo'],
   'ingredients_en': ['salt cod', 'oil', 'garlic', 'polenta', 'parsley'],
-  'places': [{'name': 'Cantina Do Mori'}, {'name': 'Ristoteca Oniga'}, {'name': 'Al Merc? Venezia'}]},
+  'places': [{'name': 'Cantina Do Mori'}, {'name': 'Ristoteca Oniga'}, {'name': 'Al Mercà Venezia'}]},
  {'name': 'Cicchetti',
   'name_en': 'Venetian Cicchetti',
-  'description': 'Piccoli assaggi da bacaro serviti con un?ombra di vino: crostini, polpette, pesce, verdure, baccal? o salumi. Sono il '
-                 'modo pi? veneziano di mangiare: informale, vario, sociale, costruito su bocconi precisi e giro tra locali. La qualit? '
+  'description': 'Piccoli assaggi da bacaro serviti con un’ombra di vino: crostini, polpette, pesce, verdure, baccalà o salumi. Sono il '
+                 'modo più veneziano di mangiare: informale, vario, sociale, costruito su bocconi precisi e giro tra locali. La qualità '
                  'dipende dalla freschezza e dal servizio immediato al banco.',
   'description_en': 'Small bacaro bites served with a glass of wine: crostini, meatballs, fish, vegetables, salt cod or cured meats. They '
                     'are the most Venetian way to eat: informal, varied and social, built around precise bites and moving between bars.',
-  'ingredients': ['pane', 'pesce', 'baccal?', 'verdure', 'salumi'],
+  'ingredients': ['pane', 'pesce', 'baccalà', 'verdure', 'salumi'],
   'ingredients_en': ['bread', 'fish', 'salt cod', 'vegetables', 'cured meats'],
   'places': [{'name': 'Cantina Do Mori'}, {'name': 'Al Portego'}, {'name': 'Bacareto da Lele'}]},
  {'name': 'Fegato alla veneziana',
   'name_en': 'Venetian Liver and Onions',
-  'description': 'Fegato di vitello cotto con molte cipolle dolci, vino o aceto, servito morbido e profumato. ? un classico veneziano di '
-                 'equilibrio: il fegato deve restare tenero, mentre la cipolla addolcisce e arrotonda l?intensit?. La qualit? richiede '
+  'description': 'Fegato di vitello cotto con molte cipolle dolci, vino o aceto, servito morbido e profumato. È un classico veneziano di '
+                 'equilibrio: il fegato deve restare tenero, mentre la cipolla addolcisce e arrotonda l’intensità. La qualità richiede '
                  'cottura breve e cipolle lungamente ammorbidite.',
   'description_en': 'Calf liver cooked with plenty of sweet onions, wine or vinegar, served soft and fragrant. It is a Venetian classic of '
                     'balance: the liver should stay tender, while onion sweetens and rounds out the intensity.',
@@ -201,8 +201,8 @@ FOODS_BY_CITY = [{'name': 'Sarde in saor',
   'places': [{'name': 'Trattoria La Bitta'}, {'name': 'Trattoria Dona Onesta'}, {'name': 'Cantina Do Spade'}]},
  {'name': 'Risi e bisi',
   'name_en': 'Rice and Peas',
-  'description': 'Piatto veneziano a met? tra risotto e minestra, con riso, piselli freschi, brodo e spesso pancetta o cipolla. '
-                 'Tradizionalmente legato alla primavera e a San Marco, deve essere cremoso ma fluido, dolce e vegetale. La qualit? sta '
+  'description': 'Piatto veneziano a metà tra risotto e minestra, con riso, piselli freschi, brodo e spesso pancetta o cipolla. '
+                 'Tradizionalmente legato alla primavera e a San Marco, deve essere cremoso ma fluido, dolce e vegetale. La qualità sta '
                  'nel rapporto corretto tra riso, brodo e piselli.',
   'description_en': 'A Venetian dish halfway between risotto and soup, with rice, fresh peas, broth and often pancetta or onion. '
                     'Traditionally linked to spring and Saint Mark, it should be creamy but fluid, sweet and vegetal. Quality lies in the '
@@ -212,9 +212,9 @@ FOODS_BY_CITY = [{'name': 'Sarde in saor',
   'places': [{'name': 'Anice Stellato'}, {'name': 'Trattoria Alla Madonna'}, {'name': 'La Zucca'}]},
  {'name': 'Moeche',
   'name_en': 'Soft-Shell Lagoon Crabs',
-  'description': 'Piccoli granchi della laguna pescati durante la muta, quando il guscio ? tenerissimo, spesso fritti interi. Sono '
-                 'stagionali e preziosi: la qualit? dipende da freschezza, frittura asciutta e sapore lagunare delicato ma riconoscibile. '
-                 'La qualit? richiede stagionalit? reale e servizio immediato dopo la frittura.',
+  'description': 'Piccoli granchi della laguna pescati durante la muta, quando il guscio è tenerissimo, spesso fritti interi. Sono '
+                 'stagionali e preziosi: la qualità dipende da freschezza, frittura asciutta e sapore lagunare delicato ma riconoscibile. '
+                 'La qualità richiede stagionalità reale e servizio immediato dopo la frittura.',
   'description_en': 'Small lagoon crabs caught during moulting, when the shell is very tender, often fried whole. They are seasonal and '
                     'precious: quality depends on freshness, dry frying and delicate but recognisable lagoon flavour. Quality requires '
                     'true seasonality and immediate service after frying.',
@@ -230,10 +230,10 @@ FOODS_BY_CITY = [{'name': 'Sarde in saor',
   'ingredients': ['bigoli', 'cipolle', 'acciughe', 'olio', 'pepe'],
   'ingredients_en': ['bigoli pasta', 'onions', 'anchovies', 'oil', 'pepper'],
   'places': [{'name': 'Ristorante da Ivo'}, {'name': 'Osteria Alla Vedova'}, {'name': "Hostaria Sant'Aponal"}]},
- {'name': 'Bussol?',
-  'name_en': 'Bussol? Burano Biscuit',
+ {'name': 'Bussolà',
+  'name_en': 'Bussolà Burano Biscuit',
   'description': 'Biscotto tradizionale di Burano, ricco di burro e uova, spesso a forma di ciambella o esse, nato per conservarsi a '
-                 'lungo. ? semplice ma profumato: friabile, dorato, ideale con caff?, vino dolce o passeggiate lagunari.',
+                 'lungo. È semplice ma profumato: friabile, dorato, ideale con caffè, vino dolce o passeggiate lagunari.',
   'description_en': 'A traditional Burano biscuit, rich in butter and eggs, often shaped as a ring or an S, originally made to keep well. '
                     'It is simple but fragrant: crumbly, golden, ideal with coffee, sweet wine or lagoon walks.',
   'ingredients': ['farina', 'burro', 'uova', 'zucchero', 'vaniglia'],

@@ -19,6 +19,7 @@ export type AnalyticsEventName =
   | "restaurant_selected"
   | "restaurant_removed"
   | "accommodation_area_viewed"
+  | "activities_viewed"
   | "pdf_preview_opened"
   | "pdf_export_started"
   | "trip_saved"
@@ -32,7 +33,8 @@ export type AnalyticsProperties = Record<string, AnalyticsValue | undefined>;
 
 const ANONYMOUS_ID_KEY = "wayra_analytics_anonymous_id";
 const CONSENT_KEY = "wayra_analytics_consent";
-const DEFAULT_ANALYTICS_ENABLED = process.env.EXPO_PUBLIC_ANALYTICS_ENABLED !== "false";
+// Analytics must remain disabled until the user explicitly opts in.
+const DEFAULT_ANALYTICS_ENABLED = false;
 
 function createAnonymousId() {
   return `anon_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;

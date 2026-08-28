@@ -10,12 +10,16 @@ from database.db import get_db
 from database.models import Attraction, Food
 from routers.itinerary import _foods_with_recommended_places
 from services.must_see import annotate_must_see_many
+from services.localization import normalize_payload
+from services.city_catalog import city_items, city_records
 from services.static_content import (
     STATIC_CITY_INFO,
     STATIC_NEIGHBORHOODS,
     localize_attractions,
     localize_culture,
     localize_foods,
+    localize_city_info,
+    localize_neighborhoods,
 )
 
 router = APIRouter(prefix="/api", tags=["data"])
@@ -48,8 +52,13 @@ def list_attractions(
     q = db.query(Attraction).filter(Attraction.city == city.lower(), Attraction.is_food_spot == False)  # noqa: E712
     if level is not None:
         q = q.filter(Attraction.category_level == level)
-    items = localize_attractions(city, [attraction.to_dict() for attraction in q.all()])
-    return {"data": annotate_must_see_many(items)}
+    catalog_items = city_items(city, "ATTRACTIONS")
+    if level is not None:
+        catalog_items = [item for item in catalog_items if item.get("category_level") == level]
+    database_items = [attraction.to_dict() for attraction in q.all()]
+    source_items = catalog_items or database_items
+    items = localize_attractions(city, source_items)
+    return {"data": normalize_payload(annotate_must_see_many(items))}
 
 
 @router.get("/food-spots")
@@ -60,7 +69,8 @@ def list_food_spots(city: str = Query(default="roma"), db: Session = Depends(get
         .order_by(Attraction.attraction_type.asc(), Attraction.name.asc())
         .all()
     )
-    return {"data": localize_attractions(city, [spot.to_dict() for spot in spots])}
+    source_items = city_items(city, "FOOD_SPOTS") or [spot.to_dict() for spot in spots]
+    return {"data": normalize_payload(localize_attractions(city, source_items))}
 
 
 @router.get("/foods")
@@ -72,15 +82,17 @@ def list_foods(city: str = Query(default="roma"), db: Session = Depends(get_db))
         .filter(Attraction.city == city_id, Attraction.is_food_spot == True)  # noqa: E712
         .all()
     )
-    items = _foods_with_recommended_places(city_id, foods, food_spots)
-    return {"data": localize_foods(city_id, items)}
+    source_foods = city_records(city_id, "FOODS_BY_CITY") or foods
+    source_spots = city_records(city_id, "FOOD_SPOTS") or food_spots
+    items = _foods_with_recommended_places(city_id, source_foods, source_spots)
+    return {"data": normalize_payload(localize_foods(city_id, items))}
 
 
 @router.get("/culture-facts")
 def list_culture_facts(city: str = Query(default="roma")):
     city_module = CITY_MODULES.get(city.lower())
     facts = getattr(city_module, "CULTURE_FACTS", []) if city_module else []
-    return {"data": localize_culture(city, facts)}
+    return {"data": normalize_payload(localize_culture(city, facts))}
 
 
 @router.get("/city-info")
@@ -88,7 +100,7 @@ def get_city_info(city: str = Query(default="roma"), db: Session = Depends(get_d
     city_id = city.lower()
     static_info = STATIC_CITY_INFO.get(city_id)
     if static_info:
-        return {"data": static_info}
+        return {"data": normalize_payload(localize_city_info(city_id, static_info))}
     try:
         row = db.execute(
             text("SELECT * FROM city_info WHERE city = :city LIMIT 1"),
@@ -96,7 +108,7 @@ def get_city_info(city: str = Query(default="roma"), db: Session = Depends(get_d
         ).first()
     except SQLAlchemyError:
         return {"data": None}
-    return {"data": _serialise_mapping(row) if row else None}
+    return {"data": normalize_payload(localize_city_info(city_id, _serialise_mapping(row) if row else None))}
 
 
 @router.get("/neighborhoods")
@@ -104,7 +116,7 @@ def list_neighborhoods(city: str = Query(default="roma"), db: Session = Depends(
     city_id = city.lower()
     static_neighborhoods = STATIC_NEIGHBORHOODS.get(city_id)
     if static_neighborhoods:
-        return {"data": static_neighborhoods}
+        return {"data": normalize_payload(localize_neighborhoods(city_id, static_neighborhoods))}
     try:
         rows = db.execute(
             text(
@@ -115,7 +127,7 @@ def list_neighborhoods(city: str = Query(default="roma"), db: Session = Depends(
         ).all()
     except SQLAlchemyError:
         return {"data": []}
-    return {"data": [_serialise_mapping(row) for row in rows]}
+    return {"data": normalize_payload(localize_neighborhoods(city_id, [_serialise_mapping(row) for row in rows]))}
 
 
 @router.get("/health")

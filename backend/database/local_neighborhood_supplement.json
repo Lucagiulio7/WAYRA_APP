@@ -1,0 +1,496 @@
+{
+  "neighborhoods": {
+    "amburgo": [
+      {
+        "id": 910001,
+        "city": "amburgo",
+        "name": "Rathaus / Altstadt",
+        "name_en": "Hamburg Old Town",
+        "name_fr": "Rathaus / Altstadt",
+        "name_es": "Ayuntamiento / Casco antiguo",
+        "description": "La scelta più centrale per municipio, canali e Speicherstadt. È comoda per le attrazioni principali, ma più turistica e costosa nelle vie centrali.",
+        "description_en": "The most central choice for the town hall, canals and Speicherstadt. It is convenient for major sights, but the central streets are more touristy and expensive.",
+        "description_fr": "Le choix le plus central pour l’hôtel de ville, les canaux et la Speicherstadt. Il est pratique pour les sites majeurs, mais les rues centrales sont plus touristiques et chères.",
+        "description_es": "La opción más céntrica para el ayuntamiento, los canales y Speicherstadt. Es cómoda para las principales visitas, pero las calles centrales son más turísticas y caras.",
+        "vibe_tags": [
+          "centro storico",
+          "culturale",
+          "shopping",
+          "attrazioni"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910002,
+        "city": "amburgo",
+        "name": "St. Pauli / Reeperbahn",
+        "name_en": "St. Pauli / Reeperbahn",
+        "name_fr": "St. Pauli / Reeperbahn",
+        "name_es": "St. Pauli / Reeperbahn",
+        "description": "Quartiere musicale e notturno vicino al porto, ricco di locali e concerti. Ideale per la sera, meno adatto a chi cerca silenzio e tranquillità.",
+        "description_en": "A music and nightlife district near the harbour, packed with venues and concerts. Excellent in the evening, less suitable for travellers seeking quiet.",
+        "description_fr": "Quartier musical et nocturne près du port, riche en bars et concerts. Excellent le soir, moins adapté à ceux qui recherchent le calme.",
+        "description_es": "Barrio musical y nocturno cerca del puerto, lleno de locales y conciertos. Excelente por la noche, menos adecuado para quien busca tranquilidad.",
+        "vibe_tags": [
+          "vita notturna",
+          "locali",
+          "porto",
+          "rumoroso"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910003,
+        "city": "amburgo",
+        "name": "Schanzenviertel",
+        "name_en": "Schanzenviertel",
+        "name_fr": "Schanzenviertel",
+        "name_es": "Schanzenviertel",
+        "description": "Zona alternativa con caffè indipendenti, ristoranti e vita locale. Ha un’atmosfera creativa e meno monumentale, ma richiede i mezzi per alcune attrazioni.",
+        "description_en": "An alternative area with independent cafés, restaurants and local life. It feels creative and less monumental, but public transport is useful for some sights.",
+        "description_fr": "Zone alternative avec cafés indépendants, restaurants et vie locale. L’ambiance est créative et moins monumentale, mais les transports sont utiles pour certains sites.",
+        "description_es": "Zona alternativa con cafeterías independientes, restaurantes y vida local. Tiene un ambiente creativo y menos monumental, aunque conviene usar transporte para algunas visitas.",
+        "vibe_tags": [
+          "autentico",
+          "gastronomia",
+          "vita notturna",
+          "metro"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910004,
+        "city": "amburgo",
+        "name": "Eppendorf / Winterhude",
+        "name_en": "Eppendorf / Winterhude",
+        "name_fr": "Eppendorf / Winterhude",
+        "name_es": "Eppendorf / Winterhude",
+        "description": "Area elegante e residenziale tra canali, mercati e parchi. È tranquilla e piacevole per soggiorni lunghi, ma più distante dal centro storico.",
+        "description_en": "An elegant residential area of canals, markets and parks. It is quiet and pleasant for longer stays, but farther from the historic centre.",
+        "description_fr": "Quartier résidentiel élégant entre canaux, marchés et parcs. Il est calme et agréable pour un long séjour, mais plus éloigné du centre historique.",
+        "description_es": "Zona residencial elegante entre canales, mercados y parques. Es tranquila y agradable para estancias largas, pero queda más lejos del centro histórico.",
+        "vibe_tags": [
+          "tranquillo",
+          "verde",
+          "elegante",
+          "mercati"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ],
+    "annecy": [
+      {
+        "id": 910005,
+        "city": "annecy",
+        "name": "Vieille Ville",
+        "name_en": "Old Town",
+        "name_fr": "Vieille Ville",
+        "name_es": "Casco antiguo",
+        "description": "Il nucleo più suggestivo tra canali, castello e ristoranti. Tutto è raggiungibile a piedi, ma in alta stagione è affollato e gli alloggi costano di più.",
+        "description_en": "The most atmospheric base among canals, the castle and restaurants. Everything is walkable, but high season is crowded and accommodation costs more.",
+        "description_fr": "Le secteur le plus charmant entre canaux, château et restaurants. Tout se fait à pied, mais la haute saison est fréquentée et les hébergements plus chers.",
+        "description_es": "La zona con más encanto entre canales, castillo y restaurantes. Todo se recorre a pie, pero en temporada alta hay mucha gente y el alojamiento es más caro.",
+        "vibe_tags": [
+          "centro storico",
+          "romantico",
+          "gastronomia",
+          "attrazioni"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910006,
+        "city": "annecy",
+        "name": "Impérial / Albigny",
+        "name_en": "Imperial / Albigny",
+        "name_fr": "Impérial / Albigny",
+        "name_es": "Imperial / Albigny",
+        "description": "Zona sul lago con passeggiate, spiagge e atmosfera elegante. È più rilassata del centro, con prezzi generalmente alti vicino all’acqua.",
+        "description_en": "A lakeside area with promenades, beaches and an elegant atmosphere. It is more relaxed than the centre, with generally high prices near the water.",
+        "description_fr": "Zone au bord du lac avec promenades, plages et atmosphère élégante. Elle est plus détendue que le centre, avec des prix généralement élevés près de l’eau.",
+        "description_es": "Zona junto al lago con paseos, playas y ambiente elegante. Es más relajada que el centro, con precios generalmente altos cerca del agua.",
+        "vibe_tags": [
+          "lago",
+          "tranquillo",
+          "elegante",
+          "romantico"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910007,
+        "city": "annecy",
+        "name": "Bonlieu / Centre",
+        "name_en": "Bonlieu / Town Centre",
+        "name_fr": "Bonlieu / Centre",
+        "name_es": "Bonlieu / Centro",
+        "description": "Posizione pratica tra stazione, lago e città vecchia, con servizi e negozi vicini. È meno pittoresca dei canali, ma molto efficiente per muoversi senza auto.",
+        "description_en": "A practical position between the station, lake and old town, with services and shops nearby. It is less picturesque than the canals, but very efficient without a car.",
+        "description_fr": "Position pratique entre la gare, le lac et la vieille ville, avec services et commerces proches. Elle est moins pittoresque que les canaux, mais très efficace sans voiture.",
+        "description_es": "Ubicación práctica entre la estación, el lago y el casco antiguo, con servicios y tiendas cerca. Es menos pintoresca que los canales, pero muy cómoda sin coche.",
+        "vibe_tags": [
+          "centrale",
+          "shopping",
+          "trasporti",
+          "culturale"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910008,
+        "city": "annecy",
+        "name": "Annecy-le-Vieux",
+        "name_en": "Annecy-le-Vieux",
+        "name_fr": "Annecy-le-Vieux",
+        "name_es": "Annecy-le-Vieux",
+        "description": "Quartiere residenziale verde e silenzioso a nord del centro. Offre maggiore tranquillità e spazio, ma richiede autobus o bicicletta per la città vecchia.",
+        "description_en": "A green, quiet residential district north of the centre. It offers more calm and space, but a bus or bicycle is useful for the old town.",
+        "description_fr": "Quartier résidentiel vert et calme au nord du centre. Il offre davantage de tranquillité et d’espace, mais le bus ou le vélo est utile pour la vieille ville.",
+        "description_es": "Barrio residencial verde y tranquilo al norte del centro. Ofrece más calma y espacio, pero conviene usar autobús o bicicleta para llegar al casco antiguo.",
+        "vibe_tags": [
+          "tranquillo",
+          "verde",
+          "famiglie",
+          "residenziale"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ],
+    "colonia": [
+      {
+        "id": 910009,
+        "city": "colonia",
+        "name": "Dom / Altstadt",
+        "name_en": "Cathedral / Old Town",
+        "name_fr": "Cathédrale / Vieille ville",
+        "name_es": "Catedral / Casco antiguo",
+        "description": "La base più centrale accanto al Duomo, alla stazione e al Reno. È comodissima per una prima visita, ma turistica, vivace e spesso più costosa.",
+        "description_en": "The most central base beside the cathedral, main station and Rhine. It is extremely convenient for a first visit, but touristy, lively and often more expensive.",
+        "description_fr": "La base la plus centrale près de la cathédrale, de la gare et du Rhin. Elle est très pratique pour une première visite, mais touristique, animée et souvent plus chère.",
+        "description_es": "La base más céntrica junto a la catedral, la estación y el Rin. Es muy cómoda para una primera visita, pero turística, animada y a menudo más cara.",
+        "vibe_tags": [
+          "centro storico",
+          "attrazioni",
+          "culturale",
+          "trasporti"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910010,
+        "city": "colonia",
+        "name": "Belgisches Viertel",
+        "name_en": "Belgian Quarter",
+        "name_fr": "Quartier belge",
+        "name_es": "Barrio belga",
+        "description": "Quartiere creativo con boutique, ristoranti e intensa vita serale. È centrale e molto piacevole, ma può essere rumoroso nel fine settimana.",
+        "description_en": "A creative district of boutiques, restaurants and busy evening life. It is central and enjoyable, but can be noisy at weekends.",
+        "description_fr": "Quartier créatif avec boutiques, restaurants et vie nocturne animée. Il est central et agréable, mais peut être bruyant le week-end.",
+        "description_es": "Barrio creativo con boutiques, restaurantes y mucha vida nocturna. Es céntrico y agradable, aunque puede ser ruidoso los fines de semana.",
+        "vibe_tags": [
+          "arte",
+          "gastronomia",
+          "vita notturna",
+          "shopping"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910011,
+        "city": "colonia",
+        "name": "Ehrenfeld",
+        "name_en": "Ehrenfeld",
+        "name_fr": "Ehrenfeld",
+        "name_es": "Ehrenfeld",
+        "description": "Zona alternativa e multiculturale con street art e locali indipendenti. Offre un’esperienza più locale e prezzi spesso migliori, restando fuori dal centro monumentale.",
+        "description_en": "An alternative multicultural area with street art and independent venues. It offers a more local experience and often better prices, outside the monumental centre.",
+        "description_fr": "Zone alternative et multiculturelle avec street art et adresses indépendantes. Elle offre une expérience plus locale et souvent de meilleurs prix, hors du centre monumental.",
+        "description_es": "Zona alternativa y multicultural con arte urbano y locales independientes. Ofrece una experiencia más local y precios a menudo mejores, fuera del centro monumental.",
+        "vibe_tags": [
+          "autentico",
+          "arte",
+          "vita notturna",
+          "budget"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910012,
+        "city": "colonia",
+        "name": "Deutz / Rheinpark",
+        "name_en": "Deutz / Rheinpark",
+        "name_fr": "Deutz / Rheinpark",
+        "name_es": "Deutz / Rheinpark",
+        "description": "Sponda orientale del Reno con parco, fiera e viste spettacolari sul Duomo. È più tranquilla dell’Altstadt, ma per molte visite bisogna attraversare il fiume.",
+        "description_en": "The east bank of the Rhine, with a park, trade fair and spectacular cathedral views. It is quieter than the Old Town, but many visits require crossing the river.",
+        "description_fr": "Rive est du Rhin avec parc, foire et vues spectaculaires sur la cathédrale. Elle est plus calme que la vieille ville, mais de nombreuses visites exigent de traverser le fleuve.",
+        "description_es": "Orilla oriental del Rin, con parque, recinto ferial y vistas espectaculares de la catedral. Es más tranquila que el casco antiguo, pero muchas visitas requieren cruzar el río.",
+        "vibe_tags": [
+          "vista panoramica",
+          "verde",
+          "tranquillo",
+          "business"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ],
+    "lione": [
+      {
+        "id": 910013,
+        "city": "lione",
+        "name": "Vieux Lyon",
+        "name_en": "Old Lyon",
+        "name_fr": "Vieux Lyon",
+        "name_es": "Viejo Lyon",
+        "description": "Quartiere rinascimentale ai piedi di Fourvière, ricco di traboules e bouchon. È scenografico e centrale, ma turistico e con vie rumorose nei momenti di punta.",
+        "description_en": "A Renaissance district below Fourvière, rich in traboules and bouchons. It is scenic and central, but touristy and busy at peak times.",
+        "description_fr": "Quartier Renaissance au pied de Fourvière, riche en traboules et bouchons. Il est pittoresque et central, mais touristique et animé aux heures de pointe.",
+        "description_es": "Barrio renacentista al pie de Fourvière, lleno de traboules y bouchons. Es pintoresco y céntrico, pero turístico y concurrido en horas punta.",
+        "vibe_tags": [
+          "centro storico",
+          "culturale",
+          "gastronomia",
+          "attrazioni"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910014,
+        "city": "lione",
+        "name": "Presqu’île",
+        "name_en": "Presquile",
+        "name_fr": "Presqu’île",
+        "name_es": "Presqu’île",
+        "description": "Cuore centrale tra Bellecour e Terreaux, ideale per shopping, musei e trasporti. La posizione è imbattibile, con prezzi elevati e poco silenzio nelle strade principali.",
+        "description_en": "The central heart between Bellecour and Terreaux, ideal for shopping, museums and transport. The location is unbeatable, with high prices and little quiet on main streets.",
+        "description_fr": "Coeur central entre Bellecour et Terreaux, idéal pour shopping, musées et transports. La situation est imbattable, avec des prix élevés et peu de calme sur les grands axes.",
+        "description_es": "Corazón céntrico entre Bellecour y Terreaux, ideal para compras, museos y transporte. La ubicación es inmejorable, con precios altos y poco silencio en las calles principales.",
+        "vibe_tags": [
+          "centrale",
+          "shopping",
+          "culturale",
+          "metro"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910015,
+        "city": "lione",
+        "name": "Croix-Rousse",
+        "name_en": "Croix-Rousse",
+        "name_fr": "Croix-Rousse",
+        "name_es": "Croix-Rousse",
+        "description": "Collina dei canuts con mercati, atelier e atmosfera di quartiere. È autentica e panoramica, ma presenta salite e distanze maggiori dal sud della città.",
+        "description_en": "The canuts’ hill, with markets, studios and a neighbourhood atmosphere. It is authentic and scenic, but involves slopes and longer distances to the south of the city.",
+        "description_fr": "Colline des canuts avec marchés, ateliers et ambiance de quartier. Elle est authentique et panoramique, mais comporte des pentes et des distances plus longues vers le sud.",
+        "description_es": "Colina de los canuts, con mercados, talleres y ambiente de barrio. Es auténtica y panorámica, pero tiene cuestas y queda más lejos del sur de la ciudad.",
+        "vibe_tags": [
+          "autentico",
+          "mercati",
+          "arte",
+          "collina"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910016,
+        "city": "lione",
+        "name": "Brotteaux / Les Halles",
+        "name_en": "Brotteaux / Les Halles",
+        "name_fr": "Brotteaux / Les Halles",
+        "name_es": "Brotteaux / Les Halles",
+        "description": "Zona elegante vicina a Part-Dieu e alle Halles Paul Bocuse. È ottima per gastronomia e collegamenti, meno suggestiva del centro storico.",
+        "description_en": "An elegant area near Part-Dieu and Les Halles Paul Bocuse. It is excellent for food and transport, though less atmospheric than the historic centre.",
+        "description_fr": "Zone élégante près de Part-Dieu et des Halles Paul Bocuse. Elle est excellente pour la gastronomie et les transports, mais moins pittoresque que le centre historique.",
+        "description_es": "Zona elegante cerca de Part-Dieu y Les Halles Paul Bocuse. Es excelente para gastronomía y transporte, aunque menos pintoresca que el centro histórico.",
+        "vibe_tags": [
+          "gastronomia",
+          "trasporti",
+          "elegante",
+          "business"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ],
+    "salisburgo": [
+      {
+        "id": 910017,
+        "city": "salisburgo",
+        "name": "Getreidegasse / Altstadt",
+        "name_en": "Getreidegasse / Old Town",
+        "name_fr": "Getreidegasse / Vieille ville",
+        "name_es": "Getreidegasse / Casco antiguo",
+        "description": "Il cuore barocco tra Duomo, Getreidegasse e fortezza. Permette di visitare quasi tutto a piedi, ma è la zona più turistica e costosa.",
+        "description_en": "The Baroque heart around the cathedral, Getreidegasse and fortress. Almost everything is walkable, but this is the most touristy and expensive area.",
+        "description_fr": "Le coeur baroque autour de la cathédrale, de la Getreidegasse et de la forteresse. Presque tout se fait à pied, mais c’est la zone la plus touristique et chère.",
+        "description_es": "El corazón barroco entre la catedral, Getreidegasse y la fortaleza. Casi todo se recorre a pie, pero es la zona más turística y cara.",
+        "vibe_tags": [
+          "centro storico",
+          "attrazioni",
+          "culturale",
+          "romantico"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910018,
+        "city": "salisburgo",
+        "name": "Mirabell / Neustadt",
+        "name_en": "Mirabell / New Town",
+        "name_fr": "Mirabell / Neustadt",
+        "name_es": "Mirabell / Ciudad nueva",
+        "description": "Zona pratica tra stazione, giardini Mirabell e centro storico. Offre ottimi collegamenti e più scelta alberghiera, con un’atmosfera meno antica.",
+        "description_en": "A practical area between the station, Mirabell Gardens and the Old Town. It offers excellent transport and more hotel choice, with a less historic atmosphere.",
+        "description_fr": "Zone pratique entre la gare, les jardins Mirabell et la vieille ville. Elle offre d’excellents transports et davantage d’hôtels, avec une ambiance moins ancienne.",
+        "description_es": "Zona práctica entre la estación, los jardines Mirabell y el casco antiguo. Ofrece excelentes conexiones y más hoteles, con un ambiente menos histórico.",
+        "vibe_tags": [
+          "centrale",
+          "trasporti",
+          "verde",
+          "shopping"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910019,
+        "city": "salisburgo",
+        "name": "Nonntal / Leopoldskron",
+        "name_en": "Nonntal / Leopoldskron",
+        "name_fr": "Nonntal / Leopoldskron",
+        "name_es": "Nonntal / Leopoldskron",
+        "description": "Area residenziale verde ai piedi del Mönchsberg, vicina al lago Leopoldskron. È silenziosa e panoramica, ma meno comoda per ristoranti e vita serale.",
+        "description_en": "A green residential area below Mönchsberg, near Leopoldskron lake. It is quiet and scenic, but less convenient for restaurants and nightlife.",
+        "description_fr": "Quartier résidentiel verdoyant au pied du Mönchsberg, près du lac Leopoldskron. Il est calme et panoramique, mais moins pratique pour les restaurants et la vie nocturne.",
+        "description_es": "Zona residencial verde al pie del Mönchsberg, cerca del lago Leopoldskron. Es tranquila y panorámica, pero menos cómoda para restaurantes y vida nocturna.",
+        "vibe_tags": [
+          "tranquillo",
+          "verde",
+          "vista panoramica",
+          "famiglie"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910020,
+        "city": "salisburgo",
+        "name": "Steingasse / Kapuzinerberg",
+        "name_en": "Steingasse / Kapuzinerberg",
+        "name_fr": "Steingasse / Kapuzinerberg",
+        "name_es": "Steingasse / Kapuzinerberg",
+        "description": "Piccola zona storica sulla riva destra, sotto il Kapuzinerberg. È romantica e vicina al centro, ma le salite e la scelta ridotta di alloggi possono limitarla.",
+        "description_en": "A small historic area on the right bank below Kapuzinerberg. It is romantic and close to the centre, but slopes and limited accommodation can be drawbacks.",
+        "description_fr": "Petite zone historique sur la rive droite sous le Kapuzinerberg. Elle est romantique et proche du centre, mais les pentes et le choix limité d’hébergements peuvent gêner.",
+        "description_es": "Pequeña zona histórica en la orilla derecha, bajo el Kapuzinerberg. Es romántica y cercana al centro, pero las cuestas y la oferta limitada de alojamiento pueden ser inconvenientes.",
+        "vibe_tags": [
+          "romantico",
+          "storico",
+          "collina",
+          "tranquillo"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ],
+    "tallinn": [
+      {
+        "id": 910021,
+        "city": "tallinn",
+        "name": "Vanalinn / Raekoja",
+        "name_en": "Old Town / Town Hall Square",
+        "name_fr": "Vanalinn / Place de l’Hôtel de ville",
+        "name_es": "Vanalinn / Plaza del Ayuntamiento",
+        "description": "Il centro medievale più scenografico, vicino a mura, chiese e ristoranti. È perfetto per una prima visita, ma turistico, acciottolato e più costoso.",
+        "description_en": "The most atmospheric medieval centre, close to walls, churches and restaurants. It is perfect for a first visit, but touristy, cobbled and more expensive.",
+        "description_fr": "Le centre médiéval le plus pittoresque, près des remparts, églises et restaurants. Il est parfait pour une première visite, mais touristique, pavé et plus cher.",
+        "description_es": "El centro medieval más pintoresco, cerca de murallas, iglesias y restaurantes. Es perfecto para una primera visita, pero turístico, adoquinado y más caro.",
+        "vibe_tags": [
+          "centro storico",
+          "culturale",
+          "attrazioni",
+          "vita notturna"
+        ],
+        "sort_order": 1,
+        "geojson": null
+      },
+      {
+        "id": 910022,
+        "city": "tallinn",
+        "name": "Kalamaja / Telliskivi",
+        "name_en": "Kalamaja / Telliskivi",
+        "name_fr": "Kalamaja / Telliskivi",
+        "name_es": "Kalamaja / Telliskivi",
+        "description": "Quartiere creativo di case in legno, street art e locali ricavati da spazi industriali. È giovane e autentico, restando a breve distanza a piedi dal centro.",
+        "description_en": "A creative district of wooden houses, street art and venues in converted industrial spaces. It is youthful and authentic, within a short walk of the centre.",
+        "description_fr": "Quartier créatif de maisons en bois, street art et lieux installés dans d’anciens espaces industriels. Il est jeune et authentique, à courte distance à pied du centre.",
+        "description_es": "Barrio creativo de casas de madera, arte urbano y locales en antiguos espacios industriales. Es joven y auténtico, a poca distancia a pie del centro.",
+        "vibe_tags": [
+          "autentico",
+          "arte",
+          "gastronomia",
+          "vita notturna"
+        ],
+        "sort_order": 2,
+        "geojson": null
+      },
+      {
+        "id": 910023,
+        "city": "tallinn",
+        "name": "Kadriorg",
+        "name_en": "Kadriorg",
+        "name_fr": "Kadriorg",
+        "name_es": "Kadriorg",
+        "description": "Zona elegante e verde attorno al palazzo e al KUMU. È tranquilla e adatta alle famiglie, ma richiede tram o autobus per la città vecchia.",
+        "description_en": "An elegant green area around the palace and KUMU. It is quiet and family-friendly, but a tram or bus is useful for the Old Town.",
+        "description_fr": "Zone élégante et verdoyante autour du palais et du KUMU. Elle est calme et adaptée aux familles, mais le tram ou le bus est utile pour la vieille ville.",
+        "description_es": "Zona elegante y verde alrededor del palacio y el KUMU. Es tranquila y adecuada para familias, pero conviene usar tranvía o autobús para el casco antiguo.",
+        "vibe_tags": [
+          "verde",
+          "elegante",
+          "tranquillo",
+          "famiglie"
+        ],
+        "sort_order": 3,
+        "geojson": null
+      },
+      {
+        "id": 910024,
+        "city": "tallinn",
+        "name": "Kesklinn / Rotermann",
+        "name_en": "Kesklinn / Rotermann",
+        "name_fr": "Kesklinn / Rotermann",
+        "name_es": "Kesklinn / Rotermann",
+        "description": "Area centrale moderna tra porto, Rotermann e Piazza della Libertà. È pratica per trasporti, shopping e ristoranti, ma meno caratteristica della città medievale.",
+        "description_en": "A modern central area between the harbour, Rotermann and Freedom Square. It is practical for transport, shopping and restaurants, but less distinctive than the medieval town.",
+        "description_fr": "Zone centrale moderne entre le port, Rotermann et la place de la Liberté. Elle est pratique pour transports, shopping et restaurants, mais moins typique que la ville médiévale.",
+        "description_es": "Zona céntrica moderna entre el puerto, Rotermann y la Plaza de la Libertad. Es práctica para transporte, compras y restaurantes, pero menos característica que la ciudad medieval.",
+        "vibe_tags": [
+          "centrale",
+          "shopping",
+          "trasporti",
+          "gastronomia"
+        ],
+        "sort_order": 4,
+        "geojson": null
+      }
+    ]
+  }
+}

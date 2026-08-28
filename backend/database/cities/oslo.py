@@ -49,6 +49,7 @@ ATTRACTIONS = [
  {'city': 'oslo', 'block_id': 8, 'zone': 'holmenkollen_nordmarka', 'category_level': 2, 'name': 'Nordmarka trail access', 'name_en': 'Nordmarka Trail Access', 'description': 'Punto utile per aggiungere una lettura più naturale del bordo verde di Oslo.', 'description_en': 'A useful point for adding a more natural reading of Oslo\'s green edge.', 'latitude': 59.9658, 'longitude': 10.6639, 'estimated_visit_time': 20, 'tags': ['sentiero', 'natura', 'bosco'], 'attraction_type': 'percorso verde', 'ticket_url': None},
  {'city': 'oslo', 'block_id': 8, 'zone': 'holmenkollen_nordmarka', 'category_level': 2, 'name': 'Sentiero del bosco alto', 'name_en': 'Upper Forest Path', 'description': 'Percorso utile per sentire il lato più naturale e panoramico della zona.', 'description_en': 'A useful route for feeling the area\'s more natural and panoramic side.', 'latitude': 59.9663, 'longitude': 10.6649, 'estimated_visit_time': 20, 'tags': ['bosco', 'sentiero', 'verde'], 'attraction_type': 'percorso panoramico', 'ticket_url': None},
  {'city': 'oslo', 'block_id': 8, 'zone': 'holmenkollen_nordmarka', 'category_level': 2, 'name': 'Affaccio sui quartieri alti', 'name_en': 'Upper Districts Viewpoint', 'description': 'Belvedere utile per legare paesaggio naturale e margini residenziali della capitale.', 'description_en': 'A useful viewpoint linking natural landscape and the capital\'s residential edges.', 'latitude': 59.9627, 'longitude': 10.6694, 'estimated_visit_time': 20, 'tags': ['panorama', 'collina', 'quartiere'], 'attraction_type': 'belvedere', 'ticket_url': None},
+ {'city': 'oslo', 'block_id': 1, 'zone': 'sentrum_karl_johan', 'category_level': 3, 'name': 'Telthusbakken', 'name_en': 'Telthusbakken', 'name_fr': 'Telthusbakken', 'name_es': 'Telthusbakken', 'description': 'Una delle strade storiche più raccolte di Oslo, con case lignee colorate e un’atmosfera quasi da piccolo borgo lungo un percorso indipendente che collega il centro all’area creativa di Vulkan.', 'description_en': "One of Oslo's most intimate historic streets, lined with colourful wooden houses and an almost village-like atmosphere on a self-guided route linking the centre with the creative Vulkan district.", 'description_fr': 'L’une des rues historiques les plus intimes d’Oslo, bordée de maisons en bois colorées et dotée d’une atmosphère de petit village, sur un parcours autonome reliant le centre au quartier créatif de Vulkan.', 'description_es': 'Una de las calles históricas más íntimas de Oslo, con casas de madera de colores y un ambiente casi de pequeño pueblo, dentro de una ruta autoguiada que une el centro con el creativo barrio de Vulkan.', 'latitude': 59.92384, 'longitude': 10.75040, 'estimated_visit_time': 60, 'tags': ['strada storica', 'case in legno', 'vita locale'], 'attraction_type': 'strada storica', 'ticket_url': 'https://www.visitoslo.com/your-oslo/on-a-budget/diy-sightseeing'},
 ]
 
 FOOD_SPOTS = [
@@ -119,20 +120,20 @@ FOOD_SPOTS = [
 ]
 
 # Normalized detailed food descriptions.
-FOODS_BY_CITY = [{'name': 'F?rik?l',
-  'name_en': 'F?rik?l Lamb and Cabbage',
-  'description': 'Stufato nazionale norvegese di agnello, cavolo e pepe nero, cotto lentamente fino a diventare morbido e aromatico. ? '
+FOODS_BY_CITY = [{'name': 'Fårikål',
+  'name_en': 'Fårikål Lamb and Cabbage',
+  'description': 'Stufato nazionale norvegese di agnello, cavolo e pepe nero, cotto lentamente fino a diventare morbido e aromatico. È '
                  'cucina essenziale e stagionale: pochi ingredienti, brodo pulito, dolcezza del cavolo e carne tenera senza pesantezza. La '
-                 'qualit? si misura nella limpidezza del brodo e nella dolcezza del cavolo.',
-  'description_en': 'Norway?s national stew of lamb, cabbage and black pepper, slowly cooked until tender and aromatic. It is essential '
+                 'qualità si misura nella limpidezza del brodo e nella dolcezza del cavolo.',
+  'description_en': 'Norway’s national stew of lamb, cabbage and black pepper, slowly cooked until tender and aromatic. It is essential '
                     'seasonal cooking: few ingredients, clean broth, cabbage sweetness and tender meat without heaviness. Quality is '
                     'measured by broth clarity, cabbage sweetness and pepper that stays gentle.',
   'ingredients': ['agnello', 'cavolo', 'pepe nero', 'sale', 'patate'],
   'ingredients_en': ['lamb', 'cabbage', 'black pepper', 'salt', 'potatoes'],
   'places': ['Kaffistova Oslo', 'Engebret Cafe Oslo', 'Dovrehallen Oslo']},
- {'name': 'Kj?ttkaker',
+ {'name': 'Kjøttkaker',
   'name_en': 'Norwegian Meat Cakes',
-  'description': 'Polpette norvegesi pi? grandi e morbide delle meatballs comuni, servite con salsa bruna, patate, piselli e confettura di '
+  'description': 'Polpette norvegesi più grandi e morbide delle meatballs comuni, servite con salsa bruna, patate, piselli e confettura di '
                  'mirtilli rossi. Sono comfort food domestico: saporite, delicate, molto legate alle mense tradizionali e ai pranzi '
                  'familiari.',
   'description_en': 'Norwegian meat cakes, larger and softer than common meatballs, served with brown sauce, potatoes, peas and '
@@ -143,8 +144,8 @@ FOODS_BY_CITY = [{'name': 'F?rik?l',
   'places': ['Kaffistova Oslo', 'Dovrehallen Oslo', 'Engebret Cafe Oslo']},
  {'name': 'Rakfisk',
   'name_en': 'Rakfisk Fermented Fish',
-  'description': 'Pesce d?acqua dolce fermentato, spesso trota, servito con lefse, panna acida, cipolla e patate. ? un sapore forte e '
-                 'tradizionale: salino, pungente, complesso, da assaggiare con contorni capaci di equilibrarne l?intensit?. La qualit? '
+  'description': 'Pesce d’acqua dolce fermentato, spesso trota, servito con lefse, panna acida, cipolla e patate. È un sapore forte e '
+                 'tradizionale: salino, pungente, complesso, da assaggiare con contorni capaci di equilibrarne l’intensità. La qualità '
                  'richiede fermentazione pulita, profumo controllato e contorni freschi.',
   'description_en': 'Fermented freshwater fish, often trout, served with lefse, sour cream, onion and potatoes. It is a strong traditional '
                     'flavour: saline, pungent and complex, best tasted with sides able to balance its intensity. Quality requires clean '
@@ -163,10 +164,10 @@ FOODS_BY_CITY = [{'name': 'F?rik?l',
   'places': ['Fiskeriet Youngstorget Oslo', 'Engebret Cafe Oslo', 'Vaaghals Oslo']},
  {'name': 'Reinsdyrgryte',
   'name_en': 'Reindeer Stew',
-  'description': 'Stufato di renna con panna, funghi, ginepro e spesso mirtilli rossi, legato alla cucina nordica e sami. ? profondo ma '
-                 'non aggressivo: carne magra, salsa cremosa, note boschive e acidit? dolce della frutta. La qualit? sta nella carne '
+  'description': 'Stufato di renna con panna, funghi, ginepro e spesso mirtilli rossi, legato alla cucina nordica e sami. È profondo ma '
+                 'non aggressivo: carne magra, salsa cremosa, note boschive e acidità dolce della frutta. La qualità sta nella carne '
                  'tenera e nella salsa cremosa ma non coprente.',
-  'description_en': 'A reindeer stew with cream, mushrooms, juniper and often lingonberries, linked to Nordic and S?mi cooking. It is deep '
+  'description_en': 'A reindeer stew with cream, mushrooms, juniper and often lingonberries, linked to Nordic and Sámi cooking. It is deep '
                     'but not aggressive: lean meat, creamy sauce, woodland notes and sweet acidity from the berries. Quality lies in '
                     'tender meat and a creamy sauce that does not cover it.',
   'ingredients': ['renna', 'panna', 'funghi', 'ginepro', 'mirtilli rossi'],
@@ -174,8 +175,8 @@ FOODS_BY_CITY = [{'name': 'F?rik?l',
   'places': ['Lorry Oslo', 'Engebret Cafe Oslo', 'Kaffistova Oslo']},
  {'name': 'Skillingsbolle',
   'name_en': 'Norwegian Cinnamon Bun',
-  'description': 'Girella dolce alla cannella, morbida e profumata, venduta nelle bakery come pausa quotidiana con caff?. Deve essere '
-                 'burrosa ma non pesante, con cannella ben distribuita, superficie leggermente caramellata e mollica soffice. La qualit? '
+  'description': 'Girella dolce alla cannella, morbida e profumata, venduta nelle bakery come pausa quotidiana con caffè. Deve essere '
+                 'burrosa ma non pesante, con cannella ben distribuita, superficie leggermente caramellata e mollica soffice. La qualità '
                  'migliore lascia burro, spezie e lievitazione in equilibrio.',
   'description_en': 'A sweet cinnamon bun, soft and fragrant, sold in bakeries as an everyday coffee break. It should be buttery but not '
                     'heavy, with well-distributed cinnamon, a lightly caramelised surface and soft crumb. The best versions keep butter, '
@@ -185,9 +186,9 @@ FOODS_BY_CITY = [{'name': 'F?rik?l',
   'places': ['Baker Hansen Oslo', 'Godt Brod Grunerlokka Oslo', 'W B Samson Oslo']},
  {'name': 'Waffle norvegese',
   'name_en': 'Norwegian Waffle',
-  'description': 'Waffle sottile a forma di cuore, morbido pi? che croccante, servito con panna acida, marmellata o brunost. In Norvegia ? '
-                 'merenda, accoglienza e pausa informale: delicato, tiepido, pi? domestico che da dessert elaborato. La qualit? dipende '
-                 'dalla leggerezza dell?impasto e dal servizio appena tiepido.',
+  'description': 'Waffle sottile a forma di cuore, morbido più che croccante, servito con panna acida, marmellata o brunost. In Norvegia è '
+                 'merenda, accoglienza e pausa informale: delicato, tiepido, più domestico che da dessert elaborato. La qualità dipende '
+                 'dalla leggerezza dell’impasto e dal servizio appena tiepido.',
   'description_en': 'A thin heart-shaped waffle, soft rather than crisp, served with sour cream, jam or brunost. In Norway it is snack, '
                     'hospitality and informal pause: delicate, warm and more home-like than elaborate dessert. Quality depends on light '
                     'batter and serving it while still gently warm.',
@@ -197,8 +198,8 @@ FOODS_BY_CITY = [{'name': 'F?rik?l',
  {'name': 'Brunost',
   'name_en': 'Brunost Brown Cheese',
   'description': 'Formaggio marrone norvegese dal gusto dolce e caramellato, ottenuto dal siero cotto a lungo, servito a fette sottili su '
-                 'pane o waffle. ? sorprendente: lattico, salato-dolce, quasi toffee, molto identitario nella colazione norvegese. La '
-                 'qualit? sta nel taglio sottile, che rende il sapore pi? armonico.',
+                 'pane o waffle. È sorprendente: lattico, salato-dolce, quasi toffee, molto identitario nella colazione norvegese. La '
+                 'qualità sta nel taglio sottile, che rende il sapore più armonico.',
   'description_en': 'Norwegian brown cheese with a sweet caramel flavour, made from whey cooked for a long time, served in thin slices on '
                     'bread or waffles. It is surprising: milky, sweet-salty, almost toffee-like and highly distinctive at Norwegian '
                     'breakfast.',

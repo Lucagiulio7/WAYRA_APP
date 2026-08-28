@@ -137,7 +137,7 @@ FOOD_SPOTS = [
 # Normalized detailed food descriptions.
 FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
   'name_en': 'Spinach with Chickpeas',
-  'description': 'Tapa sivigliana di spinaci, ceci, aglio, pane fritto, cumino e paprika, spesso legata alla tradizione quaresimale. ? '
+  'description': 'Tapa sivigliana di spinaci, ceci, aglio, pane fritto, cumino e paprika, spesso legata alla tradizione quaresimale. È '
                  'vegetale ma intensa: cremosa, speziata, sapida, perfetta quando i ceci restano integri e gli spinaci non diventano '
                  'acquosi.',
   'description_en': 'A Sevillian tapa of spinach, chickpeas, garlic, fried bread, cumin and paprika, often linked to Lenten tradition. It '
@@ -146,10 +146,10 @@ FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
   'ingredients': ['spinaci', 'ceci', 'aglio', 'cumino', 'paprika'],
   'ingredients_en': ['spinach', 'chickpeas', 'garlic', 'cumin', 'paprika'],
   'places': ['El Rinconcillo Seville', 'Bodega Santa Cruz Las Columnas Seville', 'Bar Alfalfa Seville']},
- {'name': 'Pesca?to frito',
+ {'name': 'Pescaíto frito',
   'name_en': 'Fried Small Fish',
-  'description': 'Piccoli pesci e frutti di mare infarinati e fritti rapidamente, serviti caldi con limone, classico dell?Andalusia '
-                 'occidentale. La qualit? sta nella frittura asciutta, nel pesce fresco e nella leggerezza: deve profumare di mare, non di '
+  'description': 'Piccoli pesci e frutti di mare infarinati e fritti rapidamente, serviti caldi con limone, classico dell’Andalusia '
+                 'occidentale. La qualità sta nella frittura asciutta, nel pesce fresco e nella leggerezza: deve profumare di mare, non di '
                  'olio.',
   'description_en': 'Small fish and seafood lightly floured and quickly fried, served hot with lemon, a classic of western Andalusia. '
                     'Quality lies in dry frying, fresh fish and lightness: it should smell of the sea, not of oil.',
@@ -158,17 +158,17 @@ FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
   'places': ['Freiduria Puerta de la Carne Seville', 'Freiduria La Isla Seville', 'Blanco Cerrillo Seville']},
  {'name': 'Solomillo al whisky',
   'name_en': 'Pork Tenderloin in Whisky Sauce',
-  'description': 'Filetto di maiale cotto con aglio, olio, limone e whisky, servito spesso come tapa con patate. ? una specialit? da bar '
+  'description': 'Filetto di maiale cotto con aglio, olio, limone e whisky, servito spesso come tapa con patate. È una specialità da bar '
                  'sivigliano: salsa intensa ma brillante, carne tenera, aglio evidente e fondo da raccogliere col pane.',
   'description_en': 'Pork tenderloin cooked with garlic, oil, lemon and whisky, often served as a tapa with potatoes. It is a Sevillian '
                     'bar speciality: intense but bright sauce, tender meat, clear garlic and juices meant to be collected with bread.',
   'ingredients': ['filetto di maiale', 'whisky', 'aglio', 'limone', 'olio'],
   'ingredients_en': ['pork tenderloin', 'whisky', 'garlic', 'lemon', 'oil'],
   'places': ['Bodeguita Antonio Romero Seville', 'Casa Morales Seville', 'Eslava Seville']},
- {'name': 'Montadito de pring?',
-  'name_en': 'Pring? Sandwich',
-  'description': 'Piccolo panino caldo ripieno di carni del puchero, come maiale, chorizo, morcilla e pancetta, schiacciate insieme. ? una '
-                 'tapa popolare e potentissima: grassa, sapida, morbida, migliore quando il pane resta croccante fuori. La qualit? dipende '
+ {'name': 'Montadito de pringá',
+  'name_en': 'Pringá Sandwich',
+  'description': 'Piccolo panino caldo ripieno di carni del puchero, come maiale, chorizo, morcilla e pancetta, schiacciate insieme. È una '
+                 'tapa popolare e potentissima: grassa, sapida, morbida, migliore quando il pane resta croccante fuori. La qualità dipende '
                  'dalla carne ben amalgamata e dal servizio caldo.',
   'description_en': 'A small hot sandwich filled with meats from puchero stew, such as pork, chorizo, morcilla and bacon, mashed together. '
                     'It is a powerful popular tapa: fatty, savoury and soft, best when the bread stays crisp outside.',
@@ -178,18 +178,18 @@ FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
  {'name': 'Gazpacho andaluz',
   'name_en': 'Andalusian Gazpacho',
   'description': 'Zuppa fredda di pomodoro, peperone, cetriolo, aglio, pane, olio e aceto, fondamentale nelle estati andaluse. Deve essere '
-                 'fresca, liscia e viva: acidit?, dolcezza del pomodoro e olio buono devono restare in equilibrio. La qualit? si riconosce '
+                 'fresca, liscia e viva: acidità, dolcezza del pomodoro e olio buono devono restare in equilibrio. La qualità si riconosce '
                  'nel servizio freddo e nella texture vellutata.',
   'description_en': 'A cold soup of tomato, pepper, cucumber, garlic, bread, oil and vinegar, fundamental in Andalusian summers. It should '
                     'be fresh, smooth and lively: acidity, tomato sweetness and good oil must remain in balance. Quality is recognised in '
                     'cold service and a velvety texture.',
-  'ingredients': ['pomodoro', 'peperone', 'cetriolo', 'aglio', 'olio d?oliva'],
+  'ingredients': ['pomodoro', 'peperone', 'cetriolo', 'aglio', 'olio d’oliva'],
   'ingredients_en': ['tomato', 'pepper', 'cucumber', 'garlic', 'olive oil'],
   'places': ['El Rinconcillo Seville', 'Casa Robles Seville', 'La Azotea Seville']},
  {'name': 'Torrijas',
   'name_en': 'Spanish Torrijas',
-  'description': 'Fette di pane imbevute in latte o vino, passate nell?uovo, fritte e cosparse di zucchero o miele, tipiche della '
-                 'Settimana Santa. Sono morbide, profumate e dolci, ma la qualit? richiede frittura pulita e interno non zuppo.',
+  'description': 'Fette di pane imbevute in latte o vino, passate nell’uovo, fritte e cosparse di zucchero o miele, tipiche della '
+                 'Settimana Santa. Sono morbide, profumate e dolci, ma la qualità richiede frittura pulita e interno non zuppo.',
   'description_en': 'Slices of bread soaked in milk or wine, dipped in egg, fried and covered with sugar or honey, typical of Holy Week. '
                     'They are soft, fragrant and sweet, but quality requires clean frying and an interior that is not soggy.',
   'ingredients': ['pane', 'latte', 'uova', 'zucchero', 'miele'],
@@ -197,9 +197,9 @@ FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
   'places': ['Confiteria La Campana Seville', 'Manu Jara Seville', 'Horno San Buenaventura Seville']},
  {'name': 'Huevos a la flamenca',
   'name_en': 'Flamenco-Style Eggs',
-  'description': 'Uova cotte al forno con pomodoro, piselli, peperoni, chorizo e talvolta patate o prosciutto, in terracotta. ? un piatto '
-                 'colorato e generoso: tuorlo morbido, salsa saporita e ingredienti distribuiti senza diventare confusi. La qualit? '
-                 'dipende dalla cottura dell?uovo, che non deve asciugarsi.',
+  'description': 'Uova cotte al forno con pomodoro, piselli, peperoni, chorizo e talvolta patate o prosciutto, in terracotta. È un piatto '
+                 'colorato e generoso: tuorlo morbido, salsa saporita e ingredienti distribuiti senza diventare confusi. La qualità '
+                 'dipende dalla cottura dell’uovo, che non deve asciugarsi.',
   'description_en': 'Eggs baked with tomato, peas, peppers, chorizo and sometimes potatoes or ham, in an earthenware dish. It is colourful '
                     'and generous: soft yolk, savoury sauce and ingredients distributed without becoming confused. Quality depends on egg '
                     'cooking, which should never dry out.',
@@ -209,7 +209,7 @@ FOODS_BY_CITY = [{'name': 'Espinacas con garbanzos',
  {'name': 'Caracoles',
   'name_en': 'Sevillian Snails',
   'description': 'Lumachine cotte in brodo speziato con erbe, aglio e aromi, servite come tapa stagionale soprattutto in primavera. Sono '
-                 'conviviali e particolari: piccole, saporite, profumate, da mangiare lentamente con una birra fredda. La qualit? sta nel '
+                 'conviviali e particolari: piccole, saporite, profumate, da mangiare lentamente con una birra fredda. La qualità sta nel '
                  'brodo aromatico e nella pulizia del sapore.',
   'description_en': 'Small snails cooked in a spiced broth with herbs, garlic and aromatics, served as a seasonal tapa especially in '
                     'spring. They are convivial and distinctive: small, savoury, fragrant and meant to be eaten slowly with a cold beer.',

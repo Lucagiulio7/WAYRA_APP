@@ -12,17 +12,15 @@ import {
   Modal,
   Animated,
   Easing,
-  Linking,
   Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, { Circle, Line, Polyline } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useItinerary } from "@/hooks/useItinerary";
 import { useCityInfo } from "@/hooks/useCityInfo";
-import { useCityDownload } from "@/hooks/useCityDownload";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,10 +29,32 @@ import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
 import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
+import { AccountDeletionButton } from "@/components/AccountDeletionButton";
 import { PressableCard, FadeInUp, staggerDelay, PulseGlow } from "@/components/ui";
 import { shadowLevel } from "@/utils/shadow";
+import { cityLabel } from "@/utils/cityLabels";
+import { CITIES, CITY_EMOJI_MAP, COUNTRIES, registeredCountryLabel } from "@/data/cityRegistry";
 import { getAnalyticsConsent, setAnalyticsConsent, track } from "@/services/AnalyticsService";
-import { LANGUAGE_OPTIONS, languageOption } from "@/i18n";
+import { cacheCityForOffline } from "@/services/cityOfflineCache";
+import { useCityDownload, type DownloadStatus } from "@/hooks/useCityDownload";
+import { LANGUAGE_OPTIONS, languageOption, localText } from "@/i18n";
+import { measureGuideTarget } from "@/utils/guideMeasurement";
+import {
+  ContextHelpUI,
+  contextHelpOutline,
+  useContextHelpController,
+} from "@/components/ContextHelp";
+import { homeContextHelp } from "@/data/homeContextHelp";
+import { getTransitNetwork, supportsTransit } from "@/data/transitNetworks";
+import {
+  clearGenerationRequest,
+  createGenerationRequest,
+  loadGenerationRequest,
+  saveGenerationRequest,
+  type GenerationRequest,
+} from "@/services/generationRequestStorage";
+import { withStorageLock } from "@/services/resilientStorage";
+import { openExternalLink } from "@/utils/externalLinks";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
@@ -44,204 +64,113 @@ const WALK_MODES = [
     km: 3,
     labelIt: "Rilassato",
     labelEn: "Relaxed",
+    labelFr: "Détendu",
+    labelEs: "Relajado",
     descIt: "Compatto, meno tappe extra",
     descEn: "Compact, fewer extra stops",
     icon: "leaf-outline",
+    color: "#6ee7b7",
   },
   {
     id: "balanced",
     km: 5,
     labelIt: "Bilanciato",
     labelEn: "Balanced",
+    labelFr: "Équilibré",
+    labelEs: "Equilibrado",
     descIt: "Pieno ma gestibile",
     descEn: "Full but manageable",
     icon: "walk-outline",
+    color: "#7eb8f7",
   },
   {
     id: "intense",
     km: 7,
     labelIt: "Intenso",
     labelEn: "Intense",
-    descIt: "Piu tappe e piu margine",
+    labelFr: "Intense",
+    labelEs: "Intenso",
+    descIt: "Più tappe e più margine",
     descEn: "More stops and more range",
     icon: "flash-outline",
+    color: "#f97316",
   },
 ] as const;
 const ICONIC_MAX_DAYS = 5;
 const EXPLORER_MAX_DAYS = 7;
-const ONBOARDING_KEY = "wayra_generate_guide_v1";
+const ONBOARDING_KEY = "wayra_generate_guide_v2";
 const RECENT_CITIES_KEY = "wayra_recent_cities_v1";
+const TRANSIT_PRELOAD_WAIT_MS = 4000;
 type GuideStep = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; target: string };
 type GuideRect = { x: number; y: number; width: number; height: number };
 
-// â”€â”€ Dati cittÃ  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const COUNTRIES = [
-  { id: "at", label: "Austria", labelEn: "Austria", cities: [{ id: "vienna", label: "Vienna", emoji: "??" }] },
-  { id: "be", label: "Belgio", labelEn: "Belgium", cities: [{ id: "bruges", label: "Bruges", emoji: "??" }] },
-  { id: "dk", label: "Danimarca", labelEn: "Denmark", cities: [{ id: "copenaghen", label: "Copenaghen", labelEn: "Copenhagen", emoji: "??" }] },
-  { id: "fr", label: "Francia", labelEn: "France", cities: [{ id: "parigi", label: "Parigi", labelEn: "Paris", emoji: "??" }, { id: "marsiglia", label: "Marsiglia", labelEn: "Marseille", emoji: "?" }] },
-  { id: "de", label: "Germania", labelEn: "Germany", cities: [{ id: "berlino", label: "Berlino", labelEn: "Berlin", emoji: "??" }, { id: "monaco_di_baviera", label: "Monaco di Baviera", labelEn: "Munich", emoji: "??" }, { id: "francoforte", label: "Francoforte", labelEn: "Frankfurt", emoji: "??" }] },
-  { id: "gr", label: "Grecia", labelEn: "Greece", cities: [{ id: "atene", label: "Atene", labelEn: "Athens", emoji: "??" }, { id: "candia", label: "Candia", labelEn: "Heraklion", emoji: "??" }] },
-  { id: "ie", label: "Irlanda", labelEn: "Ireland", cities: [{ id: "dublino", label: "Dublino", labelEn: "Dublin", emoji: "??" }] },
-  { id: "it", label: "Italia", labelEn: "Italy", cities: [{ id: "roma", label: "Roma", labelEn: "Rome", emoji: "???" }, { id: "milano", label: "Milano", labelEn: "Milan", emoji: "??" }, { id: "venezia", label: "Venezia", labelEn: "Venice", emoji: "??" }, { id: "napoli", label: "Napoli", labelEn: "Naples", emoji: "??" }, { id: "firenze", label: "Firenze", labelEn: "Florence", emoji: "??" }] },
-  { id: "ma", label: "Marocco", labelEn: "Morocco", cities: [{ id: "marrakech", label: "Marrakech", emoji: "??" }] },
-  { id: "nl", label: "Paesi Bassi", labelEn: "Netherlands", cities: [{ id: "amsterdam", label: "Amsterdam", emoji: "??" }] },
-  { id: "no", label: "Norvegia", labelEn: "Norway", cities: [{ id: "oslo", label: "Oslo", labelEn: "Oslo", emoji: "???" }, { id: "bergen", label: "Bergen", labelEn: "Bergen", emoji: "??" }] },
-  { id: "pl", label: "Polonia", labelEn: "Poland", cities: [{ id: "cracovia", label: "Cracovia", labelEn: "Krakow", emoji: "??" }, { id: "varsavia", label: "Varsavia", labelEn: "Warsaw", emoji: "??" }] },
-  { id: "pt", label: "Portogallo", labelEn: "Portugal", cities: [{ id: "lisbona", label: "Lisbona", labelEn: "Lisbon", emoji: "??" }, { id: "porto", label: "Porto", labelEn: "Porto", emoji: "??" }] },
-  { id: "gb", label: "Regno Unito", labelEn: "United Kingdom", cities: [{ id: "londra", label: "Londra", labelEn: "London", emoji: "??" }, { id: "edimburgo", label: "Edimburgo", labelEn: "Edinburgh", emoji: "??" }] },
-  { id: "cz", label: "Repubblica Ceca", labelEn: "Czech Republic", cities: [{ id: "praga", label: "Praga", labelEn: "Prague", emoji: "??" }] },
-  { id: "ro", label: "Romania", labelEn: "Romania", cities: [{ id: "bucarest", label: "Bucarest", labelEn: "Bucharest", emoji: "??" }] },
-  { id: "sk", label: "Slovacchia", labelEn: "Slovakia", cities: [{ id: "bratislava", label: "Bratislava", emoji: "??" }] },
-  { id: "es", label: "Spagna", labelEn: "Spain", cities: [{ id: "barcellona", label: "Barcellona", labelEn: "Barcelona", emoji: "??" }, { id: "madrid", label: "Madrid", labelEn: "Madrid", emoji: "??" }, { id: "siviglia", label: "Siviglia", labelEn: "Seville", emoji: "??" }, { id: "valencia", label: "Valencia", labelEn: "Valencia", emoji: "??" }] },
-  { id: "se", label: "Svezia", labelEn: "Sweden", cities: [{ id: "stoccolma", label: "Stoccolma", labelEn: "Stockholm", emoji: "??" }] },
-  { id: "tr", label: "Turchia", labelEn: "Turkey", cities: [{ id: "istanbul", label: "Istanbul", emoji: "??" }, { id: "antalya", label: "Antalya", emoji: "???" }, { id: "mu\u011fla", label: "Mu\u011fla", emoji: "???" }] },
-  { id: "hu", label: "Ungheria", labelEn: "Hungary", cities: [{ id: "budapest", label: "Budapest", emoji: "??" }] }
-];
-
-const CITIES = COUNTRIES.flatMap((c) => c.cities);
-type CityItem = (typeof CITIES)[number];
-
-const emoji = (...points: number[]) => String.fromCodePoint(...points);
-const CITY_EMOJI_MAP: Record<string, string> = {
-  vienna: emoji(0x1F3B5),
-  bruges: emoji(0x1F6A4),
-  copenaghen: emoji(0x1F6B2),
-  parigi: emoji(0x1F5FC),
-  marsiglia: emoji(0x2693),
-  berlino: emoji(0x1F43B),
-  monaco_di_baviera: emoji(0x1F37A),
-  francoforte: emoji(0x1F3E6),
-  atene: emoji(0x1F3DB),
-  candia: emoji(0x1F3FA),
-  dublino: emoji(0x1F340),
-  roma: emoji(0x1F3DB, 0xFE0F),
-  milano: emoji(0x1F48E),
-  venezia: emoji(0x1F6A3),
-  napoli: emoji(0x1F355),
-  firenze: emoji(0x1F338),
-  marrakech: emoji(0x1F334),
-  amsterdam: emoji(0x1F6B2),
-  oslo: emoji(0x1F3D4, 0xFE0F),
-  bergen: emoji(0x1F3A3),
-  cracovia: emoji(0x1F985),
-  varsavia: emoji(0x2694, 0xFE0F),
-  lisbona: emoji(0x1F68B),
-  porto: emoji(0x1F377),
-  londra: emoji(0x1F3A1),
-  edimburgo: emoji(0x1F3F0),
-  praga: emoji(0x1F3F0),
-  bucarest: emoji(0x1F339),
-  bratislava: emoji(0x1F3EF),
-  barcellona: emoji(0x1F30A),
-  madrid: emoji(0x1F3A8),
-  siviglia: emoji(0x1F483),
-  valencia: emoji(0x1F34A),
-  stoccolma: emoji(0x1F30A),
-  istanbul: emoji(0x1F54C),
-  antalya: emoji(0x1F3D6, 0xFE0F),
-  "mu?la": emoji(0x1F6E5, 0xFE0F),
-  "mu??la": emoji(0x1F6E5, 0xFE0F),
-  budapest: emoji(0x267E, 0xFE0F),
-};
+// Ã¢â€â‚¬Ã¢â€â‚¬ Dati cittÃƒÂ  Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const POPULAR_IDS = ["roma", "parigi", "barcellona", "londra", "amsterdam", "istanbul", "praga", "lisbona"];
-const POPULAR_CITIES = POPULAR_IDS.map((id) => CITIES.find((c) => c.id === id)!).filter(Boolean);
+const POPULAR_CITIES = POPULAR_IDS.map((id) => CITIES.find((city) => city.id === id)!).filter(Boolean);
+type CityItem = (typeof CITIES)[number];
+const emoji = (...points: number[]) => String.fromCodePoint(...points);
 
-// â”€â”€ Onboarding slides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function homeCityLabel(city: CityItem, lang: string): string {
+  return cityLabel(city.id, lang);
+}
 
+function homeCountryLabel(country: (typeof COUNTRIES)[number], lang: string): string {
+  return registeredCountryLabel(country.id, lang) ?? country.labelEn ?? country.label;
+}
 const ONBOARDING_SLIDES_IT: GuideStep[] = [
-  {
-    icon: "compass-outline",
-    target: "header",
-    title: "Barra superiore",
-    body: "In alto trovi i comandi rapidi: il segnalibro apre gli itinerari salvati, il nome WAYRA cambia tema, il libro riapre questa guida e la bandiera cambia lingua.",
-  },
-  {
-    icon: "location-outline",
-    target: "destination",
-    title: "Destinazione",
-    body: "La prima sezione sceglie la città. Puoi aprire la lista testuale con la ricerca oppure usare la mappa. Senza destinazione non puoi generare o creare un itinerario.",
-  },
-  {
-    icon: "calendar-outline",
-    target: "days",
-    title: "Numero di giorni",
-    body: "La sezione dei giorni mostra solo le durate consentite per la città e l'esperienza selezionata. Se cambi esperienza, il numero massimo può cambiare automaticamente.",
-  },
-  {
-    icon: "sparkles-outline",
-    target: "experience",
-    title: "Tipo esperienza",
-    body: "Iconico crea un viaggio essenziale con le tappe piu rappresentative. Esploratore usa un database piu ampio e puo arrivare a itinerari piu lunghi e ricchi.",
-  },
-  {
-    icon: "walk-outline",
-    target: "walk",
-    title: "Camminata max",
-    body: "Qui scegli il ritmo del viaggio: Rilassato resta piu compatto, Bilanciato riempie meglio la giornata, Intenso aggiunge piu tappe quando restano entro tempo e distanza.",
-  },
-  {
-    icon: "restaurant-outline",
-    target: "actions",
-    title: "Pulsanti finali",
-    body: "Genera costruisce automaticamente giornate, tappe e link Maps. Crea itinerario apre invece la modalità manuale, dove scegli tu ogni tappa.",
-  },
-  {
-    icon: "hourglass-outline",
-    target: "none",
-    title: "Durante la generazione",
-    body: "Quando parte il calcolo, il pannello centrale ti mostra lo stato. L'app prova a rispettare limiti di tempo, musei e distanza, poi apre direttamente il riepilogo dell'itinerario.",
-  },
+  { icon: "bookmark-outline", target: "saved", title: "Itinerari salvati", body: "Il segnalibro apre i viaggi che hai salvato. Da qui puoi riaprire un itinerario anche dopo aver chiuso l'app." },
+  { icon: "contrast-outline", target: "brand", title: "Tema dell'app", body: "Tocca WAYRA per passare dal tema scuro al tema chiaro e viceversa." },
+  { icon: "help-circle-outline", target: "guide", title: "Guida", body: "Il punto interrogativo riapre questa spiegazione in qualsiasi momento." },
+  { icon: "settings-outline", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema, privacy, account e gestione dei dati offline." },
+  { icon: "location-outline", target: "destination", title: "Destinazione", body: "Scegli la citt\u00e0 dalla lista con ricerca oppure dalla mappa. La destinazione \u00e8 necessaria sia per generare sia per creare manualmente un itinerario." },
+  { icon: "calendar-outline", target: "days", title: "Numero di giorni", body: "Seleziona la durata del viaggio. Iconico arriva fino a 5 giorni; Esploratore pu\u00f2 mostrare anche 6 e 7 giorni quando disponibili." },
+  { icon: "sparkles-outline", target: "experience", title: "Tipo di esperienza", body: "Iconico privilegia le attrazioni imperdibili. Esploratore include anche luoghi ricercati e nascosti per costruire giornate pi\u00f9 ricche." },
+  { icon: "walk-outline", target: "walk", title: "Ritmo e camminata", body: "Rilassato limita il percorso a 3 km, Bilanciato a 5 km e Intenso a 7 km al giorno. Il ritmo modifica anche quante tappe vengono inserite." },
+  { icon: "git-compare-outline", target: "actions", title: "Genera o crea", body: "Genera itinerario organizza automaticamente giorni, tappe e distanze. Crea itinerario apre l'editor manuale, dove trascini personalmente attrazioni e pasti negli slot." },
+  { icon: "hourglass-outline", target: "none", title: "Durante la generazione", body: "Il pannello di caricamento mostra lo stato del calcolo. Wayra controlla durata, musei, distanza e distribuzione delle tappe prima di aprire il riepilogo." },
 ];
 
 const ONBOARDING_SLIDES_EN: GuideStep[] = [
-  {
-    icon: "compass-outline",
-    target: "header",
-    title: "Top bar",
-    body: "At the top you find quick controls: the bookmark opens saved itineraries, WAYRA changes theme, the book reopens this guide and the flag changes language.",
-  },
-  {
-    icon: "location-outline",
-    target: "destination",
-    title: "Destination",
-    body: "The first section chooses the city. You can open the searchable list or use the map. Without a destination you cannot generate or manually create an itinerary.",
-  },
-  {
-    icon: "calendar-outline",
-    target: "days",
-    title: "Number of days",
-    body: "The days section only shows durations allowed for the selected city and experience. If you change experience, the maximum number can update automatically.",
-  },
-  {
-    icon: "sparkles-outline",
-    target: "experience",
-    title: "Experience type",
-    body: "Iconic creates an essential trip with the most representative stops. Explorer uses a wider database and can produce longer, richer itineraries.",
-  },
-  {
-    icon: "walk-outline",
-    target: "walk",
-    title: "Max walking",
-    body: "Here you choose the trip rhythm: Relaxed stays more compact, Balanced fills the day more evenly, Intense adds more stops when they fit time and distance.",
-  },
-  {
-    icon: "restaurant-outline",
-    target: "actions",
-    title: "Final buttons",
-    body: "Generate automatically builds days, stops and Maps links. Create itinerary opens the manual mode, where you choose every stop yourself.",
-  },
-  {
-    icon: "hourglass-outline",
-    target: "none",
-    title: "While generating",
-    body: "When calculation starts, the central panel shows the status. The app tries to respect time, museum and distance limits, then opens the itinerary summary directly.",
-  },
+  { icon: "bookmark-outline", target: "saved", title: "Saved itineraries", body: "The bookmark opens trips you saved, so you can resume them after closing the app." },
+  { icon: "contrast-outline", target: "brand", title: "App theme", body: "Tap WAYRA to switch between dark and light themes." },
+  { icon: "help-circle-outline", target: "guide", title: "Guide", body: "The question mark reopens this walkthrough at any time." },
+  { icon: "settings-outline", target: "settings", title: "Settings", body: "The gear opens language, theme, privacy, account and offline data controls." },
+  { icon: "location-outline", target: "destination", title: "Destination", body: "Choose a city from the searchable list or the map. A destination is required for both automatic and manual planning." },
+  { icon: "calendar-outline", target: "days", title: "Number of days", body: "Choose the trip length. Iconic supports up to 5 days; Explorer can also offer 6 and 7 days when available." },
+  { icon: "sparkles-outline", target: "experience", title: "Experience type", body: "Iconic prioritizes unmissable sights. Explorer also includes curated and hidden places for richer days." },
+  { icon: "walk-outline", target: "walk", title: "Pace and walking", body: "Relaxed limits walking to 3 km, Balanced to 5 km and Intense to 7 km per day. Pace also changes how many stops are added." },
+  { icon: "git-compare-outline", target: "actions", title: "Generate or create", body: "Generate itinerary organizes days, stops and distances automatically. Create itinerary opens the manual drag-and-drop editor." },
+  { icon: "hourglass-outline", target: "none", title: "While generating", body: "The loading panel reports progress while Wayra checks duration, museums, distance and the distribution of stops." },
 ];
 
-// â”€â”€ Messaggi generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const ONBOARDING_SLIDES_FR: GuideStep[] = [
+  { icon: "bookmark-outline", target: "saved", title: "Itin\u00e9raires enregistr\u00e9s", body: "Le signet ouvre les voyages enregistr\u00e9s pour les reprendre apr\u00e8s avoir ferm\u00e9 l'app." },
+  { icon: "contrast-outline", target: "brand", title: "Th\u00e8me de l'app", body: "Touchez WAYRA pour passer du th\u00e8me sombre au th\u00e8me clair." },
+  { icon: "help-circle-outline", target: "guide", title: "Guide", body: "Le point d'interrogation rouvre cette visite guid\u00e9e \u00e0 tout moment." },
+  { icon: "settings-outline", target: "settings", title: "Param\u00e8tres", body: "L'engrenage ouvre la langue, le th\u00e8me, la confidentialit\u00e9, le compte et les donn\u00e9es hors ligne." },
+  { icon: "location-outline", target: "destination", title: "Destination", body: "Choisissez la ville dans la liste avec recherche ou sur la carte. Elle est n\u00e9cessaire pour les deux modes de cr\u00e9ation." },
+  { icon: "calendar-outline", target: "days", title: "Nombre de jours", body: "Choisissez la dur\u00e9e. Iconique va jusqu'\u00e0 5 jours; Explorateur peut aussi proposer 6 et 7 jours." },
+  { icon: "sparkles-outline", target: "experience", title: "Type d'exp\u00e9rience", body: "Iconique privil\u00e9gie les incontournables. Explorateur ajoute aussi des lieux recherch\u00e9s et cach\u00e9s." },
+  { icon: "walk-outline", target: "walk", title: "Rythme et marche", body: "D\u00e9tendu limite la marche \u00e0 3 km, \u00c9quilibr\u00e9 \u00e0 5 km et Intense \u00e0 7 km par jour." },
+  { icon: "git-compare-outline", target: "actions", title: "G\u00e9n\u00e9rer ou cr\u00e9er", body: "G\u00e9n\u00e9rer organise automatiquement les journ\u00e9es. Cr\u00e9er ouvre l'\u00e9diteur manuel par glisser-d\u00e9poser." },
+  { icon: "hourglass-outline", target: "none", title: "Pendant la g\u00e9n\u00e9ration", body: "Le panneau indique la progression pendant que Wayra contr\u00f4le dur\u00e9e, mus\u00e9es, distance et r\u00e9partition des \u00e9tapes." },
+];
+
+// Ã¢â€â‚¬Ã¢â€â‚¬ Messaggi generazione Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+const ONBOARDING_SLIDES_ES: GuideStep[] = [
+  { icon: "bookmark-outline", target: "saved", title: "Itinerarios guardados", body: "El marcador abre los viajes guardados para retomarlos despu\u00e9s de cerrar la app." },
+  { icon: "contrast-outline", target: "brand", title: "Tema de la app", body: "Toca WAYRA para cambiar entre el tema oscuro y el claro." },
+  { icon: "help-circle-outline", target: "guide", title: "Gu\u00eda", body: "El signo de interrogaci\u00f3n vuelve a abrir esta explicaci\u00f3n en cualquier momento." },
+  { icon: "settings-outline", target: "settings", title: "Configuraci\u00f3n", body: "El engranaje abre idioma, tema, privacidad, cuenta y datos sin conexi\u00f3n." },
+  { icon: "location-outline", target: "destination", title: "Destino", body: "Elige la ciudad en la lista con buscador o en el mapa. Es necesaria para la planificaci\u00f3n autom\u00e1tica y manual." },
+  { icon: "calendar-outline", target: "days", title: "N\u00famero de d\u00edas", body: "Elige la duraci\u00f3n. Ic\u00f3nico llega hasta 5 d\u00edas; Explorador tambi\u00e9n puede ofrecer 6 y 7 d\u00edas." },
+  { icon: "sparkles-outline", target: "experience", title: "Tipo de experiencia", body: "Ic\u00f3nico prioriza los imprescindibles. Explorador a\u00f1ade lugares seleccionados y ocultos." },
+  { icon: "walk-outline", target: "walk", title: "Ritmo y caminata", body: "Relajado limita la caminata a 3 km, Equilibrado a 5 km e Intenso a 7 km por d\u00eda." },
+  { icon: "git-compare-outline", target: "actions", title: "Generar o crear", body: "Generar organiza autom\u00e1ticamente d\u00edas y paradas. Crear abre el editor manual de arrastrar y soltar." },
+  { icon: "hourglass-outline", target: "none", title: "Durante la generaci\u00f3n", body: "El panel muestra el progreso mientras Wayra comprueba duraci\u00f3n, museos, distancia y distribuci\u00f3n de las paradas." },
+];
 
 const GENERATING_MESSAGES_IT = [
   "Ricerca attrazioni in corso...",
@@ -262,20 +191,24 @@ const GENERATING_MESSAGES_EN = [
 const GENERATING_MESSAGES_FR = [
   "Recherche des attractions...",
   "Optimisation du parcours...",
-  "Sélection des restaurants...",
+  "Selection des restaurants...",
   "Ajout de conseils locaux...",
-  "Presque prêt...",
+  "Presque pret...",
 ];
 
-// â”€â”€ Screen principale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ Screen principale Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+
+const GENERATING_MESSAGES_ES = ["Buscando atracciones...", "Optimizando la ruta...", "Seleccionando restaurantes...", "Anadiendo recomendaciones locales...", "Casi listo..."];
 
 export default function HomeScreen() {
   const router = useRouter();
   const { generate, cancel, loading, error } = useItinerary();
-  const { lang, t, toggle, setLang } = useLanguage();
+  const { lang, t, setLang } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
   const { isOnline } = useNetworkStatus();
+  const { getStatus: getCityDownloadStatus, downloadCity } = useCityDownload();
+  const tx = useCallback((values: Record<string, string>) => localText(lang, values), [lang]);
 
   const [city, setCity]           = useState<string>("");
   const [numDays, setNumDays]     = useState<number>(3);
@@ -283,24 +216,32 @@ export default function HomeScreen() {
   const [maxWalkKm, setMaxWalkKm] = useState<number>(5);
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [showWorldMap, setShowWorldMap]     = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSettings, setShowSettings]     = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
+  const [preparingTrip, setPreparingTrip]   = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [transitPreload, setTransitPreload] = useState<"idle" | "loading" | "ready" | "unavailable">("idle");
   const [recentCityIds, setRecentCityIds]   = useState<string[]>([]);
   const guideTargets = useRef<Map<string, View>>(new Map());
+  const guideRootRef = useRef<View>(null);
+  const contextHelp = useContextHelpController();
+  const activeGenerationRef = useRef<string | null>(null);
+  const isOnlineRef = useRef(isOnline);
+  isOnlineRef.current = isOnline;
 
-  const genMessages = lang === "en" ? GENERATING_MESSAGES_EN : lang === "fr" ? GENERATING_MESSAGES_FR : GENERATING_MESSAGES_IT;
+  const genMessages = ({ it: GENERATING_MESSAGES_IT, en: GENERATING_MESSAGES_EN, fr: GENERATING_MESSAGES_FR, es: GENERATING_MESSAGES_ES } as Record<string, string[]>)[lang] ?? GENERATING_MESSAGES_EN;
   const currentLanguage = languageOption(lang);
+  const cityPlaceholder = tx({ it: "Seleziona una città...", en: "Select a city...", fr: "Sélectionnez une ville...", es: "Selecciona una ciudad..." });
+  const maxWalkTitle = tx({ it: "Camminata max", en: "Max walking", fr: "Marche max", es: "Caminata maxima" });
+  const noCityTitle = tx({ it: "Nessuna città selezionata", en: "No city selected", fr: "Aucune ville sélectionnée", es: "Ninguna ciudad seleccionada" });
+  const noCityBody = tx({ it: "Seleziona una destinazione prima di continuare.", en: "Select a destination before continuing.", fr: "Sélectionnez une destination avant de continuer.", es: "Selecciona un destino antes de continuar." });
+  const homeHelp = homeContextHelp(lang);
+  const generationVisible = loading || preparingTrip;
+  const displayedGenerationError = generationError || error;
 
-  // â”€â”€ Controlla se mostrare onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  useEffect(() => {
-    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
-      if (!val) setShowOnboarding(true);
-    });
-  }, []);
-
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Controlla se mostrare onboarding Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   useEffect(() => {
     AsyncStorage.getItem(RECENT_CITIES_KEY)
       .then((value) => {
@@ -318,12 +259,6 @@ export default function HomeScreen() {
       .catch((e) => { if (__DEV__) console.warn("[Home] analytics consent read failed:", e); });
   }, []);
 
-  const dismissOnboarding = async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, "done");
-    setShowOnboarding(false);
-    track("onboarding_completed", { screen: "generate_itinerary" });
-  };
-
   const openSettingsPanel = useCallback(() => {
     setShowSettings(true);
     track("settings_opened", { screen: "home" });
@@ -340,23 +275,23 @@ export default function HomeScreen() {
     else guideTargets.current.delete(key);
   }, []);
 
-  // â”€â”€ Cicla i messaggi durante la generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Cicla i messaggi durante la generazione Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   useEffect(() => {
-    if (!loading) { setGenMsgIndex(0); return; }
+    if (!generationVisible) { setGenMsgIndex(0); return; }
     setGenMsgIndex(0);
     const id = setInterval(() => {
       setGenMsgIndex((i) => Math.min(i + 1, genMessages.length - 1));
     }, 3000);
     return () => clearInterval(id);
-  }, [loading]);
+  }, [generationVisible, genMessages.length]);
 
-  // â”€â”€ Contatore secondi durante la generazione â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Contatore secondi durante la generazione Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   useEffect(() => {
-    if (!loading) { setGenSeconds(0); return; }
+    if (!generationVisible) { setGenSeconds(0); return; }
     setGenSeconds(0);
     const id = setInterval(() => setGenSeconds((s) => s + 1), 1000);
     return () => clearInterval(id);
-  }, [loading]);
+  }, [generationVisible]);
 
   const LEVELS: { id: ExperienceLevel; label: string; subtitle: string; color: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { id: 1,     label: t.iconicLabel,   subtitle: t.iconicSubtitle,   color: "#e8c06a", icon: "star-outline" },
@@ -364,7 +299,7 @@ export default function HomeScreen() {
   ];
 
   const { loading: cityInfoLoading } = useCityInfo(city);
-  // useCityInfo giÃ  applica fallback (5 per iconico, 7 per esploratore) anche senza cittÃ 
+  // useCityInfo giÃƒÂ  applica fallback (5 per iconico, 7 per esploratore) anche senza cittÃƒÂ 
   const maxDays = level === 1 ? ICONIC_MAX_DAYS : EXPLORER_MAX_DAYS;
   const availableDays = Array.from({ length: maxDays }, (_, i) => i + 1);
 
@@ -378,8 +313,8 @@ export default function HomeScreen() {
     if (numDays > maxDays) setNumDays(maxDays);
   }, [maxDays]);
 
-  // Quando l'utente cambia cittÃ  in modalitÃ  esploratore, porta i giorni
-  // selezionati al massimo disponibile per la nuova cittÃ  â€” ma solo dopo
+  // Quando l'utente cambia cittÃƒÂ  in modalitÃƒÂ  esploratore, porta i giorni
+  // selezionati al massimo disponibile per la nuova cittÃƒÂ  Ã¢â‚¬â€ ma solo dopo
   // che useCityInfo ha caricato i dati reali (evita stale read).
   const prevCityRef = useRef(city);
   useEffect(() => {
@@ -410,20 +345,14 @@ export default function HomeScreen() {
   }, [rememberCity]);
 
   function alertNoCitySelected() {
-    Alert.alert(
-      lang === "it" ? "Nessuna citt\u00e0 selezionata" : "No city selected",
-      lang === "it"
-        ? "Seleziona una destinazione prima di continuare."
-        : "Please select a destination before continuing.",
-      [{ text: "OK" }],
-    );
+    Alert.alert(noCityTitle, noCityBody, [{ text: "OK" }]);
   }
 
   function handleLevelSelect(nextLevel: ExperienceLevel) {
     if (nextLevel === level) return;
     // Quando si passa a iconico e i giorni selezionati superano il massimo, riduci subito.
-    // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha piÃ¹ giorni);
-    // l'utente puÃ² scegliere piÃ¹ giorni autonomamente dalla griglia aggiornata.
+    // Quando si passa a esploratore, la selezione corrente rimane valida (esploratore ha piÃƒÂ¹ giorni);
+    // l'utente puÃƒÂ² scegliere piÃƒÂ¹ giorni autonomamente dalla griglia aggiornata.
     if (nextLevel === "mix") {
       setLevel(nextLevel);
       setNumDays(EXPLORER_MAX_DAYS);
@@ -435,47 +364,140 @@ export default function HomeScreen() {
     setLevel(nextLevel);
   }
 
+  const runGeneration = useCallback(async (request: GenerationRequest) => {
+    if (activeGenerationRef.current) return;
+    activeGenerationRef.current = request.id;
+    const requestId = request.id;
+    const requestedCity = request.params.city;
+    const shouldPreloadTransit = isOnlineRef.current && supportsTransit(requestedCity);
+    setGenerationError(null);
+    setPreparingTrip(true);
+    setTransitPreload(shouldPreloadTransit ? "loading" : "idle");
+    try {
+      await saveGenerationRequest(request);
+      const transitPromise = shouldPreloadTransit
+        ? getTransitNetwork(requestedCity).then((network) => {
+            if (activeGenerationRef.current === requestId) {
+              setTransitPreload(network ? "ready" : "unavailable");
+            }
+            return network;
+          })
+        : Promise.resolve(null);
+
+      const result = await generate(request.params);
+      if (activeGenerationRef.current !== requestId) return;
+      if (!result) {
+        await clearGenerationRequest();
+        setGenerationError(tx({
+          it: "Non siamo riusciti a preparare questo itinerario. Riprova.",
+          en: "We could not prepare this itinerary. Please try again.",
+          fr: "Nous n'avons pas pu préparer cet itinéraire. Réessayez.",
+          es: "No hemos podido preparar este itinerario. Inténtalo de nuevo.",
+        }));
+        return;
+      }
+
+      const transferred = await withStorageLock("wayra_pending_itinerary", async () => {
+        if (activeGenerationRef.current !== requestId) return false;
+        await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
+        return true;
+      });
+      if (!transferred || activeGenerationRef.current !== requestId) return;
+      void cacheCityForOffline(requestedCity).catch(() => {});
+
+      if (shouldPreloadTransit) {
+        await Promise.race([
+          transitPromise,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), TRANSIT_PRELOAD_WAIT_MS)),
+        ]);
+      }
+      if (activeGenerationRef.current !== requestId) return;
+      await clearGenerationRequest();
+      router.push({ pathname: "/itinerary" });
+    } catch (cause) {
+      if (activeGenerationRef.current !== requestId) return;
+      if (__DEV__) console.warn("[Home] generation flow failed:", cause);
+      setGenerationError(tx({
+        it: "Il viaggio non è stato salvato. Riprova: le tue impostazioni sono ancora qui.",
+        en: "The trip was not saved. Try again: your settings are still here.",
+        fr: "Le voyage n'a pas été enregistré. Réessayez : vos réglages sont toujours là.",
+        es: "El viaje no se ha guardado. Inténtalo de nuevo: tus ajustes siguen aquí.",
+      }));
+    } finally {
+      if (activeGenerationRef.current === requestId) {
+        activeGenerationRef.current = null;
+        setPreparingTrip(false);
+        setTransitPreload("idle");
+      }
+    }
+  }, [generate, router, tx]);
+
   async function handleGenerate() {
     if (!city) { alertNoCitySelected(); return; }
-    if (!isOnline) {
-      Alert.alert(
-        lang === "it" ? "Sei offline" : "You're offline",
-        lang === "it"
-          ? "Per generare l'itinerario serve una connessione internet. Controlla WiFi o dati mobili e riprova."
-          : "An internet connection is required to generate the itinerary. Check WiFi or mobile data and try again.",
-        [{ text: "OK" }],
-      );
-      return;
-    }
-    const result = await generate({ city, num_days: numDays, level, max_walk_km: maxWalkKm });
-    if (!result) return;
-    await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(result));
-    router.push({ pathname: "/itinerary" });
+    if (activeGenerationRef.current) return;
+    const request = createGenerationRequest({
+      city,
+      num_days: numDays,
+      level,
+      max_walk_km: maxWalkKm,
+      language: lang,
+    });
+    await runGeneration(request);
   }
+
+  const handleCancelGeneration = useCallback(() => {
+    activeGenerationRef.current = null;
+    cancel();
+    setPreparingTrip(false);
+    setTransitPreload("idle");
+    void clearGenerationRequest().catch(() => {});
+    void withStorageLock("wayra_pending_itinerary", () => AsyncStorage.removeItem("wayra_pending_itinerary")).catch(() => {});
+  }, [cancel]);
+
+  useEffect(() => {
+    let active = true;
+    void loadGenerationRequest().then((request) => {
+      if (!active || !request || activeGenerationRef.current) return;
+      setCity(request.params.city);
+      setNumDays(request.params.num_days);
+      setLevel(request.params.level);
+      setMaxWalkKm(request.params.max_walk_km ?? 5);
+      void runGeneration(request);
+    });
+    return () => {
+      active = false;
+      activeGenerationRef.current = null;
+      cancel();
+    };
+  }, [cancel, runGeneration]);
 
   function handleCreate() {
     if (!city) { alertNoCitySelected(); return; }
     const cityObj = CITIES.find((c) => c.id === city);
-    track("manual_builder_opened", { city, num_days: 1 });
+    track("manual_builder_opened", { city, num_days: numDays });
     router.push({
       pathname: "/create-itinerary",
       params: {
         city,
-        numDays: "1",
+        numDays: String(numDays),
         cityLabel: cityObj ? `${CITY_EMOJI_MAP[cityObj.id] ?? emoji(0x1F4CD)} ${cityObj.label}` : city,
       },
     });
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
-      {/* â”€â”€ Header â”€â”€ */}
-      <View ref={(ref) => setGuideTarget("header", ref)} style={styles.header}>
+    <SafeAreaView ref={guideRootRef} style={[styles.safe, { backgroundColor: colors.bg }]}>
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Header Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      <View collapsable={false} ref={(ref) => setGuideTarget("header", ref)} style={styles.header}>
         {/* Sinistra */}
         <TouchableOpacity
-          onPress={() => router.push("/saved")}
+          ref={(ref) => setGuideTarget("saved", ref)}
+          onPress={contextHelp.guard(homeHelp.saved, () => router.push("/saved"))}
           activeOpacity={0.7}
-          style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          accessibilityRole="button"
+          accessibilityLabel={tx({it:"Itinerari salvati",en:"Saved itineraries",fr:"Itinéraires enregistrés",es:"Itinerarios guardados"})}
+          hitSlop={6}
         >
           <Ionicons name={user ? "bookmark" : "bookmark-outline"} size={20} color={user ? colors.accentGold : colors.textSub} />
         </TouchableOpacity>
@@ -486,37 +508,44 @@ export default function HomeScreen() {
         {/* Destra */}
         <View style={styles.headerActions}>
           <TouchableOpacity
-            onPress={() => setShowOnboarding(true)}
+            ref={(ref) => setGuideTarget("guide", ref)}
+            onPress={contextHelp.toggle}
             activeOpacity={0.7}
-            style={[styles.iconBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }]}
-            accessibilityLabel={lang === "en" ? "Open guide" : "Apri guida"}
+            style={[styles.iconBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }, contextHelp.active && { backgroundColor: colors.accentGold, borderColor: colors.accentGold }]}
+            accessibilityLabel={tx({it:"Apri guida",en:"Open guide",fr:"Ouvrir le guide",es:"Abrir la guía"})}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: contextHelp.active }}
+            hitSlop={6}
           >
-            <Ionicons name="help-circle-outline" size={23} color={colors.accentGold} />
+            <Ionicons name={contextHelp.active ? "close" : "help-circle-outline"} size={23} color={contextHelp.active ? colors.bg : colors.accentGold} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={openSettingsPanel}
+            ref={(ref) => setGuideTarget("settings", ref)}
+            onPress={contextHelp.guard(homeHelp.settings, openSettingsPanel)}
             activeOpacity={0.7}
-            style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            accessibilityLabel={lang === "en" ? "Settings" : "Impostazioni"}
+            style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+            accessibilityLabel={tx({it:"Impostazioni",en:"Settings",fr:"Paramètres",es:"Configuración"})}
+            accessibilityRole="button"
+            hitSlop={6}
           >
             <Ionicons name="settings-outline" size={19} color={colors.textSub} />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={toggle}
-            activeOpacity={0.7}
-            style={[styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-          >
-            <CountryFlag isoCode={currentLanguage.flagIso} size={18} />
-          </TouchableOpacity>
         </View>
 
-        {/* WAYRA centrato in assoluto â€” box-none: la View non cattura tocchi
+        {/* WAYRA centrato in assoluto Ã¢â‚¬â€ box-none: la View non cattura tocchi
             ma TouchableOpacity interno (cambio tema) rimane tappabile */}
         <View style={styles.headerCenter} pointerEvents="box-none">
-          <TouchableOpacity onPress={toggleTheme} activeOpacity={0.7}>
+          <TouchableOpacity
+            ref={(ref) => setGuideTarget("brand", ref)}
+            onPress={contextHelp.guard(homeHelp.brand, toggleTheme)}
+            activeOpacity={0.7}
+            style={contextHelpOutline(contextHelp.active, colors.accentGold)}
+            accessibilityRole="button"
+            accessibilityLabel={tx({it:"Cambia tema",en:"Change theme",fr:"Changer de thème",es:"Cambiar tema"})}
+          >
             <Text style={[styles.appName, { color: colors.accentGold }]}>WAYRA</Text>
           </TouchableOpacity>
-          <Text style={[styles.appSlogan, { color: colors.textMuted }]}>LET THE CITY FIND YOU</Text>
+          <Text style={[styles.appSlogan, { color: colors.textMuted }]}>{tx({it:"LASCIA CHE LA CITT\u00c0 TI TROVI",en:"LET THE CITY FIND YOU",fr:"LAISSEZ LA VILLE VOUS TROUVER",es:"DEJA QUE LA CIUDAD TE ENCUENTRE"})}</Text>
         </View>
       </View>
 
@@ -526,28 +555,33 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* â”€â”€ Selezione cittÃ  â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Selezione cittÃƒÂ  Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <FadeInUp delay={staggerDelay(0)}>
-        <View ref={(ref) => setGuideTarget("destination", ref)}>
+        <View collapsable={false} ref={(ref) => setGuideTarget("destination", ref)}>
+        <View style={styles.destinationLayout}>
+        <View style={styles.destinationPanel}>
         <Section title={t.destination} colors={colors}>
           <View style={styles.cityPickerRow}>
             {/* Bottone lista */}
             <TouchableOpacity
-              style={[styles.cityPickerBtn, { backgroundColor: colors.inputBg, borderColor: selectedCity ? colors.accentGold : colors.border }]}
-              onPress={() => setShowCityPicker(true)}
+              style={[styles.cityPickerBtn, { backgroundColor: colors.inputBg, borderColor: selectedCity ? colors.accentGold : colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+              onPress={contextHelp.guard(homeHelp.cityList, () => setShowCityPicker(true))}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={selectedCity ? homeCityLabel(selectedCity, lang) : cityPlaceholder}
+              accessibilityHint={tx({it:"Apre l'elenco delle città",en:"Opens the city list",fr:"Ouvre la liste des villes",es:"Abre la lista de ciudades"})}
             >
               <Ionicons name="search-outline" size={16} color={colors.textMuted} />
               {selectedCity ? (
                 <View style={styles.cityPickerSelected}>
                   <CityIcon cityId={selectedCity.id} colors={colors} selected size="sm" />
                   <Text style={[styles.cityPickerLabel, { color: colors.text }]}>
-                    {lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label}
+                    {homeCityLabel(selectedCity, lang)}
                   </Text>
                 </View>
               ) : (
                 <Text style={[styles.cityPickerLabel, { color: colors.textSub }]}>
-                  {lang === "it" ? "Seleziona una citt\u00e0..." : "Select a city..."}
+                  {cityPlaceholder}
                 </Text>
               )}
               <Ionicons name="chevron-down" size={16} color={colors.textMuted} style={{ marginLeft: "auto" }} />
@@ -555,20 +589,42 @@ export default function HomeScreen() {
 
             {/* Bottone mappa */}
             <TouchableOpacity
-              style={[styles.mapBtn, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
-              onPress={() => setShowWorldMap(true)}
+              style={[styles.mapBtn, { backgroundColor: colors.inputBg, borderColor: colors.border }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+              onPress={contextHelp.guard(homeHelp.cityMap, () => setShowWorldMap(true))}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={tx({it:"Scegli dalla mappa",en:"Choose from map",fr:"Choisir sur la carte",es:"Elegir en el mapa"})}
+              hitSlop={6}
             >
               <Ionicons name="earth-outline" size={22} color={colors.accentGold} />
             </TouchableOpacity>
           </View>
         </Section>
         </View>
+
+        {/* Valigia smart: fuori dalla sezione Destinazione */}
+        <PressableCard
+          style={[styles.packingCta, { backgroundColor: colors.card, borderColor: colors.accentPurple + "70" }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+          onPress={contextHelp.guard(homeHelp.packing, () => router.push({
+              pathname: "/packing",
+              params: {
+                days: String(numDays),
+              },
+          }))}
+          haptic="light"
+          pressScale={0.94}
+          accessibilityLabel={tx({ it: "Apri Valigia smart", en: "Open Smart packing", fr: "Ouvrir la valise intelligente", es: "Abrir Maleta inteligente" })}
+          accessibilityHint={tx({ it: "Crea e gestisci la lista delle cose da portare", en: "Create and manage your packing checklist", fr: "Créez et gérez votre liste de voyage", es: "Crea y gestiona tu lista de equipaje" })}
+        >
+          <MaterialCommunityIcons name="bag-suitcase-outline" size={34} color={colors.accentPurple} />
+        </PressableCard>
+        </View>
+        </View>
         </FadeInUp>
 
-        {/* â”€â”€ Giorni â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Giorni Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <FadeInUp delay={staggerDelay(1)}>
-        <View ref={(ref) => setGuideTarget("days", ref)}>
+        <View collapsable={false} ref={(ref) => setGuideTarget("days", ref)}>
         <Section title={t.numDays} colors={colors}>
           {cityInfoLoading ? (
             <View style={styles.daysLoading}>
@@ -583,13 +639,13 @@ export default function HomeScreen() {
             <View style={styles.daysGrid}>
               <View style={styles.daysRow}>
                 {daysRow1.map((d) => (
-                  <Option key={d} label={lang === "en" ? `${d}d` : `${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
+                  <Option key={d} label={`${d}`} selected={numDays === d} onPress={contextHelp.guard(homeHelp.days, () => setNumDays(d))} color={colors.accentBlue} colors={colors} helpActive={contextHelp.active} />
                 ))}
               </View>
               {daysRow2.length > 0 && (
                 <View style={styles.daysRow}>
                   {daysRow2.map((d) => (
-                    <Option key={d} label={lang === "en" ? `${d}d` : `${d}g`} selected={numDays === d} onPress={() => setNumDays(d)} color={colors.accentBlue} colors={colors} />
+                    <Option key={d} label={`${d}`} selected={numDays === d} onPress={contextHelp.guard(homeHelp.days, () => setNumDays(d))} color={colors.accentBlue} colors={colors} helpActive={contextHelp.active} />
                   ))}
                 </View>
               )}
@@ -599,13 +655,20 @@ export default function HomeScreen() {
         </View>
         </FadeInUp>
 
-        {/* â”€â”€ Tipo esperienza â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Tipo esperienza Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <FadeInUp delay={staggerDelay(2)}>
-        <View ref={(ref) => setGuideTarget("experience", ref)}>
+        <View collapsable={false} ref={(ref) => setGuideTarget("experience", ref)}>
         <Section title={t.experienceType} colors={colors}>
           <View style={styles.levelRow}>
             {LEVELS.map((l) => (
-              <LevelOption key={String(l.id)} {...l} selected={level === l.id} onPress={() => handleLevelSelect(l.id)} colors={colors} />
+              <LevelOption
+                key={String(l.id)}
+                {...l}
+                selected={level === l.id}
+                onPress={contextHelp.guard(l.id === 1 ? homeHelp.iconic : homeHelp.explorer, () => handleLevelSelect(l.id))}
+                colors={colors}
+                helpActive={contextHelp.active}
+              />
             ))}
 
           </View>
@@ -614,43 +677,48 @@ export default function HomeScreen() {
         </FadeInUp>
 
         <FadeInUp delay={staggerDelay(3)}>
-        <View ref={(ref) => setGuideTarget("walk", ref)}>
-          <Section title={lang === "it" ? "Camminata max" : "Max walking"} colors={colors}>
+        <View collapsable={false} ref={(ref) => setGuideTarget("walk", ref)}>
+          <Section title={maxWalkTitle} colors={colors}>
             <WalkModeSelector
               value={maxWalkKm}
-              onChange={setMaxWalkKm}
+              onChange={(nextValue) => {
+                const help = nextValue === 3 ? homeHelp.relaxed : nextValue === 7 ? homeHelp.intense : homeHelp.balanced;
+                if (contextHelp.active) contextHelp.explain(help);
+                else setMaxWalkKm(nextValue);
+              }}
               lang={lang}
               colors={colors}
+              helpActive={contextHelp.active}
             />
           </Section>
         </View>
         </FadeInUp>
 
-        {/* â”€â”€ Banner offline â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Banner offline Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {!isOnline && (
           <View style={[styles.errorBox, { backgroundColor: colors.textMuted + "22", borderColor: colors.textMuted + "44" }]}>
             <Ionicons name="cloud-offline-outline" size={16} color={colors.textMuted} />
             <Text style={[styles.errorText, { color: colors.textSub }]}>
-              {lang === "it" ? "Sei offline. La generazione richiede una connessione internet." : "You're offline. Generating requires an internet connection."}
+              {tx({it:"Sei offline. Itinerari e contenuti restano disponibili; mappe live e sincronizzazione richiedono internet.",en:"You are offline. Itineraries and content remain available; live maps and sync require internet.",fr:"Vous etes hors ligne. Les itineraires restent disponibles; les cartes en direct et la synchronisation demandent internet.",es:"Estas sin conexion. Los itinerarios siguen disponibles; los mapas en directo y la sincronizacion necesitan internet."})}
             </Text>
           </View>
         )}
 
-        {/* â”€â”€ Errore â”€â”€ */}
-        {!!error && (
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Errore Ã¢â€â‚¬Ã¢â€â‚¬ */}
+        {!!displayedGenerationError && (
           <View style={[styles.errorBox, { backgroundColor: colors.danger + "22", borderColor: colors.danger + "44" }]}>
             <Ionicons name="warning-outline" size={16} color={colors.danger} />
-            <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
+            <Text style={[styles.errorText, { color: colors.danger }]}>{displayedGenerationError}</Text>
           </View>
         )}
 
-        {/* â”€â”€ CTA â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ CTA Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <FadeInUp delay={staggerDelay(4)}>
-        <View ref={(ref) => setGuideTarget("actions", ref)}>
+        <View collapsable={false} ref={(ref) => setGuideTarget("actions", ref)}>
           {/* Wrapper relativo per posizionare PulseGlow dietro al bottone */}
           <View style={styles.ctaWrap}>
             <PulseGlow
-              active={!!city && !loading && !cityInfoLoading && isOnline}
+              active={!!city && !generationVisible && !cityInfoLoading}
               color={colors.accentGold}
               borderRadius={14}
             />
@@ -659,10 +727,11 @@ export default function HomeScreen() {
                 styles.cta,
                 { backgroundColor: colors.accentGold },
                 shadowLevel(3),
-                (loading || cityInfoLoading || !isOnline) && styles.ctaDisabled,
+                contextHelpOutline(contextHelp.active, colors.accentGold),
+                (generationVisible || cityInfoLoading) && styles.ctaDisabled,
               ]}
-              onPress={handleGenerate}
-              disabled={loading || cityInfoLoading || !isOnline}
+              onPress={contextHelp.guard(homeHelp.generate, handleGenerate)}
+              disabled={generationVisible || cityInfoLoading}
               haptic="medium"
               pressScale={0.97}
             >
@@ -674,39 +743,43 @@ export default function HomeScreen() {
           </View>
 
           <Text style={[styles.orDivider, { color: colors.textMuted }]}>
-            {lang === "it" ? "o" : "or"}
+            {tx({it:"o",en:"or",fr:"ou",es:"o"})}
           </Text>
 
           <PressableCard
             style={[
-              styles.ctaCreate,
-              { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" },
-              shadowLevel(2),
-              (loading || cityInfoLoading) && styles.ctaDisabled,
-            ]}
-            onPress={handleCreate}
-            disabled={loading || cityInfoLoading}
+                styles.ctaCreate,
+                { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" },
+                shadowLevel(2),
+                contextHelpOutline(contextHelp.active, colors.accentGold),
+                (generationVisible || cityInfoLoading) && styles.ctaDisabled,
+              ]}
+            onPress={contextHelp.guard(homeHelp.create, handleCreate)}
+            disabled={generationVisible || cityInfoLoading}
             haptic="light"
             pressScale={0.97}
           >
             <View style={styles.ctaInner}>
               <Ionicons name="construct-outline" size={20} color={colors.accentGreen} />
               <Text style={[styles.ctaCreateText, { color: colors.accentGreen }]}>
-                {lang === "it" ? "Crea itinerario" : "Build itinerary"}
+                {tx({it:"Crea itinerario",en:"Build itinerary",fr:"Creer l itinerario",es:"Crear itinerario"})}
               </Text>
             </View>
           </PressableCard>
         </View>
         </FadeInUp>
+
       </ScrollView>
 
-      {/* â”€â”€ Modal selezione cittÃ  (lista) â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Modal selezione cittÃƒÂ  (lista) Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <CityPickerModal
         visible={showCityPicker}
         selectedId={city}
         lang={lang}
         colors={colors}
         recentCityIds={recentCityIds}
+        getDownloadStatus={getCityDownloadStatus}
+        onDownload={downloadCity}
         onSelect={(id) => {
           selectCity(id);
           setShowCityPicker(false);
@@ -714,7 +787,7 @@ export default function HomeScreen() {
         onClose={() => setShowCityPicker(false)}
       />
 
-      {/* â”€â”€ Modal mappa del mondo â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Modal mappa del mondo Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <WorldMapModal
         visible={showWorldMap}
         lang={lang}
@@ -725,16 +798,41 @@ export default function HomeScreen() {
         onClose={() => setShowWorldMap(false)}
       />
 
-      {/* â”€â”€ Overlay generazione AI â”€â”€ */}
-      <Modal visible={loading} transparent animationType="fade">
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Overlay generazione AI Ã¢â€â‚¬Ã¢â€â‚¬ */}
+      <Modal visible={generationVisible} transparent animationType="fade">
         <View style={styles.genOverlay}>
           <View style={[styles.genCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={styles.genEmoji}>{emoji(0x2728)}</Text>
             <ActivityIndicator color={colors.accentGold} size="large" style={{ marginVertical: 16 }} />
             <Text style={[styles.genCity, { color: colors.accentGold }]}>
-              {selectedCity ? (lang === "en" && (selectedCity as any).labelEn ? (selectedCity as any).labelEn : selectedCity.label) : ""}
+              {selectedCity ? homeCityLabel(selectedCity, lang) : ""}
             </Text>
             <Text style={[styles.genMessage, { color: colors.textMuted }]}>{genMessages[genMsgIndex]}</Text>
+            {transitPreload !== "idle" && (
+              <View style={[styles.transitPreloadRow, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
+                {transitPreload === "loading" ? (
+                  <ActivityIndicator color="#0891b2" size="small" />
+                ) : (
+                  <Ionicons
+                    name={transitPreload === "ready" ? "checkmark-circle" : "cloud-offline-outline"}
+                    size={17}
+                    color={transitPreload === "ready" ? "#22c55e" : colors.textMuted}
+                  />
+                )}
+                <Text style={[styles.transitPreloadText, { color: colors.textSub }]}>
+                  {transitPreload === "loading"
+                    ? tx({
+                        it: "Prepariamo e salviamo la rete di trasporto...",
+                        en: "Preparing and saving the transport network...",
+                        fr: "Pr\u00e9paration et enregistrement du r\u00e9seau de transport...",
+                        es: "Preparando y guardando la red de transporte...",
+                      })
+                    : transitPreload === "ready"
+                      ? tx({ it: "Rete di trasporto pronta", en: "Transport network ready", fr: "R\u00e9seau de transport pr\u00eat", es: "Red de transporte lista" })
+                      : tx({ it: "La rete verr\u00e0 caricata al prossimo accesso", en: "The network will load on the next access", fr: "Le r\u00e9seau sera charg\u00e9 au prochain acc\u00e8s", es: "La red se cargar\u00e1 en el pr\u00f3ximo acceso" })}
+                </Text>
+              </View>
+            )}
             <View style={styles.genDots}>
               {genMessages.map((_, i) => (
                 <View
@@ -745,22 +843,22 @@ export default function HomeScreen() {
             </View>
 
             {/* Anteprima skeleton itinerario */}
-            <ItinerarySkeleton days={numDays >= 2 ? 2 : 1} />
+            <ItinerarySkeleton days={transitPreload === "loading" ? 1 : (numDays >= 2 ? 2 : 1)} />
 
             {/* Contatore secondi */}
             <Text style={[styles.genTimer, { color: genSeconds >= 20 ? colors.danger : colors.textMuted }]}>
-              {genSeconds}s{genSeconds >= 20 ? (lang === "it" ? " \u00b7 quasi..." : " \u00b7 almost...") : ""}
+              {genSeconds}s{genSeconds >= 20 ? (tx({it:" \u00b7 quasi...",en:" \u00b7 almost...",fr:" \u00b7 presque...",es:" \u00b7 casi..."})) : ""}
             </Text>
-            <TouchableOpacity onPress={cancel} style={[styles.genCancel, { borderColor: colors.border }]} activeOpacity={0.7}>
+            <TouchableOpacity onPress={handleCancelGeneration} style={[styles.genCancel, { borderColor: colors.border }]} activeOpacity={0.7}>
               <Text style={[styles.genCancelText, { color: colors.textMuted }]}>
-                {lang === "it" ? "Annulla" : "Cancel"}
+                {tx({it:"Annulla",en:"Cancel",fr:"Annuler",es:"Cancelar"})}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* â”€â”€ Onboarding â”€â”€ */}
+      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Onboarding Ã¢â€â‚¬Ã¢â€â‚¬ */}
       <Modal
         visible={showSettings}
         transparent
@@ -782,13 +880,13 @@ export default function HomeScreen() {
               </View>
               <View style={styles.privacyTitleWrap}>
                 <Text style={[styles.privacyTitle, { color: colors.text }]}>
-                  {lang === "en" ? "Settings" : lang === "fr" ? "Paramètres" : "Impostazioni"}
+                  {tx({it:"Impostazioni",en:"Settings",fr:"Param\u00e8tres",es:"Configuraci\u00f3n"})}
                 </Text>
                 <Text style={[styles.privacySubtitle, { color: colors.textMuted }]}>
                   {lang === "en"
                     ? "Language, theme and privacy controls."
                     : lang === "fr"
-                      ? "Langue, thème et contrôles de confidentialité."
+                      ? "Langue, th\u00e8me et contr\u00f4les de confidentialit\u00e9."
                       : "Lingua, tema e controlli privacy."}
                 </Text>
               </View>
@@ -800,7 +898,7 @@ export default function HomeScreen() {
                   <Ionicons name="language-outline" size={18} color={colors.accentGold} />
                   <View style={styles.settingsActionText}>
                     <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
-                      {lang === "en" ? "Language" : lang === "fr" ? "Langue" : "Lingua"}
+                      {tx({it:"Lingua",en:"Language",fr:"Langue",es:"Idioma"})}
                     </Text>
                     <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
                       {currentLanguage.label}
@@ -839,10 +937,10 @@ export default function HomeScreen() {
                 <Ionicons name="contrast-outline" size={18} color={colors.accentPurple} />
                 <View style={styles.settingsActionText}>
                   <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
-                    {lang === "en" ? "Theme" : lang === "fr" ? "Thème" : "Tema"}
+                    {tx({it:"Tema",en:"Theme",fr:"Theme",es:"Tema"})}
                   </Text>
                   <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
-                    {lang === "en" ? "Switch app look" : lang === "fr" ? "Changer l'apparence" : "Cambia aspetto"}
+                    {tx({it:"Cambia aspetto",en:"Switch app look",fr:"Changer l apparence",es:"Cambiar apariencia"})}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -851,13 +949,13 @@ export default function HomeScreen() {
             <View style={[styles.privacyConsentRow, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
               <View style={styles.privacyConsentText}>
                 <Text style={[styles.privacyConsentTitle, { color: colors.text }]}>
-                  {lang === "en" ? "Anonymous analytics" : lang === "fr" ? "Analytics anonymes" : "Analytics anonimi"}
+                  {tx({it:"Analytics anonimi",en:"Anonymous analytics",fr:"Analytics anonymes",es:"Analiticas anonimas"})}
                 </Text>
                 <Text style={[styles.privacyConsentBody, { color: colors.textSub }]}>
                   {lang === "en"
                     ? "Helps us understand searches, generated trips, maps, PDF exports and saved itineraries. We do not store your exact position or personal notes."
                     : lang === "fr"
-                      ? "Nous aide à comprendre les recherches, itinéraires générés, cartes, PDF et sauvegardes. Nous ne stockons pas votre position exacte ni vos notes personnelles."
+                      ? "Nous aide a comprendre les recherches, itineraires generes, cartes, PDF et sauvegardes. Nous ne stockons pas votre position exacte ni vos notes personnelles."
                     : "Ci aiuta a capire ricerche, itinerari generati, mappe, PDF e salvataggi. Non salviamo posizione precisa o note personali."}
                 </Text>
               </View>
@@ -870,16 +968,20 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.privacyLinksRow}>
-              <TouchableOpacity onPress={() => Linking.openURL("https://wayra.app/privacy")} activeOpacity={0.75}>
-                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>Privacy Policy</Text>
+              <TouchableOpacity onPress={() => openExternalLink("https://wayra.app/privacy", lang)} activeOpacity={0.75}>
+                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
+                  {tx({it:"Privacy Policy",en:"Privacy Policy",fr:"Politique de confidentialite",es:"Politica de privacidad"})}
+                </Text>
               </TouchableOpacity>
               <Text style={[styles.privacyDot, { color: colors.textMuted }]}>-</Text>
-              <TouchableOpacity onPress={() => Linking.openURL("https://wayra.app/terms")} activeOpacity={0.75}>
+              <TouchableOpacity onPress={() => openExternalLink("https://wayra.app/terms", lang)} activeOpacity={0.75}>
                 <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
-                  {lang === "en" ? "Terms" : lang === "fr" ? "Conditions" : "Termini"}
+                  {tx({it:"Termini",en:"Terms",fr:"Conditions",es:"Terminos"})}
                 </Text>
               </TouchableOpacity>
             </View>
+
+            <AccountDeletionButton onDeleted={() => setShowSettings(false)} />
 
             <TouchableOpacity
               style={[styles.privacyDoneBtn, { backgroundColor: colors.accentBlue }]}
@@ -887,42 +989,42 @@ export default function HomeScreen() {
               activeOpacity={0.85}
             >
               <Text style={[styles.privacyDoneText, { color: colors.bg }]}>
-                {lang === "en" ? "Done" : lang === "fr" ? "Terminé" : "Fatto"}
+                {localText(lang, { it: "Fatto", en: "Done", fr: "Terminé", es: "Listo" })}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
-      {showOnboarding && (
-        <OnboardingModal lang={lang} targetRefs={guideTargets.current} onDone={dismissOnboarding} />
-      )}
+      <ContextHelpUI controller={contextHelp} lang={lang} />
     </SafeAreaView>
   );
 }
 
-// â”€â”€ CityPickerModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ CityPickerModal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function CityPickerModal({
-  visible, selectedId, lang, colors, recentCityIds, onSelect, onClose,
+  visible, selectedId, lang, colors, recentCityIds, getDownloadStatus, onDownload, onSelect, onClose,
 }: {
   visible: boolean;
   selectedId: string;
   lang: string;
   colors: any;
   recentCityIds: string[];
+  getDownloadStatus: (city: string) => DownloadStatus;
+  onDownload: (city: string) => void;
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
   const searchRef = useRef<TextInput>(null);
-  const { isDownloaded, getStatus, downloadCity, confirmDelete } = useCityDownload();
+  const tx = (values: Record<string, string>) => localText(lang, values);
 
   useEffect(() => {
     if (visible) {
       setSearch("");
-      // Auto-espande il paese della cittÃ  selezionata
+      // Auto-espande il paese della cittÃƒÂ  selezionata
       if (selectedId) {
         const country = COUNTRIES.find((co) => co.cities.some((ci) => ci.id === selectedId));
         setExpandedCountry(country?.id ?? null);
@@ -938,8 +1040,9 @@ function CityPickerModal({
     ? COUNTRIES.map((co) => ({
         ...co,
         cities: co.cities.filter((c) =>
-          c.label.toLowerCase().includes(search.toLowerCase()) ||
-          ((c as any).labelEn ?? "").toLowerCase().includes(search.toLowerCase()),
+          homeCityLabel(c, "it").toLowerCase().includes(search.toLowerCase()) ||
+          homeCityLabel(c, "en").toLowerCase().includes(search.toLowerCase()) ||
+          homeCityLabel(c, "fr").toLowerCase().includes(search.toLowerCase()),
         ),
       })).filter((co) => co.cities.length > 0)
     : COUNTRIES;
@@ -961,7 +1064,7 @@ function CityPickerModal({
         {/* Header */}
         <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
           <Text style={[styles.pickerTitle, { color: colors.text }]}>
-            {lang === "it" ? "Scegli la citt\u00e0" : "Choose a city"}
+            {tx({it:"Scegli la città",en:"Choose a city",fr:"Choisir une ville",es:"Elegir una ciudad"})}
           </Text>
           <TouchableOpacity onPress={onClose} style={styles.pickerClose} activeOpacity={0.7}>
             <Ionicons name="close" size={22} color={colors.textMuted} />
@@ -976,7 +1079,7 @@ function CityPickerModal({
             style={[styles.pickerSearchInput, { color: colors.text }]}
             value={search}
             onChangeText={setSearch}
-            placeholder={lang === "it" ? "Cerca una citt\u00e0..." : "Search a city..."}
+            placeholder={tx({it:"Cerca una città...",en:"Search a city...",fr:"Rechercher une ville...",es:"Buscar una ciudad..."})}
             placeholderTextColor={colors.textSub}
             selectionColor={colors.accentGold}
             returnKeyType="search"
@@ -989,13 +1092,12 @@ function CityPickerModal({
           {!isSearching && recentCities.length > 0 && (
             <View style={styles.popularSection}>
               <Text style={[styles.popularTitle, { color: colors.textMuted }]}>
-                {lang === "it" ? "Ultime cercate" : "Recent searches"}
+              {tx({it:"Ultime cercate",en:"Recent searches",fr:"Dernieres recherches",es:"Busquedas recientes"})}
               </Text>
               <View style={styles.popularGrid}>
                 {recentCities.map((c) => {
                   const isSelected = c.id === selectedId;
-                  const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
-                  const dlDone = getStatus(c.id) === "done";
+                  const label = homeCityLabel(c, lang);
                   return (
                     <TouchableOpacity
                       key={c.id}
@@ -1003,7 +1105,6 @@ function CityPickerModal({
                         styles.popularChip,
                         { backgroundColor: colors.card, borderColor: colors.border },
                         isSelected && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "18" },
-                        dlDone && !isSelected && { borderColor: colors.accentGreen + "60" },
                       ]}
                       onPress={() => onSelect(c.id)}
                       activeOpacity={0.8}
@@ -1012,31 +1113,22 @@ function CityPickerModal({
                       <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                         {label}
                       </Text>
-                      {dlDone && (
-                        <Ionicons
-                          name="cloud-done-outline"
-                          size={12}
-                          color={colors.accentGreen}
-                          style={{ position: "absolute", top: 5, right: 6 }}
-                        />
-                      )}
                     </TouchableOpacity>
                   );
                 })}
               </View>
             </View>
           )}
-          {/* CittÃ  popolari (solo senza ricerca) */}
+          {/* CittÃƒÂ  popolari (solo senza ricerca) */}
           {!isSearching && (
             <View style={styles.popularSection}>
               <Text style={[styles.popularTitle, { color: colors.textMuted }]}>
-                {lang === "it" ? "Pi\u00f9 cercate" : "Most popular"}
+              {tx({it:"Più cercate",en:"Most popular",fr:"Les plus recherchées",es:"Más buscadas"})}
               </Text>
               <View style={styles.popularGrid}>
                 {POPULAR_CITIES.map((c) => {
                   const isSelected = c.id === selectedId;
-                  const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
-                  const dlDone = getStatus(c.id) === "done";
+                  const label = homeCityLabel(c, lang);
                   return (
                     <TouchableOpacity
                       key={c.id}
@@ -1044,7 +1136,6 @@ function CityPickerModal({
                         styles.popularChip,
                         { backgroundColor: colors.card, borderColor: colors.border },
                         isSelected && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "18" },
-                        dlDone && !isSelected && { borderColor: colors.accentGreen + "60" },
                       ]}
                       onPress={() => onSelect(c.id)}
                       activeOpacity={0.8}
@@ -1053,14 +1144,6 @@ function CityPickerModal({
                       <Text style={[styles.popularChipLabel, { color: isSelected ? colors.accentGold : colors.textSub }]}>
                         {label}
                       </Text>
-                      {dlDone && (
-                        <Ionicons
-                          name="cloud-done-outline"
-                          size={12}
-                          color={colors.accentGreen}
-                          style={{ position: "absolute", top: 5, right: 6 }}
-                        />
-                      )}
                     </TouchableOpacity>
                   );
                 })}
@@ -1071,19 +1154,19 @@ function CityPickerModal({
           {/* Divisore */}
           {!isSearching && (
             <Text style={[styles.allCitiesLabel, { color: colors.textMuted }]}>
-              {lang === "it" ? "Tutte le destinazioni" : "All destinations"}
+              {tx({it:"Tutte le destinazioni",en:"All destinations",fr:"Toutes les destinations",es:"Todos los destinos"})}
             </Text>
           )}
 
           {/* Lista per paese */}
           {filteredCountries.length === 0 ? (
             <Text style={[styles.pickerEmpty, { color: colors.textMuted }]}>
-              {lang === "it" ? "Nessuna citt\u00e0 trovata" : "No city found"}
+              {tx({it:"Nessuna città trovata",en:"No city found",fr:"Aucune ville trouvée",es:"No se encontró ninguna ciudad"})}
             </Text>
           ) : (
             filteredCountries.map((co) => {
               const isOpen = isSearching || expandedCountry === co.id;
-              const countryLabel = lang === "it" ? co.label : co.labelEn;
+              const countryLabel = homeCountryLabel(co, lang);
               return (
                 <View key={co.id} style={[styles.countryBlock, { borderColor: colors.border2 }]}>
                   {!isSearching && (
@@ -1104,10 +1187,7 @@ function CityPickerModal({
                   )}
                   {isOpen && co.cities.map((c) => {
                     const isSelected = c.id === selectedId;
-                    const label = lang === "en" && (c as any).labelEn ? (c as any).labelEn : c.label;
-                    const dlStatus = getStatus(c.id);
-                    const dlDone = dlStatus === "done";
-                    const dlBusy = dlStatus === "downloading";
+                    const label = homeCityLabel(c, lang);
                     return (
                       <TouchableOpacity
                         key={c.id}
@@ -1125,38 +1205,31 @@ function CityPickerModal({
                         </Text>
                         {isSearching && (
                           <Text style={[styles.cityRowCountry, { color: colors.textMuted }]}>
-                            {lang === "it" ? co.label : co.labelEn}
+                            {homeCountryLabel(co, lang)}
                           </Text>
                         )}
 
-                        {/* Checkmark selezione */}
-                        {isSelected && !dlDone && (
-                          <Ionicons name="checkmark-circle" size={18} color={colors.accentGold} style={{ marginLeft: "auto" }} />
-                        )}
-
-                        {/* Icona download */}
                         <TouchableOpacity
-                          style={[
-                            styles.cityDownloadBtn,
-                            { marginLeft: isSelected && !dlDone ? 8 : "auto" },
-                            dlDone && { backgroundColor: colors.accentGreen + "18" },
-                          ]}
-                          onPress={() => dlDone
-                            ? confirmDelete(c.id, label, lang)
-                            : downloadCity(c.id)
-                          }
-                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                          activeOpacity={0.7}
-                          disabled={dlBusy}
+                          onPress={() => onDownload(c.id)}
+                          style={[styles.cityDownloadBtn, { borderColor: colors.border }]}
+                          accessibilityRole="button"
+                          accessibilityLabel={tx({ it: `Scarica dati offline di ${label}`, en: `Download ${label} for offline use`, fr: `Télécharger ${label} pour une utilisation hors ligne`, es: `Descargar ${label} para usar sin conexión` })}
                         >
-                          {dlBusy ? (
-                            <ActivityIndicator size={14} color={colors.accentGold} />
-                          ) : dlDone ? (
-                            <Ionicons name="cloud-done-outline" size={17} color={colors.accentGreen} />
+                          {getDownloadStatus(c.id) === "downloading" ? (
+                            <ActivityIndicator size="small" color={colors.accentBlue} />
                           ) : (
-                            <Ionicons name="cloud-download-outline" size={17} color={colors.textMuted} />
+                            <Ionicons
+                              name={getDownloadStatus(c.id) === "done" ? "checkmark-circle" : getDownloadStatus(c.id) === "error" ? "refresh-outline" : "cloud-download-outline"}
+                              size={18}
+                              color={getDownloadStatus(c.id) === "done" ? colors.accentGreen : getDownloadStatus(c.id) === "error" ? colors.danger : colors.accentBlue}
+                            />
                           )}
                         </TouchableOpacity>
+
+                        {/* Checkmark selezione */}
+                        {isSelected && (
+                          <Ionicons name="checkmark-circle" size={18} color={colors.accentGold} style={{ marginLeft: "auto" }} />
+                        )}
                       </TouchableOpacity>
                     );
                   })}
@@ -1171,15 +1244,16 @@ function CityPickerModal({
   );
 }
 
-// â”€â”€ OnboardingModal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ OnboardingModal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRefs: Map<string, View>; onDone: () => void }) {
+function OnboardingModal({ lang, targetRefs, rootRef, onDone }: { lang: string; targetRefs: Map<string, View>; rootRef: React.RefObject<View | null>; onDone: () => void }) {
   const [slide, setSlide] = useState(0);
   const [rect, setRect] = useState<GuideRect | null>(null);
   const [cardHeight, setCardHeight] = useState(270); // stima iniziale, aggiornata da onLayout
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
-  const slides: GuideStep[] = lang === "en" ? ONBOARDING_SLIDES_EN : ONBOARDING_SLIDES_IT;
+  const slides: GuideStep[] = (({ it: ONBOARDING_SLIDES_IT, en: ONBOARDING_SLIDES_EN, fr: ONBOARDING_SLIDES_FR, es: ONBOARDING_SLIDES_ES } as Record<string, GuideStep[]>)[lang] ?? ONBOARDING_SLIDES_EN).filter((step) => step.target !== "none");
   const isLast = slide === slides.length - 1;
   const current = slides[slide];
   const tooltipWidth = Math.min(300, SCREEN_WIDTH - 32);
@@ -1191,7 +1265,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   const cutoutLeft   = rect ? Math.max(0,            rect.x - PAD)               : 0;
   const cutoutRight  = rect ? Math.min(SCREEN_WIDTH,  rect.x + rect.width + PAD)  : SCREEN_WIDTH;
 
-  // Posizione card: sotto l'elemento se c'Ã¨ spazio, altrimenti sopra
+  // Posizione card: sotto l'elemento se c'ÃƒÂ¨ spazio, altrimenti sopra
   // SAFE_BOTTOM: 48px tengono conto della safe area + home indicator + respiro visivo
   const SAFE_BOTTOM = 48;
   const fitsBelow = rect
@@ -1202,7 +1276,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
         ? rect.y + rect.height + PAD + 16
         : rect.y - cardHeight - PAD - 16)
     : (SCREEN_HEIGHT - cardHeight) / 2;
-  // Clamp: mai sopra il bordo superiore (16px) nÃ© sotto il bordo inferiore (SAFE_BOTTOM)
+  // Clamp: mai sopra il bordo superiore (16px) nÃƒÂ© sotto il bordo inferiore (SAFE_BOTTOM)
   const tooltipTop = Math.max(16, Math.min(SCREEN_HEIGHT - cardHeight - SAFE_BOTTOM, rawTooltipTop));
   const tooltipLeft = Math.max(16, Math.min(
     SCREEN_WIDTH - tooltipWidth - 16,
@@ -1210,24 +1284,23 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   ));
 
   useEffect(() => {
-    setCardHeight((prev) => Math.max(prev, 400)); // stima conservativa: non scendere sotto 400 per evitare overflow
+    setRect(null);
+    setCardHeight((prev) => Math.max(prev, 400));
     const target = targetRefs.get(current.target);
-    if (!target) { setRect(null); return; }
+    if (!target) return;
     const id = setTimeout(() => {
-      target.measureInWindow((x, y, width, height) => {
-        setRect({ x, y, width, height });
-      });
-    }, 80);
+      measureGuideTarget(target, rootRef.current, insets.top, setRect);
+    }, 120);
     return () => clearTimeout(id);
-  }, [current.target, targetRefs]);
+  }, [current.target, insets.top, rootRef, targetRefs]);
 
   const OV = "#000000d0";
 
   return (
-    <Modal visible transparent animationType="fade">
+    <Modal visible transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
       <View style={styles.tourOverlay}>
 
-        {/* â”€â”€ Overlay con cutout reale â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Overlay con cutout reale Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {rect ? (
           // 4 pannelli scuri che circondano l'elemento, lasciandolo visibile
           <>
@@ -1239,11 +1312,11 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
             <View pointerEvents="none" style={[styles.tourHighlight, { top: cutoutTop, left: cutoutLeft, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop, borderColor: colors.accentGold, backgroundColor: colors.accentGold + "14", shadowColor: colors.accentGold }]} />
           </>
         ) : (
-          // Nessun target trovato â†’ overlay pieno
+          // Nessun target trovato Ã¢â€ â€™ overlay pieno
           <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: OV }]} />
         )}
 
-        {/* â”€â”€ Freccia verso l'elemento â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Freccia verso l'elemento Ã¢â€â‚¬Ã¢â€â‚¬ */}
         {rect && (
           <View
             pointerEvents="none"
@@ -1251,7 +1324,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
               styles.tourArrow,
               {
                 left: Math.max(22, Math.min(SCREEN_WIDTH - 22, rect.x + rect.width / 2 - 7)),
-                // freccia tra highlight e card: sopra la card se card Ã¨ sotto, sotto la card se Ã¨ sopra
+                // freccia tra highlight e card: sopra la card se card ÃƒÂ¨ sotto, sotto la card se ÃƒÂ¨ sopra
                 top: fitsBelow ? tooltipTop - 13 : tooltipTop + cardHeight - 8,
                 transform: [{ rotate: fitsBelow ? "180deg" : "0deg" }],
                 borderBottomColor: colors.accentGold,
@@ -1260,7 +1333,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
           />
         )}
 
-        {/* â”€â”€ Card tooltip â”€â”€ */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Card tooltip Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <View
           style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}
           onLayout={(e) => setCardHeight(e.nativeEvent.layout.height)}
@@ -1283,13 +1356,13 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
           >
             <Text style={[styles.onboardingCtaText, { color: colors.bg }]}>
               {isLast
-                ? (lang === "it" ? "Inizia il viaggio" : "Start exploring")
-                : (lang === "it" ? "Avanti" : "Next")}
+                ? (lang === "es" ? "Empezar el viaje" : lang === "fr" ? "Commencer le voyage" : lang === "it" ? "Inizia il viaggio" : "Start exploring")
+                : (lang === "es" ? "Siguiente" : lang === "fr" ? "Suivant" : lang === "it" ? "Avanti" : "Next")}
             </Text>
           </TouchableOpacity>
           {!isLast && (
             <TouchableOpacity onPress={onDone} style={styles.onboardingSkip} activeOpacity={0.7}>
-              <Text style={[styles.onboardingSkipText, { color: colors.textMuted }]}>{lang === "it" ? "Salta" : "Skip"}</Text>
+              <Text style={[styles.onboardingSkipText, { color: colors.textMuted }]}>{lang === "es" ? "Saltar" : lang === "fr" ? "Passer" : lang === "it" ? "Salta" : "Skip"}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1299,7 +1372,7 @@ function OnboardingModal({ lang, targetRefs, onDone }: { lang: string; targetRef
   );
 }
 
-// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ Sub-components Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 function Section({ title, children, colors }: { title: string; children: React.ReactNode; colors: any }) {
   return (
@@ -1310,37 +1383,49 @@ function Section({ title, children, colors }: { title: string; children: React.R
   );
 }
 
-function WalkerPose({ color, pose }: { color: string; pose: 0 | 1 | 2 }) {
+function WalkerPose({ color, pose }: { color: string; pose: 0 | 1 | 2 | 3 | 4 }) {
   const poses = [
     {
-      frontArm: "14,10 10.5,13.5 8.5,17.5",
-      backArm: "14,10 17,12.8 19,15.8",
-      frontLeg: "14.5,16 11,20 9,25",
-      backLeg: "14.5,16 16.8,20 20,23.8",
+      frontArm: "16,10.5 12.5,14.5 10.5,19",
+      backArm: "16,10.5 19,14 21.5,17.5",
+      frontLeg: "15.7,17.8 12.2,23 10,30",
+      backLeg: "15.7,17.8 19,22.8 22.5,27.5",
     },
     {
-      frontArm: "14,10 11.8,13.5 11.5,17.5",
-      backArm: "14,10 16.2,13.5 17,17.3",
-      frontLeg: "14.5,16 13,20 11.8,25",
-      backLeg: "14.5,16 15.8,19.8 16.7,25",
+      frontArm: "16,10.5 13.2,14.4 12.5,18.8",
+      backArm: "16,10.5 18.3,14.2 20,18.5",
+      frontLeg: "15.7,17.8 13.2,23 12,29.8",
+      backLeg: "15.7,17.8 18,22.5 20,29",
     },
     {
-      frontArm: "14,10 17.5,13.5 19.5,17.5",
-      backArm: "14,10 11,12.8 9,15.8",
-      frontLeg: "14.5,16 18,20 20,25",
-      backLeg: "14.5,16 12.2,20 9,23.8",
+      frontArm: "16,10.5 14,14.5 13.8,19",
+      backArm: "16,10.5 18,14.5 18.2,19",
+      frontLeg: "15.7,17.8 14.4,23.2 13.8,30",
+      backLeg: "15.7,17.8 17.2,23.2 18,30",
+    },
+    {
+      frontArm: "16,10.5 18.8,14.4 19.5,18.8",
+      backArm: "16,10.5 13.7,14.2 12,18.5",
+      frontLeg: "15.7,17.8 18.2,23 19.5,29.8",
+      backLeg: "15.7,17.8 13.4,22.5 11.5,29",
+    },
+    {
+      frontArm: "16,10.5 19.5,14.5 21.5,19",
+      backArm: "16,10.5 13,14 10.5,17.5",
+      frontLeg: "15.7,17.8 19.2,23 22,30",
+      backLeg: "15.7,17.8 12.5,22.8 9,27.5",
     },
   ] as const;
   const p = poses[pose];
 
   return (
-    <Svg width={30} height={30} viewBox="0 0 28 28">
-      <Polyline points={p.backArm} fill="none" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
-      <Polyline points={p.backLeg} fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
-      <Line x1={14} y1={8.3} x2={14.5} y2={16} stroke={color} strokeWidth={2.6} strokeLinecap="round" />
-      <Polyline points={p.frontArm} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <Polyline points={p.frontLeg} fill="none" stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" />
-      <Circle cx={14} cy={5} r={3.2} fill={color} />
+    <Svg width={36} height={38} viewBox="0 0 32 34">
+      <Polyline points={p.backArm} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.58} />
+      <Polyline points={p.backLeg} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.58} />
+      <Line x1={16} y1={8.2} x2={15.7} y2={17.8} stroke={color} strokeWidth={2.8} strokeLinecap="round" />
+      <Polyline points={p.frontArm} fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <Polyline points={p.frontLeg} fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={16} cy={4.6} r={3.4} fill={color} />
     </Svg>
   );
 }
@@ -1374,8 +1459,8 @@ function CityIcon({
   );
 }
 
-function Option({ label, selected, onPress, color, colors }: {
-  label: string; selected: boolean; onPress: () => void; color: string; colors: any;
+function Option({ label, selected, onPress, color, colors, helpActive = false }: {
+  label: string; selected: boolean; onPress: () => void; color: string; colors: any; helpActive?: boolean;
 }) {
   return (
     <PressableCard
@@ -1384,6 +1469,7 @@ function Option({ label, selected, onPress, color, colors }: {
         { backgroundColor: colors.card, borderColor: colors.border },
         selected && { borderColor: color, backgroundColor: color + "22" },
         selected && shadowLevel(1),
+        contextHelpOutline(helpActive, colors.accentGold),
       ]}
       onPress={onPress}
       haptic="selection"
@@ -1394,9 +1480,47 @@ function Option({ label, selected, onPress, color, colors }: {
   );
 }
 
-function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colors }: {
+function AnimatedExperienceIcon({
+  id,
+  icon,
+  color,
+  selected,
+}: {
+  id: ExperienceLevel;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  selected: boolean;
+}) {
+  const activation = useRef(new Animated.Value(selected ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(activation, {
+      toValue: selected ? 1 : 0,
+      speed: 18,
+      bounciness: selected ? 10 : 0,
+      useNativeDriver: true,
+    }).start();
+  }, [activation, selected]);
+
+  const scale = activation.interpolate({
+    inputRange: [0, 0.65, 1],
+    outputRange: [1, 1.2, 1],
+  });
+  const rotate = id === "mix"
+    ? activation.interpolate({ inputRange: [0, 1], outputRange: ["-55deg", "0deg"] })
+    : "0deg";
+  const activeIcon = selected && id === 1 ? "star" : icon;
+
+  return (
+    <Animated.View style={{ transform: [{ rotate }, { scale }] }}>
+      <Ionicons name={activeIcon} size={18} color={color} />
+    </Animated.View>
+  );
+}
+
+function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colors, helpActive = false }: {
   id: ExperienceLevel; label: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap;
-  color: string; selected: boolean; onPress: () => void; colors: any;
+  color: string; selected: boolean; onPress: () => void; colors: any; helpActive?: boolean;
 }) {
   return (
     <PressableCard
@@ -1405,6 +1529,7 @@ function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colo
         { backgroundColor: colors.card, borderColor: colors.border },
         selected && { borderColor: color, backgroundColor: color + "18" },
         selected && shadowLevel(2),
+        contextHelpOutline(helpActive, colors.accentGold),
       ]}
       onPress={onPress}
       haptic="light"
@@ -1413,9 +1538,9 @@ function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colo
       <View style={styles.levelContentRow}>
         <View style={[
           styles.levelIconBox,
-          { borderColor: selected ? color + "88" : colors.border2, backgroundColor: selected ? color + "18" : colors.inputBg },
+          { borderColor: selected ? color + "88" : color + "44", backgroundColor: selected ? color + "18" : color + "10" },
         ]}>
-          <Ionicons name={icon} size={17} color={selected ? color : colors.textMuted} />
+          <AnimatedExperienceIcon id={id} icon={icon} color={color} selected={selected} />
         </View>
         <Text style={[styles.levelLabel, { color: colors.textSub }, selected && { color }]} numberOfLines={1}>
           {label}
@@ -1426,12 +1551,13 @@ function LevelOption({ id, label, subtitle, color, icon, selected, onPress, colo
 }
 
 function WalkModeSelector({
-  value, onChange, lang, colors,
+  value, onChange, lang, colors, helpActive = false,
 }: {
   value: number;
   onChange: (value: number) => void;
   lang: string;
   colors: any;
+  helpActive?: boolean;
 }) {
   const activeMode = WALK_MODES.find((mode) => mode.km === value) ?? WALK_MODES[1];
   const motion = useRef(new Animated.Value(0)).current;
@@ -1457,7 +1583,7 @@ function WalkModeSelector({
       outputRange: [0, 1, 1, 0],
     }),
     transform: [
-      { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [-10, 12] }) },
+      { translateX: motion.interpolate({ inputRange: [0, 1], outputRange: [-20, 20] }) },
       {
         translateY: activeMode.id === "relaxed"
           ? motion.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, -1, 1] })
@@ -1466,15 +1592,17 @@ function WalkModeSelector({
       { scale: activeMode.id === "intense" ? 1.08 : 1 },
     ],
   };
-  const poseOneOpacity = motion.interpolate({ inputRange: [0, 0.18, 0.36, 0.82, 1], outputRange: [1, 1, 0, 0, 1] });
-  const poseTwoOpacity = motion.interpolate({ inputRange: [0, 0.18, 0.36, 0.52, 0.7, 1], outputRange: [0, 0, 1, 1, 0, 0] });
-  const poseThreeOpacity = motion.interpolate({ inputRange: [0, 0.5, 0.7, 0.86, 1], outputRange: [0, 0, 1, 1, 0] });
+  const poseOneOpacity = motion.interpolate({ inputRange: [0, 0.1, 0.2, 0.8, 0.9, 1], outputRange: [1, 0.5, 0, 0, 0.5, 1] });
+  const poseTwoOpacity = motion.interpolate({ inputRange: [0, 0.2, 0.4, 1], outputRange: [0, 1, 0, 0] });
+  const poseThreeOpacity = motion.interpolate({ inputRange: [0, 0.2, 0.4, 0.6, 1], outputRange: [0, 0, 1, 0, 0] });
+  const poseFourOpacity = motion.interpolate({ inputRange: [0, 0.4, 0.6, 0.8, 1], outputRange: [0, 0, 1, 0, 0] });
+  const poseFiveOpacity = motion.interpolate({ inputRange: [0, 0.6, 0.8, 1], outputRange: [0, 0, 1, 0] });
   return (
     <View style={styles.walkCard}>
       <View style={styles.walkTopRow}>
         <View>
           <Text style={[styles.walkValue, { color: colors.accentGold }]}>
-            {value} km / {lang === "it" ? "giorno" : "day"}
+            {value} km / {lang === "es" ? "día" : lang === "fr" ? "jour" : lang === "it" ? "giorno" : "day"}
           </Text>
         </View>
         <View style={styles.walkMotionStage}>
@@ -1494,29 +1622,40 @@ function WalkModeSelector({
             <Animated.View style={[styles.walkerPose, { opacity: poseThreeOpacity }]}>
               <WalkerPose color={colors.accentGold} pose={2} />
             </Animated.View>
+            <Animated.View style={[styles.walkerPose, { opacity: poseFourOpacity }]}>
+              <WalkerPose color={colors.accentGold} pose={3} />
+            </Animated.View>
+            <Animated.View style={[styles.walkerPose, { opacity: poseFiveOpacity }]}>
+              <WalkerPose color={colors.accentGold} pose={4} />
+            </Animated.View>
           </Animated.View>
         </View>
       </View>
       <View style={styles.walkModeRow}>
         {WALK_MODES.map((mode) => {
           const active = value === mode.km;
-          const label = lang === "it" ? mode.labelIt : mode.labelEn;
+          const label = lang === "fr" ? mode.labelFr : lang === "es" ? mode.labelEs : lang === "it" ? mode.labelIt : mode.labelEn;
           return (
-            <TouchableOpacity
+            <PressableCard
               key={mode.id}
               style={[
                 styles.walkModeBtn,
-                { borderColor: colors.border, backgroundColor: colors.inputBg },
-                active && { borderColor: colors.accentGold, backgroundColor: colors.accentGold + "1f" },
+                { borderColor: active ? colors.accentGold : mode.color + "44", backgroundColor: active ? colors.accentGold + "1f" : mode.color + "10" },
+                contextHelpOutline(helpActive, colors.accentGold),
               ]}
               onPress={() => onChange(mode.km)}
-              activeOpacity={0.8}
+              haptic="selection"
+              pressScale={0.94}
             >
-              <Ionicons name={mode.icon as any} size={15} color={active ? colors.accentGold : colors.textMuted} />
-              <Text style={[styles.walkModeLabel, { color: active ? colors.accentGold : colors.textSub }]} numberOfLines={1}>
+              <Ionicons
+                name={(active ? mode.icon.replace("-outline", "") : mode.icon) as keyof typeof Ionicons.glyphMap}
+                size={16}
+                color={active ? colors.accentGold : mode.color}
+              />
+              <Text style={[styles.walkModeLabel, { color: active ? colors.accentGold : mode.color }]} numberOfLines={1}>
                 {label}
               </Text>
-            </TouchableOpacity>
+            </PressableCard>
           );
         })}
       </View>
@@ -1524,7 +1663,7 @@ function WalkModeSelector({
   );
 }
 
-// â”€â”€ Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬ Styles Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
@@ -1576,6 +1715,12 @@ const styles = StyleSheet.create({
   },
 
   // City picker
+  destinationLayout: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 8,
+  },
+  destinationPanel: { flex: 1, minWidth: 0 },
   cityPickerRow: {
     flexDirection: "row",
     gap: 8,
@@ -1583,13 +1728,14 @@ const styles = StyleSheet.create({
   },
   cityPickerBtn: {
     flex: 1,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 11,
+    paddingVertical: 0,
   },
   cityPickerLabel: {
     flex: 1,
@@ -1628,8 +1774,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   mapBtn: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: 10,
     borderWidth: 1.5,
     alignItems: "center",
@@ -1647,7 +1793,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  optionText: { fontWeight: "700", fontSize: 14, lineHeight: 18 },
+  optionText: { fontWeight: "800", fontSize: 17, lineHeight: 20 },
   daysLoading: { gap: 6 },
 
   // Level
@@ -1693,18 +1839,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   walkMotionStage: {
-    width: 54,
-    height: 34,
+    width: 82,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
   },
   walkRoad: {
     position: "absolute",
-    left: 5,
-    right: 5,
+    left: 3,
+    right: 3,
     bottom: 2,
-    height: 8,
+    height: 9,
     borderRadius: 8,
     opacity: 0.65,
     transform: [{ scaleX: 0.92 }],
@@ -1724,16 +1870,16 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   walkIconWrap: {
-    width: 30,
-    height: 30,
+    width: 38,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
   },
   walkerPose: {
     position: "absolute",
-    width: 30,
-    height: 30,
+    width: 38,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1794,6 +1940,14 @@ const styles = StyleSheet.create({
   ctaInner: { flexDirection: "row", alignItems: "center", gap: 8 },
   ctaText: { fontSize: 16, fontWeight: "800" },
   ctaCreateText: { fontSize: 16, fontWeight: "800" },
+  packingCta: {
+    width: 58,
+    alignSelf: "stretch",
+    borderRadius: 16,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   orDivider: {
     textAlign: "center",
     fontSize: 11,
@@ -1803,7 +1957,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // â”€â”€ City Picker Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ City Picker Modal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   pickerSafe: { flex: 1 },
   pickerHeader: {
     flexDirection: "row",
@@ -1875,11 +2029,16 @@ const styles = StyleSheet.create({
   cityRowLabel: { fontSize: 15, fontWeight: "600" },
   cityRowCountry: { fontSize: 12, marginLeft: 4 },
   cityDownloadBtn: {
-    width: 30, height: 30, borderRadius: 15,
-    alignItems: "center", justifyContent: "center",
+    width: 34,
+    height: 34,
+    marginLeft: "auto",
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  // â”€â”€ Generating overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Generating overlay Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   genOverlay: {
     flex: 1,
     backgroundColor: "#000000cc",
@@ -1909,6 +2068,25 @@ const styles = StyleSheet.create({
     marginTop: 6,
     minHeight: 40,
   },
+  transitPreloadRow: {
+    width: "100%",
+    minHeight: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  transitPreloadText: {
+    flexShrink: 1,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   genDots: { flexDirection: "row", gap: 6, marginTop: 16 },
   genDot: { width: 6, height: 6, borderRadius: 3 },
   genTimer: {
@@ -1929,7 +2107,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Onboarding Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   privacyBackdrop: {
     flex: 1,
     backgroundColor: "#000000b8",

@@ -12,6 +12,8 @@ from database.models import Attraction, Food
 from database.cities import ALL_CITIES
 from services.itinerary_builder import build_itinerary
 from services.rate_limit import proxy_aware_remote_address
+from services.localization import normalize_payload
+from services.city_catalog import city_items, city_records
 from services.static_content import localize_attractions, localize_culture, localize_foods
 
 router = APIRouter(prefix="/api/itinerary", tags=["itinerary"])
@@ -259,8 +261,13 @@ def city_info(city: str = "roma", db: Session = Depends(get_db)):
         db.query(Attraction)
         .filter(Attraction.city == city, Attraction.is_food_spot == False)  # noqa: E712
     )
-    count_total = base.count()
-    count_l1 = base.filter(Attraction.category_level == 1).count()
+    catalog_attractions = city_items(city, "ATTRACTIONS")
+    if catalog_attractions:
+        count_total = len(catalog_attractions)
+        count_l1 = sum(1 for item in catalog_attractions if item.get("category_level") == 1)
+    else:
+        count_total = base.count()
+        count_l1 = base.filter(Attraction.category_level == 1).count()
     max_days_iconico = 5 if count_l1 > 0 else 1
     max_days_esploratore = 7 if count_total > 0 else 1
     return {
@@ -276,27 +283,35 @@ def city_info(city: str = "roma", db: Session = Depends(get_db)):
 def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get_db)):
     city = body.city
 
-    # Fetch attractions and food spots separately
-    attractions = (
-        db.query(Attraction)
-        .filter(Attraction.city == city, Attraction.is_food_spot == False)  # noqa: E712
-        .order_by(Attraction.id)
-        .all()
-    )
-    food_spots = (
-        db.query(Attraction)
-        .filter(Attraction.city == city, Attraction.is_food_spot == True)  # noqa: E712
-        .order_by(Attraction.id)
-        .all()
-    )
+    # The versioned catalog is the primary source. Avoid touching the remote
+    # database when the city is already packaged with the backend: generation
+    # must keep working during a database outage and in clean local installs.
+    attraction_items = city_items(city, "ATTRACTIONS")
+    food_spot_items = city_items(city, "FOOD_SPOTS")
+    food_spots = []
 
-    if not attractions:
+    if not attraction_items:
+        attractions = (
+            db.query(Attraction)
+            .filter(Attraction.city == city, Attraction.is_food_spot == False)  # noqa: E712
+            .order_by(Attraction.id)
+            .all()
+        )
+        food_spots = (
+            db.query(Attraction)
+            .filter(Attraction.city == city, Attraction.is_food_spot == True)  # noqa: E712
+            .order_by(Attraction.id)
+            .all()
+        )
+        attraction_items = [attraction.to_dict() for attraction in attractions]
+        food_spot_items = [food_spot.to_dict() for food_spot in food_spots]
+    if not attraction_items:
         raise HTTPException(status_code=404, detail=f"Nessuna attrazione trovata per '{city}'.")
 
     try:
         days = build_itinerary(
-            attractions=localize_attractions(city, [a.to_dict() for a in attractions]),
-            food_spots=localize_attractions(city, [f.to_dict() for f in food_spots]),
+            attractions=localize_attractions(city, attraction_items),
+            food_spots=localize_attractions(city, food_spot_items),
             num_days=body.num_days,
             level=body.level,
             max_walk_km=body.max_walk_km,
@@ -310,16 +325,19 @@ def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get
             detail="Nessuna attrazione trovata per il livello selezionato.",
         )
 
-    # Traditional dishes (deterministic: sorted by id, first 6)
-    foods = db.query(Food).filter(Food.city == city).order_by(Food.id).all()
+    # Traditional dishes use the same catalog-first policy.
+    source_foods = city_records(city, "FOODS_BY_CITY")
+    if not source_foods:
+        source_foods = db.query(Food).filter(Food.city == city).order_by(Food.id).all()
+    source_food_spots = city_records(city, "FOOD_SPOTS") or food_spots
     food_recommendations = localize_foods(
         city,
-        _foods_with_recommended_places(city, foods, food_spots),
+        _foods_with_recommended_places(city, source_foods, source_food_spots),
     )
 
     return {
         "success": True,
-        "data": {
+        "data": normalize_payload({
             "city": city,
             "num_days": body.num_days,
             "level": body.level,
@@ -327,5 +345,5 @@ def generate(request: Request, body: ItineraryRequest, db: Session = Depends(get
             "days": days,
             "food_recommendations": food_recommendations,
             "culture_facts": localize_culture(city, CULTURE_FACTS.get(city, [])),
-        },
+        }),
     }

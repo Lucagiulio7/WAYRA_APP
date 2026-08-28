@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
+import { MapStatusOverlay } from "./MapStatusOverlay";
 
 // ── Dati città con coordinate geografiche ────────────────────────────────────
 
@@ -22,9 +23,12 @@ const CITY_DATA = [
   { id: "berlino",            iso3: "DEU", lat: 52.52, lng: 13.40, emoji: "🐻", labelIt: "Berlino",             labelEn: "Berlin" },
   { id: "monaco_di_baviera",  iso3: "DEU", lat: 48.14, lng: 11.58, emoji: "🍺", labelIt: "Monaco di Baviera",   labelEn: "Munich" },
   { id: "francoforte",        iso3: "DEU", lat: 50.11, lng:  8.68, emoji: "🏦", labelIt: "Francoforte",         labelEn: "Frankfurt" },
+  { id: "helsinki",           iso3: "FIN", lat: 60.17, lng: 24.94, emoji: "🧭", labelIt: "Helsinki",            labelEn: "Helsinki" },
   { id: "atene",              iso3: "GRC", lat: 37.98, lng: 23.73, emoji: "🏛",  labelIt: "Atene",               labelEn: "Athens" },
   { id: "candia",             iso3: "GRC", lat: 35.34, lng: 25.13, emoji: "🏺", labelIt: "Candia",              labelEn: "Heraklion" },
   { id: "dublino",            iso3: "IRL", lat: 53.33, lng: -6.25, emoji: "🍀", labelIt: "Dublino",             labelEn: "Dublin" },
+  { id: "dubrovnik",          iso3: "HRV", lat: 42.65, lng: 18.09, emoji: "🏰", labelIt: "Dubrovnik",           labelEn: "Dubrovnik" },
+  { id: "reykjavik",          iso3: "ISL", lat: 64.15, lng: -21.94, emoji: "🌋", labelIt: "Reykjavík",          labelEn: "Reykjavík" },
   { id: "roma",               iso3: "ITA", lat: 41.90, lng: 12.50, emoji: "🏛️", labelIt: "Roma",                labelEn: "Rome" },
   { id: "milano",             iso3: "ITA", lat: 45.47, lng:  9.19, emoji: "💎", labelIt: "Milano",              labelEn: "Milan" },
   { id: "venezia",            iso3: "ITA", lat: 45.44, lng: 12.32, emoji: "🚣", labelIt: "Venezia",             labelEn: "Venice" },
@@ -45,6 +49,7 @@ const CITY_DATA = [
   { id: "madrid",             iso3: "ESP", lat: 40.42, lng: -3.70, emoji: "🎨", labelIt: "Madrid",              labelEn: "Madrid" },
   { id: "siviglia",           iso3: "ESP", lat: 37.39, lng: -5.99, emoji: "💃", labelIt: "Siviglia",            labelEn: "Seville" },
   { id: "valencia",           iso3: "ESP", lat: 39.47, lng: -0.38, emoji: "🍊", labelIt: "Valencia",            labelEn: "Valencia" },
+  { id: "valletta",           iso3: "MLT", lat: 35.90, lng: 14.51, emoji: "⚔️", labelIt: "Valletta",            labelEn: "Valletta" },
   { id: "stoccolma",          iso3: "SWE", lat: 59.33, lng: 18.07, emoji: "🌊", labelIt: "Stoccolma",           labelEn: "Stockholm" },
   { id: "oslo",               iso3: "NOR", lat: 59.91, lng: 10.75, emoji: "🏔️", labelIt: "Oslo",                labelEn: "Oslo" },
   { id: "bergen",             iso3: "NOR", lat: 60.39, lng:  5.32, emoji: "🎣", labelIt: "Bergen",              labelEn: "Bergen" },
@@ -61,12 +66,20 @@ const AVAILABLE_ISO3 = [...new Set(CITY_DATA.map((c) => c.iso3))];
 function buildMapHtml(lang: string): string {
   const cityJson = JSON.stringify(CITY_DATA);
   const availableJson = JSON.stringify(AVAILABLE_ISO3);
-  const hint = lang === "it"
-    ? "Tocca un paese evidenziato per vedere le città"
-    : "Tap a highlighted country to see cities";
-  const tapCity = lang === "it"
-    ? "Tocca una città per selezionarla"
-    : "Tap a city to select it";
+  const hint = lang === "es"
+    ? "Toca un pais destacado para ver sus ciudades"
+    : lang === "fr"
+    ? "Touchez un pays mis en evidence pour voir les villes"
+    : lang === "it"
+      ? "Tocca un paese evidenziato per vedere le città"
+      : "Tap a highlighted country to see cities";
+  const tapCity = lang === "es"
+    ? "Toca una ciudad para seleccionarla"
+    : lang === "fr"
+    ? "Touchez une ville pour la selectionner"
+    : lang === "it"
+      ? "Tocca una città per selezionarla"
+      : "Tap a city to select it";
 
   return `<!DOCTYPE html>
 <html>
@@ -147,7 +160,7 @@ function showCities(iso3){
   clearMarkers();
   const cities = CITY_DATA.filter(c=>c.iso3===iso3);
   cities.forEach(city=>{
-    const label = LANG==='it' ? city.labelIt : city.labelEn;
+    const label = LANG==='fr' ? city.labelEn : LANG==='it' ? city.labelIt : city.labelEn;
     const icon = L.divIcon({
       html: '<div class="city-wrap"><div class="city-bubble"><span class="city-emoji">'+city.emoji+'</span><span class="city-name">'+label+'</span></div><div class="city-pin"></div></div>',
       className:'',
@@ -231,6 +244,7 @@ interface Props {
 export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
   const { colors } = useTheme();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [mapReloadKey, setMapReloadKey] = useState(0);
   const htmlRef = useRef(buildMapHtml(lang));
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const insets = useSafeAreaInsets();
@@ -262,7 +276,7 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
         {/* ── Header ── */}
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <Text style={[styles.title, { color: colors.text }]}>
-            {lang === "it" ? "Scegli la destinazione" : "Choose destination"}
+            {lang === "es" ? "Elegir destino" : lang === "fr" ? "Choisir la destination" : lang === "it" ? "Scegli la destinazione" : "Choose destination"}
           </Text>
           <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
             <Ionicons name="close" size={22} color={colors.textMuted} />
@@ -273,6 +287,7 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
         <View style={styles.mapWrap}>
           {/* iframe nativo web al posto di WebView */}
           <iframe
+            key={mapReloadKey}
             ref={iframeRef}
             srcDoc={htmlRef.current}
             style={{
@@ -286,29 +301,20 @@ export function WorldMapModal({ visible, lang, onSelect, onClose }: Props) {
 
           {/* Loading overlay */}
           {status === "loading" && (
-            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
-              <ActivityIndicator color={colors.accentGold} size="large" />
-              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
-                {lang === "it" ? "Caricamento mappa…" : "Loading map…"}
-              </Text>
-            </View>
+            <MapStatusOverlay status="loading" lang={lang} />
           )}
 
           {/* Error overlay */}
           {status === "error" && (
-            <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
-              <Ionicons name="wifi-outline" size={44} color={colors.textMuted} />
-              <Text style={[styles.overlayText, { color: colors.textMuted }]}>
-                {lang === "it"
-                  ? "Connessione internet necessaria per la mappa"
-                  : "Internet connection required for the map"}
-              </Text>
-              <TouchableOpacity onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.card, borderColor: colors.border2 }]} activeOpacity={0.8}>
-                <Text style={[styles.retryText, { color: colors.textMuted }]}>
-                  {lang === "it" ? "Usa la lista" : "Use list instead"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <MapStatusOverlay
+              status="error"
+              lang={lang}
+              onRetry={() => {
+                setStatus("loading");
+                htmlRef.current = buildMapHtml(lang);
+                setMapReloadKey((value) => value + 1);
+              }}
+            />
           )}
         </View>
       </View>

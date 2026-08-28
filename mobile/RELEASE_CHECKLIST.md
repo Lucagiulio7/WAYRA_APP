@@ -1,0 +1,81 @@
+# Wayra release checklist
+
+Updated: 2026-08-27
+
+## Automated gate
+
+Run from `mobile` before every preview or production build:
+
+```powershell
+npm run release:check
+```
+
+The command runs TypeScript, all Jest tests, validates Expo/EAS configuration, checks required assets and legal pages, rejects legacy Render dependencies, and validates all 51 local city packages and 1,836 itinerary plans.
+
+Latest automated gate (2026-08-27): 313/313 tests passed, content audit with 0 errors and 0 warnings, strict preflight passed.
+
+For a non-blocking status report while content work is in progress:
+
+```powershell
+npm run preflight
+```
+
+## Current blockers
+
+- [x] Add French descriptions for 68 neighborhoods across 17 cities.
+- [x] Add Spanish descriptions for the same 68 neighborhoods.
+- [x] Add dedicated OAuth callback and password-recovery deep-link routes.
+- [x] Verify the static web export includes all four legal pages and authentication routes.
+- [x] Link the repository to Expo project `35fadf8a-85b3-430d-86b7-01f6adf9f8c5`.
+- [ ] Deploy the legal pages and verify the final public URLs for `/privacy`, `/terms`, `/delete-account`, and `/support`.
+- [ ] Confirm that `privacy@wayra.app` is a working monitored mailbox, or replace it everywhere with the real support address.
+- [ ] Generate and install the `preview` APK on the Android emulator.
+
+## Android
+
+- [x] Application ID: `com.wayra.app`.
+- [x] Production profile creates an Android App Bundle (`.aab`).
+- [x] Native build number auto-increments in production.
+- [x] App icon and adaptive foreground are 1024x1024.
+- [x] Location is the only explicitly required sensitive capability.
+- [ ] Create the app in Google Play Console with the exact application ID.
+- [ ] Complete store listing, data safety, content rating, target audience, ads declaration, app access, and privacy policy URL.
+- [ ] Upload the first AAB to Internal testing.
+- [ ] If the personal account was created after 2023-11-13, complete a closed test with at least 12 opted-in testers for 14 continuous days before applying for production access.
+
+Build after EAS initialization:
+
+```powershell
+npx eas-cli@latest build --platform android --profile production
+```
+
+## iOS
+
+- [x] Bundle identifier: `com.wayra.app`.
+- [x] Apple Sign In capability is declared.
+- [x] Location permission has a purpose string.
+- [x] Unused photo-library permission declarations were removed.
+- [x] Privacy manifest declares account, analytics, and crash data without tracking.
+- [ ] Enroll in the Apple Developer Program.
+- [ ] Create the matching app in App Store Connect.
+- [ ] Complete app metadata, screenshots, support URL, privacy URL, age rating, and App Privacy answers.
+- [ ] Provide review notes and a test account if the reviewer needs to inspect signed-in synchronization.
+
+Build after EAS initialization:
+
+```powershell
+npx eas-cli@latest build --platform ios --profile production
+```
+
+## Device verification
+
+These checks remain intentionally pending until a physical-device session:
+
+- [ ] Fresh install and first-run onboarding.
+- [ ] Generation and manual creation online and offline.
+- [ ] All four languages and system font scaling.
+- [ ] Location denied, allowed, unavailable, and outside the destination.
+- [ ] Map failure without connectivity.
+- [ ] Account creation, login, logout, synchronization, and deletion.
+- [ ] PDF preview, export, sharing, and app resume.
+- [ ] Background/foreground transitions and process restart.

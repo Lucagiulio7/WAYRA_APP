@@ -15,8 +15,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 import { BuilderAttraction } from "@/hooks/useAttractions";
+import { localizedDescription, localizedName } from "@/utils/localization";
+import { localText } from "@/i18n";
+import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "./ContextHelp";
+import { MapStatusOverlay } from "./MapStatusOverlay";
 
-// ── Tipo condiviso con create-itinerary ───────────────────────────────────────
+// â”€â”€ Tipo condiviso con create-itinerary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface MapSlot {
   slotId: string;
@@ -24,7 +28,7 @@ export interface MapSlot {
   attraction: BuilderAttraction;
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface Props {
   visible: boolean;
@@ -40,7 +44,7 @@ interface Props {
   onReorder: (newSlotIds: string[]) => void;
 }
 
-// ── Costanti ──────────────────────────────────────────────────────────────────
+// â”€â”€ Costanti â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const LEVEL_COLORS: Record<number, string> = {
   1: "#e8c06a",
@@ -49,49 +53,75 @@ const LEVEL_COLORS: Record<number, string> = {
 };
 const FOOD_COLOR = "#6ee7b7";
 const SCREEN_H   = Dimensions.get("window").height;
-
 const ATTR_EMOJI: Record<string, string> = {
-  // Già presenti
-  museo: "🏛️", chiesa: "⛪", parco: "🌿", piazza: "🏟️",
-  archeologia: "⚱️", monumento: "🗿", quartiere: "🏘️",
-  panorama: "🌅", mercato: "🛒", palazzo: "🏰",
-  // Edifici religiosi
-  basilica: "⛪", cattedrale: "⛪", abbazia: "⛪", convento: "⛪",
-  monastero: "⛪", cappella: "⛪", santuario: "⛪",
-  sinagoga: "🕍", moschea: "🕌", tempio: "🛕",
-  // Strutture e monumenti
-  castello: "🏰", fortezza: "🏯", torre: "🗼",
-  ponte: "🌉", fontana: "⛲", villa: "🏡",
-  anfiteatro: "🏟️", statua: "🗿", arco: "🏛️",
-  obelisco: "🗿", mausoleo: "🏛️",
-  // Arte e cultura
-  teatro: "🎭", opera: "🎭", auditorium: "🎭",
-  galleria: "🖼️", arte: "🎨", biblioteca: "📚",
-  // Natura e outdoor
-  giardino: "🌸", orto: "🌱", lago: "🏞️",
-  spiaggia: "🏖️", costa: "🌊", fiordo: "🌊",
-  collina: "⛰️", montagna: "🏔️",
-  // Strade e percorsi
-  viale: "🌳", strada: "🛤️", passeggiata: "🚶",
-  // Infrastrutture
-  porto: "⚓", stazione: "🚉", terme: "♨️",
-  acquario: "🐠", zoo: "🦁", stadio: "🏟️",
-  // Belvedere / punti panoramici
-  belvedere: "🌅", miradouro: "🌅",
-  // Murales e arte di strada
-  murales: "🎨",
-  // Attrazione generica (esplicita)
-  attrazione: "📌",
+  museo: "\u{1F3DB}\u{FE0F}",
+  chiesa: "\u{26EA}",
+  parco: "\u{1F33F}",
+  piazza: "\u{1F3DF}\u{FE0F}",
+  archeologia: "\u{2692}\u{FE0F}",
+  monumento: "\u{1F5FF}",
+  quartiere: "\u{1F3D8}\u{FE0F}",
+  panorama: "\u{1F305}",
+  mercato: "\u{1F6D2}",
+  palazzo: "\u{1F3F0}",
+  basilica: "\u{26EA}",
+  cattedrale: "\u{26EA}",
+  abbazia: "\u{26EA}",
+  convento: "\u{26EA}",
+  monastero: "\u{26EA}",
+  cappella: "\u{26EA}",
+  santuario: "\u{26EA}",
+  sinagoga: "\u{1F54D}",
+  moschea: "\u{1F54C}",
+  tempio: "\u{1F6D5}",
+  castello: "\u{1F3F0}",
+  fortezza: "\u{1F3EF}",
+  torre: "\u{1F5FC}",
+  ponte: "\u{1F309}",
+  fontana: "\u{26F2}",
+  villa: "\u{1F3E1}",
+  anfiteatro: "\u{1F3DF}\u{FE0F}",
+  statua: "\u{1F5FF}",
+  arco: "\u{1F3DB}\u{FE0F}",
+  obelisco: "\u{1F5FF}",
+  mausoleo: "\u{1F3DB}\u{FE0F}",
+  teatro: "\u{1F3AD}",
+  opera: "\u{1F3AD}",
+  auditorium: "\u{1F3AD}",
+  galleria: "\u{1F5BC}\u{FE0F}",
+  arte: "\u{1F3A8}",
+  biblioteca: "\u{1F4DA}",
+  giardino: "\u{1F338}",
+  orto: "\u{1F331}",
+  lago: "\u{1F3DE}\u{FE0F}",
+  spiaggia: "\u{1F3D6}\u{FE0F}",
+  costa: "\u{1F30A}",
+  fiordo: "\u{1F30A}",
+  collina: "\u{26F0}\u{FE0F}",
+  montagna: "\u{1F3D4}\u{FE0F}",
+  viale: "\u{1F333}",
+  strada: "\u{1F6E4}\u{FE0F}",
+  passeggiata: "\u{1F6B6}",
+  porto: "\u{2693}",
+  stazione: "\u{1F689}",
+  terme: "\u{2668}\u{FE0F}",
+  acquario: "\u{1F420}",
+  zoo: "\u{1F981}",
+  stadio: "\u{1F3DF}\u{FE0F}",
+  belvedere: "\u{1F305}",
+  miradouro: "\u{1F305}",
+  murales: "\u{1F3A8}",
+  attrazione: "\u{1F4CC}",
 };
 
 function attrEmoji(type?: string | null): string {
   const key = (type ?? "").toLowerCase();
   if (ATTR_EMOJI[key]) return ATTR_EMOJI[key];
   const match = Object.keys(ATTR_EMOJI).find((k) => k.length >= 4 && key.includes(k));
-  return match ? ATTR_EMOJI[match] : "📍";
+  return match ? ATTR_EMOJI[match] : "\u{1F4CC}";
 }
 
-// ── Stato pannello inferiore ──────────────────────────────────────────────────
+// â”€â”€ Stato pannello inferiore â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type PanelMode = "list" | "detail" | "food-insert";
 
@@ -102,17 +132,15 @@ interface FilterState {
 
 const ALL_FILTERS: FilterState = { levels: [1, 2, 3], food: true };
 
-// ── HTML Leaflet ──────────────────────────────────────────────────────────────
+// â”€â”€ HTML Leaflet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function buildMapHtml(
   attractions: BuilderAttraction[],
   foodSpots: BuilderAttraction[],
   isDark: boolean,
 ): string {
-  const tileUrl = isDark
-    ? "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
-  const mapBg = isDark ? "#0a0a1a" : "#f0eff0";
+  const tileUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+  const mapBg = "#dfe8ec";
 
   const allPoints = [...attractions, ...foodSpots];
   const lats = allPoints.map((a) => a.latitude);
@@ -139,6 +167,8 @@ function buildMapHtml(
 html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,sans-serif;overflow:hidden}
 #map{width:100%;height:100%}
 .leaflet-container{background:${mapBg}!important}
+.leaflet-control-attribution{background:rgba(255,255,255,.9)!important;color:#4b5563!important;font-size:9px!important;padding:2px 5px!important}
+.leaflet-control-attribution a{color:#2563eb!important}
 .leaflet-marker-icon,.leaflet-marker-shadow{border:none!important;background:transparent!important}
 .mk-wrap{
   display:flex;flex-direction:column;align-items:center;
@@ -167,10 +197,10 @@ const FC='${FOOD_COLOR}';
 
 const map=L.map('map',{
   center:[${centerLat},${centerLng}],zoom:14,
-  zoomControl:false,attributionControl:false,
+  zoomControl:false,attributionControl:true,
   minZoom:3,maxZoom:19
 });
-L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20}).addTo(map);
+L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
 
 const AM={},FM={};
 let routeLine=null;
@@ -178,7 +208,7 @@ var _selAIds=[],_selFIds=[],_focId=null,_focFood=false;
 
 function mkIcon(color,label,sel,isFood,foc){
   const bg=sel?color:'rgba(10,10,26,0.72)';
-  const content=isFood?'🍴':(sel&&label?label:'·');
+  const content=isFood?'\u{1F374}':(sel&&label?label:'·');
   const cls='mk-bubble'+(sel?' sel':'')+(foc?' foc':'');
   return L.divIcon({
     html:'<div class="mk-wrap"><div class="'+cls+'" style="border-color:'+color+';background:'+bg+'">'+content+'</div><div class="mk-pin" style="background:'+color+'"></div></div>',
@@ -242,7 +272,7 @@ function updateState(selAIds,routeCoords,selFIds){
   }
 }
 
-/* ── Filtro marker ── */
+/* â”€â”€ Filtro marker â”€â”€ */
 function setFilter(levels, showFood) {
   ATTRS.forEach(function(a){
     try {
@@ -264,7 +294,17 @@ sendMsg({type:'ready'});
 </html>`;
 }
 
-// ── Componente ────────────────────────────────────────────────────────────────
+// â”€â”€ Componente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function builderMapHelp(lang: string) {
+  const tx = (values: Record<string, string>) => localText(lang, values);
+  const item = (icon: ContextHelpContent["icon"], title: Record<string, string>, body: Record<string, string>): ContextHelpContent => ({ icon, title: tx(title), body: tx(body) });
+  return {
+    close: item("close-circle-outline", { it: "Chiudi la mappa", en: "Close the map", fr: "Fermer la carte", es: "Cerrar el mapa" }, { it: "Torna alla composizione manuale conservando le tappe già inserite.", en: "Return to the manual builder while keeping the stops already added.", fr: "Revenez à la création manuelle en conservant les étapes déjà ajoutées.", es: "Vuelve a la creación manual conservando las paradas ya añadidas." }),
+    map: item("map-outline", { it: "Mappa delle tappe", en: "Stops map", fr: "Carte des étapes", es: "Mapa de paradas" }, { it: "Esplora attrazioni e ristoranti. Tocca un indicatore per leggere i dettagli e aggiungerlo al giorno selezionato.", en: "Explore attractions and restaurants. Tap a marker to view its details and add it to the selected day.", fr: "Explorez les attractions et les restaurants. Touchez un repère pour afficher ses détails et l’ajouter au jour sélectionné.", es: "Explora atracciones y restaurantes. Toca un marcador para ver sus detalles y añadirlo al día seleccionado." }),
+    panel: item("list-outline", { it: "Tappe del giorno", en: "Day stops", fr: "Étapes du jour", es: "Paradas del día" }, { it: "Il pannello mostra le tappe già scelte. Da qui puoi aprirne i dettagli, rimuoverle o controllarne l’ordine.", en: "This panel shows the selected stops. Open details, remove stops, or check their order here.", fr: "Ce panneau affiche les étapes choisies. Vous pouvez ouvrir leurs détails, les retirer ou vérifier leur ordre.", es: "Este panel muestra las paradas elegidas. Aquí puedes abrir sus detalles, eliminarlas o comprobar su orden." }),
+  };
+}
 
 export function BuilderMap({
   visible, onClose, lang, dayLabel,
@@ -272,12 +312,15 @@ export function BuilderMap({
   onAddAttraction, onAddFood, onRemove, onReorder,
 }: Props) {
   const { colors, isDark } = useTheme();
+  const contextHelp = useContextHelpController();
+  const mapHelp = builderMapHelp(lang);
   const insets = useSafeAreaInsets();
   const wvRef  = useRef<WebView>(null);
 
   const [ready,          setReady]          = useState(false);
   const [mapHtml,        setMapHtml]        = useState("");
   const [mapError,       setMapError]       = useState(false);
+  const [mapReloadKey,   setMapReloadKey]   = useState(0);
   const [panelMode,      setPanelMode]      = useState<PanelMode>("list");
   const [preview,        setPreview]        = useState<BuilderAttraction | null>(null);
   const [previewKind,    setPreviewKind]    = useState<"attraction" | "meal" | null>(null);
@@ -346,7 +389,7 @@ export function BuilderMap({
     );
   }, [focusedAttrId, focusedIsFood, ready]);
 
-  // ── Messaggi dalla WebView ────────────────────────────────────────────────
+  // â”€â”€ Messaggi dalla WebView â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleMessage = useCallback(
     (event: any) => {
@@ -380,7 +423,7 @@ export function BuilderMap({
     [attractions, foodSpots, switchPanel],
   );
 
-  // ── Azioni dal pannello ───────────────────────────────────────────────────
+  // â”€â”€ Azioni dal pannello â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleAdd = () => {
     if (!preview || !previewKind) return;
@@ -421,7 +464,7 @@ export function BuilderMap({
     });
   };
 
-  // ── Riordino slot ─────────────────────────────────────────────────────────
+  // â”€â”€ Riordino slot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const moveUp = (idx: number) => {
     if (idx === 0) return;
@@ -437,25 +480,25 @@ export function BuilderMap({
     onReorder(ids);
   };
 
-  // ── Helper display ────────────────────────────────────────────────────────
+  // â”€â”€ Helper display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const slotEmoji = (s: MapSlot) => {
-    if (s.kind === "meal") return "🍴";
+    if (s.kind === "meal") return "\u{1F374}";
     return attrEmoji(s.attraction.attraction_type);
   };
   const slotName = (s: MapSlot) =>
-    (lang === "en" && s.attraction.name_en) ? s.attraction.name_en : s.attraction.name;
+    localizedName(s.attraction, lang);
   const attrOrder = (idx: number) =>
     currentSlots.slice(0, idx + 1).filter((s) => s.kind === "attraction").length;
 
   const previewName = preview
-    ? ((lang === "en" && preview.name_en) ? preview.name_en : preview.name)
+    ? localizedName(preview, lang)
     : "";
   const previewDesc = preview
-    ? ((lang === "en" && preview.description_en) ? preview.description_en : preview.description) ?? ""
+    ? localizedDescription(preview, lang)
     : "";
   const previewEmoji = preview
-    ? (previewKind === "meal" ? "🍴" : attrEmoji(preview.attraction_type))
+    ? (previewKind === "meal" ? "\u{1F374}" : attrEmoji(preview.attraction_type))
     : "";
   const previewColor = preview && previewKind === "attraction"
     ? (LEVEL_COLORS[preview.category_level] ?? colors.accentGold)
@@ -465,7 +508,7 @@ export function BuilderMap({
     ? currentSlots.some((s) => s.kind === "attraction" && s.attraction.id === preview.id)
     : currentSlots.some((s) => s.kind === "meal"       && s.attraction.id === preview.id));
 
-  // ── Filtri ────────────────────────────────────────────────────────────────
+  // â”€â”€ Filtri â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const toggleLevel = (lvl: number) => {
     setFilter((prev) => {
@@ -478,38 +521,46 @@ export function BuilderMap({
   const toggleFood = () => setFilter((prev) => ({ ...prev, food: !prev.food }));
 
   const FILTER_CHIPS = [
-    { id: 1,      label: lang === "en" ? "Iconic"   : "Iconica",  color: LEVEL_COLORS[1], onPress: () => toggleLevel(1), active: filter.levels.includes(1) },
-    { id: 2,      label: lang === "en" ? "Curated"  : "Ricercata",color: LEVEL_COLORS[2], onPress: () => toggleLevel(2), active: filter.levels.includes(2) },
-    { id: 3,      label: lang === "en" ? "Hidden"   : "Nascosta", color: LEVEL_COLORS[3], onPress: () => toggleLevel(3), active: filter.levels.includes(3) },
-    { id: "food", label: lang === "en" ? "Food"     : "Cibo",     color: FOOD_COLOR,      onPress: toggleFood,            active: filter.food               },
+    { id: 1,      label: lang === "es" ? "Iconica" : lang === "fr" ? "Iconique" : lang === "en" ? "Iconic" : "Iconica",  color: LEVEL_COLORS[1], onPress: () => toggleLevel(1), active: filter.levels.includes(1) },
+    { id: 2,      label: lang === "es" ? "Seleccionada" : lang === "fr" ? "Recherch\u00e9e" : lang === "en" ? "Curated" : "Ricercata",color: LEVEL_COLORS[2], onPress: () => toggleLevel(2), active: filter.levels.includes(2) },
+    { id: 3,      label: lang === "es" ? "Oculta" : lang === "fr" ? "Cach\u00e9e" : lang === "en" ? "Hidden" : "Nascosta", color: LEVEL_COLORS[3], onPress: () => toggleLevel(3), active: filter.levels.includes(3) },
+    { id: "food", label: lang === "es" ? "Cocina" : lang === "fr" ? "Cuisine" : lang === "en" ? "Food" : "Cibo", color: FOOD_COLOR, onPress: toggleFood, active: filter.food },
   ] as const;
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={[styles.root, { backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
 
-        {/* ── Header ── */}
+        {/* â”€â”€ Header â”€â”€ */}
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>
-              {lang === "en" ? "Select on map" : "Seleziona sulla mappa"}
+              {lang === "es" ? "Seleccionar en el mapa" : lang === "fr" ? "S\u00e9lectionner sur la carte" : lang === "en" ? "Select on map" : "Seleziona sulla mappa"}
             </Text>
             <Text style={[styles.headerSub, { color: colors.textMuted }]}>{dayLabel}</Text>
           </View>
           <TouchableOpacity
-            onPress={onClose}
+            onPress={contextHelp.guard(mapHelp.close, onClose)}
             style={[styles.closeBtn, { backgroundColor: colors.card2 }]}
             activeOpacity={0.7}
           >
             <Ionicons name="close" size={20} color={colors.textMuted} />
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={contextHelp.toggle}
+            style={[styles.closeBtn, { backgroundColor: contextHelp.active ? colors.accentGold : colors.card2 }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
+            activeOpacity={0.7}
+          >
+            <Ionicons name={contextHelp.active ? "help" : "help-outline"} size={20} color={contextHelp.active ? colors.bg : colors.accentGold} />
+          </TouchableOpacity>
         </View>
 
-        {/* ── Mappa + chip filtri sovrapposti ── */}
+        {/* â”€â”€ Mappa + chip filtri sovrapposti â”€â”€ */}
         <View style={styles.mapWrap}>
           <WebView
+            key={mapReloadKey}
             ref={wvRef}
             source={{ html: mapHtml, baseUrl: "https://unpkg.com" }}
             originWhitelist={["*"]}
@@ -523,39 +574,22 @@ export function BuilderMap({
             overScrollMode="never"
           />
           {!ready && !mapError && (
-            <View style={[styles.loadingOverlay, { backgroundColor: colors.bg }]}>
-              <ActivityIndicator color={colors.accentGold} size="large" />
-            </View>
+            <MapStatusOverlay status="loading" lang={lang} />
           )}
           {mapError && (
-            <View style={[styles.loadingOverlay, { backgroundColor: colors.bg }]}>
-              <Ionicons name="wifi-outline" size={40} color={colors.textMuted} />
-              <Text style={[styles.mapErrorTitle, { color: colors.text }]}>
-                {lang === "en" ? "Map unavailable" : "Mappa non disponibile"}
-              </Text>
-              <Text style={[styles.mapErrorBody, { color: colors.textMuted }]}>
-                {lang === "en"
-                  ? "Check your internet connection and try again."
-                  : "Controlla la connessione internet e riprova."}
-              </Text>
-              <TouchableOpacity
-                style={[styles.mapRetryBtn, { backgroundColor: colors.accentGold }]}
-                onPress={() => {
-                  setMapError(false);
-                  setReady(false);
-                  setMapHtml(buildMapHtml(attractions, foodSpots, isDark));
-                }}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="refresh-outline" size={16} color={colors.bg} />
-                <Text style={[styles.mapRetryText, { color: colors.bg }]}>
-                  {lang === "en" ? "Retry" : "Riprova"}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <MapStatusOverlay
+              status="error"
+              lang={lang}
+              onRetry={() => {
+                setMapError(false);
+                setReady(false);
+                setMapReloadKey((value) => value + 1);
+                setMapHtml(buildMapHtml(attractions, foodSpots, isDark));
+              }}
+            />
           )}
 
-          {/* ── Chip filtri (floating) ── */}
+          {/* â”€â”€ Chip filtri (floating) â”€â”€ */}
           {ready && (
             <View style={styles.filterRow} pointerEvents="box-none">
               {FILTER_CHIPS.map((chip) => (
@@ -577,13 +611,16 @@ export function BuilderMap({
               ))}
             </View>
           )}
+          {contextHelp.active && (
+            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.map)} />
+          )}
         </View>
 
-        {/* ── Pannello inferiore ── */}
+        {/* â”€â”€ Pannello inferiore â”€â”€ */}
         <View style={[styles.panel, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
           <Animated.View style={[styles.panelInner, { opacity: panelFadeA }]}>
 
-          {/* ── MODE: dettaglio tappa ── */}
+          {/* â”€â”€ MODE: dettaglio tappa â”€â”€ */}
           {panelMode === "detail" && preview && (
             <>
               {/* Testa pannello: back + titolo */}
@@ -592,7 +629,7 @@ export function BuilderMap({
                   <Ionicons name="arrow-back" size={20} color={colors.textMuted} />
                 </TouchableOpacity>
                 <Text style={[styles.panelTitle, { color: colors.text, flex: 1 }]} numberOfLines={1}>
-                  {lang === "en" ? "Stop details" : "Dettagli tappa"}
+                  {lang === "es" ? "Detalles de la parada" : lang === "fr" ? "D\u00e9tails de l\u2019\u00e9tape" : lang === "en" ? "Stop details" : "Dettagli tappa"}
                 </Text>
               </View>
 
@@ -606,10 +643,10 @@ export function BuilderMap({
                       <View style={[styles.levelBadge, { backgroundColor: previewColor + "22" }]}>
                         <Text style={[styles.levelBadgeText, { color: previewColor }]}>
                           {preview.category_level === 1
-                            ? (lang === "en" ? "Iconic"   : "Iconica")
+                            ? (lang === "es" ? "Iconica" : lang === "fr" ? "Iconique" : lang === "en" ? "Iconic" : "Iconica")
                             : preview.category_level === 2
-                              ? (lang === "en" ? "Curated" : "Ricercata")
-                              : (lang === "en" ? "Hidden"  : "Nascosta")}
+                              ? (lang === "es" ? "Seleccionada" : lang === "fr" ? "Sélectionnée" : lang === "en" ? "Curated" : "Ricercata")
+                              : (lang === "es" ? "Oculta" : lang === "fr" ? "Cachee" : lang === "en" ? "Hidden" : "Nascosta")}
                         </Text>
                       </View>
                     )}
@@ -643,7 +680,7 @@ export function BuilderMap({
                   >
                     <Ionicons name="trash-outline" size={16} color={colors.danger} />
                     <Text style={[styles.ctaText, { color: colors.danger }]}>
-                      {lang === "en" ? "Remove from day" : "Rimuovi dalla giornata"}
+                      {lang === "es" ? "Eliminar del día" : lang === "fr" ? "Retirer de la journée" : lang === "en" ? "Remove from day" : "Rimuovi dalla giornata"}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -654,7 +691,7 @@ export function BuilderMap({
                   >
                     <Ionicons name="add-circle-outline" size={18} color="#fff" />
                     <Text style={[styles.ctaText, { color: "#fff" }]}>
-                      {lang === "en" ? "Add to day" : "Aggiungi alla giornata"}
+                      {lang === "es" ? "Añadir al día" : lang === "fr" ? "Ajouter à la journée" : lang === "en" ? "Add to day" : "Aggiungi alla giornata"}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -662,7 +699,7 @@ export function BuilderMap({
             </>
           )}
 
-          {/* ── MODE: inserimento posizione food ── */}
+          {/* â”€â”€ MODE: inserimento posizione food â”€â”€ */}
           {panelMode === "food-insert" && preview && (
             <>
               <View style={styles.panelHeader}>
@@ -671,11 +708,11 @@ export function BuilderMap({
                 </TouchableOpacity>
                 <Ionicons name="restaurant-outline" size={15} color={FOOD_COLOR} />
                 <Text style={[styles.panelTitle, { color: colors.text }]} numberOfLines={1}>
-                  {lang === "en" ? "Insert after…" : "Inserisci dopo…"}
+                  {lang === "es" ? "Insertar después de..." : lang === "fr" ? "Insérer après..." : lang === "en" ? "Insert after..." : "Inserisci dopo..."}
                 </Text>
               </View>
               <Text style={[styles.pendingFoodName, { color: FOOD_COLOR }]} numberOfLines={1}>
-                🍴 {previewName}
+                {"\u{1F374}"} {previewName}
               </Text>
               <ScrollView contentContainerStyle={styles.insertList} showsVerticalScrollIndicator={false}>
                 <TouchableOpacity
@@ -685,7 +722,7 @@ export function BuilderMap({
                 >
                   <Ionicons name="arrow-up-outline" size={14} color={colors.textSub} />
                   <Text style={[styles.insertLabel, { color: colors.textSub }]}>
-                    {lang === "en" ? "At the beginning" : "All'inizio"}
+                    {lang === "es" ? "Al principio" : lang === "fr" ? "Au début" : lang === "en" ? "At the beginning" : "All'inizio"}
                   </Text>
                 </TouchableOpacity>
                 {currentSlots.map((slot) => (
@@ -697,7 +734,7 @@ export function BuilderMap({
                   >
                     <Text style={styles.insertEmoji}>{slotEmoji(slot)}</Text>
                     <Text style={[styles.insertLabel, { color: colors.textSub }]} numberOfLines={1}>
-                      {lang === "en" ? "After" : "Dopo"} {slotName(slot)}
+                      {lang === "es" ? "Después de" : lang === "fr" ? "Après" : lang === "en" ? "After" : "Dopo"} {slotName(slot)}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -705,16 +742,20 @@ export function BuilderMap({
             </>
           )}
 
-          {/* ── MODE: lista tappe giornata ── */}
+          {/* â”€â”€ MODE: lista tappe giornata â”€â”€ */}
           {panelMode === "list" && (
             <>
               <View style={styles.panelHeader}>
                 <Text style={[styles.panelTitle, { color: colors.text }]}>
                   {currentSlots.length === 0
-                    ? (lang === "en" ? "Tap a marker to see details" : "Tocca un marker per i dettagli")
-                    : `${currentSlots.length} ${lang === "en"
-                        ? `stop${currentSlots.length !== 1 ? "s" : ""}`
-                        : `tapp${currentSlots.length !== 1 ? "e" : "a"}`}`}
+                    ? (lang === "es" ? "Toca un marcador para ver los detalles" : lang === "fr" ? "Touchez un marqueur pour voir les détails" : lang === "en" ? "Tap a marker to see details" : "Tocca un marker per i dettagli")
+                    : `${currentSlots.length} ${lang === "es"
+                        ? `parada${currentSlots.length !== 1 ? "s" : ""}`
+                        : lang === "fr"
+                        ? `etape${currentSlots.length !== 1 ? "s" : ""}`
+                        : lang === "en"
+                          ? `stop${currentSlots.length !== 1 ? "s" : ""}`
+                          : `tapp${currentSlots.length !== 1 ? "e" : "a"}`}`}
                 </Text>
               </View>
 
@@ -722,9 +763,13 @@ export function BuilderMap({
                 <View style={styles.emptyPanel}>
                   <Ionicons name="map-outline" size={36} color={colors.border} />
                   <Text style={[styles.emptyHint, { color: colors.textMuted }]}>
-                    {lang === "en"
-                      ? "Tap a marker to view details and add a stop.\nGreen markers are food spots."
-                      : "Tocca un marker per vedere i dettagli e aggiungere la tappa.\nI marker verdi sono ristoranti."}
+                    {lang === "fr"
+                      ? "Touchez un marqueur pour voir les détails et ajouter une étape.\nLes marqueurs verts sont des restaurants."
+                      : lang === "es"
+                        ? "Toca un marcador para ver los detalles y añadir una parada.\nLos marcadores verdes son restaurantes."
+                      : lang === "en"
+                        ? "Tap a marker to view details and add a stop.\nGreen markers are food spots."
+                        : "Tocca un marker per vedere i dettagli e aggiungere la tappa.\nI marker verdi sono ristoranti."}
                   </Text>
                 </View>
               ) : (
@@ -733,7 +778,7 @@ export function BuilderMap({
                     const color = slot.kind === "meal"
                       ? FOOD_COLOR
                       : (LEVEL_COLORS[slot.attraction.category_level] ?? colors.accentGold);
-                    const label = slot.kind === "attraction" ? String(attrOrder(idx)) : "🍴";
+                    const label = slot.kind === "attraction" ? String(attrOrder(idx)) : "\u{1F374}";
                     const isFocused = focusedAttrId === slot.attraction.id;
                     return (
                       <TouchableOpacity
@@ -792,18 +837,23 @@ export function BuilderMap({
           )}
 
           </Animated.View>
+          {contextHelp.active && (
+            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.panel)} />
+          )}
         </View>
+        <ContextHelpUI controller={contextHelp} lang={lang} />
       </View>
     </Modal>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// â”€â”€ Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const PANEL_H = Math.round(SCREEN_H * 0.40);
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  guideOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 30 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -821,7 +871,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  // ── Mappa + filtri ──────────────────────────────────────────────────────────
+  // â”€â”€ Mappa + filtri â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   mapWrap:      { flex: 1 },
   webview:      { flex: 1 },
   loadingOverlay: {
@@ -863,7 +913,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // ── Pannello ────────────────────────────────────────────────────────────────
+  // â”€â”€ Pannello â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   panel:      { height: PANEL_H, borderTopWidth: 1 },
   panelInner: { flex: 1 },
   panelHeader: {
@@ -876,7 +926,7 @@ const styles = StyleSheet.create({
   },
   panelTitle: { fontSize: 14, fontWeight: "700", flex: 1 },
 
-  // ── Detail panel ────────────────────────────────────────────────────────────
+  // â”€â”€ Detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   detailBody: { paddingHorizontal: 14, paddingBottom: 14, gap: 8 },
   detailNameRow: {
     flexDirection: "row",
@@ -917,7 +967,7 @@ const styles = StyleSheet.create({
   },
   ctaText: { fontSize: 15, fontWeight: "800" },
 
-  // ── Food insert ─────────────────────────────────────────────────────────────
+  // â”€â”€ Food insert â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pendingFoodName: { fontSize: 13, fontWeight: "600", paddingHorizontal: 14, marginBottom: 6 },
   insertList: { paddingHorizontal: 12, paddingBottom: 12, gap: 6 },
   insertRow: {
@@ -932,7 +982,7 @@ const styles = StyleSheet.create({
   insertEmoji: { fontSize: 15 },
   insertLabel: { fontSize: 13, flex: 1 },
 
-  // ── Stop list ───────────────────────────────────────────────────────────────
+  // â”€â”€ Stop list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   emptyPanel: {
     flex: 1,
     alignItems: "center",

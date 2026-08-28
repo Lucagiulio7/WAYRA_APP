@@ -4,45 +4,66 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Linking,
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { CityInfo, TransportApp, EmergencyNumber } from "@/types";
+import { CityInfo, EmergencyNumber, TransportApp } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { exactLocalizedField, localizedField } from "@/utils/localization";
+import { openExternalLink } from "@/utils/externalLinks";
 
 interface Props {
   info: CityInfo;
 }
 
-// Livello inglese → colore + etichetta
+const emoji = (...points: number[]) => String.fromCodePoint(...points);
+
 const ENGLISH_LEVEL_COLOR: Record<string, string> = {
   alto: "#4ade80",
   medio: "#facc15",
   basso: "#f87171",
 };
+
 const ENGLISH_LEVEL_IT: Record<string, string> = {
   alto: "Alto",
   medio: "Medio",
   basso: "Basso",
 };
+
 const ENGLISH_LEVEL_EN: Record<string, string> = {
   alto: "High",
   medio: "Medium",
   basso: "Low",
 };
 
-// ── Sezione generica ──────────────────────────────────────────────────────────
+const ENGLISH_LEVEL_FR: Record<string, string> = {
+  alto: "Eleve",
+  medio: "Moyen",
+  basso: "Faible",
+};
+
+const ENGLISH_LEVEL_ES: Record<string, string> = {
+  alto: "Alto",
+  medio: "Medio",
+  basso: "Bajo",
+};
+
 function Section({
-  title, icon, children, colors,
+  title,
+  icon,
+  children,
+  colors,
 }: {
-  title: string; icon: string; children: React.ReactNode; colors: any;
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  children: React.ReactNode;
+  colors: any;
 }) {
   return (
     <View style={[styles.section, { backgroundColor: colors.card2, borderColor: colors.border }]}>
       <View style={[styles.sectionHeader, { borderBottomColor: colors.border }]}>
-        <Ionicons name={icon as any} size={16} color={colors.accentGold} />
+        <Ionicons name={icon} size={16} color={colors.accentGold} />
         <Text style={[styles.sectionTitle, { color: colors.accentGold }]}>{title}</Text>
       </View>
       {children}
@@ -50,15 +71,20 @@ function Section({
   );
 }
 
-// ── Riga info (es. Moneta: Euro) ──────────────────────────────────────────────
 function InfoRow({
-  emoji, label, value, colors,
+  emoji: emojiValue,
+  label,
+  value,
+  colors,
 }: {
-  emoji: string; label: string; value: string; colors: any;
+  emoji: string;
+  label: string;
+  value: string;
+  colors: any;
 }) {
   return (
     <View style={styles.infoRow}>
-      <Text style={styles.infoEmoji}>{emoji}</Text>
+      <Text style={styles.infoEmoji}>{emojiValue}</Text>
       <View style={styles.infoContent}>
         <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{label}</Text>
         <Text style={[styles.infoValue, { color: colors.text }]}>{value}</Text>
@@ -67,16 +93,22 @@ function InfoRow({
   );
 }
 
-// ── Card app (trasporti / utili) ──────────────────────────────────────────────
-function AppCard({ app, lang, colors }: { app: TransportApp; lang: "it" | "en"; colors: any }) {
-  const desc = (lang === "en" && app.description_en) ? app.description_en : app.description;
+function AppCard({ app, lang, colors, transport }: { app: TransportApp; lang: string; colors: any; transport: boolean }) {
+  const genericDescription = transport
+    ? (lang === "es" ? "Aplicación recomendada para moverte por la ciudad." : lang === "fr" ? "Application recommandée pour vous déplacer en ville." : lang === "en" ? "Recommended app for getting around the city." : "App consigliata per muoversi in città.")
+    : (lang === "es" ? "Aplicación útil recomendada para el viaje." : lang === "fr" ? "Application utile recommandée pour le voyage." : lang === "en" ? "Useful app recommended for the trip." : "App utile consigliata per il viaggio.");
+  const desc = exactLocalizedField<string>(app, "description", lang, genericDescription);
 
-  const openApp = () => {
+  const openApp = async () => {
     const query = encodeURIComponent(app.name);
-    const url = Platform.OS === "ios"
-      ? `itms-apps://itunes.apple.com/search?term=${query}&media=software`
+    const fallbackUrl = Platform.OS === "ios"
+      ? `https://apps.apple.com/search?term=${query}`
       : `https://play.google.com/store/search?q=${query}&c=apps`;
-    Linking.openURL(url);
+    const directUrl = Platform.OS === "ios" ? app.ios_url : app.android_url;
+    await openExternalLink(directUrl ?? fallbackUrl, lang, {
+      fallbackUrl,
+      message: lang === "es" ? "No se puede abrir la tienda de aplicaciones." : lang === "fr" ? "Impossible d'ouvrir la boutique d'applications." : lang === "en" ? "The app store could not be opened." : "Non è stato possibile aprire lo store.",
+    });
   };
 
   return (
@@ -87,7 +119,7 @@ function AppCard({ app, lang, colors }: { app: TransportApp; lang: "it" | "en"; 
     >
       <View style={styles.appInfo}>
         <Text style={[styles.appName, { color: colors.text }]}>{app.name}</Text>
-        {desc && <Text style={[styles.appDesc, { color: colors.textSub }]}>{desc}</Text>}
+        {desc ? <Text style={[styles.appDesc, { color: colors.textSub }]}>{desc}</Text> : null}
       </View>
       <View style={[styles.appBadge, { backgroundColor: colors.accentGold + "22", borderColor: colors.accentGold + "44" }]}>
         <Ionicons name="download-outline" size={14} color={colors.accentGold} />
@@ -96,13 +128,13 @@ function AppCard({ app, lang, colors }: { app: TransportApp; lang: "it" | "en"; 
   );
 }
 
-// ── Numero emergenza ──────────────────────────────────────────────────────────
-function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: "it" | "en"; colors: any }) {
-  const label = (lang === "en" && item.label_en) ? item.label_en : item.label;
+function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: string; colors: any }) {
+  const fallbackLabel = lang === "es" ? "Número de emergencia" : lang === "fr" ? "Numéro d'urgence" : lang === "en" ? "Emergency number" : "Numero di emergenza";
+  const label = exactLocalizedField<string>(item, "label", lang, fallbackLabel);
   return (
     <TouchableOpacity
       style={[styles.emergencyRow, { backgroundColor: colors.danger + "1a", borderColor: colors.danger + "33" }]}
-      onPress={() => Linking.openURL(`tel:${item.number}`)}
+      onPress={() => openExternalLink(`tel:${item.number}`, lang)}
       activeOpacity={0.75}
     >
       <Text style={[styles.emergencyNumber, { color: colors.danger }]}>{item.number}</Text>
@@ -112,105 +144,96 @@ function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: "it
   );
 }
 
-// ── Componente principale ─────────────────────────────────────────────────────
 export function PracticalInfoTab({ info }: Props) {
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
-  const contentLang: "it" | "en" = lang === "it" ? "it" : "en";
 
-  const currency = (contentLang === "en" && info.currency_en)  ? info.currency_en  : info.currency;
-  const language = (contentLang === "en" && info.language_en)  ? info.language_en  : info.language;
-  const water    = (contentLang === "en" && info.water_en)     ? info.water_en     : info.water;
-  const tipping  = (contentLang === "en" && info.tipping_en)   ? info.tipping_en   : info.tipping;
-  const engNote  = (contentLang === "en" && info.english_note_en) ? info.english_note_en : info.english_note;
-  const engLevel = contentLang === "en"
-    ? ENGLISH_LEVEL_EN[info.english_level] ?? info.english_level
-    : ENGLISH_LEVEL_IT[info.english_level] ?? info.english_level;
+  const currency = localizedField<string>(info, "currency", lang, "");
+  const language = localizedField<string>(info, "language", lang, "");
+  const water = localizedField<string>(info, "water", lang, "");
+  const tipping = localizedField<string>(info, "tipping", lang, "");
+  const engNote = localizedField<string>(info, "english_note", lang, "");
+  const englishLevelLabels: Record<string, Record<string, string>> = {
+    it: ENGLISH_LEVEL_IT,
+    en: ENGLISH_LEVEL_EN,
+    fr: ENGLISH_LEVEL_FR,
+    es: ENGLISH_LEVEL_ES,
+  };
+  const engLevel = englishLevelLabels[lang]?.[info.english_level]
+    ?? ENGLISH_LEVEL_EN[info.english_level]
+    ?? info.english_level;
   const engColor = ENGLISH_LEVEL_COLOR[info.english_level] ?? "#facc15";
-  const tips     = (contentLang === "en" && info.quick_tips_en?.length)
-    ? info.quick_tips_en
-    : info.quick_tips ?? [];
+  const tips = localizedField<string[]>(info, "quick_tips", lang, []);
 
   return (
     <View style={styles.container}>
-
-      {/* ── Essenziali ── */}
       <Section title={t.practicalEssentials} icon="information-circle-outline" colors={colors}>
         <View style={styles.infoGrid}>
-          <InfoRow emoji="💶" label={t.practicalCurrency} value={currency} colors={colors} />
-          <InfoRow emoji="🗣️" label={t.practicalLanguage} value={language} colors={colors} />
+          <InfoRow emoji={emoji(0x1f4b6)} label={t.practicalCurrency} value={currency} colors={colors} />
+          <InfoRow emoji={emoji(0x1f5e3, 0xfe0f)} label={t.practicalLanguage} value={language} colors={colors} />
 
-          {/* English level */}
           <View style={styles.infoRow}>
-            <Text style={styles.infoEmoji}>🇬🇧</Text>
+            <Text style={styles.infoEmoji}>{emoji(0x1f1ec, 0x1f1e7)}</Text>
             <View style={styles.infoContent}>
               <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{t.practicalEnglish}</Text>
               <View style={styles.engRow}>
                 <View style={[styles.engDot, { backgroundColor: engColor }]} />
                 <Text style={[styles.engLevel, { color: engColor }]}>{engLevel}</Text>
-                {engNote && <Text style={[styles.engNote, { color: colors.textSub }]}> — {engNote}</Text>}
+                {engNote ? <Text style={[styles.engNote, { color: colors.textSub }]}> - {engNote}</Text> : null}
               </View>
             </View>
           </View>
 
-          <InfoRow emoji="🕐" label={t.practicalTimezone} value={info.timezone} colors={colors} />
-          {info.voltage && <InfoRow emoji="🔌" label={t.practicalVoltage} value={info.voltage} colors={colors} />}
-          {water && <InfoRow emoji="💧" label={t.practicalWater} value={water} colors={colors} />}
-          {tipping && <InfoRow emoji="💰" label={t.practicalTipping} value={tipping} colors={colors} />}
+          <InfoRow emoji={emoji(0x1f550)} label={t.practicalTimezone} value={info.timezone} colors={colors} />
+          {info.voltage ? <InfoRow emoji={emoji(0x1f50c)} label={t.practicalVoltage} value={info.voltage} colors={colors} /> : null}
+          {water ? <InfoRow emoji={emoji(0x1f4a7)} label={t.practicalWater} value={water} colors={colors} /> : null}
+          {tipping ? <InfoRow emoji={emoji(0x1f4b0)} label={t.practicalTipping} value={tipping} colors={colors} /> : null}
         </View>
       </Section>
 
-      {/* ── Emergenze ── */}
-      {info.emergency_numbers.length > 0 && (
+      {info.emergency_numbers.length > 0 ? (
         <Section title={t.practicalEmergency} icon="alert-circle-outline" colors={colors}>
-          {info.emergency_numbers.map((e, i) => (
-            <EmergencyRow key={i} item={e} lang={contentLang} colors={colors} />
+          {info.emergency_numbers.map((item, index) => (
+            <EmergencyRow key={index} item={item} lang={lang} colors={colors} />
           ))}
         </Section>
-      )}
+      ) : null}
 
-      {/* ── App mezzi ── */}
-      {info.transport_apps.length > 0 && (
+      {info.transport_apps.length > 0 ? (
         <Section title={t.practicalTransportApps} icon="subway-outline" colors={colors}>
-          {info.transport_apps.map((app, i) => (
-            <AppCard key={i} app={app} lang={contentLang} colors={colors} />
+          {info.transport_apps.map((app, index) => (
+            <AppCard key={index} app={app} lang={lang} colors={colors} transport />
           ))}
         </Section>
-      )}
+      ) : null}
 
-      {/* ── App utili ── */}
-      {info.useful_apps.length > 0 && (
+      {info.useful_apps.length > 0 ? (
         <Section title={t.practicalUsefulApps} icon="apps-outline" colors={colors}>
-          {info.useful_apps.map((app, i) => (
-            <AppCard key={i} app={app} lang={contentLang} colors={colors} />
+          {info.useful_apps.map((app, index) => (
+            <AppCard key={index} app={app} lang={lang} colors={colors} transport={false} />
           ))}
         </Section>
-      )}
+      ) : null}
 
-      {/* ── Consigli rapidi ── */}
-      {tips.length > 0 && (
+      {tips.length > 0 ? (
         <Section title={t.practicalTips} icon="bulb-outline" colors={colors}>
-          {tips.map((tip, i) => (
-            <View key={i} style={styles.tipRow}>
-              <Text style={[styles.tipBullet, { color: colors.accentGold }]}>›</Text>
+          {tips.map((tip, index) => (
+            <View key={index} style={styles.tipRow}>
+              <Text style={[styles.tipBullet, { color: colors.accentGold }]}>{">"}</Text>
               <Text style={[styles.tipText, { color: colors.textSub }]}>{tip}</Text>
             </View>
           ))}
         </Section>
-      )}
-
+      ) : null}
     </View>
   );
 }
 
-// Stili statici (le parti non dipendenti dal tema rimangono in StyleSheet)
 const styles = StyleSheet.create({
   container: {
     gap: 14,
     paddingBottom: 24,
   },
-
-  // Sezione
   section: {
     borderRadius: 16,
     padding: 14,
@@ -230,8 +253,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     textTransform: "uppercase",
   },
-
-  // Info grid
   infoGrid: {
     gap: 10,
   },
@@ -260,8 +281,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-
-  // English level
   engRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -281,8 +300,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     flex: 1,
   },
-
-  // Emergenze
   emergencyRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -301,8 +318,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
   },
-
-  // App cards
   appCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -329,8 +344,6 @@ const styles = StyleSheet.create({
     padding: 6,
     borderWidth: 1,
   },
-
-  // Consigli
   tipRow: {
     flexDirection: "row",
     alignItems: "flex-start",

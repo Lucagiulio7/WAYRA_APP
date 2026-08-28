@@ -136,8 +136,8 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Irish Stew',
   'name_en': 'Irish Stew',
   'description': 'Stufato tradizionale di agnello o montone con patate, cipolle e carote, cotto lentamente fino a diventare morbido e '
-                 'profondo. A Dublino ? comfort food da pub: semplice, caldo, sostanzioso, pi? legato alla qualit? del brodo che alla '
-                 'complessit?.',
+                 'profondo. A Dublino è comfort food da pub: semplice, caldo, sostanzioso, più legato alla qualità del brodo che alla '
+                 'complessità.',
   'description_en': 'A traditional stew of lamb or mutton with potatoes, onions and carrots, slowly cooked until soft and deep. In Dublin '
                     'it is pub comfort food: simple, warm, substantial and more tied to broth quality than complexity.',
   'ingredients': ['agnello', 'patate', 'cipolle', 'carote', 'brodo'],
@@ -145,7 +145,7 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
   'places': ['The Brazen Head Dublin', 'The Hairy Lemon Dublin', 'ONeills Pub Dublin']},
  {'name': 'Boxty',
   'name_en': 'Boxty Potato Pancake',
-  'description': 'Frittella irlandese di patate crude e cotte, farina e latticello, servita semplice o farcita con ingredienti salati. ? '
+  'description': 'Frittella irlandese di patate crude e cotte, farina e latticello, servita semplice o farcita con ingredienti salati. È '
                  'un piatto contadino molto intelligente: croccante ai bordi, morbido dentro, capace di trasformare la patata in base '
                  'completa.',
   'description_en': 'An Irish potato pancake made from raw and cooked potatoes, flour and buttermilk, served plain or filled with savoury '
@@ -157,8 +157,8 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
  {'name': 'Coddle',
   'name_en': 'Dublin Coddle',
   'description': 'Stufato cittadino di salsicce, bacon, patate e cipolle, cotto lentamente in brodo fino a diventare tenero e '
-                 'rassicurante. ? una specialit? dublinese senza fronzoli: domestica, economica, sapida, nata per riempire e scaldare. La '
-                 'qualit? sta in un brodo saporito, non acquoso, e in patate ancora integre.',
+                 'rassicurante. È una specialità dublinese senza fronzoli: domestica, economica, sapida, nata per riempire e scaldare. La '
+                 'qualità sta in un brodo saporito, non acquoso, e in patate ancora integre.',
   'description_en': 'A city stew of sausages, bacon, potatoes and onions, slowly cooked in broth until tender and reassuring. It is a '
                     'no-frills Dublin speciality: domestic, economical, savoury, created to fill and warm. Quality lies in savoury, not '
                     'watery broth, and potatoes that remain intact.',
@@ -168,7 +168,7 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
  {'name': 'Fish and Chips',
   'name_en': 'Fish and Chips',
   'description': 'Filetto di pesce bianco fritto in pastella, servito con patatine spesse, sale e aceto, presenza storica della vita '
-                 'informale dublinese. La qualit? sta nella frittura asciutta, nel pesce ancora succoso e nelle patate ben dorate.',
+                 'informale dublinese. La qualità sta nella frittura asciutta, nel pesce ancora succoso e nelle patate ben dorate.',
   'description_en': 'White fish fried in batter, served with thick chips, salt and vinegar, a historic part of informal Dublin life. '
                     'Quality lies in dry frying, fish that remains juicy and chips that are properly golden. The vinegar should brighten '
                     'the plate without turning the crust soggy.',
@@ -177,8 +177,8 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
   'places': ['Leo Burdocks Dublin', 'Fish Shop Dublin', 'Beshoffs Dublin']},
  {'name': 'Full Irish Breakfast',
   'name_en': 'Full Irish Breakfast',
-  'description': 'Colazione sostanziosa con uova, bacon, salsicce, black pudding, white pudding, pomodori, funghi e pane. ? quasi un pasto '
-                 'completo: salata, energetica, rituale, ideale per capire il lato pi? robusto della cultura da pub e pensione.',
+  'description': 'Colazione sostanziosa con uova, bacon, salsicce, black pudding, white pudding, pomodori, funghi e pane. È quasi un pasto '
+                 'completo: salata, energetica, rituale, ideale per capire il lato più robusto della cultura da pub e pensione.',
   'description_en': 'A substantial breakfast with eggs, bacon, sausages, black pudding, white pudding, tomatoes, mushrooms and bread. It '
                     'is almost a full meal: savoury, energetic and ritualistic, ideal for understanding the heartier pub-and-guesthouse '
                     'culture. The best plates feel generous but controlled, with each element cooked distinctly.',
@@ -188,9 +188,9 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
  {'name': 'Seafood Chowder',
   'name_en': 'Seafood Chowder',
   'description': 'Zuppa cremosa di pesce, molluschi, patate, porri e panna, molto adatta al clima e alla costa irlandese. Deve essere '
-                 'ricca ma non pesante: profumata di mare, vellutata, con pezzi riconoscibili e brodo ben equilibrato. La qualit? emerge '
+                 'ricca ma non pesante: profumata di mare, vellutata, con pezzi riconoscibili e brodo ben equilibrato. La qualità emerge '
                  'quando panna e pesce restano in equilibrio senza coprirsi.',
-  'description_en': 'A creamy soup of fish, shellfish, potatoes, leeks and cream, very suited to Ireland?s coast and climate. It should be '
+  'description_en': 'A creamy soup of fish, shellfish, potatoes, leeks and cream, very suited to Ireland’s coast and climate. It should be '
                     'rich but not heavy: sea-scented, velvety, with recognisable pieces and a well-balanced broth. Quality appears when '
                     'cream and seafood remain balanced without covering each other.',
   'ingredients': ['pesce', 'molluschi', 'patate', 'porri', 'panna'],
@@ -198,9 +198,9 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
   'places': ['Fish Shop Dublin', 'ONeills Pub Dublin', 'The Winding Stair Dublin']},
  {'name': 'Soda Bread',
   'name_en': 'Soda Bread',
-  'description': 'Pane irlandese lievitato con bicarbonato invece che lievito, spesso preparato con latticello e farina integrale. ? '
+  'description': 'Pane irlandese lievitato con bicarbonato invece che lievito, spesso preparato con latticello e farina integrale. È '
                  'rustico e immediato: crosta asciutta, mollica compatta, sapore leggermente acidulo, perfetto con burro, zuppe o salmone. '
-                 'La qualit? si riconosce nella fetta che resta compatta ma non secca.',
+                 'La qualità si riconosce nella fetta che resta compatta ma non secca.',
   'description_en': 'Irish bread leavened with baking soda rather than yeast, often made with buttermilk and wholemeal flour. It is rustic '
                     'and immediate: dry crust, compact crumb, gently tangy flavour, perfect with butter, soups or salmon. Quality is '
                     'recognised in a slice that stays compact but never dry.',
@@ -210,11 +210,11 @@ FOODS_BY_CITY = [{'name': 'Irish Stew',
  {'name': 'Barmbrack',
   'name_en': 'Barmbrack Fruit Loaf',
   'description': 'Pane dolce irlandese con uvetta e frutta secca, legato soprattutto ad Halloween ma presente anche nelle bakery '
-                 'tradizionali. ? profumato di t? e spezie, morbido a fette, spesso servito con burro come merenda semplice. La qualit? '
+                 'tradizionali. È profumato di tè e spezie, morbido a fette, spesso servito con burro come merenda semplice. La qualità '
                  'migliore mantiene frutta morbida, spezie leggere e mollica elastica.',
   'description_en': 'An Irish sweet loaf with raisins and dried fruit, especially linked to Halloween but also found in traditional '
                     'bakeries. It is scented with tea and spices, soft when sliced and often served with butter as a simple snack.',
-  'ingredients': ['farina', 'uvetta', 't?', 'spezie', 'zucchero'],
+  'ingredients': ['farina', 'uvetta', 'tè', 'spezie', 'zucchero'],
   'ingredients_en': ['flour', 'raisins', 'tea', 'spices', 'sugar'],
   'places': ['The Bretzel Bakery Dublin', 'The Bakery Temple Bar Dublin', 'Mannings Bakery Dublin']}]
 

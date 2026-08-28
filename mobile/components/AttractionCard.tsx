@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Attraction } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { localizedDescription, localizedName } from "@/utils/localization";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -40,8 +41,8 @@ export function AttractionCard({ attraction, index }: Props) {
   };
 
   const color = LEVEL_COLORS[attraction.category_level] ?? "#ccc";
-  const displayName = (lang === "en" && attraction.name_en) ? attraction.name_en : attraction.name;
-  const displayDesc = (lang === "en" && attraction.description_en) ? attraction.description_en : attraction.description;
+  const displayName = localizedName(attraction, lang);
+  const displayDesc = localizedDescription(attraction, lang);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

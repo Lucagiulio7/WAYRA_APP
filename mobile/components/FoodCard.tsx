@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   LayoutAnimation,
-  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { localizedField, localizedName, localizedDescription } from "@/utils/localization";
+import { curatedFoodIcon } from "@/data/foodIcons";
+import { openExternalLink } from "@/utils/externalLinks";
 
 const emoji = (...points: number[]) => String.fromCodePoint(...points);
 
@@ -79,27 +81,36 @@ function getFoodEmoji(name: string, description?: string | null, ingredients?: s
 }
 
 function localizedFoodName(food: Food, lang: string): string {
-  if (lang === "fr") return food.name_fr ?? food.name_en ?? food.name;
-  if (lang === "en") return food.name_en ?? food.name;
-  return food.name;
+  return localizedName(food, lang);
 }
 
 function localizedFoodDescription(food: Food, lang: string): string {
-  if (lang === "fr") return food.description_fr ?? food.description_en ?? food.description;
-  if (lang === "en") return food.description_en ?? food.description;
-  return food.description;
+  return localizedDescription(food, lang);
 }
 
 function localizedFoodIngredients(food: Food, lang: string): string[] {
-  if (lang === "fr") return food.ingredients_fr?.length ? food.ingredients_fr : food.ingredients_en?.length ? food.ingredients_en : food.ingredients;
-  if (lang === "en") return food.ingredients_en?.length ? food.ingredients_en : food.ingredients;
-  return food.ingredients;
+  return localizedField<string[]>(food, "ingredients", lang, []);
 }
 
 function localizedFoodPlaceName(place: NonNullable<Food["places"]>[number], lang: string): string {
-  if (lang === "fr") return place.name_fr ?? place.name_en ?? place.name;
-  if (lang === "en") return place.name_en ?? place.name;
-  return place.name;
+  return localizedName(place, lang);
+}
+
+function getStableFoodEmoji(food: Food): string {
+  const curatedIcon = curatedFoodIcon(food.city, food.name);
+  if (curatedIcon) return curatedIcon;
+
+  const allIngredients = [
+    ...(food.ingredients ?? []),
+    ...(food.ingredients_en ?? []),
+    ...(food.ingredients_fr ?? []),
+    ...(food.ingredients_es ?? []),
+  ];
+  return getFoodEmoji(
+    `${food.name} ${food.name_en ?? ""} ${food.name_fr ?? ""} ${food.name_es ?? ""}`.trim(),
+    `${food.description ?? ""} ${food.description_en ?? ""} ${food.description_fr ?? ""} ${food.description_es ?? ""}`.trim(),
+    allIngredients,
+  );
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -121,7 +132,7 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
   const displayIngredients = localizedFoodIngredients(food, lang);
 
   const places = food.places ?? [];
-  const foodIcon = getFoodEmoji(displayName, displayDesc, displayIngredients);
+  const foodIcon = getStableFoodEmoji(food);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -168,11 +179,20 @@ export function FoodCard({ food, expanded: controlledExpanded, onToggle }: Props
                 <TouchableOpacity
                   key={i}
                   style={[styles.placeRow, { backgroundColor: colors.card2, borderColor: colors.border }]}
-                  onPress={() => Linking.openURL(place.maps_link)}
+                  onPress={() => openExternalLink(place.maps_link, lang)}
                   activeOpacity={0.75}
                 >
                   <Ionicons name="restaurant-outline" size={14} color={colors.accentGold} style={styles.placeIcon} />
-                  <Text style={[styles.placeName, { color: colors.text }]}>{localizedFoodPlaceName(place, lang)}</Text>
+                  <View style={styles.placeContent}>
+                    <Text style={[styles.placeName, { color: colors.text }]}>{localizedFoodPlaceName(place, lang)}</Text>
+                    <Text style={[styles.placeEvidence, { color: colors.textMuted }]}>
+                      {place.rating
+                        ? `${place.rating.toFixed(1)} / 5`
+                        : place.curated
+                          ? (lang === "es" ? "Selección editorial" : lang === "fr" ? "Sélection éditoriale" : lang === "en" ? "Editorial selection" : "Selezione editoriale")
+                          : (lang === "es" ? "Lugar sugerido" : lang === "fr" ? "Adresse suggérée" : lang === "en" ? "Suggested place" : "Locale suggerito")}
+                    </Text>
+                  </View>
                   <Ionicons name="open-outline" size={13} color={colors.textMuted} />
                 </TouchableOpacity>
               ))}
@@ -264,8 +284,14 @@ const styles = StyleSheet.create({
     width: 16,
   },
   placeName: {
-    flex: 1,
     fontSize: 13,
     fontWeight: "500",
+  },
+  placeContent: {
+    flex: 1,
+    gap: 2,
+  },
+  placeEvidence: {
+    fontSize: 11,
   },
 });

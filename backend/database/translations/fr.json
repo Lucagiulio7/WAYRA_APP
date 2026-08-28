@@ -1,0 +1,705 @@
+{
+  "attractions": {
+    "muğla": {
+      "Simitçi Merkez": {
+        "description": "Simit frais et petites pâtisseries au cœur du centre ancien."
+      },
+      "Dondurma Saburhane": {
+        "description": "Une pause sucrée toute simple dans les rues historiques de Muğla."
+      },
+      "Gözleme Evi": {
+        "description": "Une petite adresse de gözleme et d'en-cas rapides, profondément ancrée dans la tradition locale."
+      },
+      "Keyfet Restaurant": {
+        "description": "Une adresse traditionnelle du centre, avec cuisine régionale et ambiance intime."
+      },
+      "Muğla Sofrası": {
+        "description": "Un restaurant central très pratique pour découvrir les plats locaux."
+      },
+      "Saburhane Mutfağı": {
+        "description": "Une adresse simple, fidèle au caractère familial et historique du quartier."
+      },
+      "Konak Akşam Sofrası": {
+        "description": "Un restaurant plus soigné dans le vieux centre, adapté à un dîner tranquille."
+      },
+      "Eski Merkez Fine Table": {
+        "description": "Un dîner plus raffiné dans le noyau historique, avec service attentif et menu régional."
+      },
+      "Lokma Köşesi": {
+        "description": "Des douceurs frites et une halte rapide près du secteur historique de la mosquée."
+      },
+      "Çay Bahçesi Kurşunlu": {
+        "description": "Thé, douceurs et petites pauses dans un quartier très agréable à parcourir à pied."
+      },
+      "Börekçi Kurşunlu": {
+        "description": "Une halte simple pour le börek et des en-cas salés issus de la tradition turque."
+      },
+      "Kurşunlu Sofrası": {
+        "description": "Un restaurant local attaché aux saveurs régionales et à la cuisine familiale."
+      },
+      "Avlu Restaurant": {
+        "description": "Une adresse calme avec une cour intérieure au style historique."
+      },
+      "Hamamaltı Mutfağı": {
+        "description": "Une adresse simple mais cohérente avec le visage historique et intime du quartier."
+      },
+      "Kurşunlu Akşam Evi": {
+        "description": "Un dîner plus soigné dans un cadre historique bien préservé."
+      },
+      "Ottoman Courtyard Dining": {
+        "description": "Un restaurant plus élégant, d'inspiration régionale et à l'ambiance intime."
+      },
+      "Kampüs Kahve": {
+        "description": "Café et pâtisseries rapides près du quartier universitaire."
+      },
+      "Dondurma Kampüs": {
+        "description": "Une pause sucrée très simple dans la partie la plus jeune de la ville."
+      },
+      "Toast Büfesi": {
+        "description": "Une halte décontractée pour des toasts et petits en-cas près du musée et du campus."
+      },
+      "Kampüs Sofrası": {
+        "description": "Un restaurant pratique, fréquenté par les étudiants et les habitants."
+      },
+      "Müze Lokantası": {
+        "description": "Une adresse utile pour un déjeuner ou un dîner simple dans le quartier culturel."
+      },
+      "Gençlik Mutfağı": {
+        "description": "Un lieu contemporain et informel, bien adapté au secteur universitaire."
+      },
+      "Üniversite Fine Table": {
+        "description": "Un dîner plus soigné à proximité du campus et des institutions culturelles."
+      },
+      "Akdeniz Akşamları": {
+        "description": "Un restaurant plus élégant, avec menu soigné et atmosphère plus haut de gamme."
+      },
+      "Gözleme Bahçesi": {
+        "description": "Une petite adresse en harmonie avec le cadre verdoyant et détendu du plateau."
+      },
+      "Dondurma Yayla": {
+        "description": "Une pause sucrée légère dans un cadre plus verdoyant de la ville."
+      },
+      "Çay ve Börek Evi": {
+        "description": "Thé, börek et petites pauses en accord avec le rythme paisible du quartier."
+      },
+      "Yayla Sofrası": {
+        "description": "Un restaurant simple, fortement lié à la tradition rurale et familiale."
+      },
+      "Karabağlar Mutfağı": {
+        "description": "Une adresse fidèle à l'identité locale du plateau."
+      },
+      "Bağ Evi Lokantası": {
+        "description": "Une adresse agréable dans un cadre verdoyant, idéale pour une halte plus longue."
+      },
+      "Yayla Akşam Evi": {
+        "description": "Un dîner calme et soigné dans un cadre verdoyant et traditionnel."
+      },
+      "Karabağlar Fine Dining": {
+        "description": "Un restaurant plus raffiné sur le plateau, idéal pour un dîner sans hâte."
+      },
+      "Sokak Simit": {
+        "description": "Un en-cas rapide bien adapté au centre civique et commerçant de la ville."
+      },
+      "Dondurma Cumhuriyet": {
+        "description": "Une pause sucrée dans l'un des quartiers les plus centraux et animés de Muğla."
+      },
+      "Tost Büfesi Merkez": {
+        "description": "Un en-cas rapide et urbain le long du centre administratif."
+      },
+      "Cumhuriyet Sofrası": {
+        "description": "Un restaurant central et accessible pour une cuisine turque quotidienne."
+      },
+      "Meydan Lokantası": {
+        "description": "Une adresse utile pour découvrir le visage quotidien et public de la ville."
+      },
+      "Kent Mutfağı": {
+        "description": "Une adresse simple, cohérente avec le caractère urbain du centre."
+      },
+      "Kent Akşamları": {
+        "description": "Un restaurant plus soigné pour un dîner central et tranquille."
+      },
+      "Cumhuriyet Fine Table": {
+        "description": "Une adresse plus haut de gamme dans le quartier civique de la ville."
+      },
+      "Mahalle Simitçisi": {
+        "description": "Une halte très simple, fidèle au caractère résidentiel de Yeniköy."
+      },
+      "Dondurma Yeniköy": {
+        "description": "Une pause sucrée rapide dans les rues hautes du quartier."
+      },
+      "Toast Yeniköy": {
+        "description": "Une petite adresse pour des toasts et en-cas rapides dans le secteur résidentiel."
+      },
+      "Yeniköy Sofrası": {
+        "description": "Une adresse de quartier utile pour comprendre le quotidien de Muğla."
+      },
+      "Tepe Restaurant": {
+        "description": "Un restaurant simple, avec de belles vues et une atmosphère locale."
+      },
+      "Mahalle Mutfağı": {
+        "description": "Une adresse pratique, fidèle au caractère résidentiel du secteur."
+      },
+      "Yeniköy Akşam Evi": {
+        "description": "Un dîner plus calme et soigné dans la partie haute de la ville."
+      },
+      "Hill View Dining": {
+        "description": "Un restaurant plus élégant offrant de belles vues sur le tissu urbain diffus."
+      },
+      "Pazar Simit": {
+        "description": "Simit et en-cas rapides en accord avec le rythme du marché."
+      },
+      "Dondurma Pazar": {
+        "description": "Une pause sucrée simple près du secteur commerçant le plus animé."
+      },
+      "Köfte Ekmek Büfesi": {
+        "description": "Un en-cas très pratique dans la zone de passage et du marché."
+      },
+      "Pazar Lokantası": {
+        "description": "Un restaurant utile pour une cuisine locale simple et sans artifices."
+      },
+      "Otogar Sofrası": {
+        "description": "Une adresse pratique et directe, cohérente avec le rôle de carrefour de transport du quartier."
+      },
+      "Lezzet Durağı": {
+        "description": "Une adresse populaire pour une pause complète liée au secteur du marché."
+      },
+      "Pazar Akşamları": {
+        "description": "Un dîner plus soigné près de la zone commerçante et de passage."
+      },
+      "Market Fine Table": {
+        "description": "Un restaurant plus haut de gamme, avec menu soigné dans le secteur du bazar."
+      },
+      "Sokak Çayı": {
+        "description": "Une adresse simple pour prendre le thé et faire une courte pause dans la partie plus diffuse de la ville."
+      },
+      "Dondurma Güney": {
+        "description": "Une pause sucrée légère dans une partie moins touristique de la ville."
+      },
+      "Toast Güney": {
+        "description": "Un en-cas rapide dans la ceinture urbaine sud."
+      },
+      "Güney Sofrası": {
+        "description": "Un restaurant pratique pour découvrir la ville au-delà de son noyau historique."
+      },
+      "Kent Kenarı Lokantası": {
+        "description": "Une adresse de quartier utile pour comprendre la lisière urbaine de Muğla."
+      },
+      "Panorama Mutfağı": {
+        "description": "Une adresse simple avec une vue plus ouverte sur la ville et les collines."
+      },
+      "Southern View Dining": {
+        "description": "Un dîner plus soigné dans un secteur moins historique, intéressant pour comprendre la ville contemporaine."
+      },
+      "Muğla Fine South": {
+        "description": "Un restaurant plus haut de gamme sur la lisière urbaine sud."
+      }
+    },
+    "cracovia": {
+      "Chiesa di San Giuseppe a Podgórze": {
+        "name": "Église Saint-Joseph de Podgórze",
+        "description": "Église néogothique dominant la place du marché de Podgórze, utile pour comprendre le quartier au-delà de la seule mémoire du ghetto."
+      },
+      "Chiesa Arka Pana": {
+        "name": "Église Arka Pana",
+        "description": "Église emblématique de Nowa Huta, construite après une longue mobilisation des habitants et reconnaissable à son architecture moderne."
+      },
+      "Abbazia cistercense di Mogiła": {
+        "name": "Abbaye cistercienne de Mogiła",
+        "description": "Ensemble monastique médiéval qui apporte à Nowa Huta une perspective historique bien antérieure à la ville socialiste."
+      }
+    },
+    "firenze": {
+      "Osteria Santo Spirito": {
+        "description": "Osteria donnant sur la Piazza Santo Spirito, appréciée pour sa cuisine toscane généreuse, ses pâtes gratinées et l’atmosphère animée de l’Oltrarno."
+      },
+      "I'Brindellone": {
+        "description": "Trattoria populaire de l’Oltrarno réputée pour la bistecca alla fiorentina, la ribollita et ses portions généreuses dans un cadre simple et traditionnel."
+      }
+    },
+    "istanbul": {
+      "Biblioteca statale di Beyazıt": {
+        "name": "Bibliothèque d’État de Beyazıt",
+        "description": "Bibliothèque historique donnant sur la place Beyazıt, installée dans un ensemble ottoman restauré doté d’une remarquable salle de lecture."
+      }
+    },
+    "londra": {
+      "Giardino di St Dunstan in the East": {
+        "name": "Jardin de l’église St Dunstan-in-the-East",
+        "description": "Jardin public aménagé dans les ruines d’une église de la City endommagée pendant la guerre, intime et surprenant au milieu du quartier financier."
+      }
+    },
+    "marsiglia": {
+      "Chiesa Saint-Pierre-ès-Liens dell'Estaque": {
+        "name": "Église Saint-Pierre-ès-Liens de L’Estaque",
+        "description": "Église du XIXe siècle située sur les hauteurs du quartier, avec une vue dégagée sur le port et le littoral nord de Marseille."
+      }
+    },
+    "stoccolma": {
+      "Skinnarviksberget": {
+        "name": "Skinnarviksberget",
+        "description": "Point naturel le plus élevé du centre de Stockholm, offrant une large vue sur Riddarfjärden, Kungsholmen et l’hôtel de ville."
+      },
+      "Museo Hallwyl": {
+        "name": "Musée Hallwyl",
+        "description": "Demeure aristocratique de la fin du XIXe siècle conservée avec son mobilier et ses collections d’origine, au cœur élégant de la ville."
+      },
+      "Smedsuddsbadet": {
+        "name": "Smedsuddsbadet",
+        "description": "Plage urbaine et espace vert de Kungsholmen où observer le rapport quotidien des habitants avec l’eau."
+      }
+    },
+    "valencia": {
+      "Mercado de Colón": {
+        "name": "Mercado de Colón",
+        "description": "Marché moderniste restauré, aujourd’hui lieu gastronomique et social illustrant le caractère bourgeois de l’Eixample valencien."
+      },
+      "CaixaForum València": {
+        "name": "CaixaForum València",
+        "description": "Centre culturel installé dans l’Àgora de la Cité des arts et des sciences, accueillant des expositions et installations contemporaines."
+      },
+      "Playa de la Malvarrosa": {
+        "name": "Plage de la Malvarrosa",
+        "description": "La plage urbaine la plus connue de Valence est vaste et reliée au Cabanyal par une longue promenade maritime."
+      },
+      "Centro visitatori Racó de l’Olla": {
+        "name": "Centre d’accueil du Racó de l’Olla",
+        "description": "Le centre présente les écosystèmes de l’Albufera et explique la lagune, la pinède, les dunes et les zones humides protégées."
+      },
+      "Osservatorio ornitologico Racó de l’Olla": {
+        "name": "Observatoire ornithologique du Racó de l’Olla",
+        "description": "Un observatoire sur les eaux peu profondes permet de découvrir les oiseaux de la lagune sans perturber les habitats sensibles."
+      },
+      "Belvedere della Gola de Pujol": {
+        "name": "Belvédère de la Gola de Pujol",
+        "description": "L’un des points de vue les plus accessibles sur la lagune, particulièrement évocateur en fin d’après-midi."
+      },
+      "Sendero de la Devesa": {
+        "name": "Sentier de la Devesa",
+        "description": "Un itinéraire plat traverse la pinède littorale, la végétation méditerranéenne, les dunes et les zones humides."
+      },
+      "Laguna dell’Albufera": {
+        "name": "Lagune de l’Albufera",
+        "description": "Le vaste plan d’eau douce du parc est étroitement lié à la pêche, aux rizières et à la culture de la paella."
+      },
+      "Passerella della Devesa": {
+        "name": "Passerelle de la Devesa",
+        "description": "La passerelle traverse la lisière humide entre roselières, dunes et transition vers le littoral."
+      }
+    },
+    "varsavia": {
+      "Bunker di Anielewicz - memoriale Miła 18": {
+        "name": "Bunker d’Anielewicz - mémorial Miła 18",
+        "description": "Mémorial situé à l’emplacement du bunker de commandement de l’Organisation juive de combat, essentiel pour comprendre l’insurrection du ghetto de Varsovie."
+      }
+    },
+    "venezia": {
+      "Chiesa di San Pantalon": {
+        "name": "Église San Pantalon",
+        "description": "Église de Dorsoduro célèbre pour l’immense plafond peint par Fumiani, une scénographie baroque surprenante derrière une façade sobre."
+      },
+      "Chiesa della Madonna dell'Orto": {
+        "name": "Église de la Madonna dell’Orto",
+        "description": "Église gothique retirée de Cannaregio, étroitement liée au Tintoret et riche d’œuvres conservées dans leur contexte d’origine."
+      }
+    },
+    "antalya": {
+      "Teatro di Termessos": {
+        "name": "Théâtre de Termessos",
+        "description": "Le théâtre antique ouvert sur les monts Taurus conserve ses gradins, son bâtiment de scène et un spectaculaire panorama montagnard."
+      },
+      "Agorà di Termessos": {
+        "name": "Agora de Termessos",
+        "description": "La place publique de la cité pisidienne conserve des terrasses, des portiques et des vestiges des bâtiments civiques de l’établissement montagnard."
+      },
+      "Necropoli di Termessos": {
+        "name": "Nécropole de Termessos",
+        "description": "La zone funéraire boisée conserve des sarcophages monumentaux et des tombes rupestres, complétant la visite de la ville antique."
+      }
+    },
+    "candia": {
+      "Piccolo Palazzo di Cnosso": {
+        "name": "Petit Palais de Cnossos",
+        "description": "Un édifice minoen distinct du palais principal, avec des salles de réception qui révèlent la complexité de Cnossos."
+      },
+      "Villa Reale di Cnosso": {
+        "name": "Villa royale de Cnossos",
+        "description": "La villa dite royale conserve une salle à piliers, un bassin lustral et des espaces résidentiels minoens."
+      },
+      "Casa degli Affreschi di Cnosso": {
+        "name": "Maison des Fresques de Cnossos",
+        "description": "Un édifice connu pour ses fragments peints, essentiels pour restituer les couleurs, les paysages et le langage visuel minoens."
+      },
+      "Caravanserraglio di Cnosso": {
+        "name": "Caravansérail de Cnossos",
+        "description": "Le complexe de l’ancienne approche méridionale comprend des espaces d’accueil, un bassin et des vestiges décoratifs."
+      }
+    },
+    "annecy": {
+      "Abbaye de Talloires": {
+        "name": "Abbaye de Talloires",
+        "description": "L’ancienne abbaye bénédictine au bord du lac couvre près de mille ans d’histoire et forme l’un des ensembles les plus reconnaissables de Talloires."
+      },
+      "Église Saint-Germain de Talloires": {
+        "name": "Église Saint-Germain de Talloires",
+        "description": "L’église domine le village depuis une terrasse naturelle et réunit patrimoine religieux et vaste panorama sur le lac."
+      },
+      "Plage de Talloires": {
+        "name": "Plage de Talloires",
+        "description": "Une petite plage de la rive orientale, accessible à pied depuis le port et le centre du village."
+      },
+      "Cascade d’Angon": {
+        "name": "Cascade d’Angon",
+        "description": "La cascade tombe dans une gorge boisée au-dessus de Talloires ; un sentier aménagé mène près du rideau d’eau."
+      },
+      "Riserva naturale del Roc de Chère": {
+        "name": "Réserve naturelle du Roc de Chère",
+        "description": "Le promontoire protégé alterne forêts, falaises calcaires et belvédères sur le lac le long de sentiers accessibles."
+      },
+      "Port de Talloires": {
+        "name": "Port de Talloires",
+        "description": "Le petit port révèle le rapport du village au lac, entre pontons, bateaux et façades historiques."
+      },
+      "Clocher roman d’Annecy-le-Vieux": {
+        "name": "Clocher roman d’Annecy-le-Vieux",
+        "description": "Le clocher roman du XIIe siècle, vestige de l’ancienne église, est le principal repère historique du vieux centre d’Annecy-le-Vieux."
+      }
+    },
+    "porto": {
+      "Mercado do Bom Sucesso": {
+        "name": "Marché de Bom Sucesso",
+        "description": "Le marché couvert moderniste est aujourd’hui un lieu gastronomique et social pour découvrir les produits, la cuisine et la vie quotidienne de Boavista."
+      },
+      "Casa-Museu Marta Ortigão Sampaio": {
+        "name": "Maison-musée Marta Ortigão Sampaio",
+        "description": "Une maison-musée consacrée à la vie bourgeoise de Porto, avec peinture naturaliste, bijoux, mobilier et petit jardin historique."
+      },
+      "Museu do Carro Eléctrico": {
+        "name": "Musée du Tramway de Porto",
+        "description": "Installé dans l’ancienne centrale de Massarelos, le musée conserve tramways, remorques et véhicules de service retraçant l’évolution du transport urbain sur rails."
+      }
+    }
+  },
+  "foods": {
+    "muğla": {
+      "Keşkek": {
+        "name": "Ragoût de blé et de viande keşkek",
+        "description": "Un plat traditionnel de blé pilé et de viande cuits longuement ensemble jusqu'à obtenir une consistance crémeuse. Préparé lors des cérémonies et des grandes fêtes villageoises, il est inscrit au patrimoine immatériel de l'UNESCO.",
+        "ingredients": [
+          "blé pilé",
+          "viande d'agneau ou poulet",
+          "beurre",
+          "sel",
+          "poivre"
+        ]
+      }
+    }
+  },
+  "neighborhoods": {
+    "antalya": {
+      "Lara": {
+        "name": "Lara",
+        "description": "Zone des grands complexes tout compris à l’est de la ville. Plages de sable fin, hôtels cinq étoiles avec parcs aquatiques et services complets. Elle convient à ceux qui souhaitent des vacances balnéaires organisées sans avoir à quitter leur hôtel."
+      },
+      "Kaleiçi": {
+        "name": "Kaleiçi",
+        "description": "Le cœur historique d’Antalya, avec ses ruelles pavées, ses murailles romaines, ses maisons ottomanes restaurées et ses riads de charme. C’est le quartier le plus séduisant et le mieux placé pour les visites. Les prix sont plus élevés, mais l’atmosphère est unique."
+      },
+      "Konyaaltı": {
+        "name": "Konyaaltı",
+        "description": "Quartier moderne tourné vers la longue plage de galets à l’ouest du centre. Il convient à ceux qui recherchent des hôtels de bord de mer, des restaurants sur le littoral et des prix plus accessibles. Le centre est bien desservi en bus ou en taxi."
+      },
+      "Muratpaşa": {
+        "name": "Muratpaşa",
+        "description": "Quartier central et commerçant d’Antalya, autour de l’avenue principale Atatürk Caddesi. Idéal pour vivre la ville comme un habitant, entre bazars, restaurants traditionnels, marchés et bonnes liaisons vers tous les secteurs. Les prix sont abordables."
+      }
+    },
+    "bratislava": {
+      "Staré Mesto": {
+        "name": "Staré Mesto",
+        "description": "Le centre historique de Bratislava est compact, piéton et très agréable. Tous les principaux monuments, restaurants et bars s’y trouvent. Y séjourner permet de tout rejoindre à pied. Les prix sont plus élevés, mais la commodité est maximale."
+      },
+      "Nové Mesto": {
+        "name": "Nové Mesto",
+        "description": "Quartier moderne au nord du centre historique, avec des édifices Art nouveau, de larges boulevards arborés et de bonnes liaisons vers le centre. Les prix sont plus accessibles et l’atmosphère plus locale. Un excellent choix pour rester proche du centre sans en payer les tarifs."
+      },
+      "Petržalka": {
+        "name": "Petržalka",
+        "description": "Grand quartier résidentiel sur la rive sud du Danube, relié au centre par le pont Apollo. Très abordable, authentique et peu touristique. Idéal pour les budgets serrés ; avec environ 100 000 habitants, c’est l’un des plus grands ensembles de logements sociaux d’Europe."
+      },
+      "Ružinov": {
+        "name": "Ružinov",
+        "description": "Quartier oriental, moderne et calme, bien relié au centre par tramway et bus. Un excellent choix pour les familles ou ceux qui recherchent la tranquillité loin de la vie nocturne de la vieille ville, avec des prix abordables."
+      }
+    },
+    "bucarest": {
+      "Centrul Vechi": {
+        "name": "Centrul Vechi",
+        "description": "La vieille ville de Bucarest est le cœur de la vie nocturne et touristique : rues pavées, bâtiments baroques, bars, restaurants et clubs animent le quartier jour et nuit. Emplacement idéal pour visiter les principales attractions. Bruyant le soir, mais incontournable."
+      },
+      "Floreasca": {
+        "name": "Floreasca",
+        "description": "Quartier élégant et résidentiel au nord du centre, très apprécié des expatriés et des professionnels. Il offre de nombreux restaurants de qualité, cafés de spécialité, boutiques et parcs. Atmosphère raffinée, prix moyens à élevés. Parfait pour ceux qui recherchent calme et bonne cuisine."
+      },
+      "Dorobanți": {
+        "name": "Dorobanți",
+        "description": "Quartier résidentiel chic au nord de la ville, mêlant villas des années 1930 et bâtiments modernes. Excellents restaurants, cafés et boutiques. Plus calme que la vieille ville, mais très bien relié par le métro. Prix moyens."
+      },
+      "Piața Unirii": {
+        "name": "Piața Unirii",
+        "description": "Zone centrale autour de la vaste place Unirii, avec le Palais du Parlement accessible à pied. Nœud de transport desservi par trois lignes de métro. Excellente base pour explorer toute la ville, avec des prix abordables et un bon choix d’hôtels."
+      }
+    },
+    "candia": {
+      "Centro Storico": {
+        "name": "Centre historique",
+        "description": "Le cœur d’Héraklion, avec les murailles vénitiennes, le port et la fontaine Morosini. Musées, marché couvert, restaurants et tavernes sont tous accessibles à pied. Atmosphère authentique et animée, prix moyens. Le meilleur choix pour s’immerger dans la ville."
+      },
+      "Koules - Porto Veneziano": {
+        "name": "Koules - Port vénitien",
+        "description": "Le secteur du port vénitien, avec la forteresse de Koules, des restaurants de poissons et fruits de mer sur le front de mer et de splendides vues marines. Idéal pour les promenades du soir et les dîners romantiques. Les restaurants du port sont plus touristiques, mais l’atmosphère est magnifique."
+      },
+      "Ammoudara": {
+        "name": "Ammoudara",
+        "description": "Quartier balnéaire à l’ouest d’Héraklion, bordé par l’une des plus longues plages de sable de Crète. Large choix d’hôtels, d’appartements et de résidences à prix abordables. Parfait pour les familles qui souhaitent combiner plage et excursions à la journée dans toute la Crète."
+      },
+      "Poros": {
+        "name": "Poros",
+        "description": "Quartier résidentiel calme à l’est de la ville, près de l’aéroport et du port des ferries. Pratique pour les départs matinaux ou les arrivées tardives. Prix abordables, atmosphère locale et bonnes liaisons en bus vers le centre."
+      }
+    },
+    "cracovia": {
+      "Stare Miasto": {
+        "name": "Stare Miasto",
+        "description": "Le centre historique de Cracovie, classé par l’UNESCO, réunit la grande place du Marché, Rynek Główny, le château du Wawel et les principales attractions accessibles à pied. Atmosphère historique et animée, excellent choix de restaurants et d’hôtels. Prix plus élevés, mais commodité maximale."
+      },
+      "Kazimierz": {
+        "name": "Kazimierz",
+        "description": "L’ancien quartier juif est aujourd’hui le cœur bohème et artistique de Cracovie. Synagogues, galeries d’art, cafés vintage, restaurants de cuisines juive et polonaise, bars tendance et clubs. Une atmosphère unique, très appréciée des jeunes et des voyageurs indépendants."
+      },
+      "Podgórze": {
+        "name": "Podgórze",
+        "description": "Quartier de la rive sud de la Vistule, doté d’une scène artistique en plein essor. Le ghetto juif de la Seconde Guerre mondiale se trouvait ici, ainsi que l’usine de Schindler. C’est aujourd’hui un quartier authentique, avec cafés indépendants, art urbain et prix abordables. Idéal pour échapper au tourisme de masse."
+      },
+      "Grzegórzki": {
+        "name": "Grzegórzki",
+        "description": "Quartier résidentiel à l’est du centre historique, calme et bien desservi par le tramway. Prix très abordables, atmosphère locale et authentique. Une excellente solution économique pour rester confortablement logé à faible coût près du centre."
+      }
+    },
+    "edimburgo": {
+      "Old Town": {
+        "name": "Old Town",
+        "description": "Le cœur médiéval d’Édimbourg, avec le château, le Royal Mile, le palais de Holyroodhouse et les ruelles historiques appelées closes. Tout se parcourt à pied. L’atmosphère est magique, surtout le soir. Les hôtels sont plus chers, mais l’emplacement est imbattable."
+      },
+      "New Town": {
+        "name": "New Town",
+        "description": "Quartier géorgien construit au XVIIIe siècle, avec d’élégantes rues en damier, des boutiques, des restaurants et des bars de qualité. Calme la nuit et très bien desservi. Prix moyens. Idéal pour ceux qui recherchent plus de tranquillité que dans l’Old Town tout en restant au centre."
+      },
+      "Leith": {
+        "name": "Leith",
+        "description": "Ancien quartier portuaire d’Édimbourg, aujourd’hui pleinement revitalisé avec des restaurants étoilés, des bars créatifs, des galeries d’art et une scène gastronomique dynamique. Bohème et authentique, à vingt minutes à pied du centre ou accessible en bus. Prix abordables."
+      },
+      "Stockbridge": {
+        "name": "Stockbridge",
+        "description": "Quartier résidentiel chic au nord de la New Town, avec un marché dominical, des épiceries fines, des cafés indépendants et des boutiques. Une atmosphère de village au cœur de la ville. Excellent pour les familles et les couples en quête de calme. Prix moyens."
+      }
+    },
+    "firenze": {
+      "Centro Storico": {
+        "name": "Centre historique",
+        "description": "Le cœur Renaissance de Florence, classé au patrimoine mondial de l’UNESCO : le Duomo, les Offices, le Ponte Vecchio et la Piazza della Signoria sont tous accessibles à pied. Une concentration maximale d’histoire et de beauté. Les hôtels comptent parmi les plus chers d’Italie, mais l’emplacement est incomparable."
+      },
+      "Oltrarno": {
+        "name": "Oltrarno",
+        "description": "Le quartier « au-delà de l’Arno » représente le visage le plus authentique et bohème de Florence. Artisans, trattorias, antiquaires, galeries et adresses tendance cohabitent dans des ruelles médiévales. Le palais Pitti et les jardins de Boboli s’y trouvent. Prix moyens et atmosphère unique."
+      },
+      "Santa Croce": {
+        "name": "Santa Croce",
+        "description": "Quartier animé à l’est du Duomo, avec la basilique Santa Croce, les meilleurs marchés du cuir, des restaurants et la vie nocturne florentine. Un équilibre parfait entre histoire et modernité. Prix moyens, très apprécié des étudiants et des jeunes voyageurs."
+      },
+      "San Frediano": {
+        "name": "San Frediano",
+        "description": "Quartier populaire de l’Oltrarno, parmi les plus authentiques et les moins touristiques de Florence. Ateliers artisanaux, tavernes traditionnelles et établissements fréquentés par les Florentins. Prix abordables et atmosphère détendue. Parfait pour vivre Florence comme un habitant."
+      }
+    },
+    "istanbul": {
+      "Sultanahmet": {
+        "name": "Sultanahmet",
+        "description": "Le cœur historique d’Istanbul, avec Sainte-Sophie, la Mosquée bleue, le Grand Bazar et le palais de Topkapı tous accessibles à pied. L’emplacement est imbattable pour les visiteurs. Les hôtels sont plus chers et le quartier très touristique, mais c’est le seul secteur permettant de tout rejoindre sans transport."
+      },
+      "Beyoğlu - Taksim": {
+        "name": "Beyoğlu - Taksim",
+        "description": "Quartier moderne et cosmopolite de la rive européenne. İstiklal Caddesi est la grande rue piétonne bordée de boutiques, restaurants et bars. Vie nocturne animée, restaurants internationaux, galeries d’art et marchés locaux. Excellent équilibre entre emplacement et authenticité."
+      },
+      "Karaköy - Galata": {
+        "name": "Karaköy - Galata",
+        "description": "Quartier en plein essor entre le port de Karaköy et la tour de Galata. Cafés de spécialité, restaurants créatifs, galeries d’art et boutiques de design ont transformé cet ancien secteur industriel en quartier le plus tendance d’Istanbul. Prix moyens et atmosphère branchée."
+      },
+      "Kadıköy": {
+        "name": "Kadıköy",
+        "description": "Le quartier le plus dynamique de la rive asiatique, accessible en vingt minutes de ferry depuis Eminönü. Marché coloré, restaurants authentiques, bars, librairies et ambiance bohème. Très apprécié des habitants et des jeunes. Prix abordables et expérience authentique loin du tourisme de masse."
+      }
+    },
+    "madrid": {
+      "Sol - Centro": {
+        "name": "Sol - Centre",
+        "description": "Le cœur battant de Madrid autour de la Puerta del Sol. Tout est accessible à pied : le Prado, le Reina Sofía, la Plaza Mayor et les meilleurs marchés. Animé de jour comme de nuit. Les prix sont les plus élevés de la ville, mais la commodité est absolue."
+      },
+      "Salamanca": {
+        "name": "Salamanca",
+        "description": "Le quartier élégant et chic de Madrid, avec boutiques de luxe sur Serrano, restaurants étoilés et bâtiments historiques. Atmosphère raffinée et calme. Prix élevés, mais services excellents. Idéal pour ceux qui recherchent confort et distinction loin de l’agitation touristique."
+      },
+      "Malasaña": {
+        "name": "Malasaña",
+        "description": "Le quartier bohème et branché de Madrid, avec cafés indépendants, boutiques vintage, art urbain et vie nocturne dynamique. L’un des secteurs les plus créatifs et à la mode de la ville. Excellent rapport qualité-prix, très apprécié des jeunes."
+      },
+      "La Latina - Lavapiés": {
+        "name": "La Latina - Lavapiés",
+        "description": "Les quartiers les plus authentiques et populaires du centre historique. La Latina est le royaume des tapas, notamment Cava Baja, et du marché dominical du Rastro ; Lavapiés est multiculturel et bohème. Ensemble, ils forment le secteur le plus vivant et authentique de Madrid. Prix moyens."
+      }
+    },
+    "marrakech": {
+      "Medina": {
+        "name": "Médina",
+        "description": "Le cœur ancien de Marrakech, classé au patrimoine mondial de l’UNESCO : souks, mosquées, palais, riads et place Jemaa el-Fna. Chaotique, fascinant et authentique. Séjourner dans un riad de la médina est l’expérience la plus immersive possible. Les prix vont des maisons d’hôtes abordables aux riads de luxe."
+      },
+      "Gueliz": {
+        "name": "Guéliz",
+        "description": "Le quartier moderne et français de Marrakech, construit durant le protectorat. Boulevards arborés, restaurants de qualité, cafés et boutiques. Plus calme et ordonné que la médina, avec hôtels modernes et prix modérés. Excellent pour ceux qui privilégient le confort tout en rejoignant la médina en taxi."
+      },
+      "Palmeraie": {
+        "name": "Palmeraie",
+        "description": "La palmeraie au nord de la ville abrite les complexes de luxe et les riads les plus exclusifs de Marrakech. Piscines, spas et tranquillité absolue. Idéale pour ceux qui recherchent une oasis de calme. Chaque déplacement vers la ville nécessite un taxi."
+      },
+      "Hivernage": {
+        "name": "Hivernage",
+        "description": "Quartier résidentiel élégant à l’ouest de la médina, avec hôtels de moyenne et haute gamme, restaurants et discothèques. Proche des jardins de l’Agdal et bien relié à la médina en taxi. Atmosphère calme en journée, plus animée le soir."
+      }
+    },
+    "napoli": {
+      "Centro Storico": {
+        "name": "Centre historique",
+        "description": "Le cœur de Naples classé par l’UNESCO, avec Spaccanapoli, la cathédrale, les églises baroques et le Musée archéologique national. Chaotique, authentique et inoubliable. C’est ici que la pizza est née et que l’on découvre la Naples la plus véritable. Prix moyens et vaste choix d’hébergements."
+      },
+      "Chiaia - Mergellina": {
+        "name": "Chiaia - Mergellina",
+        "description": "Le quartier élégant et bourgeois de Naples, en bord de mer. Boutiques, restaurants de qualité, bars et promenades avec vue sur le Vésuve. Plus calme que le centre historique et bien desservi. Prix moyens à élevés et atmosphère raffinée."
+      },
+      "Quartieri Spagnoli": {
+        "name": "Quartiers espagnols",
+        "description": "Le réseau de ruelles étroites à l’ouest de Via Toledo. Authentique, populaire et fascinant, avec linge suspendu entre les immeubles, pizzerias historiques, fritureries et cuisine de rue. L’âme la plus populaire de Naples. Prix abordables et excellente situation."
+      },
+      "Posillipo": {
+        "name": "Posillipo",
+        "description": "Le quartier perché le plus exclusif de Naples, avec villas panoramiques sur le golfe, restaurants de poissons et fruits de mer étoilés et vues spectaculaires. Loin de l’agitation du centre, il nécessite taxi ou voiture. Prix élevés. Idéal pour le luxe et la tranquillité, tout en gardant la Naples touristique accessible en taxi."
+      }
+    },
+    "porto": {
+      "Ribeira": {
+        "name": "Ribeira",
+        "description": "Le quartier historique sur le Douro, classé au patrimoine mondial de l’UNESCO, avec ses maisons colorées accrochées au-dessus du fleuve, ses restaurants en bord d’eau et son accès direct au pont Dom Luís. L’emplacement le plus emblématique de Porto. Prix moyens à élevés, très touristique mais merveilleux."
+      },
+      "Bonfim": {
+        "name": "Bonfim",
+        "description": "Quartier en plein essor à l’est du centre, avec les meilleurs cafés de spécialité, des galeries d’art, des restaurants créatifs et des boutiques indépendantes. L’un des secteurs les plus tendance de Porto, très apprécié des jeunes et des voyageurs indépendants. Les prix restent abordables."
+      },
+      "Boavista": {
+        "name": "Boavista",
+        "description": "Quartier résidentiel et commerçant à l’ouest du centre, autour du grand rond-point et du Parque da Cidade. Plus calme que le centre, avec de bons hôtels d’affaires et appartements. Le métro permet de rejoindre facilement toute la ville. Prix abordables."
+      },
+      "Vila Nova de Gaia": {
+        "name": "Vila Nova de Gaia",
+        "description": "La rive sud du Douro, face au centre historique. Toutes les caves de vin de Porto s’y trouvent, notamment Graham’s, Sandeman et Taylor’s. Vues splendides sur Porto, restaurants en bord de fleuve et prix légèrement inférieurs à ceux de Ribeira."
+      }
+    },
+    "siviglia": {
+      "Santa Cruz": {
+        "name": "Santa Cruz",
+        "description": "L’ancien quartier juif de Séville est aujourd’hui le cœur touristique de la ville. Ruelles blanches fleuries, Alcázar, cathédrale et Giralda sont tous accessibles à pied. Atmosphère romantique et pittoresque. Prix élevés, mais emplacement imbattable. Idéal pour une première visite."
+      },
+      "Triana": {
+        "name": "Triana",
+        "description": "Le quartier populaire de la rive ouest du Guadalquivir, berceau du flamenco, de la céramique et des tapas les plus authentiques. Marché de Triana, restaurants locaux et excellente ambiance. Prix moyens, très apprécié de ceux qui souhaitent vivre Séville comme un habitant."
+      },
+      "La Macarena": {
+        "name": "La Macarena",
+        "description": "Quartier populaire au nord du centre historique, avec murailles romaines, églises baroques et vie quotidienne animée. Peu touristique et très authentique. Excellents restaurants locaux et bars à tapas fréquentés presque uniquement par les Sévillans. Prix abordables."
+      },
+      "El Arenal": {
+        "name": "El Arenal",
+        "description": "Quartier historique entre la cathédrale et le fleuve, avec La Maestranza, considérée comme la plus belle arène d’Espagne, et le Teatro de la Maestranza. Excellent emplacement central, restaurants de qualité et hôtels de gamme moyenne. Moins fréquenté que Santa Cruz, mais tout aussi pratique."
+      }
+    },
+    "stoccolma": {
+      "Gamla Stan": {
+        "name": "Gamla Stan",
+        "description": "L’île médiévale de Stockholm, avec ruelles colorées, palais du XVIIe siècle, Palais royal et cathédrale. Le seul quartier où dormir plongé dans le cœur historique. Prix élevés, très touristique mais extrêmement charmant."
+      },
+      "Vasastan": {
+        "name": "Vasastan",
+        "description": "Quartier résidentiel au nord du centre, au fort caractère local et intellectuel. Librairies, cafés, restaurants authentiques et parcs. Très apprécié des familles et des professionnels. Prix abordables, excellente qualité de vie et bonnes liaisons en métro."
+      },
+      "Södermalm": {
+        "name": "Södermalm",
+        "description": "L’île au sud du centre, bohème et alternative. Le quartier le plus branché de Stockholm, avec cafés de spécialité, restaurants créatifs, boutiques vintage, galeries d’art et vie nocturne animée. Très apprécié des habitants et des jeunes voyageurs. Prix moyens."
+      },
+      "Östermalm": {
+        "name": "Östermalm",
+        "description": "Le quartier le plus élégant et aisé de Stockholm, avec Östermalms Saluhall, le plus beau marché couvert de la ville, des boutiques de luxe, des restaurants étoilés et des immeubles du XIXe siècle. Atmosphère raffinée et prix élevés. Idéal pour un confort haut de gamme."
+      }
+    },
+    "valencia": {
+      "Ciutat Vella": {
+        "name": "Ciutat Vella",
+        "description": "Le centre historique de Valence, avec la cathédrale, le Marché central, la Lonja et la vie nocturne animée d’El Carmen. Tout est accessible à pied. Atmosphère authentique mêlée à une scène nocturne dynamique. Prix moyens et excellent choix d’hôtels et d’auberges."
+      },
+      "Eixample": {
+        "name": "Eixample",
+        "description": "Le quartier bourgeois et moderne de Valence, avec l’élégant hôtel de ville, d’excellents restaurants, boutiques et cafés. Calme mais bien desservi. Idéal pour ceux qui recherchent la tranquillité avec tous les services à proximité. Prix moyens."
+      },
+      "Ruzafa": {
+        "name": "Ruzafa",
+        "description": "Le quartier le plus branché de Valence : cafés de spécialité, restaurants créatifs, marchés vintage et art urbain. En plein essor, très apprécié des jeunes et des expatriés. Vie nocturne animée et excellent rapport qualité-prix. Un quartier à ne pas manquer."
+      },
+      "La Malvarrosa": {
+        "name": "La Malvarrosa",
+        "description": "Le quartier balnéaire de Valence, avec une longue plage de sable, des restaurants de paella et une atmosphère détendue de bord de mer. À vingt minutes du centre en tramway. Prix inférieurs à ceux du centre, idéal pour combiner plage et ville."
+      }
+    },
+    "varsavia": {
+      "Stare Miasto": {
+        "name": "Stare Miasto",
+        "description": "La vieille ville de Varsovie, reconstruite après la Seconde Guerre mondiale et classée au patrimoine mondial de l’UNESCO. Place du Marché, remparts médiévaux et musées historiques. Très touristique, mais fondamentale pour comprendre l’histoire. Prix plus élevés et emplacement unique. Idéale pour une première visite."
+      },
+      "Praga": {
+        "name": "Praga",
+        "description": "Le quartier de la rive est de la Vistule, le plus authentique et en pleine transformation artistique. Art urbain, galeries, bars indépendants et marchés vintage. Peu touristique, très apprécié des créatifs et des voyageurs curieux. Prix abordables et atmosphère unique."
+      },
+      "Śródmieście": {
+        "name": "Śródmieście",
+        "description": "Le centre moderne de Varsovie, avec le Palais de la Culture, les gratte-ciel, les meilleurs restaurants et la vie nocturne. Nœud de transport et vaste choix d’hôtels pour tous les budgets. La meilleure base pour explorer toute la ville. Prix moyens."
+      },
+      "Mokotów": {
+        "name": "Mokotów",
+        "description": "Quartier résidentiel verdoyant au sud du centre, très apprécié des familles et des professionnels. Parcs, restaurants locaux, cafés et marchés. Prix abordables, atmosphère calme et bourgeoise. Excellent pour ceux qui recherchent le confort loin du bruit du centre-ville."
+      }
+    },
+    "muğla": {
+      "Bodrum Centro": {
+        "name": "Centre de Bodrum",
+        "description": "Le centre de Bodrum, avec le château Saint-Pierre, le port et la promenade animée. Restaurants, bars en bord de mer et vie nocturne intense. Le meilleur emplacement pour explorer la péninsule. Prix moyens à élevés en haute saison."
+      },
+      "Marmaris Centro": {
+        "name": "Centre de Marmaris",
+        "description": "Le centre de Marmaris, l’une des destinations balnéaires les plus animées de Turquie. Marina, promenade, plages et discothèques. Idéal pour ceux qui recherchent des vacances à la mer avec une vie nocturne intense. Prix abordables hors haute saison."
+      },
+      "Fethiye": {
+        "name": "Fethiye",
+        "description": "Charmante ville portuaire avec vestiges lyciens, marché coloré et base idéale pour rejoindre le Lagon bleu d’Ölüdeniz. Atmosphère plus détendue qu’à Bodrum et Marmaris. Excellent choix pour les familles et les amateurs de randonnée et de nature, notamment la voie lycienne. Prix moyens."
+      },
+      "Muğla Città": {
+        "name": "Ville de Muğla",
+        "description": "La capitale provinciale, éloignée du tourisme balnéaire, possède un centre historique ottoman authentique et charmant. Prix très abordables et atmosphère locale, peu touristique. Une base économique idéale pour explorer la région en voiture."
+      }
+    }
+  }
+}

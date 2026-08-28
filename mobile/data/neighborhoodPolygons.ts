@@ -784,4 +784,334 @@ export const NEIGHBORHOOD_POLYGONS: NeighborhoodPolygon[] = [
     names: ["mugla citta", "muğla città", "mugla", "muğla"],
     geometry: polygon([[28.2748, 37.1435], [28.4268, 37.1438], [28.4420, 37.2520], [28.3376, 37.2920], [28.2360, 37.2262], [28.2748, 37.1435]]),
   },
+  {
+    city: "helsinki",
+    names: ["kluuvi e kaartinkaupunki", "kluuvi and kaartinkaupunki", "kluuvi et kaartinkaupunki", "kluuvi y kaartinkaupunki"],
+    geometry: polygon([[24.9300,60.1620],[24.9595,60.1620],[24.9620,60.1745],[24.9330,60.1765],[24.9300,60.1620]]),
+  },
+  {
+    city: "helsinki",
+    names: ["punavuori e design district", "punavuori and design district", "punavuori et design district", "punavuori y design district"],
+    geometry: polygon([[24.9220,60.1510],[24.9520,60.1510],[24.9530,60.1650],[24.9250,60.1680],[24.9220,60.1510]]),
+  },
+  {
+    city: "helsinki",
+    names: ["katajanokka e kruununhaka", "katajanokka and kruununhaka", "katajanokka et kruununhaka", "katajanokka y kruununhaka"],
+    geometry: polygon([[24.9490,60.1640],[24.9810,60.1630],[24.9810,60.1775],[24.9500,60.1790],[24.9490,60.1640]]),
+  },
+  {
+    city: "helsinki",
+    names: ["kallio e hakaniemi", "kallio and hakaniemi", "kallio et hakaniemi", "kallio y hakaniemi"],
+    geometry: polygon([[24.9370,60.1760],[24.9680,60.1760],[24.9700,60.1960],[24.9380,60.1970],[24.9370,60.1760]]),
+  },
+  {
+    city: "helsinki",
+    names: ["töölö", "toolo"],
+    geometry: polygon([[24.9020,60.1670],[24.9380,60.1670],[24.9400,60.1950],[24.9070,60.1980],[24.9020,60.1670]]),
+  },
+  {
+    city: "helsinki",
+    names: ["munkkiniemi"],
+    geometry: polygon([[24.8500,60.1850],[24.8910,60.1830],[24.8960,60.2100],[24.8550,60.2140],[24.8500,60.1850]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["centro storico", "old town", "vieille ville", "casco antiguo"],
+    geometry: polygon([[18.1060,42.6380],[18.1126,42.6380],[18.1130,42.6422],[18.1060,42.6422],[18.1060,42.6380]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["pile"],
+    geometry: polygon([[18.0965,42.6380],[18.1068,42.6375],[18.1070,42.6460],[18.0970,42.6465],[18.0965,42.6380]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["ploče", "ploce"],
+    geometry: polygon([[18.1110,42.6365],[18.1260,42.6365],[18.1280,42.6480],[18.1120,42.6480],[18.1110,42.6365]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["gruž", "gruz"],
+    geometry: polygon([[18.0750,42.6500],[18.0980,42.6500],[18.1000,42.6660],[18.0760,42.6680],[18.0750,42.6500]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["lapad"],
+    geometry: polygon([[18.0570,42.6430],[18.0780,42.6430],[18.0830,42.6620],[18.0590,42.6650],[18.0570,42.6430]]),
+  },
+  {
+    city: "dubrovnik",
+    names: ["babin kuk"],
+    geometry: polygon([[18.0470,42.6540],[18.0660,42.6540],[18.0700,42.6690],[18.0500,42.6710],[18.0470,42.6540]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["miðborg, centro 101", "miðborg, downtown 101", "miðborg, centre 101", "miðborg, centro 101"],
+    geometry: polygon([[-21.9490,64.1360],[-21.9180,64.1360],[-21.9170,64.1515],[-21.9420,64.1540],[-21.9490,64.1360]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["vesturbær"],
+    geometry: polygon([[-21.9850,64.1370],[-21.9460,64.1370],[-21.9420,64.1585],[-21.9750,64.1640],[-21.9850,64.1370]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["hlíðar"],
+    geometry: polygon([[-21.9400,64.1230],[-21.9000,64.1230],[-21.9010,64.1400],[-21.9400,64.1400],[-21.9400,64.1230]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["laugardalur"],
+    geometry: polygon([[-21.9100,64.1290],[-21.8460,64.1290],[-21.8500,64.1580],[-21.9060,64.1590],[-21.9100,64.1290]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["grandi e porto vecchio", "grandi and old harbour", "grandi et vieux-port", "grandi y puerto viejo"],
+    geometry: polygon([[-21.9690,64.1500],[-21.9360,64.1500],[-21.9350,64.1625],[-21.9650,64.1660],[-21.9690,64.1500]]),
+  },
+  {
+    city: "reykjavik",
+    names: ["kópavogur"],
+    geometry: polygon([[-21.9500,64.0800],[-21.8500,64.0800],[-21.8500,64.1300],[-21.9450,64.1300],[-21.9500,64.0800]]),
+  },
+  {
+    city: "valletta",
+    names: ["valletta", "la valette", "la valeta"],
+    geometry: polygon([[14.5060,35.8930],[14.5195,35.8930],[14.5200,35.9030],[14.5070,35.9030],[14.5060,35.8930]]),
+  },
+  {
+    city: "valletta",
+    names: ["floriana"],
+    geometry: polygon([[14.4940,35.8860],[14.5100,35.8860],[14.5100,35.8960],[14.4960,35.8970],[14.4940,35.8860]]),
+  },
+  {
+    city: "valletta",
+    names: ["sliema"],
+    geometry: polygon([[14.4930,35.9040],[14.5150,35.9040],[14.5100,35.9200],[14.4930,35.9200],[14.4930,35.9040]]),
+  },
+  {
+    city: "valletta",
+    names: ["three cities", "trois cités", "tres ciudades"],
+    geometry: polygon([[14.5110,35.8750],[14.5360,35.8750],[14.5350,35.8960],[14.5120,35.8970],[14.5110,35.8750]]),
+  },
+  {
+    city: "valletta",
+    names: ["st julian's", "saint julian's"],
+    geometry: polygon([[14.4800,35.9120],[14.5000,35.9120],[14.4990,35.9320],[14.4780,35.9320],[14.4800,35.9120]]),
+  },
+  {
+    city: "valletta",
+    names: ["mdina e rabat", "mdina and rabat", "mdina et rabat", "mdina y rabat"],
+    geometry: polygon([[14.3890,35.8720],[14.4140,35.8720],[14.4140,35.8940],[14.3900,35.8940],[14.3890,35.8720]]),
+  },
+  {
+    city: "amburgo",
+    names: ["rathaus / altstadt", "hamburg old town", "ayuntamiento / casco antiguo"],
+    geometry: polygon([[9.9840,53.5450],[10.0060,53.5450],[10.0080,53.5580],[9.9870,53.5590],[9.9840,53.5450]]),
+  },
+  {
+    city: "amburgo",
+    names: ["st. pauli / reeperbahn"],
+    geometry: polygon([[9.9480,53.5460],[9.9760,53.5460],[9.9770,53.5590],[9.9510,53.5600],[9.9480,53.5460]]),
+  },
+  {
+    city: "amburgo",
+    names: ["schanzenviertel"],
+    geometry: polygon([[9.9550,53.5560],[9.9770,53.5560],[9.9780,53.5710],[9.9560,53.5710],[9.9550,53.5560]]),
+  },
+  {
+    city: "amburgo",
+    names: ["eppendorf / winterhude"],
+    geometry: polygon([[9.9730,53.5750],[10.0220,53.5750],[10.0230,53.6040],[9.9740,53.6040],[9.9730,53.5750]]),
+  },
+  {
+    city: "annecy",
+    names: ["vieille ville", "old town", "casco antiguo"],
+    geometry: polygon([[6.1220,45.8940],[6.1330,45.8940],[6.1340,45.9030],[6.1230,45.9040],[6.1220,45.8940]]),
+  },
+  {
+    city: "annecy",
+    names: ["impérial / albigny", "imperial / albigny"],
+    geometry: polygon([[6.1370,45.9010],[6.1560,45.9010],[6.1580,45.9160],[6.1390,45.9170],[6.1370,45.9010]]),
+  },
+  {
+    city: "annecy",
+    names: ["bonlieu / centre", "bonlieu / town centre", "bonlieu / centro"],
+    geometry: polygon([[6.1200,45.9000],[6.1350,45.9000],[6.1350,45.9080],[6.1210,45.9080],[6.1200,45.9000]]),
+  },
+  {
+    city: "annecy",
+    names: ["annecy-le-vieux"],
+    geometry: polygon([[6.1340,45.9120],[6.1720,45.9120],[6.1730,45.9370],[6.1360,45.9380],[6.1340,45.9120]]),
+  },
+  {
+    city: "colonia",
+    names: ["dom / altstadt", "cathedral / old town", "cathédrale / vieille ville", "catedral / casco antiguo"],
+    geometry: polygon([[6.9480,50.9330],[6.9700,50.9330],[6.9710,50.9460],[6.9490,50.9470],[6.9480,50.9330]]),
+  },
+  {
+    city: "colonia",
+    names: ["belgisches viertel", "belgian quarter", "quartier belge", "barrio belga"],
+    geometry: polygon([[6.9270,50.9320],[6.9490,50.9320],[6.9500,50.9470],[6.9280,50.9470],[6.9270,50.9320]]),
+  },
+  {
+    city: "colonia",
+    names: ["ehrenfeld"],
+    geometry: polygon([[6.8930,50.9430],[6.9300,50.9430],[6.9310,50.9690],[6.8950,50.9690],[6.8930,50.9430]]),
+  },
+  {
+    city: "colonia",
+    names: ["deutz / rheinpark"],
+    geometry: polygon([[6.9690,50.9280],[7.0040,50.9280],[7.0050,50.9570],[6.9700,50.9570],[6.9690,50.9280]]),
+  },
+  {
+    city: "lione",
+    names: ["vieux lyon", "old lyon", "viejo lyon"],
+    geometry: polygon([[4.8160,45.7530],[4.8330,45.7530],[4.8340,45.7720],[4.8170,45.7720],[4.8160,45.7530]]),
+  },
+  {
+    city: "lione",
+    names: ["presqu’île", "presquile"],
+    geometry: polygon([[4.8260,45.7460],[4.8430,45.7460],[4.8440,45.7780],[4.8270,45.7780],[4.8260,45.7460]]),
+  },
+  {
+    city: "lione",
+    names: ["croix-rousse"],
+    geometry: polygon([[4.8200,45.7680],[4.8420,45.7680],[4.8430,45.7870],[4.8210,45.7870],[4.8200,45.7680]]),
+  },
+  {
+    city: "lione",
+    names: ["brotteaux / les halles"],
+    geometry: polygon([[4.8410,45.7550],[4.8720,45.7550],[4.8730,45.7760],[4.8420,45.7760],[4.8410,45.7550]]),
+  },
+  {
+    city: "salisburgo",
+    names: ["getreidegasse / altstadt", "getreidegasse / old town", "getreidegasse / vieille ville", "getreidegasse / casco antiguo"],
+    geometry: polygon([[13.0330,47.7930],[13.0520,47.7930],[13.0530,47.8050],[13.0340,47.8050],[13.0330,47.7930]]),
+  },
+  {
+    city: "salisburgo",
+    names: ["mirabell / neustadt", "mirabell / new town", "mirabell / ciudad nueva"],
+    geometry: polygon([[13.0350,47.8010],[13.0560,47.8010],[13.0570,47.8180],[13.0360,47.8180],[13.0350,47.8010]]),
+  },
+  {
+    city: "salisburgo",
+    names: ["nonntal / leopoldskron"],
+    geometry: polygon([[13.0330,47.7780],[13.0560,47.7780],[13.0570,47.7980],[13.0340,47.7980],[13.0330,47.7780]]),
+  },
+  {
+    city: "salisburgo",
+    names: ["steingasse / kapuzinerberg"],
+    geometry: polygon([[13.0450,47.7970],[13.0700,47.7970],[13.0710,47.8130],[13.0460,47.8130],[13.0450,47.7970]]),
+  },
+  {
+    city: "tallinn",
+    names: ["vanalinn / raekoja", "old town / town hall square", "vanalinn / place de l’hôtel de ville", "vanalinn / plaza del ayuntamiento"],
+    geometry: polygon([[24.7340,59.4310],[24.7590,59.4310],[24.7600,59.4440],[24.7350,59.4440],[24.7340,59.4310]]),
+  },
+  {
+    city: "tallinn",
+    names: ["kalamaja / telliskivi"],
+    geometry: polygon([[24.7140,59.4370],[24.7480,59.4370],[24.7490,59.4620],[24.7150,59.4620],[24.7140,59.4370]]),
+  },
+  {
+    city: "tallinn",
+    names: ["kadriorg"],
+    geometry: polygon([[24.7740,59.4280],[24.8160,59.4280],[24.8170,59.4500],[24.7750,59.4500],[24.7740,59.4280]]),
+  },
+  {
+    city: "tallinn",
+    names: ["kesklinn / rotermann"],
+    geometry: polygon([[24.7470,59.4280],[24.7750,59.4280],[24.7760,59.4440],[24.7480,59.4440],[24.7470,59.4280]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["grand-place e centro", "grand-place and centre", "grand-place et centre", "grand-place y centro"],
+    geometry: polygon([[4.3400,50.8380],[4.3650,50.8380],[4.3650,50.8580],[4.3400,50.8580],[4.3400,50.8380]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["sablon"],
+    geometry: polygon([[4.3450,50.8320],[4.3640,50.8320],[4.3640,50.8460],[4.3450,50.8460],[4.3450,50.8320]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["marolles"],
+    geometry: polygon([[4.3300,50.8240],[4.3540,50.8240],[4.3540,50.8420],[4.3300,50.8420],[4.3300,50.8240]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["quartiere europeo", "european quarter", "quartier européen", "barrio europeo"],
+    geometry: polygon([[4.3650,50.8270],[4.4050,50.8270],[4.4050,50.8520],[4.3650,50.8520],[4.3650,50.8270]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["ixelles e flagey", "ixelles and flagey", "ixelles et flagey", "ixelles y flagey"],
+    geometry: polygon([[4.3540,50.8120],[4.3930,50.8120],[4.3930,50.8390],[4.3540,50.8390],[4.3540,50.8120]]),
+  },
+  {
+    city: "bruxelles",
+    names: ["saint-gilles"],
+    geometry: polygon([[4.3240,50.8120],[4.3600,50.8120],[4.3600,50.8370],[4.3240,50.8370],[4.3240,50.8120]]),
+  },
+  {
+    city: "zurigo",
+    names: ["altstadt", "old town", "vieille ville", "casco antiguo"],
+    geometry: polygon([[8.5320,47.3630],[8.5530,47.3630],[8.5530,47.3820],[8.5320,47.3820],[8.5320,47.3630]]),
+  },
+  {
+    city: "zurigo",
+    names: ["enge"],
+    geometry: polygon([[8.5190,47.3450],[8.5450,47.3450],[8.5450,47.3690],[8.5190,47.3690],[8.5190,47.3450]]),
+  },
+  {
+    city: "zurigo",
+    names: ["zürich-west", "zurich-west"],
+    geometry: polygon([[8.5000,47.3780],[8.5300,47.3780],[8.5300,47.3980],[8.5000,47.3980],[8.5000,47.3780]]),
+  },
+  {
+    city: "zurigo",
+    names: ["wiedikon"],
+    geometry: polygon([[8.4950,47.3550],[8.5280,47.3550],[8.5280,47.3830],[8.4950,47.3830],[8.4950,47.3550]]),
+  },
+  {
+    city: "zurigo",
+    names: ["oerlikon"],
+    geometry: polygon([[8.5100,47.3970],[8.5600,47.3970],[8.5600,47.4290],[8.5100,47.4290],[8.5100,47.3970]]),
+  },
+  {
+    city: "zurigo",
+    names: ["seefeld"],
+    geometry: polygon([[8.5400,47.3450],[8.5700,47.3450],[8.5700,47.3700],[8.5400,47.3700],[8.5400,47.3450]]),
+  },
+  {
+    city: "lubiana",
+    names: ["centro storico", "old town", "vieille ville", "casco antiguo"],
+    geometry: polygon([[14.4980,46.0400],[14.5180,46.0400],[14.5180,46.0590],[14.4980,46.0590],[14.4980,46.0400]]),
+  },
+  {
+    city: "lubiana",
+    names: ["tabor e metelkova", "tabor and metelkova", "tabor et metelkova", "tabor y metelkova"],
+    geometry: polygon([[14.5050,46.0490],[14.5250,46.0490],[14.5250,46.0670],[14.5050,46.0670],[14.5050,46.0490]]),
+  },
+  {
+    city: "lubiana",
+    names: ["trnovo e krakovo", "trnovo and krakovo", "trnovo et krakovo", "trnovo y krakovo"],
+    geometry: polygon([[14.4920,46.0310],[14.5160,46.0310],[14.5160,46.0490],[14.4920,46.0490],[14.4920,46.0310]]),
+  },
+  {
+    city: "lubiana",
+    names: ["šiška"],
+    geometry: polygon([[14.4660,46.0540],[14.5000,46.0540],[14.5000,46.0820],[14.4660,46.0820],[14.4660,46.0540]]),
+  },
+  {
+    city: "lubiana",
+    names: ["tivoli e rožna dolina", "tivoli and rožna dolina", "tivoli et rožna dolina", "tivoli y rožna dolina"],
+    geometry: polygon([[14.4700,46.0440],[14.5020,46.0440],[14.5020,46.0660],[14.4700,46.0660],[14.4700,46.0440]]),
+  },
+  {
+    city: "lubiana",
+    names: ["bežigrad"],
+    geometry: polygon([[14.5000,46.0580],[14.5350,46.0580],[14.5350,46.0910],[14.5000,46.0910],[14.5000,46.0580]]),
+  },
 ];

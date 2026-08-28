@@ -20,41 +20,77 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Wayra usa la tua posizione solo se la richiedi per trovare ristoranti vicini alle tappe del tuo itinerario.",
-        "NSPhotoLibraryUsageDescription": "Wayra può salvare il PDF del tuo itinerario nella libreria foto se lo desideri.",
-        "NSPhotoLibraryAddUsageDescription": "Wayra può salvare il PDF del tuo itinerario nella libreria foto se lo desideri.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
           }
         ],
         "NSPrivacyTracking": false,
         "NSPrivacyTrackingDomains": [],
-        "NSPrivacyCollectedDataTypes": []
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeEmailAddress",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeUserID",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality",
+              "NSPrivacyCollectedDataTypePurposeAnalytics"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeProductInteraction",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAnalytics"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeCrashData",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          }
+        ]
       }
     },
     "android": {
       "package": "com.wayra.app",
       "versionCode": 1,
-      "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
-      ],
       "adaptiveIcon": {
         "foregroundImage": "./public/adaptive-icon.png",
         "backgroundColor": "#0f0f1e"
@@ -76,6 +112,14 @@
           "locationWhenInUsePermission": "Wayra usa la tua posizione solo se la richiedi per trovare ristoranti vicini alle tappe del tuo itinerario."
         }
       ]
-    ]
+    ],
+    "description": "Wayra crea itinerari di viaggio personalizzati e consultabili anche offline.",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "35fadf8a-85b3-430d-86b7-01f6adf9f8c5"
+      }
+    },
+    "owner": "lucagiulio799"
   }
 }

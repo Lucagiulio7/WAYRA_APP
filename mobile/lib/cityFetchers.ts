@@ -1,36 +1,42 @@
 /**
- * City content access through the Wayra backend.
- * Supabase is reserved for authentication and user-owned data.
+ * Local city catalog access.
+ *
+ * Maps, external links and optional account sync may use the network, but the
+ * travel catalog is always bundled with the app.
  */
 
-import { API_BASE_URL } from "@/constants/api";
 import type { BuilderAttraction } from "@/hooks/useAttractions";
 import type { CityInfo, Food, CultureFact, Neighborhood } from "@/types";
+import { getLocalCityPackage } from "@/services/localCatalog";
 
-interface BackendEnvelope<T> {
-  data: T;
-}
-
-async function backendFetch<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  if (!response.ok) throw new Error(`Backend HTTP ${response.status}`);
-  const payload = (await response.json()) as BackendEnvelope<T>;
-  return payload.data;
+function requiredCityPackage(city: string) {
+  const cityPackage = getLocalCityPackage(city);
+  if (!cityPackage) {
+    throw new Error(
+      `Catalogo locale non disponibile per "${city}". Rigenera i pacchetti città prima della build.`,
+    );
+  }
+  return cityPackage;
 }
 
 export async function fetchAttractions(city: string): Promise<BuilderAttraction[]> {
-  const encodedCity = encodeURIComponent(city);
-  return backendFetch<BuilderAttraction[]>(`/api/attractions?city=${encodedCity}`);
+  return requiredCityPackage(city).attractions;
 }
 
 export async function fetchFoodSpots(city: string): Promise<BuilderAttraction[]> {
-  const encodedCity = encodeURIComponent(city);
-  return backendFetch<BuilderAttraction[]>(`/api/food-spots?city=${encodedCity}`);
+  return requiredCityPackage(city).foodSpots;
 }
 
 export async function fetchCityInfo(city: string): Promise<CityInfo | null> {
-  const encodedCity = encodeURIComponent(city);
-  return backendFetch<CityInfo | null>(`/api/city-info?city=${encodedCity}`);
+  const cityPackage = requiredCityPackage(city);
+  if (!cityPackage.cityInfo) {
+    throw new Error(`Info utili locali mancanti per "${city}".`);
+  }
+  return {
+    ...cityPackage.cityInfo,
+    max_days_iconico: cityPackage.maxDaysIconic,
+    max_days_esploratore: cityPackage.maxDaysExplorer,
+  };
 }
 
 export interface CityExtrasData {
@@ -39,23 +45,18 @@ export interface CityExtrasData {
 }
 
 export async function fetchCityExtras(city: string): Promise<CityExtrasData> {
-  const encodedCity = encodeURIComponent(city);
-  const [foods, cultureFacts] = await Promise.all([
-    backendFetch<Food[]>(`/api/foods?city=${encodedCity}`),
-    backendFetch<CultureFact[]>(`/api/culture-facts?city=${encodedCity}`),
-  ]);
-  return { foods, cultureFacts };
+  const cityPackage = requiredCityPackage(city);
+  return {
+    foods: cityPackage.foods,
+    cultureFacts: cityPackage.cultureFacts,
+  };
 }
 
 export async function fetchNeighborhoods(city: string): Promise<Neighborhood[]> {
-  const encodedCity = encodeURIComponent(city);
-  const data = await backendFetch<Neighborhood[]>(
-    `/api/neighborhoods?city=${encodedCity}`,
-  );
-
+  const neighborhoods = requiredCityPackage(city).neighborhoods;
   const seen = new Set<string>();
-  return data.filter((item) => {
-    const key = `${item.name}`.trim().toLowerCase();
+  return neighborhoods.filter((item) => {
+    const key = item.name.trim().toLocaleLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

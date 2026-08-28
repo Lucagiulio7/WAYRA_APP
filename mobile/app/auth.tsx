@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView,
   Keyboard,
-  Linking,
 } from "react-native";
 
 // ── URL legali — aggiorna prima della pubblicazione ────────────────────────────
@@ -22,6 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { openExternalLink } from "@/utils/externalLinks";
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -62,7 +62,7 @@ export default function AuthScreen() {
   const handleForgot = async () => {
     Keyboard.dismiss();
     if (!email.trim()) {
-      setError(lang === "it" ? "Inserisci la tua email" : "Enter your email");
+      setError(lang === "es" ? "Introduce tu correo electrónico" : lang === "fr" ? "Saisissez votre e-mail" : lang === "it" ? "Inserisci la tua email" : "Enter your email");
       return;
     }
     setLoading(true);
@@ -74,9 +74,7 @@ export default function AuthScreen() {
       setError(translateError(err, lang));
     } else {
       setSuccess(
-        lang === "it"
-          ? "Email inviata! Controlla la tua casella di posta."
-          : "Email sent! Check your inbox.",
+        lang === "es" ? "Correo enviado. Revisa tu bandeja de entrada." : lang === "fr" ? "E-mail envoyé ! Vérifiez votre boîte de réception." : lang === "it" ? "Email inviata! Controlla la tua casella di posta." : "Email sent! Check your inbox.",
       );
     }
   };
@@ -84,7 +82,7 @@ export default function AuthScreen() {
   const handleSubmit = async () => {
     Keyboard.dismiss();
     if (!email.trim() || !password.trim()) {
-      setError(lang === "it" ? "Compila tutti i campi" : "Fill in all fields");
+      setError(lang === "es" ? "Completa todos los campos" : lang === "fr" ? "Remplissez tous les champs" : lang === "it" ? "Compila tutti i campi" : "Fill in all fields");
       return;
     }
     setLoading(true);
@@ -100,9 +98,7 @@ export default function AuthScreen() {
       setError(translateError(authError, lang));
     } else if (!isLogin) {
       setSuccess(
-        lang === "it"
-          ? "Account creato! Controlla la tua email per confermare."
-          : "Account created! Check your email to confirm.",
+        lang === "es" ? "Cuenta creada. Revisa tu correo para confirmarla." : lang === "fr" ? "Compte créé ! Vérifiez votre e-mail pour confirmer." : lang === "it" ? "Account creato! Controlla la tua email per confermare." : "Account created! Check your email to confirm.",
       );
     } else {
       router.back();
@@ -141,10 +137,10 @@ export default function AuthScreen() {
             <Text style={s.brand}>WAYRA</Text>
             <Text style={s.tagline}>
               {isForgot
-                ? (lang === "it" ? "Recupera password" : "Reset password")
+                ? (lang === "es" ? "Restablecer contraseña" : lang === "fr" ? "Récupérer le mot de passe" : lang === "it" ? "Recupera password" : "Reset password")
                 : isLogin
-                  ? (lang === "it" ? "Accedi al tuo account" : "Sign in to your account")
-                  : (lang === "it" ? "Crea un account" : "Create an account")}
+                  ? (lang === "es" ? "Inicia sesión en tu cuenta" : lang === "fr" ? "Connectez-vous à votre compte" : lang === "it" ? "Accedi al tuo account" : "Sign in to your account")
+                  : (lang === "es" ? "Crear una cuenta" : lang === "fr" ? "Créer un compte" : lang === "it" ? "Crea un account" : "Create an account")}
             </Text>
           </View>
 
@@ -195,7 +191,7 @@ export default function AuthScreen() {
                     <ActivityIndicator color={colors.bg} />
                   ) : (
                     <Text style={s.ctaText}>
-                      {lang === "it" ? "Invia email di recupero" : "Send reset email"}
+                      {lang === "es" ? "Enviar correo de recuperación" : lang === "fr" ? "Envoyer l'e-mail de récupération" : lang === "it" ? "Invia email di recupero" : "Send reset email"}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -206,7 +202,7 @@ export default function AuthScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={s.toggleText}>
-                    {lang === "it" ? "Torna al login" : "Back to sign in"}
+                    {lang === "es" ? "Volver al inicio de sesion" : lang === "fr" ? "Retour a la connexion" : lang === "it" ? "Torna al login" : "Back to sign in"}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -234,14 +230,14 @@ export default function AuthScreen() {
                 {/* ── Password ── */}
                 <View style={s.fieldGroup}>
                   <View style={s.passwordLabelRow}>
-                    <Text style={s.label}>Password</Text>
+                    <Text style={s.label}>{lang === "es" ? "Contrasena" : lang === "fr" ? "Mot de passe" : "Password"}</Text>
                     {isLogin && (
                       <TouchableOpacity
                         onPress={() => { setMode("forgot"); setError(null); setSuccess(null); }}
                         activeOpacity={0.7}
                       >
                         <Text style={s.forgotLink}>
-                          {lang === "it" ? "Password dimenticata?" : "Forgot password?"}
+                          {lang === "es" ? "Has olvidado la contrasena?" : lang === "fr" ? "Mot de passe oublie ?" : lang === "it" ? "Password dimenticata?" : "Forgot password?"}
                         </Text>
                       </TouchableOpacity>
                     )}
@@ -252,7 +248,7 @@ export default function AuthScreen() {
                       style={s.input}
                       value={password}
                       onChangeText={(v) => { setPassword(v); setError(null); }}
-                      placeholder={lang === "it" ? "La tua password" : "Your password"}
+                      placeholder={lang === "es" ? "Tu contrasena" : lang === "fr" ? "Votre mot de passe" : lang === "it" ? "La tua password" : "Your password"}
                       placeholderTextColor={colors.textSub}
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
@@ -299,8 +295,8 @@ export default function AuthScreen() {
                   ) : (
                     <Text style={s.ctaText}>
                       {isLogin
-                        ? (lang === "it" ? "Accedi" : "Sign in")
-                        : (lang === "it" ? "Crea account" : "Create account")}
+                        ? (lang === "es" ? "Iniciar sesión" : lang === "fr" ? "Connexion" : lang === "it" ? "Accedi" : "Sign in")
+                        : (lang === "es" ? "Crear cuenta" : lang === "fr" ? "Créer un compte" : lang === "it" ? "Crea account" : "Create account")}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -308,7 +304,7 @@ export default function AuthScreen() {
                 {/* ── Social divider ── */}
                 <View style={s.dividerRow}>
                   <View style={s.dividerLine} />
-                  <Text style={s.dividerText}>{lang === "it" ? "oppure" : "or"}</Text>
+                  <Text style={s.dividerText}>{lang === "es" ? "o" : lang === "fr" ? "ou" : lang === "it" ? "oppure" : "or"}</Text>
                   <View style={s.dividerLine} />
                 </View>
 
@@ -325,7 +321,7 @@ export default function AuthScreen() {
                     <>
                       <Text style={s.googleIcon}>G</Text>
                       <Text style={s.socialBtnText}>
-                        {lang === "it" ? "Continua con Google" : "Continue with Google"}
+                        {lang === "es" ? "Continuar con Google" : lang === "fr" ? "Continuer avec Google" : lang === "it" ? "Continua con Google" : "Continue with Google"}
                       </Text>
                     </>
                   )}
@@ -345,7 +341,7 @@ export default function AuthScreen() {
                       <>
                         <Ionicons name="logo-apple" size={18} color={colors.bg} />
                         <Text style={[s.socialBtnText, s.appleBtnText]}>
-                          {lang === "it" ? "Continua con Apple" : "Continue with Apple"}
+                          {lang === "es" ? "Continuar con Apple" : lang === "fr" ? "Continuer avec Apple" : lang === "it" ? "Continua con Apple" : "Continue with Apple"}
                         </Text>
                       </>
                     )}
@@ -360,8 +356,8 @@ export default function AuthScreen() {
                 >
                   <Text style={s.toggleText}>
                     {isLogin
-                      ? (lang === "it" ? "Non hai un account? Registrati" : "No account? Register")
-                      : (lang === "it" ? "Hai già un account? Accedi" : "Already have an account? Sign in")}
+                      ? (lang === "es" ? "No tienes cuenta? Registrate" : lang === "fr" ? "Pas de compte ? Inscrivez-vous" : lang === "it" ? "Non hai un account? Registrati" : "No account? Register")
+                      : (lang === "fr" ? "Vous avez déjà un compte ? Connectez-vous" : lang === "it" ? "Hai già un account? Accedi" : "Already have an account? Sign in")}
                   </Text>
                 </TouchableOpacity>
 
@@ -372,21 +368,21 @@ export default function AuthScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={s.guestText}>
-                    {lang === "it" ? "Continua senza account" : "Continue without account"}
+                    {lang === "es" ? "Continuar sin cuenta" : lang === "fr" ? "Continuer sans compte" : lang === "it" ? "Continua senza account" : "Continue without account"}
                   </Text>
                 </TouchableOpacity>
 
                 {/* Privacy / Termini */}
                 <View style={s.legalRow}>
-                  <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={() => openExternalLink(PRIVACY_URL, lang)} activeOpacity={0.7}>
                     <Text style={s.legalLink}>
-                      {lang === "it" ? "Privacy Policy" : "Privacy Policy"}
+                      {lang === "es" ? "Politica de privacidad" : lang === "fr" ? "Politique de confidentialite" : lang === "it" ? "Privacy Policy" : "Privacy Policy"}
                     </Text>
                   </TouchableOpacity>
                   <Text style={s.legalSep}>·</Text>
-                  <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={() => openExternalLink(TERMS_URL, lang)} activeOpacity={0.7}>
                     <Text style={s.legalLink}>
-                      {lang === "it" ? "Termini di servizio" : "Terms of Service"}
+                      {lang === "es" ? "Terminos del servicio" : lang === "fr" ? "Conditions d'utilisation" : lang === "it" ? "Termini di servizio" : "Terms of Service"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -402,14 +398,14 @@ export default function AuthScreen() {
 function translateError(msg: string, lang: string): string {
   const m = msg.toLowerCase();
   if (m.includes("invalid login") || m.includes("invalid credentials"))
-    return lang === "it" ? "Email o password errati" : "Invalid email or password";
+    return lang === "es" ? "Correo o contrasena incorrectos" : lang === "fr" ? "E-mail ou mot de passe incorrect" : lang === "it" ? "Email o password errati" : "Invalid email or password";
   if (m.includes("already registered") || m.includes("user already"))
-    return lang === "it" ? "Email già registrata" : "Email already registered";
+    return lang === "fr" ? "E-mail déjà enregistré" : lang === "it" ? "Email già registrata" : "Email already registered";
   if (m.includes("password"))
-    return lang === "it" ? "Password troppo corta (min 6 caratteri)" : "Password too short (min 6 chars)";
+    return lang === "es" ? "Contrasena demasiado corta (minimo 6 caracteres)" : lang === "fr" ? "Mot de passe trop court (min. 6 caracteres)" : lang === "it" ? "Password troppo corta (min 6 caratteri)" : "Password too short (min 6 chars)";
   if (m.includes("email"))
-    return lang === "it" ? "Indirizzo email non valido" : "Invalid email address";
-  return lang === "it" ? "Errore. Riprova." : "Error. Please try again.";
+    return lang === "es" ? "Dirección de correo no válida" : lang === "fr" ? "Adresse e-mail non valide" : lang === "it" ? "Indirizzo email non valido" : "Invalid email address";
+  return lang === "es" ? "Error. Intentalo de nuevo." : lang === "fr" ? "Erreur. Reessayez." : lang === "it" ? "Errore. Riprova." : "Error. Please try again.";
 }
 
 function makeStyles(colors: any) {

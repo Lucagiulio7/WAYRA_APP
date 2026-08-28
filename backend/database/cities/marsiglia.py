@@ -55,8 +55,13 @@ ATTRACTIONS = [
  {'city': 'marsiglia', 'block_id': 714, 'zone': 'cours_julien_noailles', 'category_level': 3, 'name': 'Rue d\'Aubagne upper stretch', 'name_en': 'Upper Aubagne Street', 'description': 'Tratto utile per leggere la continuita tra mercati, street art e quartieri centrali.', 'description_en': 'A useful stretch for reading the continuity between markets, street art and central districts.', 'latitude': 43.2950, 'longitude': 5.3809, 'estimated_visit_time': 20, 'tags': ['strada', 'mercato', 'street art'], 'attraction_type': 'strada urbana', 'ticket_url': None},
  {'city': 'marsiglia', 'block_id': 715, 'zone': 'prado_borely', 'category_level': 2, 'name': 'Passeggiata del Parc Borély', 'name_en': 'Parc Borely Walk', 'description': 'Percorso utile per ampliare la lettura verde e balneare del settore meridionale.', 'description_en': 'A useful route for broadening the green and seaside reading of the southern sector.', 'latitude': 43.2617, 'longitude': 5.3762, 'estimated_visit_time': 20, 'tags': ['parco', 'verde', 'passeggiata'], 'attraction_type': 'percorso verde', 'ticket_url': None},
  {'city': 'marsiglia', 'block_id': 715, 'zone': 'prado_borely', 'category_level': 3, 'name': 'Belvedere delle spiagge del Prado', 'name_en': 'Prado Beaches Viewpoint', 'description': 'Affaccio utile per leggere il rapporto tra mare, parco e grandi aperture della costa.', 'description_en': 'A useful viewpoint for reading the relationship between sea, park and the coast\'s broad openings.', 'latitude': 43.2559, 'longitude': 5.3738, 'estimated_visit_time': 20, 'tags': ['spiagge', 'panorama', 'mare'], 'attraction_type': 'belvedere', 'ticket_url': None},
- {'city': 'marsiglia', 'block_id': 716, 'zone': 'estaque', 'category_level': 2, 'name': 'Belvedere dell\'Estaque', 'name_en': 'Estaque Viewpoint', 'description': 'Punto molto utile per leggere porto, colline e luce industriale del nord marittimo.', 'description_en': 'A very useful point for reading harbour, hills and industrial light in the northern seafront.', 'latitude': 43.3622, 'longitude': 5.3134, 'estimated_visit_time': 20, 'tags': ['panorama', 'porto', 'quartiere'], 'attraction_type': 'belvedere', 'ticket_url': None},
+ {'city': 'marsiglia', 'block_id': 716, 'zone': 'estaque', 'category_level': 2, 'name': "Chiesa Saint-Pierre-ès-Liens dell'Estaque", 'name_en': "Saint-Pierre-ès-Liens Church in L'Estaque", 'description': 'Chiesa ottocentesca collocata sulle alture del quartiere, con un punto di vista aperto sul porto e sulla costa nord di Marsiglia.', 'description_en': 'A nineteenth-century church set above the district, with an open view over the harbour and Marseille’s northern coastline.', 'latitude': 43.3639, 'longitude': 5.3113, 'estimated_visit_time': 30, 'tags': ['chiesa', 'panorama', 'quartiere'], 'attraction_type': 'chiesa', 'ticket_url': None},
  {'city': 'marsiglia', 'block_id': 716, 'zone': 'estaque', 'category_level': 3, 'name': 'Passeggiata del porticciolo', 'name_en': 'Small Harbour Walk', 'description': 'Tratto utile per sentire il lato piu raccolto e pittorico dell\'Estaque.', 'description_en': 'A useful stretch for feeling the more intimate and pictorial side of L\'Estaque.', 'latitude': 43.3631, 'longitude': 5.3124, 'estimated_visit_time': 20, 'tags': ['porto', 'passeggiata', 'mare'], 'attraction_type': 'lungomare', 'ticket_url': None},
+ {'city': 'marsiglia', 'block_id': 710, 'zone': 'panier_joliette', 'category_level': 1, 'name': 'Cosquer Méditerranée', 'name_en': 'Cosquer Méditerranée', 'name_fr': 'Cosquer Méditerranée', 'name_es': 'Cosquer Méditerranée', 'description': 'Esperienza immersiva nella Villa Méditerranée che ricostruisce la grotta preistorica sommersa delle Calanques, con un percorso nella replica, arte rupestre e una galleria sul Paleolitico e l’innalzamento del mare.', 'description_en': 'An immersive experience in Villa Méditerranée reconstructing the submerged prehistoric cave of the Calanques, with a journey through the replica, cave art and a gallery on the Palaeolithic and rising sea levels.', 'description_fr': 'Une expérience immersive à la Villa Méditerranée qui reconstitue la grotte préhistorique submergée des Calanques, avec un parcours dans la réplique, de l’art pariétal et une galerie sur le Paléolithique et la montée des eaux.', 'description_es': 'Una experiencia inmersiva en la Villa Méditerranée que reconstruye la cueva prehistórica sumergida de las Calanques, con un recorrido por la réplica, arte rupestre y una galería sobre el Paleolítico y la subida del mar.', 'latitude': 43.2965, 'longitude': 5.3611, 'estimated_visit_time': 120, 'tags': ['preistoria', 'esperienza immersiva', 'mare'], 'attraction_type': 'centro di interpretazione', 'ticket_url': 'https://www.grotte-cosquer.com/'},
+ {'city': 'marsiglia', 'block_id': 710, 'zone': 'panier_joliette', 'category_level': 2, 'name': 'Museo Regards de Provence', 'name_en': 'Regards de Provence Museum', 'name_fr': 'Musée Regards de Provence', 'name_es': 'Museo Regards de Provence', 'description': 'Museo nell’ex stazione sanitaria del porto dedicato all’arte di Marsiglia, della Provenza e del Mediterraneo, con collezioni e mostre temporanee dal Settecento alla scena contemporanea.', 'description_en': 'A museum in the port’s former sanitary station devoted to the art of Marseille, Provence and the Mediterranean, with collections and temporary exhibitions ranging from the eighteenth century to the contemporary scene.', 'description_fr': 'Un musée installé dans l’ancienne station sanitaire du port, consacré à l’art de Marseille, de la Provence et de la Méditerranée, avec collections et expositions temporaires du XVIIIe siècle à la création contemporaine.', 'description_es': 'Un museo en la antigua estación sanitaria del puerto dedicado al arte de Marsella, la Provenza y el Mediterráneo, con colecciones y exposiciones temporales desde el siglo XVIII hasta la escena contemporánea.', 'latitude': 43.2975, 'longitude': 5.3620, 'estimated_visit_time': 75, 'tags': ['museo', 'arte', 'mediterraneo'], 'attraction_type': 'museo', 'ticket_url': 'https://www.museeregardsdeprovence.com/'},
+ {'city': 'marsiglia', 'block_id': 701, 'zone': 'vieux_port', 'category_level': 2, 'name': 'Abbazia Saint-Victor', 'name_en': 'Saint-Victor Abbey', 'name_fr': 'Abbaye Saint-Victor', 'name_es': 'Abadía de Saint-Victor', 'description': 'Antica abbazia fortificata sulla riva sud del Vieux-Port, con cappelle, sarcofagi e cripte paleocristiane; dalla zona si comprende anche il rapporto storico tra il porto e la città religiosa.', 'description_en': 'An ancient fortified abbey on the south side of the Vieux-Port, with chapels, sarcophagi and early Christian crypts; the setting also reveals the historic relationship between the harbour and the religious city.', 'description_fr': 'Une ancienne abbaye fortifiée sur la rive sud du Vieux-Port, avec chapelles, sarcophages et cryptes paléochrétiennes ; le site révèle aussi le lien historique entre le port et la ville religieuse.', 'description_es': 'Una antigua abadía fortificada en la orilla sur del Vieux-Port, con capillas, sarcófagos y criptas paleocristianas; el entorno también muestra la relación histórica entre el puerto y la ciudad religiosa.', 'latitude': 43.2902, 'longitude': 5.3655, 'estimated_visit_time': 60, 'tags': ['abbazia', 'storia', 'cripte'], 'attraction_type': 'abbazia', 'ticket_url': 'https://www.marseille-tourisme.com/decouvrez-marseille/culture-et-patrimoine/sites-et-monuments/abbaye-st-victor/'},
+ {'city': 'marsiglia', 'block_id': 705, 'zone': 'longchamp_cinq_avenues', 'category_level': 2, 'name': 'Friche la Belle de Mai', 'name_en': 'Friche la Belle de Mai', 'name_fr': 'Friche la Belle de Mai', 'name_es': 'Friche la Belle de Mai', 'description': 'Ex manifattura di tabacco trasformata in grande polo culturale con mostre, atelier, spettacoli, skatepark e terrazza panoramica; mostra il volto creativo e postindustriale della Marsiglia contemporanea.', 'description_en': 'A former tobacco factory transformed into a major cultural hub with exhibitions, studios, performances, a skatepark and panoramic rooftop, revealing contemporary Marseille’s creative post-industrial side.', 'description_fr': 'Une ancienne manufacture de tabac transformée en vaste pôle culturel avec expositions, ateliers, spectacles, skatepark et toit-terrasse panoramique, révélant le visage créatif et postindustriel de la Marseille contemporaine.', 'description_es': 'Una antigua fábrica de tabaco transformada en un gran centro cultural con exposiciones, talleres, espectáculos, skatepark y azotea panorámica, que muestra la cara creativa y posindustrial de la Marsella contemporánea.', 'latitude': 43.3101, 'longitude': 5.3906, 'estimated_visit_time': 75, 'tags': ['cultura', 'arte contemporanea', 'spazio industriale'], 'attraction_type': 'centro culturale', 'ticket_url': 'https://www.lafriche.org/'},
+ {'city': 'marsiglia', 'block_id': 704, 'zone': 'notre_dame_corniche', 'category_level': 2, 'name': 'Palais du Pharo', 'name_en': 'Palais du Pharo', 'name_fr': 'Palais du Pharo', 'name_es': 'Palacio del Pharo', 'description': 'Palazzo ottocentesco voluto da Napoleone III, circondato da un parco aperto con una delle vedute più complete sul Vieux-Port, Fort Saint-Jean, MuCEM e costa nord della città.', 'description_en': 'A nineteenth-century palace commissioned by Napoleon III, surrounded by an open park with one of the most complete views over the Vieux-Port, Fort Saint-Jean, MuCEM and the city’s northern coast.', 'description_fr': 'Un palais du XIXe siècle commandé par Napoléon III, entouré d’un parc ouvert offrant l’une des vues les plus complètes sur le Vieux-Port, le fort Saint-Jean, le MuCEM et la côte nord de la ville.', 'description_es': 'Un palacio del siglo XIX encargado por Napoleón III, rodeado por un parque abierto con una de las vistas más completas del Vieux-Port, Fort Saint-Jean, el MuCEM y la costa norte de la ciudad.', 'latitude': 43.2940, 'longitude': 5.3589, 'estimated_visit_time': 60, 'tags': ['palazzo', 'parco', 'panorama'], 'attraction_type': 'palazzo storico', 'ticket_url': None},
 ]
 
 FOOD_SPOTS = [
@@ -137,30 +142,30 @@ FOOD_SPOTS = [
 FOODS_BY_CITY = [{'name': 'Bouillabaisse',
   'name_en': 'Bouillabaisse',
   'description': 'Zuppa di pesci di roccia, crostacei, zafferano, finocchio e rouille, nata come cucina marinara e diventata piatto '
-                 'simbolo di Marsiglia. La qualit? sta nel brodo: intenso, iodato, speziato, servito con pesce riconoscibile e pane '
+                 'simbolo di Marsiglia. La qualità sta nel brodo: intenso, iodato, speziato, servito con pesce riconoscibile e pane '
                  'tostato.',
-  'description_en': 'A soup of rock fish, shellfish, saffron, fennel and rouille, born from fishermen?s cooking and turned into '
-                    'Marseille?s symbolic dish. Quality lies in the broth: intense, briny and spiced, served with recognisable fish and '
+  'description_en': 'A soup of rock fish, shellfish, saffron, fennel and rouille, born from fishermen’s cooking and turned into '
+                    'Marseille’s symbolic dish. Quality lies in the broth: intense, briny and spiced, served with recognisable fish and '
                     'toasted bread.',
   'ingredients': ['pesci di roccia', 'zafferano', 'finocchio', 'rouille', 'pane'],
   'ingredients_en': ['rock fish', 'saffron', 'fennel', 'rouille', 'bread'],
   'places': ['Chez Fonfon Marseille', 'Le Miramar Marseille', 'Restaurant Michel Marseille']},
  {'name': 'Panisse',
   'name_en': 'Panisse Chickpea Fries',
-  'description': 'Preparazione di farina di ceci cotta, raffreddata, tagliata e fritta, tipica dell?area marsigliese e dell?Estaque. Deve '
-                 'essere croccante fuori e cremosa dentro, con sapore delicato di ceci e una semplicit? perfetta da aperitivo. La qualit? '
+  'description': 'Preparazione di farina di ceci cotta, raffreddata, tagliata e fritta, tipica dell’area marsigliese e dell’Estaque. Deve '
+                 'essere croccante fuori e cremosa dentro, con sapore delicato di ceci e una semplicità perfetta da aperitivo. La qualità '
                  'si riconosce quando non assorbe troppo olio e resta pulita.',
-  'description_en': 'A preparation of chickpea flour cooked, cooled, cut and fried, typical of the Marseille area and L?Estaque. It should '
+  'description_en': 'A preparation of chickpea flour cooked, cooled, cut and fried, typical of the Marseille area and L’Estaque. It should '
                     'be crisp outside and creamy inside, with a delicate chickpea flavour and aperitif-friendly simplicity. Quality is '
                     'recognised when it does not absorb too much oil and stays clean.',
   'ingredients': ['farina di ceci', 'acqua', 'olio', 'sale'],
   'ingredients_en': ['chickpea flour', 'water', 'oil', 'salt'],
   'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'La Boite a Sardine Marseille']},
- {'name': 'A?oli',
-  'name_en': 'A?oli',
+ {'name': 'Aïoli',
+  'name_en': 'Aïoli',
   'description': 'Salsa provenzale di aglio, olio e tuorlo, servita anche come piatto completo con verdure, pesce, uova e patate. A '
-                 'Marsiglia ? mediterranea e conviviale: pungente, cremosa, solare, da bilanciare con ingredienti semplici e ben cotti.',
-  'description_en': 'A Proven?al sauce of garlic, oil and egg yolk, also served as a complete dish with vegetables, fish, eggs and '
+                 'Marsiglia è mediterranea e conviviale: pungente, cremosa, solare, da bilanciare con ingredienti semplici e ben cotti.',
+  'description_en': 'A Provençal sauce of garlic, oil and egg yolk, also served as a complete dish with vegetables, fish, eggs and '
                     'potatoes. In Marseille it is Mediterranean and convivial: pungent, creamy and sunny, to be balanced with simple '
                     'well-cooked ingredients.',
   'ingredients': ['aglio', 'olio', 'tuorlo', 'verdure', 'pesce'],
@@ -169,29 +174,29 @@ FOODS_BY_CITY = [{'name': 'Bouillabaisse',
  {'name': 'Pieds et paquets',
   'name_en': 'Pieds et Paquets',
   'description': 'Piatto tradizionale di piedini di agnello e piccoli involtini di trippa ripieni, cotti lentamente in salsa di pomodoro, '
-                 'vino bianco ed erbe. ? rustico e profondamente provenzale: gelatinoso, saporito, adatto a chi ama cucina di carattere.',
+                 'vino bianco ed erbe. È rustico e profondamente provenzale: gelatinoso, saporito, adatto a chi ama cucina di carattere.',
   'description_en': 'A traditional dish of lamb feet and small stuffed tripe parcels, slowly cooked in tomato sauce, white wine and herbs. '
-                    'It is rustic and deeply Proven?al: gelatinous, savoury and suited to those who enjoy cooking with strong character.',
+                    'It is rustic and deeply Provençal: gelatinous, savoury and suited to those who enjoy cooking with strong character.',
   'ingredients': ['piedini di agnello', 'trippa', 'pomodoro', 'vino bianco', 'erbe'],
   'ingredients_en': ['lamb feet', 'tripe', 'tomato', 'white wine', 'herbs'],
   'places': ['Le Lauracee Marseille', 'Chez Etienne Marseille', 'Le Bouchon Provencal Marseille']},
  {'name': 'Navettes',
   'name_en': 'Navettes Biscuits',
-  'description': 'Biscotti secchi a forma di piccola barca, profumati tradizionalmente con acqua di fiori d?arancio e legati alla '
-                 'Candelora. Sono semplici ma identitari: croccanti, aromatici, poco burrosi, pensati pi? per il rito che per l?opulenza. '
-                 'La qualit? migliore mantiene profumo netto e friabilit? senza diventare dura.',
+  'description': 'Biscotti secchi a forma di piccola barca, profumati tradizionalmente con acqua di fiori d’arancio e legati alla '
+                 'Candelora. Sono semplici ma identitari: croccanti, aromatici, poco burrosi, pensati più per il rito che per l’opulenza. '
+                 'La qualità migliore mantiene profumo netto e friabilità senza diventare dura.',
   'description_en': 'Dry biscuits shaped like small boats, traditionally scented with orange blossom water and linked to Candlemas. They '
                     'are simple but identity-rich: crisp, aromatic and lightly buttery, made more for ritual than opulence. The best '
                     'quality keeps a clean aroma and crumbly texture without becoming hard.',
-  'ingredients': ['farina', 'zucchero', 'uova', 'olio', 'acqua di fiori d?arancio'],
+  'ingredients': ['farina', 'zucchero', 'uova', 'olio', 'acqua di fiori d’arancio'],
   'ingredients_en': ['flour', 'sugar', 'eggs', 'oil', 'orange blossom water'],
   'places': ['Four des Navettes Marseille', 'Navettes des Accoules Marseille', 'Maison Saint Honore Marseille']},
- {'name': 'Chichi fr?gi',
-  'name_en': 'Chichi Fr?gi Doughnut',
-  'description': 'Lungo dolce fritto simile a una ciambella allungata, venduto soprattutto all?Estaque e nei chioschi popolari. Deve '
+ {'name': 'Chichi frégi',
+  'name_en': 'Chichi Frégi Doughnut',
+  'description': 'Lungo dolce fritto simile a una ciambella allungata, venduto soprattutto all’Estaque e nei chioschi popolari. Deve '
                  'arrivare caldo, zuccherato e leggermente croccante fuori, con interno morbido: semplice, nostalgico, perfetto da '
-                 'passeggio. La qualit? sta nella frittura asciutta e nella dolcezza non invadente.',
-  'description_en': 'A long fried sweet similar to an elongated doughnut, sold especially in L?Estaque and popular stalls. It should '
+                 'passeggio. La qualità sta nella frittura asciutta e nella dolcezza non invadente.',
+  'description_en': 'A long fried sweet similar to an elongated doughnut, sold especially in L’Estaque and popular stalls. It should '
                     'arrive hot, sugared and slightly crisp outside, with a soft centre: simple, nostalgic and perfect for eating while '
                     'walking.',
   'ingredients': ['farina', 'lievito', 'zucchero', 'olio', 'acqua'],
@@ -199,20 +204,20 @@ FOODS_BY_CITY = [{'name': 'Bouillabaisse',
   'places': ['Chichi Fregi Chez Magali Marseille', 'L Estaque Marseille', 'Chez Freddy Marseille']},
  {'name': 'Tapenade',
   'name_en': 'Tapenade',
-  'description': 'Crema provenzale di olive, capperi, acciughe e olio d?oliva, servita su pane o come condimento. A Marsiglia porta subito '
-                 'mare e Mediterraneo: salina, intensa, brillante, migliore quando l?oliva resta protagonista e non viene coperta. La '
-                 'qualit? dipende dal sale controllato e da una texture ancora viva.',
-  'description_en': 'A Proven?al spread of olives, capers, anchovies and olive oil, served on bread or as a condiment. In Marseille it '
+  'description': 'Crema provenzale di olive, capperi, acciughe e olio d’oliva, servita su pane o come condimento. A Marsiglia porta subito '
+                 'mare e Mediterraneo: salina, intensa, brillante, migliore quando l’oliva resta protagonista e non viene coperta. La '
+                 'qualità dipende dal sale controllato e da una texture ancora viva.',
+  'description_en': 'A Provençal spread of olives, capers, anchovies and olive oil, served on bread or as a condiment. In Marseille it '
                     'immediately brings sea and Mediterranean character: salty, intense and bright, best when the olive remains the '
                     'protagonist.',
-  'ingredients': ['olive', 'capperi', 'acciughe', 'olio d?oliva', 'aglio'],
+  'ingredients': ['olive', 'capperi', 'acciughe', 'olio d’oliva', 'aglio'],
   'ingredients_en': ['olives', 'capers', 'anchovies', 'olive oil', 'garlic'],
   'places': ['La Boite a Sardine Marseille', 'Les Halles de la Major Marseille', 'Maison Empereur Marseille']},
  {'name': 'Pastis',
   'name_en': 'Pastis',
-  'description': 'Aperitivo all?anice diluito con acqua fredda, simbolo assoluto delle pause marsigliesi e provenzali. Non ? solo una '
-                 'bevanda alcolica: ? ritmo lento, terrazza, sole, profumo erbaceo e modo di aprire la conversazione prima del pasto.',
-  'description_en': 'An anise-flavoured aperitif diluted with cold water, an absolute symbol of Marseille and Proven?al pauses. It is not '
+  'description': 'Aperitivo all’anice diluito con acqua fredda, simbolo assoluto delle pause marsigliesi e provenzali. Non è solo una '
+                 'bevanda alcolica: è ritmo lento, terrazza, sole, profumo erbaceo e modo di aprire la conversazione prima del pasto.',
+  'description_en': 'An anise-flavoured aperitif diluted with cold water, an absolute symbol of Marseille and Provençal pauses. It is not '
                     'just an alcoholic drink: it is slow rhythm, terrace, sun, herbal aroma and a way to open conversation before eating.',
   'ingredients': ['anice', 'liquirizia', 'alcool', 'acqua', 'erbe'],
   'ingredients_en': ['anise', 'liquorice', 'alcohol', 'water', 'herbs'],

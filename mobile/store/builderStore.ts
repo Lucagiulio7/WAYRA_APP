@@ -1,5 +1,5 @@
 /**
- * builderStore.ts — Zustand store per il Builder itinerario
+ * builderStore.ts â€” Zustand store per il Builder itinerario
  *
  * Contiene solo lo stato *dati* del builder: giorni e slot.
  * Lo stato UI effimero (drag, modali, ricerca) rimane locale nel componente.
@@ -11,8 +11,9 @@
 
 import { create } from "zustand";
 import type { BuilderAttraction } from "@/hooks/useAttractions";
+import { routeWalkingKm } from "@/utils/routeMetrics";
 
-// ─── Tipi (mirror di quelli in create-itinerary.tsx) ─────────────────────────
+// â”€â”€â”€ Tipi (mirror di quelli in create-itinerary.tsx) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type SlotKind = "attraction" | "meal";
 
@@ -28,7 +29,7 @@ export interface DayPlan {
   slots: SlotData[];
 }
 
-// ─── Helpers interni ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers interni â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 let _counter = 0;
 
@@ -43,26 +44,21 @@ function makeDays(numDays: number): DayPlan[] {
   }));
 }
 
-// ─── Ottimizzazione percorso (copiata dal componente) ────────────────────────
+function syncSlotCounter(days: DayPlan[]) {
+  for (const slot of days.flatMap((day) => day.slots)) {
+    const match = /^slot_(\d+)$/.exec(slot.id);
+    if (match) _counter = Math.max(_counter, Number(match[1]));
+  }
+}
+
+// â”€â”€â”€ Ottimizzazione percorso (copiata dal componente) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type GeoRef = { latitude: number; longitude: number };
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const f1 = (lat1 * Math.PI) / 180;
-  const f2 = (lat2 * Math.PI) / 180;
-  const df = ((lat2 - lat1) * Math.PI) / 180;
-  const dl = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+
 
 function routeCost(stops: GeoRef[]): number {
-  let total = 0;
-  for (let i = 0; i < stops.length - 1; i++) {
-    total += haversineKm(stops[i].latitude, stops[i].longitude, stops[i + 1].latitude, stops[i + 1].longitude);
-  }
-  return total;
+  return routeWalkingKm(stops);
 }
 
 function optimizeSegment(slots: SlotData[], from: GeoRef | null, to: GeoRef | null): SlotData[] {
@@ -78,8 +74,11 @@ function optimizeSegment(slots: SlotData[], from: GeoRef | null, to: GeoRef | nu
     improved = false;
     for (let i = 0; i < best.length - 1; i++) {
       for (let j = i + 1; j < best.length; j++) {
-        const candidate = [...best];
-        [candidate[i], candidate[j]] = [candidate[j], candidate[i]];
+        const candidate = [
+          ...best.slice(0, i),
+          ...best.slice(i, j + 1).reverse(),
+          ...best.slice(j + 1),
+        ];
         const c = routeCost([
           ...(from ? [from] : []),
           ...candidate.map((s) => s.attraction!),
@@ -93,27 +92,13 @@ function optimizeSegment(slots: SlotData[], from: GeoRef | null, to: GeoRef | nu
 }
 
 function optimizeSlots(slots: SlotData[]): SlotData[] {
-  const filled = slots.filter((s) => s.attraction !== null);
+  const filledAttractions = slots.filter((s) => s.attraction !== null && s.kind === "attraction");
+  const filledMeals = slots.filter((s) => s.attraction !== null && s.kind === "meal");
   const empty = slots.filter((s) => s.attraction === null);
-  const result: SlotData[] = [];
-  let segment: SlotData[] = [];
-  let prevMealRef: GeoRef | null = null;
-  for (const slot of filled) {
-    if (slot.kind === "meal") {
-      const endRef: GeoRef = { latitude: slot.attraction!.latitude, longitude: slot.attraction!.longitude };
-      result.push(...optimizeSegment(segment, prevMealRef, endRef));
-      result.push(slot);
-      prevMealRef = endRef;
-      segment = [];
-    } else {
-      segment.push(slot);
-    }
-  }
-  result.push(...optimizeSegment(segment, prevMealRef, null));
-  return [...result, ...empty];
+  return [...optimizeSegment(filledAttractions, null, null), ...filledMeals, ...empty];
 }
 
-// ─── Store ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MAX_DAYS = 15;
 
@@ -123,6 +108,7 @@ interface BuilderState {
 
   // Inizializza / resetta il builder per una nuova sessione
   init: (numDays: number) => void;
+  restore: (days: DayPlan[], expandedDay: number) => void;
 
   // Giorni
   setExpandedDay: (day: number) => void;
@@ -138,7 +124,7 @@ interface BuilderState {
   // Ottimizzazione
   optimizeDay: (dayIdx: number) => void;
 
-  // Aggiunge uno slot già pieno (usato da commitNewSlot nel drag)
+  // Aggiunge uno slot giÃ  pieno (usato da commitNewSlot nel drag)
   addFilledSlot: (dayIdx: number, kind: SlotKind, attraction: BuilderAttraction) => void;
 
   // Azioni mappa
@@ -152,6 +138,11 @@ export const useBuilderStore = create<BuilderState>()((set) => ({
 
   init: (numDays) =>
     set({ days: makeDays(numDays), expandedDay: 1 }),
+
+  restore: (days, expandedDay) => {
+    syncSlotCounter(days);
+    set({ days, expandedDay: Math.min(Math.max(1, expandedDay), days.length) });
+  },
 
   setExpandedDay: (day) =>
     set({ expandedDay: day }),
@@ -246,10 +237,18 @@ export const useBuilderStore = create<BuilderState>()((set) => ({
     set((s) => ({
       days: s.days.map((d, i) => {
         if (i !== dayIdx) return d;
-        const slotMap = new Map(d.slots.map((sl) => [sl.id, sl]));
+        const filledSlots = d.slots.filter((sl) => sl.attraction !== null);
+        const filledById = new Map(filledSlots.map((sl) => [sl.id, sl]));
+        const seen = new Set<string>();
+        const reordered = newSlotIds.flatMap((id) => {
+          const slot = filledById.get(id);
+          if (!slot || seen.has(id)) return [];
+          seen.add(id);
+          return [slot];
+        });
+        const unmentioned = filledSlots.filter((slot) => !seen.has(slot.id));
         const emptySlots = d.slots.filter((sl) => sl.attraction === null);
-        const reordered = newSlotIds.map((id) => slotMap.get(id)).filter(Boolean) as SlotData[];
-        return { ...d, slots: [...reordered, ...emptySlots] };
+        return { ...d, slots: [...reordered, ...unmentioned, ...emptySlots] };
       }),
     })),
 }));

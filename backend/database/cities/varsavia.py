@@ -36,20 +36,20 @@ ATTRACTIONS = [
 
  {'city': 'varsavia', 'block_id': 9, 'zone': 'stare_miasto', 'category_level': 2, 'name': 'Mura della Città Vecchia', 'name_en': 'Old Town Walls', 'description': 'Tratto utile per ampliare la lettura del bordo storico ricostruito del centro.', 'description_en': 'A useful stretch for broadening the reading of the rebuilt historic edge of the centre.', 'latitude': 52.2500, 'longitude': 21.0105, 'estimated_visit_time': 20, 'tags': ['mura', 'storia', 'centro'], 'attraction_type': 'mura storiche', 'ticket_url': None},
  {'city': 'varsavia', 'block_id': 9, 'zone': 'stare_miasto', 'category_level': 3, 'name': 'Belvedere sulla Vistola dal centro storico', 'name_en': 'Old Town Vistula Viewpoint', 'description': 'Affaccio utile per leggere la città vecchia verso il fiume e le sue scarpate.', 'description_en': 'A useful viewpoint for reading the old town toward the river and its embankments.', 'latitude': 52.2492, 'longitude': 21.0158, 'estimated_visit_time': 20, 'tags': ['panorama', 'fiume', 'centro'], 'attraction_type': 'belvedere', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 10, 'zone': 'trak_krÃ³lewski', 'category_level': 2, 'name': 'Palazzo Staszic exterior', 'name_en': 'Staszic Palace Exterior', 'description': 'Tappa utile per aggiungere una lettura culturale e accademica al Tratto Reale.', 'description_en': 'A useful stop for adding a cultural and academic reading to the Royal Route.', 'latitude': 52.2402, 'longitude': 21.0188, 'estimated_visit_time': 20, 'tags': ['palazzo', 'cultura', 'asse urbano'], 'attraction_type': 'palazzo storico', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 10, 'zone': 'trak_krÃ³lewski', 'category_level': 3, 'name': 'Piazza Adam Mickiewicz', 'name_en': 'Adam Mickiewicz Square', 'description': 'Spazio utile per leggere il lato monumentale e simbolico dell\'asse centrale.', 'description_en': 'A useful space for reading the monumental and symbolic side of the central axis.', 'latitude': 52.2447, 'longitude': 21.0155, 'estimated_visit_time': 20, 'tags': ['piazza', 'monumento', 'storia'], 'attraction_type': 'piazza', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 11, 'zone': 'Å›rÃ³dmieÅ›cie', 'category_level': 2, 'name': 'Palazzo della Cultura forecourt', 'name_en': 'Palace of Culture Forecourt', 'description': 'Spazio molto utile per leggere la scala monumentale e moderna del centro novecentesco.', 'description_en': 'A very useful space for reading the monumental and modern scale of the twentieth-century centre.', 'latitude': 52.2318, 'longitude': 21.0058, 'estimated_visit_time': 20, 'tags': ['moderno', 'piazza', 'centro'], 'attraction_type': 'piazza urbana', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 11, 'zone': 'Å›rÃ³dmieÅ›cie', 'category_level': 3, 'name': 'Ulica Chmielna', 'name_en': 'Chmielna Street', 'description': 'Tratto utile per sentire il lato pedonale, commerciale e quotidiano della centralità contemporanea.', 'description_en': 'A useful stretch for feeling the pedestrian, commercial and everyday side of the contemporary centre.', 'latitude': 52.2310, 'longitude': 21.0128, 'estimated_visit_time': 20, 'tags': ['strada', 'shopping', 'centro'], 'attraction_type': 'asse pedonale', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 10, 'zone': 'trakt_krolewski', 'category_level': 2, 'name': 'Palazzo Staszic exterior', 'name_en': 'Staszic Palace Exterior', 'description': 'Tappa utile per aggiungere una lettura culturale e accademica al Tratto Reale.', 'description_en': 'A useful stop for adding a cultural and academic reading to the Royal Route.', 'latitude': 52.2402, 'longitude': 21.0188, 'estimated_visit_time': 20, 'tags': ['palazzo', 'cultura', 'asse urbano'], 'attraction_type': 'palazzo storico', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 10, 'zone': 'trakt_krolewski', 'category_level': 3, 'name': 'Piazza Adam Mickiewicz', 'name_en': 'Adam Mickiewicz Square', 'description': 'Spazio utile per leggere il lato monumentale e simbolico dell\'asse centrale.', 'description_en': 'A useful space for reading the monumental and symbolic side of the central axis.', 'latitude': 52.2447, 'longitude': 21.0155, 'estimated_visit_time': 20, 'tags': ['piazza', 'monumento', 'storia'], 'attraction_type': 'piazza', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 11, 'zone': 'srodmiescie', 'category_level': 2, 'name': 'Palazzo della Cultura forecourt', 'name_en': 'Palace of Culture Forecourt', 'description': 'Spazio molto utile per leggere la scala monumentale e moderna del centro novecentesco.', 'description_en': 'A very useful space for reading the monumental and modern scale of the twentieth-century centre.', 'latitude': 52.2318, 'longitude': 21.0058, 'estimated_visit_time': 20, 'tags': ['moderno', 'piazza', 'centro'], 'attraction_type': 'piazza urbana', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 11, 'zone': 'srodmiescie', 'category_level': 3, 'name': 'Ulica Chmielna', 'name_en': 'Chmielna Street', 'description': 'Tratto utile per sentire il lato pedonale, commerciale e quotidiano della centralità contemporanea.', 'description_en': 'A useful stretch for feeling the pedestrian, commercial and everyday side of the contemporary centre.', 'latitude': 52.2310, 'longitude': 21.0128, 'estimated_visit_time': 20, 'tags': ['strada', 'shopping', 'centro'], 'attraction_type': 'asse pedonale', 'ticket_url': None},
  {'city': 'varsavia', 'block_id': 12, 'zone': 'powiÅ›le', 'category_level': 2, 'name': 'Boulevard della Vistola', 'name_en': 'Vistula Boulevard', 'description': 'Lungofiume utile per ampliare la lettura del lato giovane e aperto di Powiśle.', 'description_en': 'A useful riverside promenade for broadening the reading of Powisle\'s youthful and open side.', 'latitude': 52.2395, 'longitude': 21.0330, 'estimated_visit_time': 20, 'tags': ['fiume', 'passeggiata', 'vita urbana'], 'attraction_type': 'lungofiume', 'ticket_url': None},
  {'city': 'varsavia', 'block_id': 12, 'zone': 'powiÅ›le', 'category_level': 3, 'name': 'Biblioteca Universitaria roof garden', 'name_en': 'University Library Roof Garden', 'description': 'Punto utile per aggiungere verde, panorama e architettura contemporanea al quartiere.', 'description_en': 'A useful point for adding greenery, panorama and contemporary architecture to the district.', 'latitude': 52.2418, 'longitude': 21.0285, 'estimated_visit_time': 25, 'tags': ['giardino', 'panorama', 'universita'], 'attraction_type': 'giardino pensile', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 13, 'zone': 'muranÃ³w', 'category_level': 2, 'name': 'Monumento agli Eroi del Ghetto', 'name_en': 'Ghetto Heroes Monument', 'description': 'Tappa utile per rafforzare la lettura memoriale e storica del quartiere.', 'description_en': 'A useful stop for strengthening the memorial and historic reading of the district.', 'latitude': 52.2493, 'longitude': 20.9935, 'estimated_visit_time': 20, 'tags': ['memoria', 'monumento', 'storia'], 'attraction_type': 'memoriale', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 13, 'zone': 'muranÃ³w', 'category_level': 3, 'name': 'Giardini del quartiere Muranów', 'name_en': 'Muranow District Gardens', 'description': 'Spazio utile per leggere il lato residenziale e più quieto del quartiere della memoria.', 'description_en': 'A useful space for reading the more residential and quieter side of the memorial district.', 'latitude': 52.2499, 'longitude': 20.9957, 'estimated_visit_time': 20, 'tags': ['giardini', 'quartiere', 'residenziale'], 'attraction_type': 'parco urbano', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 14, 'zone': 'praga_pÃ³Å‚noc', 'category_level': 2, 'name': 'Ulica Ząbkowska', 'name_en': 'Zabkowska Street', 'description': 'Strada molto utile per sentire il lato più locale, creativo e in trasformazione di Praga.', 'description_en': 'A very useful street for feeling Praga\'s more local, creative and changing side.', 'latitude': 52.2510, 'longitude': 21.0433, 'estimated_visit_time': 20, 'tags': ['strada', 'quartiere', 'vita locale'], 'attraction_type': 'strada urbana', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 14, 'zone': 'praga_pÃ³Å‚noc', 'category_level': 3, 'name': 'Koneser courtyard', 'name_en': 'Koneser Courtyard', 'description': 'Cortile utile per aggiungere una lettura industriale rigenerata del quartiere.', 'description_en': 'A useful courtyard for adding a regenerated industrial reading of the district.', 'latitude': 52.2543, 'longitude': 21.0447, 'estimated_visit_time': 20, 'tags': ['cortile', 'industriale', 'quartiere'], 'attraction_type': 'cortile urbano', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 13, 'zone': 'muranów', 'category_level': 2, 'name': 'Bunker di Anielewicz - memoriale Miła 18', 'name_en': 'Anielewicz Bunker - Miła 18 Memorial', 'description': 'Memoriale sul luogo del bunker del comando dell’Organizzazione ebraica di combattimento, tappa essenziale per comprendere l’insurrezione del ghetto.', 'description_en': 'A memorial at the site of the Jewish Combat Organization command bunker, essential for understanding the Warsaw Ghetto Uprising.', 'latitude': 52.2512, 'longitude': 20.9918, 'estimated_visit_time': 25, 'tags': ['memoria', 'ghetto', 'storia'], 'attraction_type': 'memoriale', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 13, 'zone': 'muranów', 'category_level': 3, 'name': 'Giardini del quartiere Muranów', 'name_en': 'Muranow District Gardens', 'description': 'Spazio utile per leggere il lato residenziale e più quieto del quartiere della memoria.', 'description_en': 'A useful space for reading the more residential and quieter side of the memorial district.', 'latitude': 52.2499, 'longitude': 20.9957, 'estimated_visit_time': 20, 'tags': ['giardini', 'quartiere', 'residenziale'], 'attraction_type': 'parco urbano', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 14, 'zone': 'praga_polnoc', 'category_level': 2, 'name': 'Ulica Ząbkowska', 'name_en': 'Zabkowska Street', 'description': 'Strada molto utile per sentire il lato più locale, creativo e in trasformazione di Praga.', 'description_en': 'A very useful street for feeling Praga\'s more local, creative and changing side.', 'latitude': 52.2510, 'longitude': 21.0433, 'estimated_visit_time': 20, 'tags': ['strada', 'quartiere', 'vita locale'], 'attraction_type': 'strada urbana', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 14, 'zone': 'praga_polnoc', 'category_level': 3, 'name': 'Koneser courtyard', 'name_en': 'Koneser Courtyard', 'description': 'Cortile utile per aggiungere una lettura industriale rigenerata del quartiere.', 'description_en': 'A useful courtyard for adding a regenerated industrial reading of the district.', 'latitude': 52.2543, 'longitude': 21.0447, 'estimated_visit_time': 20, 'tags': ['cortile', 'industriale', 'quartiere'], 'attraction_type': 'cortile urbano', 'ticket_url': None},
  {'city': 'varsavia', 'block_id': 15, 'zone': 'Å‚azienki', 'category_level': 2, 'name': 'Teatro sull\'Isola', 'name_en': 'Theatre on the Island', 'description': 'Tappa utile per ampliare la lettura scenografica e paesaggistica del grande parco reale.', 'description_en': 'A useful stop for broadening the scenic and landscape reading of the great royal park.', 'latitude': 52.2149, 'longitude': 21.0355, 'estimated_visit_time': 20, 'tags': ['parco', 'teatro', 'paesaggio'], 'attraction_type': 'teatro storico', 'ticket_url': None},
  {'city': 'varsavia', 'block_id': 15, 'zone': 'Å‚azienki', 'category_level': 3, 'name': 'Passeggiata dei giardini reali', 'name_en': 'Royal Gardens Walk', 'description': 'Percorso utile per leggere il parco oltre il solo palazzo sull\'acqua.', 'description_en': 'A useful route for reading the park beyond the palace on the water alone.', 'latitude': 52.2168, 'longitude': 21.0328, 'estimated_visit_time': 20, 'tags': ['giardini', 'passeggiata', 'verde'], 'attraction_type': 'percorso verde', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 16, 'zone': 'wilanÃ³w', 'category_level': 2, 'name': 'Giardini del Palazzo di Wilanów', 'name_en': 'Wilanow Palace Gardens', 'description': 'Spazio utile per aggiungere una lettura paesaggistica e aristocratica al complesso.', 'description_en': 'A useful space for adding a landscape and aristocratic reading to the complex.', 'latitude': 52.1655, 'longitude': 21.0901, 'estimated_visit_time': 20, 'tags': ['giardini', 'palazzo', 'storia'], 'attraction_type': 'giardino storico', 'ticket_url': None},
- {'city': 'varsavia', 'block_id': 16, 'zone': 'wilanÃ³w', 'category_level': 3, 'name': 'Belvedere del parco di Wilanów', 'name_en': 'Wilanow Park Viewpoint', 'description': 'Affaccio utile per leggere insieme acqua, parco e residenza reale ai margini della città.', 'description_en': 'A useful viewpoint for reading water, parkland and royal residence together on the city\'s edge.', 'latitude': 52.1643, 'longitude': 21.0914, 'estimated_visit_time': 20, 'tags': ['panorama', 'parco', 'palazzo'], 'attraction_type': 'belvedere', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 16, 'zone': 'wilanow', 'category_level': 2, 'name': 'Giardini del Palazzo di Wilanów', 'name_en': 'Wilanow Palace Gardens', 'description': 'Spazio utile per aggiungere una lettura paesaggistica e aristocratica al complesso.', 'description_en': 'A useful space for adding a landscape and aristocratic reading to the complex.', 'latitude': 52.1655, 'longitude': 21.0901, 'estimated_visit_time': 20, 'tags': ['giardini', 'palazzo', 'storia'], 'attraction_type': 'giardino storico', 'ticket_url': None},
+ {'city': 'varsavia', 'block_id': 16, 'zone': 'wilanow', 'category_level': 3, 'name': 'Belvedere del parco di Wilanów', 'name_en': 'Wilanow Park Viewpoint', 'description': 'Affaccio utile per leggere insieme acqua, parco e residenza reale ai margini della città.', 'description_en': 'A useful viewpoint for reading water, parkland and royal residence together on the city\'s edge.', 'latitude': 52.1643, 'longitude': 21.0914, 'estimated_visit_time': 20, 'tags': ['panorama', 'parco', 'palazzo'], 'attraction_type': 'belvedere', 'ticket_url': None},
 ]
 
 FOOD_SPOTS = [
@@ -131,21 +131,21 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
   'ingredients': ['farina', 'patate', 'formaggio', 'cipolla', 'burro'],
   'ingredients_en': ['flour', 'potatoes', 'cheese', 'onion', 'butter'],
   'places': ['Zapiecek Warsaw', 'Syrena Irena Warsaw', 'Pierogarnia na Bednarskiej Warsaw']},
- {'name': '?urek',
-  'name_en': '?urek Sour Rye Soup',
+ {'name': 'Żurek',
+  'name_en': 'Żurek Sour Rye Soup',
   'description': 'Zuppa acidula di segale fermentata con salsiccia, uovo, patate e maggiorana, servita spesso in pane o ciotola profonda. '
-                 '? rustica ma equilibrata: l?acidit? deve rinfrescare, non dominare, mentre affumicato e spezie danno profondit?. La '
-                 'qualit? migliore mantiene il profumo della segale fermentata pulito.',
+                 'È rustica ma equilibrata: l’acidità deve rinfrescare, non dominare, mentre affumicato e spezie danno profondità. La '
+                 'qualità migliore mantiene il profumo della segale fermentata pulito.',
   'description_en': 'A sour rye soup with fermented rye starter, sausage, egg, potatoes and marjoram, often served in bread or a deep '
                     'bowl. It is rustic but balanced: acidity should refresh, not dominate, while smoke and spices add depth.',
   'ingredients': ['segale fermentata', 'salsiccia', 'uovo', 'patate', 'maggiorana'],
   'ingredients_en': ['fermented rye', 'sausage', 'egg', 'potatoes', 'marjoram'],
   'places': ['Specjaly Regionalne Warsaw', 'Zapiecek Warsaw', 'Stary Dom Warsaw']},
  {'name': 'Bigos',
-  'name_en': 'Bigos Hunter?s Stew',
+  'name_en': 'Bigos Hunter’s Stew',
   'description': 'Stufato polacco di crauti, cavolo, carni miste, salsiccia, funghi e spezie, cotto a lungo e spesso migliore riscaldato. '
-                 '? un piatto invernale e profondo: acidit?, fumo, dolcezza del cavolo e carne devono fondersi lentamente. La qualit? si '
-                 'misura nella profondit? della cottura, non nella pesantezza.',
+                 'È un piatto invernale e profondo: acidità, fumo, dolcezza del cavolo e carne devono fondersi lentamente. La qualità si '
+                 'misura nella profondità della cottura, non nella pesantezza.',
   'description_en': 'A Polish stew of sauerkraut, cabbage, mixed meats, sausage, mushrooms and spices, cooked for a long time and often '
                     'better reheated. It is wintery and deep: acidity, smoke, cabbage sweetness and meat should slowly merge.',
   'ingredients': ['crauti', 'cavolo', 'salsiccia', 'carne', 'funghi'],
@@ -154,7 +154,7 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
  {'name': 'Kotlet Schabowy',
   'name_en': 'Polish Pork Cutlet',
   'description': 'Cotoletta polacca di maiale impanata e fritta, simile alla schnitzel ma inserita nella tradizione domestica locale. Si '
-                 'serve con patate e insalata di cavolo: deve essere croccante, sottile, asciutta e con carne ancora succosa. La qualit? '
+                 'serve con patate e insalata di cavolo: deve essere croccante, sottile, asciutta e con carne ancora succosa. La qualità '
                  'dipende dalla panatura uniforme e dalla frittura asciutta.',
   'description_en': 'A Polish breaded and fried pork cutlet, similar to schnitzel but rooted in local home cooking. It is served with '
                     'potatoes and cabbage salad: it should be crisp, thin, dry-fried and still juicy inside. Quality depends on even '
@@ -165,16 +165,16 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
  {'name': 'Zapiekanka',
   'name_en': 'Zapiekanka Open Baguette',
   'description': 'Mezza baguette gratinata con funghi, formaggio e salse, nata come street food urbano e ancora molto presente nelle pause '
-                 'veloci. La qualit? sta nel pane croccante, nel formaggio filante e nel condimento generoso ma non confuso.',
+                 'veloci. La qualità sta nel pane croccante, nel formaggio filante e nel condimento generoso ma non confuso.',
   'description_en': 'A half baguette baked with mushrooms, cheese and sauces, born as urban street food and still common for quick breaks. '
                     'Quality lies in crisp bread, melting cheese and toppings that are generous but not chaotic.',
   'ingredients': ['baguette', 'funghi', 'formaggio', 'ketchup', 'erba cipollina'],
   'ingredients_en': ['baguette', 'mushrooms', 'cheese', 'ketchup', 'chives'],
   'places': ['Zapiekanki Warszawskie Warsaw', 'Zapiexy Luxusowe Warsaw', 'Okienko Warsaw']},
- {'name': 'P?czki',
+ {'name': 'Pączki',
   'name_en': 'Polish Doughnuts',
   'description': 'Bomboloni polacchi fritti, farciti con confettura di rosa, crema o altri ripieni, glassati o spolverati di zucchero. A '
-                 'Varsavia sono legati alla pasticceria quotidiana e al Gioved? Grasso: soffici, profumati, ricchi ma non unti. La qualit? '
+                 'Varsavia sono legati alla pasticceria quotidiana e al Giovedì Grasso: soffici, profumati, ricchi ma non unti. La qualità '
                  'si riconosce nella pasta elastica e nel ripieno ben distribuito.',
   'description_en': 'Polish fried doughnuts filled with rose jam, cream or other fillings, glazed or dusted with sugar. In Warsaw they are '
                     'tied to everyday pastry and Fat Thursday: soft, fragrant and rich but not greasy. Quality is recognised in elastic '
@@ -185,7 +185,7 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
  {'name': 'Barszcz',
   'name_en': 'Barszcz Beet Soup',
   'description': 'Zuppa limpida di barbabietola, acidula e profumata, servita da sola, con raviolini uszka o come parte delle feste. Deve '
-                 'avere colore intenso, acidit? viva e dolcezza terrosa, senza diventare pesante o troppo zuccherina. La qualit? sta nella '
+                 'avere colore intenso, acidità viva e dolcezza terrosa, senza diventare pesante o troppo zuccherina. La qualità sta nella '
                  'limpidezza del brodo e nel profumo vegetale.',
   'description_en': 'A clear beetroot soup, tangy and fragrant, served alone, with small uszka dumplings or as part of celebrations. It '
                     'should have intense colour, lively acidity and earthy sweetness, without becoming heavy or overly sweet. Quality lies '
@@ -195,14 +195,14 @@ FOODS_BY_CITY = [{'name': 'Pierogi',
   'places': ['Polka Warsaw', 'Specjaly Regionalne Warsaw', 'Stary Dom Warsaw']},
  {'name': 'Sernik',
   'name_en': 'Polish Cheesecake',
-  'description': 'Cheesecake polacca a base di twar?g, formaggio fresco compatto e leggermente acidulo, spesso con vaniglia, uvetta o '
-                 'cioccolato. ? pi? densa che cremosa: elegante, profumata, con dolcezza controllata e taglio netto della fetta. La '
-                 'qualit? migliore lascia il formaggio protagonista, senza eccesso di zucchero.',
-  'description_en': 'Polish cheesecake made with twar?g, a compact and gently tangy fresh cheese, often with vanilla, raisins or '
+  'description': 'Cheesecake polacca a base di twaróg, formaggio fresco compatto e leggermente acidulo, spesso con vaniglia, uvetta o '
+                 'cioccolato. È più densa che cremosa: elegante, profumata, con dolcezza controllata e taglio netto della fetta. La '
+                 'qualità migliore lascia il formaggio protagonista, senza eccesso di zucchero.',
+  'description_en': 'Polish cheesecake made with twaróg, a compact and gently tangy fresh cheese, often with vanilla, raisins or '
                     'chocolate. It is denser than creamy: elegant, fragrant, with controlled sweetness and a clean slice. The best version '
                     'leaves cheese as the protagonist, without excess sugar.',
-  'ingredients': ['twar?g', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
-  'ingredients_en': ['twar?g cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
+  'ingredients': ['twaróg', 'uova', 'zucchero', 'vaniglia', 'uvetta'],
+  'ingredients_en': ['twaróg cheese', 'eggs', 'sugar', 'vanilla', 'raisins'],
   'places': ['Lukullus Warsaw', 'A Blikle Warsaw', 'Odette Tea Room Warsaw']}]
 
 CULTURE_FACTS = [

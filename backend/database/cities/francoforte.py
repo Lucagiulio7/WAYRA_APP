@@ -119,11 +119,11 @@ FOOD_SPOTS = [
 ]
 
 # Normalized detailed food descriptions.
-FOODS_BY_CITY = [{'name': 'Frankfurter W?rstchen',
+FOODS_BY_CITY = [{'name': 'Frankfurter Würstchen',
   'name_en': 'Frankfurter Sausages',
   'description': 'Salsicce sottili di maiale leggermente affumicate, scaldate in acqua e servite con pane, senape e spesso insalata di '
-                 'patate. Sono un simbolo cittadino: semplici, precise, delicate, da non confondere con hot dog pi? industriali. La '
-                 'qualit? si sente nello scatto della pelle e nel fumo appena percepibile.',
+                 'patate. Sono un simbolo cittadino: semplici, precise, delicate, da non confondere con hot dog più industriali. La '
+                 'qualità si sente nello scatto della pelle e nel fumo appena percepibile.',
   'description_en': 'Thin pork sausages, lightly smoked, warmed in water and served with bread, mustard and often potato salad. They are a '
                     'city symbol: simple, precise and delicate, not to be confused with more industrial hot dogs.',
   'ingredients': ['maiale', 'spezie', 'pane', 'senape', 'patate'],
@@ -131,51 +131,51 @@ FOODS_BY_CITY = [{'name': 'Frankfurter W?rstchen',
   'places': ['Best Worscht in Town Frankfurt', 'Kleinmarkthalle Frankfurt', 'Apfelwein Wagner Frankfurt']},
  {'name': 'Apfelwein',
   'name_en': 'Apple Wine',
-  'description': 'Sidro secco di mele, servito nelle brocche tradizionali e bevuto nelle taverne di Sachsenhausen. ? acidulo, leggero, '
-                 'sociale e molto locale: accompagna bene piatti grassi perch? pulisce il palato senza appesantire. Deve essere bevuto '
-                 'lentamente, pi? per atmosfera che per dolcezza.',
+  'description': 'Sidro secco di mele, servito nelle brocche tradizionali e bevuto nelle taverne di Sachsenhausen. È acidulo, leggero, '
+                 'sociale e molto locale: accompagna bene piatti grassi perché pulisce il palato senza appesantire. Deve essere bevuto '
+                 'lentamente, più per atmosfera che per dolcezza.',
   'description_en': 'A dry apple cider served in traditional jugs and drunk in Sachsenhausen taverns. It is tart, light, social and deeply '
                     'local: it pairs well with fatty dishes because it refreshes the palate without heaviness. It should be drunk slowly, '
                     'more for atmosphere than for sweetness.',
   'ingredients': ['mele', 'lieviti', 'acqua'],
   'ingredients_en': ['apples', 'yeasts', 'water'],
   'places': ['Apfelwein Wagner Frankfurt', 'Atschel Frankfurt', 'Zum Gemalten Haus Frankfurt']},
- {'name': 'Gr?ne So?e',
+ {'name': 'Grüne Soße',
   'name_en': 'Green Sauce',
-  'description': 'Salsa fredda di sette erbe fresche, panna acida o yogurt e uova, servita con patate e talvolta carne bollita. ? una '
-                 'specialit? amatissima di Francoforte: erbacea, cremosa, fresca, perfetta nei mesi pi? miti. La qualit? dipende dalla '
+  'description': 'Salsa fredda di sette erbe fresche, panna acida o yogurt e uova, servita con patate e talvolta carne bollita. È una '
+                 'specialità amatissima di Francoforte: erbacea, cremosa, fresca, perfetta nei mesi più miti. La qualità dipende dalla '
                  'freschezza reale delle erbe, non solo dal colore.',
   'description_en': 'A cold sauce of seven fresh herbs, sour cream or yoghurt and eggs, served with potatoes and sometimes boiled meat. It '
                     'is a beloved Frankfurt speciality: herbal, creamy, fresh and perfect in the milder months.',
   'ingredients': ['sette erbe', 'panna acida', 'uova', 'patate', 'yogurt'],
   'ingredients_en': ['seven herbs', 'sour cream', 'eggs', 'potatoes', 'yoghurt'],
   'places': ['Atschel Frankfurt', 'Apfelwein Wagner Frankfurt', 'Klaane Sachsehaeuser Frankfurt']},
- {'name': 'Handk?s mit Musik',
+ {'name': 'Handkäs mit Musik',
   'name_en': 'Hand Cheese with Music',
   'description': 'Formaggio acidulo di latte cagliato marinato con cipolla, aceto, olio e cumino, servito freddo nelle taverne. Il nome '
-                 'scherza sugli effetti della cipolla: gusto pungente, consistenza compatta e abbinamento ideale con Apfelwein. La qualit? '
-                 'sta nell?acidit? controllata e nella marinatura ben assorbita.',
+                 'scherza sugli effetti della cipolla: gusto pungente, consistenza compatta e abbinamento ideale con Apfelwein. La qualità '
+                 'sta nell’acidità controllata e nella marinatura ben assorbita.',
   'description_en': 'A tangy curd-milk cheese marinated with onion, vinegar, oil and caraway, served cold in taverns. The name jokes about '
                     'the effect of onions: pungent flavour, compact texture and an ideal pairing with Apfelwein. Quality lies in '
                     'controlled acidity and a marinade absorbed evenly.',
-  'ingredients': ['Handk?se', 'cipolla', 'aceto', 'olio', 'cumino'],
-  'ingredients_en': ['Handk?se cheese', 'onion', 'vinegar', 'oil', 'caraway'],
+  'ingredients': ['Handkäse', 'cipolla', 'aceto', 'olio', 'cumino'],
+  'ingredients_en': ['Handkäse cheese', 'onion', 'vinegar', 'oil', 'caraway'],
   'places': ['Apfelwein Dax Frankfurt', 'Atschel Frankfurt', 'Zum Gemalten Haus Frankfurt']},
- {'name': 'Bethm?nnchen',
-  'name_en': 'Bethm?nnchen Marzipan Biscuits',
+ {'name': 'Bethmännchen',
+  'name_en': 'Bethmännchen Marzipan Biscuits',
   'description': 'Dolcetti di marzapane con mandorle, zucchero e acqua di rose, decorati tradizionalmente con tre mezze mandorle. Sono '
-                 'piccoli ma eleganti: morbidi dentro, leggermente dorati fuori, legati alla pasticceria storica della citt?. La qualit? '
+                 'piccoli ma eleganti: morbidi dentro, leggermente dorati fuori, legati alla pasticceria storica della città. La qualità '
                  'migliore mantiene aroma di mandorla pulito e dolcezza misurata.',
   'description_en': 'Small marzipan sweets made with almonds, sugar and rose water, traditionally decorated with three almond halves. They '
-                    'are small but elegant: soft inside, lightly golden outside and tied to the city?s historic pastry culture. The best '
+                    'are small but elegant: soft inside, lightly golden outside and tied to the city’s historic pastry culture. The best '
                     'versions keep a clean almond aroma and measured sweetness.',
   'ingredients': ['mandorle', 'zucchero', 'acqua di rose', 'uova'],
   'ingredients_en': ['almonds', 'sugar', 'rose water', 'eggs'],
   'places': ['ConditCouture Frankfurt', 'Cafe Hauptwache Frankfurt', 'Baeckerei Huck Frankfurt']},
  {'name': 'Rippchen mit Kraut',
   'name_en': 'Pork Cutlet with Sauerkraut',
-  'description': 'Costoletta o taglio di maiale salato servito con crauti, patate e spesso senape, classico delle taverne dell?Assia. ? '
-                 'robusto e diretto: carne sapida, cavolo acidulo e contorno capace di reggere l?Apfelwein. Il risultato migliore ? '
+  'description': 'Costoletta o taglio di maiale salato servito con crauti, patate e spesso senape, classico delle taverne dell’Assia. È '
+                 'robusto e diretto: carne sapida, cavolo acidulo e contorno capace di reggere l’Apfelwein. Il risultato migliore è '
                  'sostanzioso ma non monotono, con crauti ben aciduli.',
   'description_en': 'Salted pork cutlet or similar cut served with sauerkraut, potatoes and often mustard, a classic of Hessian taverns. '
                     'It is hearty and direct: savoury meat, tangy cabbage and a side strong enough for Apfelwein. The best result is '
@@ -186,7 +186,7 @@ FOODS_BY_CITY = [{'name': 'Frankfurter W?rstchen',
  {'name': 'Brezel',
   'name_en': 'Pretzel',
   'description': 'Pane intrecciato dalla crosta lucida e salata, morbido dentro e leggermente elastico, venduto in panetterie, mercati e '
-                 'birrerie. A Francoforte accompagna bene salsicce, formaggi e birra, ma funziona anche come spuntino semplice. La qualit? '
+                 'birrerie. A Francoforte accompagna bene salsicce, formaggi e birra, ma funziona anche come spuntino semplice. La qualità '
                  'si riconosce quando sale, crosta e mollica restano in equilibrio.',
   'description_en': 'A twisted bread with glossy salty crust, soft inside and gently elastic, sold in bakeries, markets and beer halls. In '
                     'Frankfurt it pairs well with sausages, cheeses and beer, but also works as a simple snack.',
@@ -196,7 +196,7 @@ FOODS_BY_CITY = [{'name': 'Frankfurter W?rstchen',
  {'name': 'Currywurst',
   'name_en': 'Currywurst',
   'description': 'Salsiccia tagliata a rondelle con salsa di pomodoro speziata al curry, diffusa in Germania e molto presente anche a '
-                 'Francoforte. ? cibo veloce e urbano: dolce, piccante, salato, ideale quando la salsa resta vivace e non copre la carne.',
+                 'Francoforte. È cibo veloce e urbano: dolce, piccante, salato, ideale quando la salsa resta vivace e non copre la carne.',
   'description_en': 'Sliced sausage with a curry-spiced tomato sauce, widespread in Germany and very present in Frankfurt too. It is fast '
                     'urban food: sweet, spicy and salty, best when the sauce stays lively without covering the meat.',
   'ingredients': ['salsiccia', 'pomodoro', 'curry', 'paprika', 'patatine'],

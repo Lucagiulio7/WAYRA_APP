@@ -22,6 +22,8 @@ interface Props extends Omit<PressableProps, "style" | "children"> {
   children?: React.ReactNode;
   /** Stile applicato al container animato. */
   style?: StyleProp<ViewStyle>;
+  /** Stile del contenuto animato interno, utile per righe icona + testo. */
+  contentStyle?: StyleProp<ViewStyle>;
   /** Tipo di feedback aptico. Default: "selection". */
   haptic?: HapticLevel;
   /** Scala minima al press-in. Default 0.96. */
@@ -52,9 +54,10 @@ function triggerHaptic(level: HapticLevel) {
   }
 }
 
-export function PressableCard({
+export const PressableCard = React.forwardRef<React.ElementRef<typeof Pressable>, Props>(function PressableCard({
   children,
   style,
+  contentStyle,
   haptic = "selection",
   pressScale = 0.96,
   noScale = false,
@@ -63,7 +66,7 @@ export function PressableCard({
   onPressIn,
   onPressOut,
   ...rest
-}: Props) {
+}: Props, forwardedRef) {
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
 
@@ -123,6 +126,7 @@ export function PressableCard({
 
   return (
     <Pressable
+      ref={forwardedRef}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={handlePress}
@@ -138,13 +142,13 @@ export function PressableCard({
           Ha le dimensioni del contenuto, e il Pressable la centra grazie ai
           suoi alignItems/justifyContent originali. */}
       <Animated.View
-        style={{ transform: [{ scale }], opacity: disabled ? 1 : opacity }}
+        style={[contentStyle, { transform: [{ scale }], opacity: disabled ? 1 : opacity }]}
       >
         {children}
       </Animated.View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   disabled: { opacity: 0.55 },

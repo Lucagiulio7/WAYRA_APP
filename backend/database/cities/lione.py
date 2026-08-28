@@ -143,7 +143,7 @@ FOOD_SPOTS = [
 # Normalized detailed food descriptions.
 FOODS_BY_CITY = [{'name': 'Quenelle de brochet',
   'name_en': 'Pike Quenelle',
-  'description': 'Preparazione soffice di luccio, uova, burro e panade, modellata a forma ovale e servita con salsa Nantua ai crostacei. ? '
+  'description': 'Preparazione soffice di luccio, uova, burro e panade, modellata a forma ovale e servita con salsa Nantua ai crostacei. È '
                  'uno dei simboli dei bouchon lionesi: delicata ma ricca, ariosa al centro, capace di trasformare un pesce minuto in '
                  'piatto elegante.',
   'description_en': 'A soft preparation of pike, eggs, butter and panade, shaped into an oval and served with crayfish-based Nantua sauce. '
@@ -155,7 +155,7 @@ FOODS_BY_CITY = [{'name': 'Quenelle de brochet',
  {'name': 'Salade Lyonnaise',
   'name_en': 'Lyonnaise Salad',
   'description': 'Insalata tiepida con lattuga, pancetta croccante, crostini e uovo in camicia, condita con vinaigrette decisa. Sembra '
-                 'semplice ma ? molto precisa: il tuorlo deve legare gli ingredienti, mentre pancetta e pane danno sapidit? e struttura.',
+                 'semplice ma è molto precisa: il tuorlo deve legare gli ingredienti, mentre pancetta e pane danno sapidità e struttura.',
   'description_en': 'A warm salad with lettuce, crisp bacon, croutons and poached egg, dressed with a sharp vinaigrette. It seems simple '
                     'but is very precise: the yolk should bind the ingredients, while bacon and bread provide savouriness and structure.',
   'ingredients': ['lattuga', 'pancetta', 'uovo', 'crostini', 'vinaigrette'],
@@ -174,36 +174,36 @@ FOODS_BY_CITY = [{'name': 'Quenelle de brochet',
  {'name': 'Cervelle de canut',
   'name_en': 'Cervelle de Canut Cheese Spread',
   'description': 'Crema fresca di formaggio bianco, erbe, scalogno, aglio, aceto e olio, servita con pane o patate. Il nome ironico '
-                 'richiama i tessitori lionesi: ? un piatto povero ma brillante, acidulo, erbaceo e molto conviviale. La qualit? migliore '
-                 '? fresca, cremosa e mai troppo pungente.',
+                 'richiama i tessitori lionesi: è un piatto povero ma brillante, acidulo, erbaceo e molto conviviale. La qualità migliore '
+                 'è fresca, cremosa e mai troppo pungente.',
   'description_en': 'A fresh spread of fromage blanc, herbs, shallot, garlic, vinegar and oil, served with bread or potatoes. Its ironic '
-                    'name refers to Lyon?s silk workers: it is humble but bright, tangy, herbaceous and very convivial.',
+                    'name refers to Lyon’s silk workers: it is humble but bright, tangy, herbaceous and very convivial.',
   'ingredients': ['formaggio bianco', 'erbe', 'scalogno', 'aglio', 'aceto'],
   'ingredients_en': ['fromage blanc', 'herbs', 'shallot', 'garlic', 'vinegar'],
   'places': ['Le Bouchon des Filles Lyon', 'Daniel et Denise Lyon', 'Bouchon Tupin Lyon']},
- {'name': 'Tarte ? la praline',
+ {'name': 'Tarte à la praline',
   'name_en': 'Praline Tart',
-  'description': 'Crostata dolce con guscio friabile e ripieno rosa di praline lionesi, mandorle caramellate e panna. ? scenografica ma '
-                 'non deve essere solo zucchero: la qualit? sta nell?equilibrio tra croccantezza, crema densa e aroma tostato della '
+  'description': 'Crostata dolce con guscio friabile e ripieno rosa di praline lionesi, mandorle caramellate e panna. È scenografica ma '
+                 'non deve essere solo zucchero: la qualità sta nell’equilibrio tra croccantezza, crema densa e aroma tostato della '
                  'mandorla.',
   'description_en': 'A sweet tart with a crumbly shell and a pink filling of Lyon pralines, caramelised almonds and cream. It is '
                     'theatrical but should not be only sugar: quality lies in the balance of crunch, dense cream and toasted almond aroma.',
   'ingredients': ['pasta frolla', 'praline rosa', 'mandorle', 'panna', 'zucchero'],
   'ingredients_en': ['shortcrust pastry', 'pink pralines', 'almonds', 'cream', 'sugar'],
   'places': ['Boulangerie du Palais Lyon', 'Sebastien Bouillet Lyon', 'Jocteur Lyon']},
- {'name': 'Andouillette ? la lyonnaise',
+ {'name': 'Andouillette à la lyonnaise',
   'name_en': 'Lyonnaise Andouillette',
-  'description': 'Salsiccia di trippa e frattaglie di maiale, dal profumo deciso, spesso cotta alla griglia o in salsa di senape. ? un '
+  'description': 'Salsiccia di trippa e frattaglie di maiale, dal profumo deciso, spesso cotta alla griglia o in salsa di senape. È un '
                  'piatto per palati curiosi: intenso, tradizionale, divisivo, ma molto rappresentativo della cucina carnivora lionese.',
   'description_en': 'A sausage of tripe and pork offal, with a strong aroma, often grilled or cooked in mustard sauce. It is a dish for '
-                    'curious eaters: intense, traditional and divisive, but highly representative of Lyon?s meat-centred cooking.',
+                    'curious eaters: intense, traditional and divisive, but highly representative of Lyon’s meat-centred cooking.',
   'ingredients': ['trippa', 'maiale', 'senape', 'vino bianco', 'spezie'],
   'ingredients_en': ['tripe', 'pork', 'mustard', 'white wine', 'spices'],
   'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
- {'name': 'Gratin de cardons ? la moelle',
+ {'name': 'Gratin de cardons à la moelle',
   'name_en': 'Cardoon and Bone Marrow Gratin',
   'description': 'Cardi cotti e gratinati con salsa cremosa e midollo, piatto festivo e profondamente lionese. Il cardo porta una nota '
-                 'vegetale leggermente amara, mentre il midollo d? ricchezza: l?equilibrio deve restare elegante, non semplicemente '
+                 'vegetale leggermente amara, mentre il midollo dà ricchezza: l’equilibrio deve restare elegante, non semplicemente '
                  'pesante. Deve conservare il carattere vegetale del cardo anche sotto la gratinatura.',
   'description_en': 'Cardoons cooked and baked with a creamy sauce and bone marrow, a festive and deeply Lyonnais dish. The cardoon brings '
                     'a slightly bitter vegetal note, while marrow adds richness: the balance should remain elegant, not merely heavy.',
@@ -212,8 +212,8 @@ FOODS_BY_CITY = [{'name': 'Quenelle de brochet',
   'places': ['Daniel et Denise Lyon', 'Le Garet Lyon', 'Cafe Comptoir Abel Lyon']},
  {'name': 'Beaujolais Nouveau',
   'name_en': 'Beaujolais Nouveau',
-  'description': 'Vino rosso giovane prodotto nella regione vicina del Beaujolais, celebrato ogni novembre con un forte rito conviviale. ? '
-                 'leggero, fruttato e immediato: pi? che un vino da meditazione, racconta festa, territorio e cultura dei bouchon.',
+  'description': 'Vino rosso giovane prodotto nella regione vicina del Beaujolais, celebrato ogni novembre con un forte rito conviviale. È '
+                 'leggero, fruttato e immediato: più che un vino da meditazione, racconta festa, territorio e cultura dei bouchon.',
   'description_en': 'A young red wine produced in the nearby Beaujolais region, celebrated every November through a strong convivial '
                     'ritual. It is light, fruity and immediate: more than a contemplative wine, it expresses celebration, territory and '
                     'bouchon culture.',

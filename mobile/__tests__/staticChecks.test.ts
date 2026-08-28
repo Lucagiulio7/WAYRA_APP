@@ -124,7 +124,7 @@ describe("hooks — enabled: !!city", () => {
 
 // ─── hooks — no useState/useEffect rimasti ────────────────────────────────────
 
-describe("hooks — nessun useState/useEffect residuo", () => {
+describe("hooks — nessuno stato locale superfluo", () => {
   const hookFiles = [
     "hooks/useAttractions.ts",
     "hooks/useFoodSpots.ts",
@@ -141,7 +141,7 @@ describe("hooks — nessun useState/useEffect residuo", () => {
       expect(file).not.toMatch(/\buseState\s*\(/);
     });
 
-    it(`${path.basename(f)} non usa più useEffect`, () => {
+    it(`${path.basename(f)} non usa useEffect`, () => {
       const file = src(f);
       expect(file).not.toMatch(/\buseEffect\s*\(/);
     });
@@ -263,5 +263,24 @@ describe("types/index.ts", () => {
 
   it("Attraction ha description_en", () => {
     expect(file).toContain("description_en");
+  });
+});
+
+describe("mappe e precaricamento metro", () => {
+  it("le mappe giornaliere consentono lo zoom fino alla vista regionale", () => {
+    ["components/DayMap.tsx", "components/DayMap.web.tsx"].forEach((fileName) => {
+      const file = src(fileName);
+      expect(file).toContain("minZoom:3");
+      expect(file).not.toContain("minZoom:12");
+    });
+  });
+
+  it("la generazione precarica la rete senza bloccare indefinitamente l'itinerario", () => {
+    const file = src("app/index.tsx");
+    expect(file).toContain("supportsTransit(requestedCity)");
+    expect(file).toContain("getTransitNetwork(requestedCity)");
+    expect(file).toContain("Promise.race");
+    expect(file).toContain("TRANSIT_PRELOAD_WAIT_MS");
+    expect(file).toContain("Prepariamo e salviamo la rete di trasporto");
   });
 });

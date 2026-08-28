@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   LayoutAnimation,
-  Linking,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stop } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { localizedDescription, localizedField, localizedName } from "@/utils/localization";
+import { cityLabel } from "@/utils/cityLabels";
+import { openExternalLink } from "@/utils/externalLinks";
 
 // ── Colori per livello ────────────────────────────────────────────────────────
 
@@ -42,7 +43,17 @@ function getAttractionEmoji(type?: string | null): string {
 }
 
 function isMuseum(type?: string | null): boolean {
-  return type === "museo";
+  return (type ?? "").toLowerCase() === "museo";
+}
+
+function mapsSearchUrl(stop: Stop, lang: string): string {
+  const query = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? "", lang)}`.trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+function transitDirectionsUrl(stop: Stop, lang: string): string {
+  const destination = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? "", lang)}`.trim();
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=transit&dir_action=navigate`;
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -103,14 +114,13 @@ function FoodStop({
   useEffect(() => { setNoteText(stop.notes ?? ""); }, [stop.notes]);
 
   const isEmptySlot = stop.empty_meal_slot || stop.id < 0;
-  const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
-  const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
+  const displayName = localizedName(stop, lang);
+  const displayDesc = localizedDescription(stop, lang);
   const emoji = stop.attraction_type ? getAttractionEmoji(stop.attraction_type) : "🍴";
 
   const openMaps = async () => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
-    try { await Linking.openURL(url); }
-    catch { Alert.alert(labels.errTitle, labels.errOpenMaps); }
+    const url = mapsSearchUrl(stop, lang);
+    await openExternalLink(url, lang, { title: labels.errTitle, message: labels.errOpenMaps });
   };
 
   const toggle = () => {
@@ -138,7 +148,7 @@ function FoodStop({
           <Text style={[styles.foodStopName, { color: colors.text }]} numberOfLines={2}>{displayName}</Text>
           {isEmptySlot ? (
             <Text style={[styles.foodStopDesc, { color: isDark ? "#7aa895" : "#3d7a65" }]} numberOfLines={2}>
-              {lang === "en" ? "Tap to choose on the map" : "Tocca per scegliere sulla mappa"}
+              {lang === "es" ? "Toca para elegir en el mapa" : lang === "fr" ? "Touchez pour choisir sur la carte" : lang === "en" ? "Tap to choose on the map" : "Tocca per scegliere sulla mappa"}
             </Text>
           ) : !!displayDesc && (
             <Text style={[styles.foodStopDesc, { color: isDark ? "#7aa895" : "#3d7a65" }]} numberOfLines={2}>{displayDesc}</Text>
@@ -204,8 +214,17 @@ function AttractionStop({
   const museum = isMuseum(stop.attraction_type);
   const emoji  = getAttractionEmoji(stop.attraction_type);
 
-  const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
-  const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
+  const displayName = localizedName(stop, lang);
+  const displayDesc = localizedDescription(stop, lang);
+
+  const openingNote = localizedField<string>(stop, "opening_hours_note", lang, "");
+  const priceNote = localizedField<string>(stop, "price_note", lang, "");
+  const visitDetails = [
+    stop.free_entry === true ? (lang === "es" ? "Entrada gratuita" : lang === "fr" ? "Entrée gratuite" : lang === "en" ? "Free entry" : "Ingresso gratuito") : "",
+    stop.booking_required === true ? (lang === "es" ? "Reserva obligatoria" : lang === "fr" ? "Réservation obligatoire" : lang === "en" ? "Booking required" : "Prenotazione obbligatoria") : "",
+    openingNote,
+    priceNote,
+  ].filter(Boolean);
 
   // Museum gets a subtle purple tint that works on both themes
   const cardBg     = museum ? (isDark ? "#1a0f2e" : "#f0eaff") : colors.card2;
@@ -219,14 +238,16 @@ function AttractionStop({
 
   const openTickets = async () => {
     if (!stop.ticket_url) return;
-    try { await Linking.openURL(stop.ticket_url); }
-    catch { Alert.alert(labels.errTitle, labels.errOpenLink); }
+    await openExternalLink(stop.ticket_url, lang, { title: labels.errTitle, message: labels.errOpenLink });
   };
 
   const openMaps = async () => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${stop.latitude},${stop.longitude}`;
-    try { await Linking.openURL(url); }
-    catch { Alert.alert(labels.errTitle, labels.errOpenMaps); }
+    const url = mapsSearchUrl(stop, lang);
+    await openExternalLink(url, lang, { title: labels.errTitle, message: labels.errOpenMaps });
+  };
+
+  const openTransit = async () => {
+    await openExternalLink(transitDirectionsUrl(stop, lang), lang, { title: labels.errTitle, message: labels.errOpenMaps });
   };
 
   return (
@@ -295,6 +316,16 @@ function AttractionStop({
           {!!displayDesc && (
             <Text style={[styles.description, { color: colors.textSub }]}>{displayDesc}</Text>
           )}
+          {visitDetails.length > 0 && (
+            <View style={styles.visitDetails}>
+              {visitDetails.map((detail) => (
+                <View key={detail} style={styles.visitDetailRow}>
+                  <Ionicons name="information-circle-outline" size={14} color={colors.accentGold} />
+                  <Text style={[styles.visitDetailText, { color: colors.textSub }]}>{detail}</Text>
+                </View>
+              ))}
+            </View>
+          )}
           {museum && !!stop.ticket_url && (
             <TouchableOpacity
               style={[styles.ticketFullBtn, { backgroundColor: colors.accentPurple + "15", borderColor: colors.accentPurple + "44" }]}
@@ -303,11 +334,22 @@ function AttractionStop({
             >
               <Ionicons name="ticket-outline" size={14} color={colors.accentPurple} />
               <Text style={[styles.ticketFullText, { color: colors.accentPurple }]}>
-                {lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
+                {lang === "es" ? "Comprar entradas en linea" : lang === "fr" ? "Acheter les billets en ligne" : lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
               </Text>
               <Ionicons name="open-outline" size={13} color={colors.accentPurple} />
             </TouchableOpacity>
           )}
+          <TouchableOpacity
+            style={[styles.transitFullBtn, { backgroundColor: "#0891b215", borderColor: "#0891b244" }]}
+            onPress={openTransit}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="bus-outline" size={15} color="#0891b2" />
+            <Text style={styles.transitFullText}>
+              {lang === "es" ? "Cómo llegar en transporte público" : lang === "fr" ? "Itinéraire en transports" : lang === "en" ? "Public transport directions" : "Come arrivare con i mezzi"}
+            </Text>
+            <Ionicons name="open-outline" size={13} color="#0891b2" />
+          </TouchableOpacity>
           {(stop.tags ?? []).length > 0 && (
             <View style={styles.tags}>
               {stop.tags!.map((tag) => (
@@ -349,7 +391,7 @@ function NoteInput({
         value={value}
         onChangeText={onChange}
         onBlur={onBlur}
-        placeholder={lang === "en" ? "Add a note…" : "Aggiungi una nota…"}
+        placeholder={lang === "es" ? "Añadir una nota\u2026" : lang === "fr" ? "Ajouter une note\u2026" : lang === "en" ? "Add a note\u2026" : "Aggiungi una nota\u2026"}
         placeholderTextColor={colors.textMuted}
         multiline
         maxLength={300}
@@ -366,8 +408,8 @@ function FreeTimeStop({
 }: {
   stop: Stop; lang: string; freeTimeLabel: string; colors: any;
 }) {
-  const displayName = (lang === "en" && stop.name_en) ? stop.name_en : stop.name;
-  const displayDesc = (lang === "en" && stop.description_en) ? stop.description_en : stop.description;
+  const displayName = localizedName(stop, lang);
+  const displayDesc = localizedDescription(stop, lang);
 
   return (
     <View style={[styles.freeTimeCard, { backgroundColor: colors.accentGreen + "12", borderColor: colors.accentGreen + "40" }]}>
@@ -456,6 +498,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   description:   { fontSize: 13, lineHeight: 19 },
+  visitDetails: { gap: 6 },
+  visitDetailRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
+  visitDetailText: { flex: 1, fontSize: 12, lineHeight: 17 },
   ticketFullBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -467,6 +512,17 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   ticketFullText: { fontWeight: "600", fontSize: 13 },
+  transitFullBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignSelf: "flex-start",
+  },
+  transitFullText: { color: "#0891b2", fontWeight: "700", fontSize: 13 },
   tags:  { flexDirection: "row", flexWrap: "wrap", gap: 5 },
   tag:   { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   tagText: { fontSize: 11 },
