@@ -14,11 +14,10 @@ import {
   PanResponder,
   PanResponderGestureState,
   Platform,
-  Dimensions,
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cacheCityForOffline } from "@/services/cityOfflineCache";
@@ -38,7 +37,6 @@ import { localizedDescription, localizedName } from "@/utils/localization";
 import { translateAttractionType } from "@/utils/attractionType";
 import { isMuseumType, routeWalkingKm, walkingKm } from "@/utils/routeMetrics";
 import { MANUAL_MAX_WALK_KM, MAX_ACTIVITY_MINUTES, MAX_MUSEUMS_PER_DAY } from "@/utils/itineraryRules";
-import { measureGuideTarget } from "@/utils/guideMeasurement";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
 import {
   loadManualBuilderDraft,
@@ -81,12 +79,10 @@ const LEVEL_COLORS: Record<number, string> = {
   1: "#e8c06a", 2: "#7eb8f7", 3: "#a78bfa",
 };
 
-const MANUAL_GUIDE_KEY = "wayra_manual_guide_v2";
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const MANUAL_GUIDE_SLIDES_IT = [
   { icon: "\u{1F9ED}", target: "header", title: "Intestazione", body: "Qui controlli la città e la durata del viaggio. La freccia torna alla schermata precedente; sotto il nome vedi quante tappe hai già inserito." },
-  { icon: "\u{1F4D6}", target: "guide", title: "Guida della sezione", body: "Il pulsante con il punto interrogativo riapre questa spiegazione in qualsiasi momento, senza modificare il tuo itinerario." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Guida contestuale", body: "Il punto interrogativo attiva la modalità guida. Puoi continuare a scorrere e toccare un controllo per sapere esattamente cosa fa, senza modificare l'itinerario." },
   { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema e preferenze dell'app. Le modifiche vengono applicate anche al riepilogo finale." },
   { icon: "\u{1F4CC}", target: "tabs", title: "Attrazioni, pasti e piano", body: "Attrazioni mostra i luoghi da visitare, Pasti ristoranti e locali, Piano il riepilogo dei giorni. I numeri indicano gli elementi disponibili o già inseriti." },
   { icon: "\u{1F50E}", target: "search", title: "Ricerca e filtri", body: "Cerca restringe la lista in tempo reale. Il pulsante con gli slider filtra per categoria, per esempio musei, piazze, monumenti o tipi di cucina." },
@@ -99,7 +95,7 @@ const MANUAL_GUIDE_SLIDES_IT = [
 
 const MANUAL_GUIDE_SLIDES_EN = [
   { icon: "\u{1F9ED}", target: "header", title: "Header", body: "Check the city and trip length here. The arrow returns to the previous screen; below the city name you can see how many stops have already been added." },
-  { icon: "\u{1F4D6}", target: "guide", title: "Section guide", body: "The question-mark button reopens this walkthrough at any time without changing your itinerary." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Contextual help", body: "The question mark enables help mode. Keep scrolling and tap a control to learn exactly what it does without changing the itinerary." },
   { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Settings", body: "The gear opens the app language, theme and preferences. Changes also apply to the final itinerary." },
   { icon: "\u{1F4CC}", target: "tabs", title: "Places, food and plan", body: "Places lists attractions, Food lists restaurants and local spots, and Plan summarizes the days. Badges show available or inserted items." },
   { icon: "\u{1F50E}", target: "search", title: "Search and filters", body: "Search narrows the list in real time. The sliders button filters by category, such as museums, squares, monuments or food types." },
@@ -112,7 +108,7 @@ const MANUAL_GUIDE_SLIDES_EN = [
 
 const MANUAL_GUIDE_SLIDES_FR = [
   { icon: "\u{1F9ED}", target: "header", title: "En-tête", body: "Contrôlez ici la ville et la durée du voyage. La flèche revient à l'écran précédent ; sous le nom, vous voyez combien d'étapes sont déjà ajoutées." },
-  { icon: "\u{1F4D6}", target: "guide", title: "Guide de la section", body: "Le bouton avec le point d'interrogation rouvre cette visite à tout moment sans modifier votre itinéraire." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Aide contextuelle", body: "Le point d'interrogation active le mode d'aide. Continuez à défiler et touchez un contrôle pour connaître précisément sa fonction sans modifier l'itinéraire." },
   { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Paramètres", body: "L'engrenage ouvre la langue, le thème et les préférences. Les changements s'appliquent aussi au récapitulatif final." },
   { icon: "\u{1F4CC}", target: "tabs", title: "Attractions, repas et plan", body: "Attractions affiche les lieux, Repas les restaurants, et Plan le résumé des jours. Les nombres indiquent les éléments disponibles ou déjà ajoutés." },
   { icon: "\u{1F50E}", target: "search", title: "Recherche et filtres", body: "La recherche réduit la liste en temps réel. Le bouton avec les curseurs filtre par catégorie : musées, places, monuments ou types de cuisine." },
@@ -125,7 +121,7 @@ const MANUAL_GUIDE_SLIDES_FR = [
 
 const MANUAL_GUIDE_SLIDES_ES = [
   { icon: "\u{1F9ED}", target: "header", title: "Encabezado", body: "Aquí controlas la ciudad y la duración del viaje. La flecha vuelve a la pantalla anterior; debajo ves cuántas paradas has añadido." },
-  { icon: "\u{1F4D6}", target: "guide", title: "Guía de la sección", body: "El botón con el signo de interrogación vuelve a abrir esta explicación sin modificar el itinerario." },
+  { icon: "\u{1F4D6}", target: "guide", title: "Ayuda contextual", body: "El signo de interrogación activa el modo de ayuda. Puedes seguir desplazándote y tocar un control para saber exactamente qué hace sin modificar el itinerario." },
   { icon: "\u{2699}\u{FE0F}", target: "settings", title: "Configuración", body: "El engranaje abre el idioma, el tema y las preferencias. Los cambios también se aplican al resumen final." },
   { icon: "\u{1F4CC}", target: "tabs", title: "Lugares, comida y plan", body: "Lugares muestra atracciones, Comida restaurantes y Plan el resumen de los días. Los números indican elementos disponibles o añadidos." },
   { icon: "\u{1F50E}", target: "search", title: "Búsqueda y filtros", body: "La búsqueda filtra la lista en tiempo real. El botón de controles filtra por categoría: museos, plazas, monumentos o tipos de comida." },
@@ -192,8 +188,6 @@ type DockDetail = { dayIdx: number; slot: SlotData } | null;
 type AttractionDetail = { item: BuilderAttraction; kind: SlotKind } | null;
 type SlotTarget = { dayIdx: number; slotId: string; kind: SlotKind; ref: View | null };
 type DragState = { item: BuilderAttraction; kind: SlotKind } | null;
-type GuideStep = { icon: string; title: string; body: string; target: string };
-type GuideRect = { x: number; y: number; width: number; height: number };
 
 let _slotCounter = 0;
 function makeSlot(kind: SlotKind = "attraction"): SlotData {
@@ -1436,108 +1430,6 @@ export default function CreateItineraryScreen() {
         onReorder={handleMapReorder}
       />
     </SafeAreaView>
-  );
-}
-
-function GuideModal({
-  lang, slides, targetRefs, rootRef, onDone,
-}: {
-  lang: string;
-  slides: GuideStep[];
-  targetRefs: Map<string, View>;
-  rootRef: React.RefObject<View | null>;
-  onDone: () => void;
-}) {
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [slide, setSlide] = useState(0);
-  const [rect, setRect] = useState<GuideRect | null>(null);
-  const [cardHeight, setCardHeight] = useState(300);
-  const isLast = slide === slides.length - 1;
-  const current = slides[slide];
-  const tooltipWidth = Math.min(300, SCREEN_WIDTH - 32);
-  const tooltipHeight = cardHeight;
-  const tooltipTop = rect
-    ? Math.max(16, Math.min(SCREEN_HEIGHT - tooltipHeight - 16,
-        rect.y + rect.height + tooltipHeight + 24 > SCREEN_HEIGHT
-          ? rect.y - tooltipHeight - 16
-          : rect.y + rect.height + 16))
-    : Math.max(16, Math.min(SCREEN_HEIGHT - tooltipHeight - 16, SCREEN_HEIGHT * 0.46));
-  const tooltipLeft = Math.max(16, Math.min(SCREEN_WIDTH - tooltipWidth - 16, rect ? rect.x + rect.width / 2 - tooltipWidth / 2 : 16));
-  const pad = 6;
-  const cutoutTop = rect ? Math.max(0, rect.y - pad) : 0;
-  const cutoutBottom = rect ? Math.min(SCREEN_HEIGHT, rect.y + rect.height + pad) : 0;
-  const cutoutLeft = rect ? Math.max(0, rect.x - pad) : 0;
-  const cutoutRight = rect ? Math.min(SCREEN_WIDTH, rect.x + rect.width + pad) : SCREEN_WIDTH;
-  const overlayColor = "#000000d0";
-
-  useEffect(() => {
-    setRect(null);
-    const target = targetRefs.get(current.target);
-    if (!target) return;
-    const id = setTimeout(() => {
-      measureGuideTarget(target, rootRef.current, insets.top, setRect);
-    }, 120);
-    return () => clearTimeout(id);
-  }, [current.target, insets.top, rootRef, targetRefs]);
-
-  return (
-    <Modal visible transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
-      <View style={styles.tourOverlay}>
-        {rect ? (
-          <>
-            <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: cutoutTop, backgroundColor: overlayColor }} />
-            <View pointerEvents="none" style={{ position: "absolute", top: cutoutTop, left: 0, width: cutoutLeft, height: cutoutBottom - cutoutTop, backgroundColor: overlayColor }} />
-            <View pointerEvents="none" style={{ position: "absolute", top: cutoutTop, left: cutoutRight, right: 0, height: cutoutBottom - cutoutTop, backgroundColor: overlayColor }} />
-            <View pointerEvents="none" style={{ position: "absolute", top: cutoutBottom, left: 0, right: 0, bottom: 0, backgroundColor: overlayColor }} />
-            <View pointerEvents="none" style={[styles.tourHighlight, { left: cutoutLeft, top: cutoutTop, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop }]} />
-          </>
-        ) : (
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: overlayColor }]} />
-        )}
-        {rect && (
-          <View
-            pointerEvents="none"
-            style={[
-              styles.tourArrow,
-              {
-                left: Math.max(22, Math.min(SCREEN_WIDTH - 22, rect.x + rect.width / 2 - 7)),
-                top: tooltipTop > rect.y ? tooltipTop - 13 : tooltipTop + tooltipHeight - 8,
-                transform: [{ rotate: tooltipTop > rect.y ? "180deg" : "0deg" }],
-              },
-            ]}
-          />
-        )}
-        <View onLayout={(event) => setCardHeight(event.nativeEvent.layout.height)} style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth }]}>
-          <Text style={styles.tourEyebrow}>{slide + 1} / {slides.length}</Text>
-          <Text style={styles.guideIcon}>{current.icon}</Text>
-          <Text style={styles.guideTitle}>{current.title}</Text>
-          <Text style={styles.guideBody}>{current.body}</Text>
-          <View style={styles.guideDots}>
-            {slides.map((_, i) => (
-              <View key={i} style={[styles.guideDot, i === slide && styles.guideDotActive]} />
-            ))}
-          </View>
-          <TouchableOpacity
-            style={styles.guideCta}
-            onPress={() => isLast ? onDone() : setSlide((s) => s + 1)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.guideCtaText}>
-              {isLast
-                ? (lang === "es" ? "Empezar a crear" : lang === "fr" ? "Commencer la creation" : lang === "en" ? "Start building" : "Inizia a creare")
-                : (lang === "es" ? "Siguiente" : lang === "fr" ? "Suivant" : lang === "en" ? "Next" : "Avanti")}
-            </Text>
-          </TouchableOpacity>
-          {!isLast && (
-            <TouchableOpacity onPress={onDone} style={styles.guideSkip} activeOpacity={0.7}>
-              <Text style={styles.guideSkipText}>{lang === "es" ? "Saltar" : lang === "fr" ? "Passer" : lang === "en" ? "Skip" : "Salta"}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    </Modal>
   );
 }
 

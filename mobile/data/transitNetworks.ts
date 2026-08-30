@@ -782,7 +782,7 @@ async function fetchElements(config: TransitCityConfig): Promise<OsmElement[]> {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
           Accept: "application/json",
-          "User-Agent": "WayraTravelApp/1.0 (transit map)",
+          "User-Agent": "UrveyaTravelApp/1.0 (transit map)",
         },
         body: `data=${encodeURIComponent(overpassQuery(config))}`,
         signal: controller.signal,

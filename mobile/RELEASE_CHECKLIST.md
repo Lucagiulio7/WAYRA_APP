@@ -1,6 +1,6 @@
-# Wayra release checklist
+# Urveya release checklist
 
-Updated: 2026-08-27
+Updated: 2026-08-28
 
 ## Automated gate
 
@@ -12,7 +12,7 @@ npm run release:check
 
 The command runs TypeScript, all Jest tests, validates Expo/EAS configuration, checks required assets and legal pages, rejects legacy Render dependencies, and validates all 51 local city packages and 1,836 itinerary plans.
 
-Latest automated gate (2026-08-27): 313/313 tests passed, content audit with 0 errors and 0 warnings, strict preflight passed.
+Latest automated gate (2026-08-29): 324/324 tests passed, content audit with 0 errors and 0 warnings. The strict preflight now intentionally blocks publication while temporary legal URLs remain.
 
 For a non-blocking status report while content work is in progress:
 
@@ -29,15 +29,22 @@ npm run preflight
 - [x] Link the repository to Expo project `35fadf8a-85b3-430d-86b7-01f6adf9f8c5`.
 - [ ] Deploy the legal pages and verify the final public URLs for `/privacy`, `/terms`, `/delete-account`, and `/support`.
 - [ ] Confirm that `privacy@wayra.app` is a working monitored mailbox, or replace it everywhere with the real support address.
+- [x] Final product name selected: `Urveya`; preliminary exact-name trademark screening completed.
+- [ ] Complete a professional similarity search before filing the `Urveya` trademark.
+- [ ] Purchase and configure a developer-controlled Urveya domain and support mailbox; legacy `wayra.app` references are temporary and must not be published.
 - [ ] Generate and install the `preview` APK on the Android emulator.
+- [ ] Install `expo-store-review` and connect the prepared review eligibility rule to the native prompt (the current terminal could not reach npm).
+- [x] Remove inactive Sentry runtime and align privacy declarations with zero crash/diagnostic collection.
 
 ## Android
 
-- [x] Application ID: `com.wayra.app`.
+- [x] Application ID: `com.urveya.app`.
 - [x] Production profile creates an Android App Bundle (`.aab`).
 - [x] Native build number auto-increments in production.
 - [x] App icon and adaptive foreground are 1024x1024.
 - [x] Location is the only explicitly required sensitive capability.
+- [x] Expo SDK 54 targets Android 16 / API level 36, required for new submissions from 2026-08-31.
+- [x] Legacy Android storage permissions are explicitly blocked.
 - [ ] Create the app in Google Play Console with the exact application ID.
 - [ ] Complete store listing, data safety, content rating, target audience, ads declaration, app access, and privacy policy URL.
 - [ ] Upload the first AAB to Internal testing.
@@ -51,11 +58,11 @@ npx eas-cli@latest build --platform android --profile production
 
 ## iOS
 
-- [x] Bundle identifier: `com.wayra.app`.
+- [x] Bundle identifier: `com.urveya.app`.
 - [x] Apple Sign In capability is declared.
 - [x] Location permission has a purpose string.
 - [x] Unused photo-library permission declarations were removed.
-- [x] Privacy manifest declares account, analytics, and crash data without tracking.
+- [x] Privacy manifest declares account and crash data without tracking.
 - [ ] Enroll in the Apple Developer Program.
 - [ ] Create the matching app in App Store Connect.
 - [ ] Complete app metadata, screenshots, support URL, privacy URL, age rating, and App Privacy answers.
@@ -71,7 +78,7 @@ npx eas-cli@latest build --platform ios --profile production
 
 These checks remain intentionally pending until a physical-device session:
 
-- [ ] Fresh install and first-run onboarding.
+- [ ] Fresh install and contextual help mode from the question-mark button.
 - [ ] Generation and manual creation online and offline.
 - [ ] All four languages and system font scaling.
 - [ ] Location denied, allowed, unavailable, and outside the destination.

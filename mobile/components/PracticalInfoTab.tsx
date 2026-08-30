@@ -12,9 +12,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { exactLocalizedField, localizedField } from "@/utils/localization";
 import { openExternalLink } from "@/utils/externalLinks";
+import { contextHelpOutline, type ContextHelpAnchor, type ContextHelpContent } from "@/components/ContextHelp";
 
 interface Props {
   info: CityInfo;
+  helpActive?: boolean;
+  onHelpRequest?: (content: ContextHelpContent, anchor?: ContextHelpAnchor) => void;
 }
 
 const emoji = (...points: number[]) => String.fromCodePoint(...points);
@@ -93,11 +96,16 @@ function InfoRow({
   );
 }
 
-function AppCard({ app, lang, colors, transport }: { app: TransportApp; lang: string; colors: any; transport: boolean }) {
+function AppCard({ app, lang, colors, transport, helpActive, onHelpRequest }: { app: TransportApp; lang: string; colors: any; transport: boolean; helpActive: boolean; onHelpRequest?: Props["onHelpRequest"] }) {
   const genericDescription = transport
     ? (lang === "es" ? "Aplicación recomendada para moverte por la ciudad." : lang === "fr" ? "Application recommandée pour vous déplacer en ville." : lang === "en" ? "Recommended app for getting around the city." : "App consigliata per muoversi in città.")
     : (lang === "es" ? "Aplicación útil recomendada para el viaje." : lang === "fr" ? "Application utile recommandée pour le voyage." : lang === "en" ? "Useful app recommended for the trip." : "App utile consigliata per il viaggio.");
   const desc = exactLocalizedField<string>(app, "description", lang, genericDescription);
+  const help: ContextHelpContent = {
+    icon: "download-outline",
+    title: lang === "es" ? "Aplicación recomendada" : lang === "fr" ? "Application recommandée" : lang === "en" ? "Recommended app" : "App consigliata",
+    body: lang === "es" ? "Abre la página oficial o busca esta aplicación en la tienda del dispositivo. Comprueba disponibilidad y condiciones antes de instalarla." : lang === "fr" ? "Ouvre la page officielle ou recherche cette application dans la boutique de l'appareil. Vérifiez disponibilité et conditions avant installation." : lang === "en" ? "Opens the official page or searches for this app in your device store. Check availability and terms before installing." : "Apre la pagina ufficiale o cerca l'app nello store del dispositivo. Verifica disponibilità e condizioni prima di installarla.",
+  };
 
   const openApp = async () => {
     const query = encodeURIComponent(app.name);
@@ -113,8 +121,8 @@ function AppCard({ app, lang, colors, transport }: { app: TransportApp; lang: st
 
   return (
     <TouchableOpacity
-      style={[styles.appCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={openApp}
+      style={[styles.appCard, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(helpActive, colors.accentGold)]}
+      onPress={(event) => helpActive ? onHelpRequest?.(help, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY }) : openApp()}
       activeOpacity={0.75}
     >
       <View style={styles.appInfo}>
@@ -128,13 +136,18 @@ function AppCard({ app, lang, colors, transport }: { app: TransportApp; lang: st
   );
 }
 
-function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: string; colors: any }) {
+function EmergencyRow({ item, lang, colors, helpActive, onHelpRequest }: { item: EmergencyNumber; lang: string; colors: any; helpActive: boolean; onHelpRequest?: Props["onHelpRequest"] }) {
   const fallbackLabel = lang === "es" ? "Número de emergencia" : lang === "fr" ? "Numéro d'urgence" : lang === "en" ? "Emergency number" : "Numero di emergenza";
   const label = exactLocalizedField<string>(item, "label", lang, fallbackLabel);
+  const help: ContextHelpContent = {
+    icon: "call-outline",
+    title: lang === "es" ? "Llamada de emergencia" : lang === "fr" ? "Appel d'urgence" : lang === "en" ? "Emergency call" : "Chiamata di emergenza",
+    body: lang === "es" ? "Toca este número fuera del modo guía para abrir el marcador. Llama solo cuando sea necesario y confirma siempre el país y el servicio." : lang === "fr" ? "Touchez ce numéro hors du mode guide pour ouvrir le téléphone. Appelez uniquement si nécessaire et vérifiez le pays et le service." : lang === "en" ? "Tap this number outside help mode to open the dialler. Call only when needed and confirm the country and service." : "Tocca questo numero fuori dalla modalità guida per aprire il telefono. Chiama solo quando necessario e verifica Paese e servizio.",
+  };
   return (
     <TouchableOpacity
-      style={[styles.emergencyRow, { backgroundColor: colors.danger + "1a", borderColor: colors.danger + "33" }]}
-      onPress={() => openExternalLink(`tel:${item.number}`, lang)}
+      style={[styles.emergencyRow, { backgroundColor: colors.danger + "1a", borderColor: colors.danger + "33" }, contextHelpOutline(helpActive, colors.accentGold)]}
+      onPress={(event) => helpActive ? onHelpRequest?.(help, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY }) : openExternalLink(`tel:${item.number}`, lang)}
       activeOpacity={0.75}
     >
       <Text style={[styles.emergencyNumber, { color: colors.danger }]}>{item.number}</Text>
@@ -144,7 +157,7 @@ function EmergencyRow({ item, lang, colors }: { item: EmergencyNumber; lang: str
   );
 }
 
-export function PracticalInfoTab({ info }: Props) {
+export function PracticalInfoTab({ info, helpActive = false, onHelpRequest }: Props) {
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
 
@@ -194,7 +207,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.emergency_numbers.length > 0 ? (
         <Section title={t.practicalEmergency} icon="alert-circle-outline" colors={colors}>
           {info.emergency_numbers.map((item, index) => (
-            <EmergencyRow key={index} item={item} lang={lang} colors={colors} />
+            <EmergencyRow key={index} item={item} lang={lang} colors={colors} helpActive={helpActive} onHelpRequest={onHelpRequest} />
           ))}
         </Section>
       ) : null}
@@ -202,7 +215,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.transport_apps.length > 0 ? (
         <Section title={t.practicalTransportApps} icon="subway-outline" colors={colors}>
           {info.transport_apps.map((app, index) => (
-            <AppCard key={index} app={app} lang={lang} colors={colors} transport />
+            <AppCard key={index} app={app} lang={lang} colors={colors} transport helpActive={helpActive} onHelpRequest={onHelpRequest} />
           ))}
         </Section>
       ) : null}
@@ -210,7 +223,7 @@ export function PracticalInfoTab({ info }: Props) {
       {info.useful_apps.length > 0 ? (
         <Section title={t.practicalUsefulApps} icon="apps-outline" colors={colors}>
           {info.useful_apps.map((app, index) => (
-            <AppCard key={index} app={app} lang={lang} colors={colors} transport={false} />
+            <AppCard key={index} app={app} lang={lang} colors={colors} transport={false} helpActive={helpActive} onHelpRequest={onHelpRequest} />
           ))}
         </Section>
       ) : null}

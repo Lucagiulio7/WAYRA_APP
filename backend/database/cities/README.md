@@ -1,4 +1,4 @@
-# Adding a city to Wayra
+# Adding a city to Urveya
 
 A city has two versioned registrations and does not require SQL to become usable.
 

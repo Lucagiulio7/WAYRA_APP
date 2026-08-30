@@ -50,10 +50,10 @@ export function AccountDeletionButton({ onDeleted }: Props) {
   const requestDeletion = () => {
     const title = tx({ it: "Elimina account", en: "Delete account", fr: "Supprimer le compte", es: "Eliminar cuenta" });
     const message = tx({
-      it: "L'operazione è definitiva. Verranno eliminati l'account, gli itinerari sincronizzati e i dati analytics associati.",
-      en: "This action is permanent. Your account, synced itineraries and associated analytics data will be deleted.",
-      fr: "Cette action est définitive. Votre compte, vos itinéraires synchronisés et les données d'analyse associées seront supprimés.",
-      es: "Esta acción es permanente. Se eliminarán tu cuenta, los itinerarios sincronizados y los datos analíticos asociados.",
+      it: "L'operazione è definitiva. Verranno eliminati l'account e gli itinerari sincronizzati associati.",
+      en: "This action is permanent. Your account and associated synced itineraries will be deleted.",
+      fr: "Cette action est définitive. Votre compte et les itinéraires synchronisés associés seront supprimés.",
+      es: "Esta acción es permanente. Se eliminarán tu cuenta y los itinerarios sincronizados asociados.",
     });
 
     if (Platform.OS === "web") {

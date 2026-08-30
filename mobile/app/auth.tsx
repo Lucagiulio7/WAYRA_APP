@@ -134,7 +134,7 @@ export default function AuthScreen() {
 
           {/* Logo */}
           <View style={s.logoArea}>
-            <Text style={s.brand}>WAYRA</Text>
+            <Text style={s.brand}>URVEYA</Text>
             <Text style={s.tagline}>
               {isForgot
                 ? (lang === "es" ? "Restablecer contraseña" : lang === "fr" ? "Récupérer le mot de passe" : lang === "it" ? "Recupera password" : "Reset password")

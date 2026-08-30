@@ -2,7 +2,6 @@ import { useRef, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { Itinerary } from "@/types";
 import { buildBundledItinerary, type BundledGenerateParams } from "@/services/bundledItinerary";
-import { track } from "@/services/AnalyticsService";
 import { normalizeItineraryStructure } from "@/utils/itineraryStructure";
 
 type GenerateParams = BundledGenerateParams;
@@ -68,37 +67,13 @@ export function useItinerary(): UseItineraryReturn {
       const key = cacheKey(params);
       if (inFlightRef.current?.key === key) return inFlightRef.current.promise;
       const requestVersion = ++requestVersionRef.current;
-      track("trip_created", {
-        city: params.city,
-        num_days: params.num_days,
-        level: String(params.level),
-        max_walk_km: params.max_walk_km ?? 5,
-      });
-
       let promise!: Promise<Itinerary | null>;
       promise = (async () => {
         try {
           const result = await mutateAsyncRef.current(params);
           if (requestVersion !== requestVersionRef.current) return null;
-          track("itinerary_generated", {
-            city: result.city,
-            requested_num_days: params.num_days,
-            generated_num_days: result.days.length,
-            level: Array.isArray(result.level) ? "mix" : String(result.level),
-            max_walk_km: params.max_walk_km ?? 5,
-            stops_count: result.days.reduce((sum, day) => sum + day.stops.length, 0),
-          });
           return result;
         } catch (error: any) {
-          if (requestVersion === requestVersionRef.current) {
-            track("trip_generation_failed", {
-              city: params.city,
-              num_days: params.num_days,
-              level: String(params.level),
-              max_walk_km: params.max_walk_km ?? 5,
-              error: error?.message ?? "unknown",
-            });
-          }
           return null;
         } finally {
           if (inFlightRef.current?.promise === promise) inFlightRef.current = null;

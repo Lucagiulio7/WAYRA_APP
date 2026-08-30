@@ -7,8 +7,8 @@ import { supabase } from "@/lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const OAUTH_REDIRECT_URI = makeRedirectUri({ scheme: "viaggio-ai", path: "auth-callback" });
-const PASSWORD_REDIRECT_URI = makeRedirectUri({ scheme: "viaggio-ai", path: "reset-password" });
+const OAUTH_REDIRECT_URI = makeRedirectUri({ scheme: "urveya", path: "auth-callback" });
+const PASSWORD_REDIRECT_URI = makeRedirectUri({ scheme: "urveya", path: "reset-password" });
 
 interface AuthContextValue {
   user: User | null;

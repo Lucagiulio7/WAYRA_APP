@@ -304,7 +304,7 @@ def comparison_issues(city: str, scenarios: list[Scenario]) -> list[Issue]:
 def markdown_report(report: dict[str, Any]) -> str:
     summary = report["summary"]
     lines = [
-        "# Wayra itinerary audit",
+        "# Urveya itinerary audit",
         "",
         f"Generated: {report['generated_at']}",
         f"Cities: {summary['cities']} | Scenarios: {summary['scenarios']} | Runtime: {summary['runtime_seconds']} s",

@@ -1,4 +1,4 @@
-"""Audit the city content that is actually bundled with the Wayra app.
+"""Audit the city content that is actually bundled with the Urveya app.
 
 The command is intentionally read-only. It validates local city packages and
 the client registries, then writes a JSON report and a human-readable Markdown
@@ -403,7 +403,7 @@ def check_client_registries(audit: Audit, cities: set[str]) -> None:
 
 def check_live_links(audit: Audit, urls: set[str], timeout: float) -> None:
     for index, url in enumerate(sorted(urls), start=1):
-        request = Request(url, headers={"User-Agent": "WayraContentAudit/1.0"}, method="HEAD")
+        request = Request(url, headers={"User-Agent": "UrveyaContentAudit/1.0"}, method="HEAD")
         try:
             with urlopen(request, timeout=timeout) as response:
                 if response.status >= 400:
@@ -432,7 +432,7 @@ def write_reports(audit: Audit, cities: list[str], report_dir: Path) -> tuple[Pa
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     lines = [
-        "# Wayra content validation",
+        "# Urveya content validation",
         "",
         f"Generated: {timestamp}",
         f"Cities: {len(cities)}",
@@ -524,7 +524,7 @@ def main() -> int:
 
     json_path, markdown_path = write_reports(audit, cities, args.report_dir)
     counts = Counter(finding.severity for finding in audit.findings)
-    print(f"Wayra content audit: {len(cities)} cities")
+    print(f"Urveya content audit: {len(cities)} cities")
     print(f"Errors: {counts['error']} | Warnings: {counts['warning']} | Quality notes: {counts['info']}")
     print(f"JSON: {json_path}")
     print(f"Report: {markdown_path}")

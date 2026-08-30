@@ -13,10 +13,6 @@ jest.mock("react", () => ({
   useCallback: (fn: any) => fn,
 }));
 
-jest.mock("@/services/AnalyticsService", () => ({
-  track: jest.fn(),
-}));
-
 jest.mock("@/constants/api", () => ({
   API_BASE_URL: "http://localhost:8000",
 }));

@@ -1,17 +1,24 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   Animated,
+  findNodeHandle,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 import { localText } from "@/i18n";
+import { calculateContextHelpPlacement, type ContextHelpAnchor } from "@/utils/contextHelpPlacement";
+
+export type { ContextHelpAnchor } from "@/utils/contextHelpPlacement";
 
 export interface ContextHelpContent {
   icon: keyof typeof Ionicons.glyphMap;
@@ -23,37 +30,49 @@ export interface ContextHelpContent {
 export interface ContextHelpController {
   active: boolean;
   selected: ContextHelpContent | null;
+  anchor: ContextHelpAnchor | null;
   toggle: () => void;
   exit: () => void;
   close: () => void;
-  explain: (content: ContextHelpContent) => void;
+  explain: (content: ContextHelpContent, anchor?: ContextHelpAnchor | null) => void;
   guard: <T extends unknown[]>(content: ContextHelpContent, action: (...args: T) => void) => (...args: T) => void;
 }
 
 export function useContextHelpController(): ContextHelpController {
   const [active, setActive] = useState(false);
   const [selected, setSelected] = useState<ContextHelpContent | null>(null);
+  const [anchor, setAnchor] = useState<ContextHelpAnchor | null>(null);
 
   const exit = useCallback(() => {
     setSelected(null);
+    setAnchor(null);
     setActive(false);
   }, []);
 
   const toggle = useCallback(() => {
     setSelected(null);
+    setAnchor(null);
     setActive((value) => !value);
   }, []);
 
-  const explain = useCallback((content: ContextHelpContent) => {
+  const explain = useCallback((content: ContextHelpContent, nextAnchor?: ContextHelpAnchor | null) => {
+    setAnchor(nextAnchor ?? null);
     setSelected(content);
   }, []);
 
-  const close = useCallback(() => setSelected(null), []);
+  const close = useCallback(() => {
+    setSelected(null);
+    setAnchor(null);
+  }, []);
 
   const guard = useCallback(
     <T extends unknown[]>(content: ContextHelpContent, action: (...args: T) => void) =>
       (...args: T) => {
         if (active) {
+          const candidate = (args as unknown[])[0] as { nativeEvent?: { pageX?: number; pageY?: number } } | undefined;
+          const pageX = candidate?.nativeEvent?.pageX;
+          const pageY = candidate?.nativeEvent?.pageY;
+          setAnchor(Number.isFinite(pageX) && Number.isFinite(pageY) ? { x: pageX!, y: pageY! } : null);
           setSelected(content);
           return;
         }
@@ -62,17 +81,17 @@ export function useContextHelpController(): ContextHelpController {
     [active],
   );
 
-  return { active, selected, toggle, exit, close, explain, guard };
+  return { active, selected, anchor, toggle, exit, close, explain, guard };
 }
 
 export function contextHelpOutline(active: boolean, color: string) {
   return active
     ? {
         shadowColor: color,
-        shadowOpacity: 0.28,
-        shadowRadius: 7,
+        shadowOpacity: 0.18,
+        shadowRadius: 4,
         shadowOffset: { width: 0, height: 0 },
-        elevation: 2,
+        elevation: 1,
       }
     : null;
 }
@@ -86,8 +105,21 @@ export function ContextHelpUI({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const bannerEntrance = useRef(new Animated.Value(0)).current;
+  const titleRef = useRef<Text>(null);
+  const [cardHeight, setCardHeight] = useState(270);
   const tx = (values: Record<string, string>) => localText(lang, values);
+  const cardWidth = Math.min(380, screenWidth - 24);
+  const placement = calculateContextHelpPlacement({
+    screenWidth,
+    screenHeight,
+    cardWidth,
+    cardHeight,
+    anchor: controller.anchor,
+    safeTop: insets.top,
+    safeBottom: insets.bottom,
+  });
 
   useEffect(() => {
     if (!controller.active || controller.selected) return;
@@ -100,6 +132,15 @@ export function ContextHelpUI({
       useNativeDriver: true,
     }).start();
   }, [bannerEntrance, controller.active, controller.selected]);
+
+  useEffect(() => {
+    if (!controller.selected) return;
+    const timeout = setTimeout(() => {
+      const node = findNodeHandle(titleRef.current);
+      if (node) AccessibilityInfo.setAccessibilityFocus(node);
+    }, 180);
+    return () => clearTimeout(timeout);
+  }, [controller.selected]);
 
   return (
     <>
@@ -148,14 +189,27 @@ export function ContextHelpUI({
       >
         <Pressable style={styles.backdrop} onPress={controller.close}>
           <Pressable
-            style={[styles.sheet, { backgroundColor: colors.card, borderColor: colors.border }]}
+            accessibilityViewIsModal
+            accessibilityLiveRegion="polite"
+            onLayout={(event) => setCardHeight(event.nativeEvent.layout.height)}
+            style={[
+              styles.sheet,
+              {
+                top: placement.top,
+                left: placement.left,
+                width: cardWidth,
+                maxHeight: Math.max(240, screenHeight - insets.top - insets.bottom - 24),
+                backgroundColor: colors.card,
+                borderColor: colors.accentGold + "88",
+              },
+            ]}
             onPress={(event) => event.stopPropagation()}
           >
             <View style={styles.sheetHeader}>
               <View style={[styles.iconBox, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "55" }]}>
                 <Ionicons name={controller.selected?.icon ?? "help-circle-outline"} size={23} color={colors.accentGold} />
               </View>
-              <Text style={[styles.title, { color: colors.text }]}>{controller.selected?.title}</Text>
+              <Text ref={titleRef} accessible accessibilityRole="header" style={[styles.title, { color: colors.text }]}>{controller.selected?.title}</Text>
               <TouchableOpacity
                 onPress={controller.close}
                 style={[styles.closeButton, { backgroundColor: colors.card2 }]}
@@ -165,14 +219,21 @@ export function ContextHelpUI({
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.body, { color: colors.textSub }]}>{controller.selected?.body}</Text>
+            <ScrollView
+              style={styles.contentScroll}
+              contentContainerStyle={styles.contentScrollInner}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              <Text style={[styles.body, { color: colors.textSub }]}>{controller.selected?.body}</Text>
 
-            {controller.selected?.note ? (
-              <View style={[styles.note, { backgroundColor: colors.accentBlue + "12", borderColor: colors.accentBlue + "45" }]}>
-                <Ionicons name="information-circle-outline" size={17} color={colors.accentBlue} />
-                <Text style={[styles.noteText, { color: colors.textSub }]}>{controller.selected.note}</Text>
-              </View>
-            ) : null}
+              {controller.selected?.note ? (
+                <View style={[styles.note, { backgroundColor: colors.accentBlue + "12", borderColor: colors.accentBlue + "45" }]}>
+                  <Ionicons name="information-circle-outline" size={17} color={colors.accentBlue} />
+                  <Text style={[styles.noteText, { color: colors.textSub }]}>{controller.selected.note}</Text>
+                </View>
+              ) : null}
+            </ScrollView>
 
             <TouchableOpacity style={[styles.confirm, { backgroundColor: colors.accentGold }]} onPress={controller.close}>
               <Text style={[styles.confirmText, { color: colors.bg }]}>
@@ -215,24 +276,27 @@ const styles = StyleSheet.create({
   bannerClose: { width: 32, height: 32, alignItems: "center", justifyContent: "center" },
   backdrop: {
     flex: 1,
-    backgroundColor: "#0000009a",
-    justifyContent: "flex-end",
-    padding: 12,
+    backgroundColor: "#00000070",
   },
   sheet: {
-    width: "100%",
-    maxWidth: 560,
-    alignSelf: "center",
+    position: "absolute",
     borderWidth: 1,
     borderRadius: 8,
     padding: 16,
     gap: 13,
+    elevation: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.32,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 7 },
   },
   sheetHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
   iconBox: { width: 40, height: 40, borderRadius: 8, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   title: { flex: 1, fontSize: 18, fontWeight: "900" },
   closeButton: { width: 36, height: 36, borderRadius: 7, alignItems: "center", justifyContent: "center" },
   body: { fontSize: 14, lineHeight: 21 },
+  contentScroll: { flexShrink: 1 },
+  contentScrollInner: { gap: 13 },
   note: { borderWidth: 1, borderRadius: 7, padding: 10, flexDirection: "row", alignItems: "flex-start", gap: 8 },
   noteText: { flex: 1, fontSize: 12, lineHeight: 18 },
   confirm: { minHeight: 44, borderRadius: 7, alignItems: "center", justifyContent: "center" },

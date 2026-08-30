@@ -1,15 +1,27 @@
-# Wayra - scheda Google Play
+# Urveya - scheda Google Play
 
-Stato: bozza pronta per il primo caricamento interno.
+Stato: documentazione pronta; build e operazioni Play Console ancora da eseguire.
+
+Documenti da usare durante la compilazione:
+
+- `STORE_LISTING.md`: testi localizzati della scheda.
+- `DATA_SAFETY.md`: risposte Sicurezza dei dati.
+- `REVIEW_AND_RATING.md`: accesso app, pubblicita, pubblico e rating.
+- `SCREENSHOTS.md`: piano per gli asset grafici.
 
 ## Identita
 
-- Nome app: `Wayra`
-- ID applicazione: `com.wayra.app`
+- Nome app: `Urveya`
+- ID applicazione: `com.urveya.app`
 - Categoria proposta: `Viaggi e informazioni locali`
 - Email di contatto da confermare: `privacy@wayra.app`
 - Privacy policy da pubblicare: `https://wayra.app/privacy`
 - Eliminazione account da pubblicare: `https://wayra.app/delete-account`
+
+Il nome definitivo e `Urveya`. La ricerca preliminare non ha rilevato marchi
+identici nel settore travel/software; prima del deposito resta consigliata una
+verifica professionale di somiglianza. Il dominio e la casella email definitivi
+devono ancora essere acquistati e configurati.
 
 L'ID applicazione non deve piu cambiare dopo la creazione dell'app in Play Console.
 
@@ -21,9 +33,9 @@ Itinerari personalizzati, mappe e consigli di viaggio anche offline.
 
 ### Descrizione completa
 
-Wayra ti aiuta a organizzare un viaggio coerente con il tuo ritmo.
+Urveya ti aiuta a organizzare un viaggio coerente con il tuo ritmo.
 
-Scegli la citta, la durata e l'intensita del viaggio: Wayra distribuisce le attrazioni nei diversi giorni, limita gli spostamenti a piedi e crea un percorso ordinato. Puoi anche costruire l'itinerario manualmente, consultare la mappa e modificare l'ordine delle tappe.
+Scegli la citta, la durata e l'intensita del viaggio: Urveya distribuisce le attrazioni nei diversi giorni, limita gli spostamenti a piedi e crea un percorso ordinato. Puoi anche costruire l'itinerario manualmente, consultare la mappa e modificare l'ordine delle tappe.
 
 Per ogni destinazione trovi inoltre:
 
@@ -39,7 +51,7 @@ Le informazioni principali e gli itinerari predefiniti restano consultabili anch
 ## Materiale grafico
 
 - Icona Play Store: esportare `public/icon.png` a 512x512 PNG.
-- Feature graphic: da creare in formato 1024x500 PNG o JPG.
+- Feature graphic pronta: `release/android/assets/feature-graphic-1024x500.png`.
 - Screenshot telefono: almeno 2; obiettivo 6 schermate a 1080x1920.
 
 Sequenza screenshot proposta:
@@ -59,14 +71,14 @@ Sequenza screenshot proposta:
 - Posizione: approssimativa e precisa, usata solo durante la ricerca volontaria di luoghi vicini; non in background.
 - Account: email e identificativo utente quando l'utente sceglie di registrarsi.
 - Contenuti utente: itinerari sincronizzati soltanto per utenti autenticati.
-- Diagnostica: crash e prestazioni se Sentry e configurato.
-- Analytics: facoltativi e disattivati finche l'utente non presta il consenso.
+- Diagnostica e crash log: non raccolti nella prima release.
+- Analytics di utilizzo: non presenti nella release.
 
 Le risposte definitive della sezione Sicurezza dei dati devono essere ricontrollate sul bundle di produzione e sugli SDK effettivamente configurati.
 
 ## Blocchi prima della pubblicazione
 
-- Collegare EAS e generare `extra.eas.projectId`.
+- EAS e gia collegato al progetto Expo.
 - Pubblicare e verificare privacy, termini, supporto ed eliminazione account.
 - Confermare una casella email realmente monitorata.
 - Generare AAB e caricarlo nel test interno.

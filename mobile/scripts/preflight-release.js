@@ -41,7 +41,10 @@ function walkFiles(directory, extensions) {
 }
 
 const expo = app.expo || {};
-check(expo.name === "Wayra", "Expo app name must be Wayra.");
+check(expo.name === "Urveya", "Expo app name must be Urveya.");
+check(expo.scheme === "urveya", "Expo deep-link scheme must be urveya.");
+check(expo.ios?.bundleIdentifier === "com.urveya.app", "iOS bundle identifier must be com.urveya.app.");
+check(expo.android?.package === "com.urveya.app", "Android package must be com.urveya.app.");
 check(/^\d+\.\d+\.\d+$/.test(expo.version || ""), "Expo version must use semantic versioning.");
 check(/^[a-z][a-z0-9.-]+$/.test(expo.ios?.bundleIdentifier || ""), "Missing or invalid iOS bundle identifier.");
 check(/^[a-z][a-z0-9_.]+$/.test(expo.android?.package || ""), "Missing or invalid Android package.");
@@ -86,6 +89,8 @@ const runtimeRoots = ["app", "components", "contexts", "hooks", "lib", "services
 const runtimeFiles = runtimeRoots.flatMap((dir) => walkFiles(path.join(root, dir), [".ts", ".tsx", ".js"]));
 const forbidden = /wayra-api|onrender\.com|API_BASE_URL|\/api\/itinerary\/generate|backendFetch/;
 const legacySupabaseCatalog = /\.from\((['"])(?:attractions|foods|culture_facts|city_info|neighborhoods)\1\)|functions\.invoke\((['"])(?:city-info|generate-itinerary)\2\)/;
+const removedAnalyticsRuntime = /AnalyticsService|analytics_events|getAnalyticsConsent|setAnalyticsConsent/;
+const removedCrashReportingRuntime = /@sentry\/react-native|EXPO_PUBLIC_SENTRY_DSN|Sentry\./;
 for (const file of runtimeFiles) {
   const source = fs.readFileSync(file, "utf8");
   if (forbidden.test(source)) {
@@ -93,6 +98,12 @@ for (const file of runtimeFiles) {
   }
   if (legacySupabaseCatalog.test(source)) {
     errors.push(`Legacy Supabase catalog dependency found in ${path.relative(root, file)}.`);
+  }
+  if (removedAnalyticsRuntime.test(source)) {
+    errors.push(`Removed analytics runtime found in ${path.relative(root, file)}.`);
+  }
+  if (removedCrashReportingRuntime.test(source)) {
+    errors.push(`Disabled crash-reporting runtime found in ${path.relative(root, file)}.`);
   }
 }
 for (const file of runtimeFiles) {
@@ -111,6 +122,21 @@ for (const file of runtimeFiles) {
 
 const productionEnv = fs.readFileSync(path.join(root, ".env.production"), "utf8");
 check(!forbidden.test(productionEnv), ".env.production still references the legacy backend.");
+check(!pkg.dependencies?.["@sentry/react-native"], "Sentry must not be bundled while crash collection is declared disabled.");
+
+const publicationFiles = [
+  ...runtimeFiles,
+  ...["public/privacy.html", "public/terms.html", "public/delete-account.html", "public/support.html"]
+    .map((relativePath) => path.join(root, relativePath)),
+];
+const temporaryPublicationReferences = publicationFiles.filter((file) =>
+  /wayra\.app|privacy@wayra\.app/i.test(fs.readFileSync(file, "utf8")),
+);
+if (temporaryPublicationReferences.length) {
+  const message = `Temporary wayra.app legal/contact references remain in ${temporaryPublicationReferences.length} publication file(s).`;
+  if (strict) errors.push(message);
+  else warnings.push(message);
+}
 
 function hasCorruptedText(value) {
   if (typeof value === "string") {
@@ -175,7 +201,7 @@ for (const language of ["fr", "es"]) {
 check(pkg.dependencies?.expo === "~54.0.35", "Unexpected Expo version; review SDK compatibility.");
 check(pkg.dependencies?.["expo-router"] === "~6.0.24", "Unexpected Expo Router version.");
 
-console.log(`Wayra release preflight: ${cityFiles.length} cities, ${planCount} local plans.`);
+console.log(`Urveya release preflight: ${cityFiles.length} cities, ${planCount} local plans.`);
 for (const message of warnings) console.warn(`WARN: ${message}`);
 for (const message of errors) console.error(`ERROR: ${message}`);
 if (errors.length) {

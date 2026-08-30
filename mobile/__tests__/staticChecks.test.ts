@@ -183,6 +183,40 @@ describe("create-itinerary.tsx", () => {
   });
 });
 
+describe("contextual help", () => {
+  const home = src("app/index.tsx");
+  const builder = src("app/create-itinerary.tsx");
+  const itinerary = src("app/itinerary.tsx");
+
+  it("does not render the legacy automatic onboarding", () => {
+    expect(home).not.toContain("<OnboardingModal");
+    expect(builder).not.toContain("<GuideModal");
+    expect(itinerary).not.toContain("<ItineraryGuideModal");
+    expect(home).not.toContain("function OnboardingModal");
+    expect(builder).not.toContain("function GuideModal");
+    expect(itinerary).not.toContain("function ItineraryGuideModal");
+  });
+
+  it("keeps contextual help available on the main planning screens", () => {
+    [home, builder, itinerary].forEach((file) => {
+      expect(file).toContain("useContextHelpController");
+      expect(file).toContain("<ContextHelpUI");
+    });
+  });
+
+  it("covers settings and actionable itinerary content", () => {
+    expect(src("components/SettingsModal.tsx")).toContain("<ContextHelpUI");
+    expect(src("components/ActivitiesTab.tsx")).toContain("helpActive");
+    expect(src("components/PracticalInfoTab.tsx")).toContain("onHelpRequest");
+  });
+
+  it("does not keep first-launch guide storage keys", () => {
+    expect(home).not.toContain("ONBOARDING_KEY");
+    expect(builder).not.toContain("MANUAL_GUIDE_KEY");
+    expect(itinerary).not.toContain("ITINERARY_GUIDE_KEY");
+  });
+});
+
 // ─── components/ErrorBoundary.tsx ─────────────────────────────────────────────
 
 describe("ErrorBoundary", () => {

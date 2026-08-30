@@ -27,7 +27,7 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* BebasNeue – logo WAYRA (fallback CSS se useFonts è lento) */
+            /* BebasNeue - logo URVEYA (fallback CSS se useFonts e lento) */
             @font-face {
               font-family: 'BebasNeue_400Regular';
               src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXooxW5rygbi49c.woff2') format('woff2');

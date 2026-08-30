@@ -15,7 +15,7 @@ The published app bundles the complete travel catalog for all cities:
 
 Itinerary generation and manual creation do not require Render, Supabase, or an internet connection. Saved itineraries are written to AsyncStorage first. When the user is signed in, Supabase only adds optional account synchronization.
 
-Internet is intentionally used for map tiles and map libraries, Google Maps and store links, authentication, optional synchronization, and consented analytics. A map can therefore be unavailable offline without blocking the itinerary itself.
+Internet is intentionally used for map tiles and map libraries, Google Maps and store links, authentication, and optional synchronization. A map can therefore be unavailable offline without blocking the itinerary itself.
 
 ## Rebuilding packages
 

@@ -8,14 +8,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Dimensions,
   Modal,
   Animated,
   Easing,
-  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, { Circle, Line, Polyline } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -34,11 +32,9 @@ import { PressableCard, FadeInUp, staggerDelay, PulseGlow } from "@/components/u
 import { shadowLevel } from "@/utils/shadow";
 import { cityLabel } from "@/utils/cityLabels";
 import { CITIES, CITY_EMOJI_MAP, COUNTRIES, registeredCountryLabel } from "@/data/cityRegistry";
-import { getAnalyticsConsent, setAnalyticsConsent, track } from "@/services/AnalyticsService";
 import { cacheCityForOffline } from "@/services/cityOfflineCache";
 import { useCityDownload, type DownloadStatus } from "@/hooks/useCityDownload";
 import { LANGUAGE_OPTIONS, languageOption, localText } from "@/i18n";
-import { measureGuideTarget } from "@/utils/guideMeasurement";
 import {
   ContextHelpUI,
   contextHelpOutline,
@@ -56,7 +52,6 @@ import {
 import { withStorageLock } from "@/services/resilientStorage";
 import { openExternalLink } from "@/utils/externalLinks";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const DAYS_GAP = 7;
 const WALK_MODES = [
   {
@@ -98,11 +93,9 @@ const WALK_MODES = [
 ] as const;
 const ICONIC_MAX_DAYS = 5;
 const EXPLORER_MAX_DAYS = 7;
-const ONBOARDING_KEY = "wayra_generate_guide_v2";
 const RECENT_CITIES_KEY = "wayra_recent_cities_v1";
 const TRANSIT_PRELOAD_WAIT_MS = 4000;
 type GuideStep = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; target: string };
-type GuideRect = { x: number; y: number; width: number; height: number };
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Dati cittÃƒÂ  Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -120,7 +113,7 @@ function homeCountryLabel(country: (typeof COUNTRIES)[number], lang: string): st
 }
 const ONBOARDING_SLIDES_IT: GuideStep[] = [
   { icon: "bookmark-outline", target: "saved", title: "Itinerari salvati", body: "Il segnalibro apre i viaggi che hai salvato. Da qui puoi riaprire un itinerario anche dopo aver chiuso l'app." },
-  { icon: "contrast-outline", target: "brand", title: "Tema dell'app", body: "Tocca WAYRA per passare dal tema scuro al tema chiaro e viceversa." },
+  { icon: "contrast-outline", target: "brand", title: "Tema dell'app", body: "Tocca URVEYA per passare dal tema scuro al tema chiaro e viceversa." },
   { icon: "help-circle-outline", target: "guide", title: "Guida", body: "Il punto interrogativo riapre questa spiegazione in qualsiasi momento." },
   { icon: "settings-outline", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema, privacy, account e gestione dei dati offline." },
   { icon: "location-outline", target: "destination", title: "Destinazione", body: "Scegli la citt\u00e0 dalla lista con ricerca oppure dalla mappa. La destinazione \u00e8 necessaria sia per generare sia per creare manualmente un itinerario." },
@@ -128,12 +121,12 @@ const ONBOARDING_SLIDES_IT: GuideStep[] = [
   { icon: "sparkles-outline", target: "experience", title: "Tipo di esperienza", body: "Iconico privilegia le attrazioni imperdibili. Esploratore include anche luoghi ricercati e nascosti per costruire giornate pi\u00f9 ricche." },
   { icon: "walk-outline", target: "walk", title: "Ritmo e camminata", body: "Rilassato limita il percorso a 3 km, Bilanciato a 5 km e Intenso a 7 km al giorno. Il ritmo modifica anche quante tappe vengono inserite." },
   { icon: "git-compare-outline", target: "actions", title: "Genera o crea", body: "Genera itinerario organizza automaticamente giorni, tappe e distanze. Crea itinerario apre l'editor manuale, dove trascini personalmente attrazioni e pasti negli slot." },
-  { icon: "hourglass-outline", target: "none", title: "Durante la generazione", body: "Il pannello di caricamento mostra lo stato del calcolo. Wayra controlla durata, musei, distanza e distribuzione delle tappe prima di aprire il riepilogo." },
+  { icon: "hourglass-outline", target: "none", title: "Durante la generazione", body: "Il pannello di caricamento mostra lo stato del calcolo. Urveya controlla durata, musei, distanza e distribuzione delle tappe prima di aprire il riepilogo." },
 ];
 
 const ONBOARDING_SLIDES_EN: GuideStep[] = [
   { icon: "bookmark-outline", target: "saved", title: "Saved itineraries", body: "The bookmark opens trips you saved, so you can resume them after closing the app." },
-  { icon: "contrast-outline", target: "brand", title: "App theme", body: "Tap WAYRA to switch between dark and light themes." },
+  { icon: "contrast-outline", target: "brand", title: "App theme", body: "Tap URVEYA to switch between dark and light themes." },
   { icon: "help-circle-outline", target: "guide", title: "Guide", body: "The question mark reopens this walkthrough at any time." },
   { icon: "settings-outline", target: "settings", title: "Settings", body: "The gear opens language, theme, privacy, account and offline data controls." },
   { icon: "location-outline", target: "destination", title: "Destination", body: "Choose a city from the searchable list or the map. A destination is required for both automatic and manual planning." },
@@ -141,12 +134,12 @@ const ONBOARDING_SLIDES_EN: GuideStep[] = [
   { icon: "sparkles-outline", target: "experience", title: "Experience type", body: "Iconic prioritizes unmissable sights. Explorer also includes curated and hidden places for richer days." },
   { icon: "walk-outline", target: "walk", title: "Pace and walking", body: "Relaxed limits walking to 3 km, Balanced to 5 km and Intense to 7 km per day. Pace also changes how many stops are added." },
   { icon: "git-compare-outline", target: "actions", title: "Generate or create", body: "Generate itinerary organizes days, stops and distances automatically. Create itinerary opens the manual drag-and-drop editor." },
-  { icon: "hourglass-outline", target: "none", title: "While generating", body: "The loading panel reports progress while Wayra checks duration, museums, distance and the distribution of stops." },
+  { icon: "hourglass-outline", target: "none", title: "While generating", body: "The loading panel reports progress while Urveya checks duration, museums, distance and the distribution of stops." },
 ];
 
 const ONBOARDING_SLIDES_FR: GuideStep[] = [
   { icon: "bookmark-outline", target: "saved", title: "Itin\u00e9raires enregistr\u00e9s", body: "Le signet ouvre les voyages enregistr\u00e9s pour les reprendre apr\u00e8s avoir ferm\u00e9 l'app." },
-  { icon: "contrast-outline", target: "brand", title: "Th\u00e8me de l'app", body: "Touchez WAYRA pour passer du th\u00e8me sombre au th\u00e8me clair." },
+  { icon: "contrast-outline", target: "brand", title: "Th\u00e8me de l'app", body: "Touchez URVEYA pour passer du th\u00e8me sombre au th\u00e8me clair." },
   { icon: "help-circle-outline", target: "guide", title: "Guide", body: "Le point d'interrogation rouvre cette visite guid\u00e9e \u00e0 tout moment." },
   { icon: "settings-outline", target: "settings", title: "Param\u00e8tres", body: "L'engrenage ouvre la langue, le th\u00e8me, la confidentialit\u00e9, le compte et les donn\u00e9es hors ligne." },
   { icon: "location-outline", target: "destination", title: "Destination", body: "Choisissez la ville dans la liste avec recherche ou sur la carte. Elle est n\u00e9cessaire pour les deux modes de cr\u00e9ation." },
@@ -154,14 +147,14 @@ const ONBOARDING_SLIDES_FR: GuideStep[] = [
   { icon: "sparkles-outline", target: "experience", title: "Type d'exp\u00e9rience", body: "Iconique privil\u00e9gie les incontournables. Explorateur ajoute aussi des lieux recherch\u00e9s et cach\u00e9s." },
   { icon: "walk-outline", target: "walk", title: "Rythme et marche", body: "D\u00e9tendu limite la marche \u00e0 3 km, \u00c9quilibr\u00e9 \u00e0 5 km et Intense \u00e0 7 km par jour." },
   { icon: "git-compare-outline", target: "actions", title: "G\u00e9n\u00e9rer ou cr\u00e9er", body: "G\u00e9n\u00e9rer organise automatiquement les journ\u00e9es. Cr\u00e9er ouvre l'\u00e9diteur manuel par glisser-d\u00e9poser." },
-  { icon: "hourglass-outline", target: "none", title: "Pendant la g\u00e9n\u00e9ration", body: "Le panneau indique la progression pendant que Wayra contr\u00f4le dur\u00e9e, mus\u00e9es, distance et r\u00e9partition des \u00e9tapes." },
+  { icon: "hourglass-outline", target: "none", title: "Pendant la g\u00e9n\u00e9ration", body: "Le panneau indique la progression pendant que Urveya contr\u00f4le dur\u00e9e, mus\u00e9es, distance et r\u00e9partition des \u00e9tapes." },
 ];
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Messaggi generazione Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const ONBOARDING_SLIDES_ES: GuideStep[] = [
   { icon: "bookmark-outline", target: "saved", title: "Itinerarios guardados", body: "El marcador abre los viajes guardados para retomarlos despu\u00e9s de cerrar la app." },
-  { icon: "contrast-outline", target: "brand", title: "Tema de la app", body: "Toca WAYRA para cambiar entre el tema oscuro y el claro." },
+  { icon: "contrast-outline", target: "brand", title: "Tema de la app", body: "Toca URVEYA para cambiar entre el tema oscuro y el claro." },
   { icon: "help-circle-outline", target: "guide", title: "Gu\u00eda", body: "El signo de interrogaci\u00f3n vuelve a abrir esta explicaci\u00f3n en cualquier momento." },
   { icon: "settings-outline", target: "settings", title: "Configuraci\u00f3n", body: "El engranaje abre idioma, tema, privacidad, cuenta y datos sin conexi\u00f3n." },
   { icon: "location-outline", target: "destination", title: "Destino", body: "Elige la ciudad en la lista con buscador o en el mapa. Es necesaria para la planificaci\u00f3n autom\u00e1tica y manual." },
@@ -169,7 +162,7 @@ const ONBOARDING_SLIDES_ES: GuideStep[] = [
   { icon: "sparkles-outline", target: "experience", title: "Tipo de experiencia", body: "Ic\u00f3nico prioriza los imprescindibles. Explorador a\u00f1ade lugares seleccionados y ocultos." },
   { icon: "walk-outline", target: "walk", title: "Ritmo y caminata", body: "Relajado limita la caminata a 3 km, Equilibrado a 5 km e Intenso a 7 km por d\u00eda." },
   { icon: "git-compare-outline", target: "actions", title: "Generar o crear", body: "Generar organiza autom\u00e1ticamente d\u00edas y paradas. Crear abre el editor manual de arrastrar y soltar." },
-  { icon: "hourglass-outline", target: "none", title: "Durante la generaci\u00f3n", body: "El panel muestra el progreso mientras Wayra comprueba duraci\u00f3n, museos, distancia y distribuci\u00f3n de las paradas." },
+  { icon: "hourglass-outline", target: "none", title: "Durante la generaci\u00f3n", body: "El panel muestra el progreso mientras Urveya comprueba duraci\u00f3n, museos, distancia y distribuci\u00f3n de las paradas." },
 ];
 
 const GENERATING_MESSAGES_IT = [
@@ -217,7 +210,6 @@ export default function HomeScreen() {
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [showWorldMap, setShowWorldMap]     = useState(false);
   const [showSettings, setShowSettings]     = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [genMsgIndex, setGenMsgIndex]       = useState(0);
   const [genSeconds, setGenSeconds]         = useState(0);
   const [preparingTrip, setPreparingTrip]   = useState(false);
@@ -253,21 +245,8 @@ export default function HomeScreen() {
       .catch((e) => { if (__DEV__) console.warn("[Home] recent cities read failed:", e); });
   }, []);
 
-  useEffect(() => {
-    getAnalyticsConsent()
-      .then(setAnalyticsEnabled)
-      .catch((e) => { if (__DEV__) console.warn("[Home] analytics consent read failed:", e); });
-  }, []);
-
   const openSettingsPanel = useCallback(() => {
     setShowSettings(true);
-    track("settings_opened", { screen: "home" });
-  }, []);
-
-  const handleAnalyticsConsentChange = useCallback(async (enabled: boolean) => {
-    setAnalyticsEnabled(enabled);
-    await setAnalyticsConsent(enabled);
-    if (enabled) track("analytics_consent_updated", { enabled: true });
   }, []);
 
   const setGuideTarget = useCallback((key: string, ref: View | null) => {
@@ -341,7 +320,6 @@ export default function HomeScreen() {
   const selectCity = useCallback((id: string) => {
     setCity(id);
     rememberCity(id);
-    track("destination_viewed", { city: id });
   }, [rememberCity]);
 
   function alertNoCitySelected() {
@@ -474,7 +452,6 @@ export default function HomeScreen() {
   function handleCreate() {
     if (!city) { alertNoCitySelected(); return; }
     const cityObj = CITIES.find((c) => c.id === city);
-    track("manual_builder_opened", { city, num_days: numDays });
     router.push({
       pathname: "/create-itinerary",
       params: {
@@ -532,7 +509,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* WAYRA centrato in assoluto Ã¢â‚¬â€ box-none: la View non cattura tocchi
+        {/* URVEYA centrato in assoluto - box-none: la View non cattura tocchi
             ma TouchableOpacity interno (cambio tema) rimane tappabile */}
         <View style={styles.headerCenter} pointerEvents="box-none">
           <TouchableOpacity
@@ -543,7 +520,7 @@ export default function HomeScreen() {
             accessibilityRole="button"
             accessibilityLabel={tx({it:"Cambia tema",en:"Change theme",fr:"Changer de thème",es:"Cambiar tema"})}
           >
-            <Text style={[styles.appName, { color: colors.accentGold }]}>WAYRA</Text>
+            <Text style={[styles.appName, { color: colors.accentGold }]}>URVEYA</Text>
           </TouchableOpacity>
           <Text style={[styles.appSlogan, { color: colors.textMuted }]}>{tx({it:"LASCIA CHE LA CITT\u00c0 TI TROVI",en:"LET THE CITY FIND YOU",fr:"LAISSEZ LA VILLE VOUS TROUVER",es:"DEJA QUE LA CIUDAD TE ENCUENTRE"})}</Text>
         </View>
@@ -946,27 +923,6 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.privacyConsentRow, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
-              <View style={styles.privacyConsentText}>
-                <Text style={[styles.privacyConsentTitle, { color: colors.text }]}>
-                  {tx({it:"Analytics anonimi",en:"Anonymous analytics",fr:"Analytics anonymes",es:"Analiticas anonimas"})}
-                </Text>
-                <Text style={[styles.privacyConsentBody, { color: colors.textSub }]}>
-                  {lang === "en"
-                    ? "Helps us understand searches, generated trips, maps, PDF exports and saved itineraries. We do not store your exact position or personal notes."
-                    : lang === "fr"
-                      ? "Nous aide a comprendre les recherches, itineraires generes, cartes, PDF et sauvegardes. Nous ne stockons pas votre position exacte ni vos notes personnelles."
-                    : "Ci aiuta a capire ricerche, itinerari generati, mappe, PDF e salvataggi. Non salviamo posizione precisa o note personali."}
-                </Text>
-              </View>
-              <Switch
-                value={analyticsEnabled}
-                onValueChange={handleAnalyticsConsentChange}
-                trackColor={{ false: colors.border, true: colors.accentBlue + "88" }}
-                thumbColor={analyticsEnabled ? colors.accentBlue : colors.textMuted}
-              />
-            </View>
-
             <View style={styles.privacyLinksRow}>
               <TouchableOpacity onPress={() => openExternalLink("https://wayra.app/privacy", lang)} activeOpacity={0.75}>
                 <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
@@ -1055,7 +1011,6 @@ function CityPickerModal({
     const query = search.trim();
     if (!query) return;
     const resultsCount = filteredCountries.reduce((sum, country) => sum + country.cities.length, 0);
-    track("search_performed", { query, results_count: resultsCount });
   }, [filteredCountries, search]);
 
   return (
@@ -1245,132 +1200,6 @@ function CityPickerModal({
 }
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ OnboardingModal Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
-
-function OnboardingModal({ lang, targetRefs, rootRef, onDone }: { lang: string; targetRefs: Map<string, View>; rootRef: React.RefObject<View | null>; onDone: () => void }) {
-  const [slide, setSlide] = useState(0);
-  const [rect, setRect] = useState<GuideRect | null>(null);
-  const [cardHeight, setCardHeight] = useState(270); // stima iniziale, aggiornata da onLayout
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
-
-  const slides: GuideStep[] = (({ it: ONBOARDING_SLIDES_IT, en: ONBOARDING_SLIDES_EN, fr: ONBOARDING_SLIDES_FR, es: ONBOARDING_SLIDES_ES } as Record<string, GuideStep[]>)[lang] ?? ONBOARDING_SLIDES_EN).filter((step) => step.target !== "none");
-  const isLast = slide === slides.length - 1;
-  const current = slides[slide];
-  const tooltipWidth = Math.min(300, SCREEN_WIDTH - 32);
-  const PAD = 6; // padding intorno all'elemento evidenziato
-
-  // Coordinate cutout (elemento evidenziato con padding)
-  const cutoutTop    = rect ? Math.max(0,            rect.y - PAD)               : 0;
-  const cutoutBottom = rect ? Math.min(SCREEN_HEIGHT, rect.y + rect.height + PAD) : 0;
-  const cutoutLeft   = rect ? Math.max(0,            rect.x - PAD)               : 0;
-  const cutoutRight  = rect ? Math.min(SCREEN_WIDTH,  rect.x + rect.width + PAD)  : SCREEN_WIDTH;
-
-  // Posizione card: sotto l'elemento se c'ÃƒÂ¨ spazio, altrimenti sopra
-  // SAFE_BOTTOM: 48px tengono conto della safe area + home indicator + respiro visivo
-  const SAFE_BOTTOM = 48;
-  const fitsBelow = rect
-    ? rect.y + rect.height + cardHeight + SAFE_BOTTOM <= SCREEN_HEIGHT
-    : false;
-  const rawTooltipTop = rect
-    ? (fitsBelow
-        ? rect.y + rect.height + PAD + 16
-        : rect.y - cardHeight - PAD - 16)
-    : (SCREEN_HEIGHT - cardHeight) / 2;
-  // Clamp: mai sopra il bordo superiore (16px) nÃƒÂ© sotto il bordo inferiore (SAFE_BOTTOM)
-  const tooltipTop = Math.max(16, Math.min(SCREEN_HEIGHT - cardHeight - SAFE_BOTTOM, rawTooltipTop));
-  const tooltipLeft = Math.max(16, Math.min(
-    SCREEN_WIDTH - tooltipWidth - 16,
-    rect ? rect.x + rect.width / 2 - tooltipWidth / 2 : (SCREEN_WIDTH - tooltipWidth) / 2,
-  ));
-
-  useEffect(() => {
-    setRect(null);
-    setCardHeight((prev) => Math.max(prev, 400));
-    const target = targetRefs.get(current.target);
-    if (!target) return;
-    const id = setTimeout(() => {
-      measureGuideTarget(target, rootRef.current, insets.top, setRect);
-    }, 120);
-    return () => clearTimeout(id);
-  }, [current.target, insets.top, rootRef, targetRefs]);
-
-  const OV = "#000000d0";
-
-  return (
-    <Modal visible transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
-      <View style={styles.tourOverlay}>
-
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Overlay con cutout reale Ã¢â€â‚¬Ã¢â€â‚¬ */}
-        {rect ? (
-          // 4 pannelli scuri che circondano l'elemento, lasciandolo visibile
-          <>
-            <View pointerEvents="none" style={[styles.cutoutPanel, { top: 0, left: 0, right: 0, height: cutoutTop, backgroundColor: OV }]} />
-            <View pointerEvents="none" style={[styles.cutoutPanel, { top: cutoutTop, left: 0, width: cutoutLeft, height: cutoutBottom - cutoutTop, backgroundColor: OV }]} />
-            <View pointerEvents="none" style={[styles.cutoutPanel, { top: cutoutTop, left: cutoutRight, right: 0, height: cutoutBottom - cutoutTop, backgroundColor: OV }]} />
-            <View pointerEvents="none" style={[styles.cutoutPanel, { top: cutoutBottom, left: 0, right: 0, bottom: 0, backgroundColor: OV }]} />
-            {/* Bordo dorato attorno all'elemento */}
-            <View pointerEvents="none" style={[styles.tourHighlight, { top: cutoutTop, left: cutoutLeft, width: cutoutRight - cutoutLeft, height: cutoutBottom - cutoutTop, borderColor: colors.accentGold, backgroundColor: colors.accentGold + "14", shadowColor: colors.accentGold }]} />
-          </>
-        ) : (
-          // Nessun target trovato Ã¢â€ â€™ overlay pieno
-          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: OV }]} />
-        )}
-
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Freccia verso l'elemento Ã¢â€â‚¬Ã¢â€â‚¬ */}
-        {rect && (
-          <View
-            pointerEvents="none"
-            style={[
-              styles.tourArrow,
-              {
-                left: Math.max(22, Math.min(SCREEN_WIDTH - 22, rect.x + rect.width / 2 - 7)),
-                // freccia tra highlight e card: sopra la card se card ÃƒÂ¨ sotto, sotto la card se ÃƒÂ¨ sopra
-                top: fitsBelow ? tooltipTop - 13 : tooltipTop + cardHeight - 8,
-                transform: [{ rotate: fitsBelow ? "180deg" : "0deg" }],
-                borderBottomColor: colors.accentGold,
-              },
-            ]}
-          />
-        )}
-
-        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Card tooltip Ã¢â€â‚¬Ã¢â€â‚¬ */}
-        <View
-          style={[styles.tourCard, { top: tooltipTop, left: tooltipLeft, width: tooltipWidth, backgroundColor: colors.card, borderColor: colors.border }]}
-          onLayout={(e) => setCardHeight(e.nativeEvent.layout.height)}
-        >
-          <Text style={[styles.tourEyebrow, { color: colors.accentGold }]}>{slide + 1} / {slides.length}</Text>
-          <View style={[styles.onboardingIconBox, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "44" }]}>
-            <Ionicons name={current.icon} size={28} color={colors.accentGold} />
-          </View>
-          <Text style={[styles.onboardingTitle, { color: colors.text }]}>{current.title}</Text>
-          <Text style={[styles.onboardingBody, { color: colors.textSub }]}>{current.body}</Text>
-          <View style={styles.onboardingDots}>
-            {slides.map((_, i) => (
-              <View key={i} style={[styles.onboardingDot, { backgroundColor: colors.border }, i === slide && { backgroundColor: colors.accentGold, width: 22 }]} />
-            ))}
-          </View>
-          <TouchableOpacity
-            style={[styles.onboardingCta, { backgroundColor: colors.accentGold }]}
-            onPress={() => isLast ? onDone() : setSlide((s) => s + 1)}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.onboardingCtaText, { color: colors.bg }]}>
-              {isLast
-                ? (lang === "es" ? "Empezar el viaje" : lang === "fr" ? "Commencer le voyage" : lang === "it" ? "Inizia il viaggio" : "Start exploring")
-                : (lang === "es" ? "Siguiente" : lang === "fr" ? "Suivant" : lang === "it" ? "Avanti" : "Next")}
-            </Text>
-          </TouchableOpacity>
-          {!isLast && (
-            <TouchableOpacity onPress={onDone} style={styles.onboardingSkip} activeOpacity={0.7}>
-              <Text style={[styles.onboardingSkipText, { color: colors.textMuted }]}>{lang === "es" ? "Saltar" : lang === "fr" ? "Passer" : lang === "it" ? "Salta" : "Skip"}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-      </View>
-    </Modal>
-  );
-}
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Sub-components Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -2149,14 +1978,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginTop: 2,
   },
-  privacyConsentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 14,
-  },
   settingsGrid: {
     gap: 10,
   },
@@ -2210,19 +2031,6 @@ const styles = StyleSheet.create({
   settingsActionSub: {
     fontSize: 12,
     marginTop: 2,
-  },
-  privacyConsentText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  privacyConsentTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    marginBottom: 5,
-  },
-  privacyConsentBody: {
-    fontSize: 12,
-    lineHeight: 17,
   },
   privacyLinksRow: {
     flexDirection: "row",

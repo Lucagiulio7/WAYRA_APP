@@ -26,7 +26,7 @@ export function homeContextHelp(lang: string): Record<string, ContextHelpContent
     brand: item(
       "contrast-outline",
       { it: "Tema dell'app", en: "App theme", fr: "Thème de l'application", es: "Tema de la aplicación" },
-      { it: "Toccando WAYRA passi dal tema scuro a quello chiaro e viceversa. La scelta viene ricordata sul dispositivo.", en: "Tap WAYRA to switch between dark and light themes. Your choice is saved on the device.", fr: "Touchez WAYRA pour alterner entre les thèmes sombre et clair. Le choix est mémorisé sur l'appareil.", es: "Toca WAYRA para cambiar entre los temas oscuro y claro. La elección se guarda en el dispositivo." },
+      { it: "Toccando URVEYA passi dal tema scuro a quello chiaro e viceversa. La scelta viene ricordata sul dispositivo.", en: "Tap URVEYA to switch between dark and light themes. Your choice is saved on the device.", fr: "Touchez URVEYA pour alterner entre les thèmes sombre et clair. Le choix est mémorisé sur l'appareil.", es: "Toca URVEYA para cambiar entre los temas oscuro y claro. La elección se guarda en el dispositivo." },
     ),
     settings: item(
       "settings-outline",
@@ -77,7 +77,7 @@ export function homeContextHelp(lang: string): Record<string, ContextHelpContent
     generate: item(
       "sparkles-outline",
       { it: "Genera itinerario", en: "Generate itinerary", fr: "Générer l'itinéraire", es: "Generar itinerario" },
-      { it: "Crea automaticamente le giornate usando destinazione, durata, esperienza e ritmo selezionati. Wayra distribuisce e ordina le tappe rispettando i vincoli del viaggio.", en: "Automatically builds the trip using the selected destination, duration, experience and pace.", fr: "Crée automatiquement le voyage selon la destination, la durée, l'expérience et le rythme choisis.", es: "Crea automáticamente el viaje según el destino, la duración, la experiencia y el ritmo elegidos." },
+      { it: "Crea automaticamente le giornate usando destinazione, durata, esperienza e ritmo selezionati. Urveya distribuisce e ordina le tappe rispettando i vincoli del viaggio.", en: "Automatically builds the trip using the selected destination, duration, experience and pace.", fr: "Crée automatiquement le voyage selon la destination, la durée, l'expérience et le rythme choisis.", es: "Crea automáticamente el viaje según el destino, la duración, la experiencia y el ritmo elegidos." },
     ),
     create: item(
       "construct-outline",

@@ -1,4 +1,4 @@
--- Security hardening for the only two Wayra runtime tables.
+-- Security hardening for the only two Urveya account tables.
 -- Safe to run repeatedly: policies are dropped and recreated explicitly.
 
 begin;
@@ -38,18 +38,12 @@ create policy saved_itineraries_delete_own
 
 drop policy if exists analytics_events_insert on public.analytics_events;
 drop policy if exists analytics_events_select_own on public.analytics_events;
+drop policy if exists "analytics_events_insert" on public.analytics_events;
+drop policy if exists "analytics_events_select_own" on public.analytics_events;
 
-create policy analytics_events_insert
-  on public.analytics_events
-  for insert
-  to anon, authenticated
-  with check (user_id is null or auth.uid() = user_id);
-
-create policy analytics_events_select_own
-  on public.analytics_events
-  for select
-  to authenticated
-  using (auth.uid() = user_id);
+revoke all on table public.analytics_events from anon, authenticated;
+grant select, insert, update, delete on table public.saved_itineraries to authenticated;
+revoke all on table public.saved_itineraries from anon;
 
 commit;
 

@@ -117,7 +117,7 @@ export default function ResetPasswordScreen() {
             <Text style={styles.muted}>
               {success
                 ? tx({ it: "Password aggiornata correttamente.", en: "Password updated successfully.", fr: "Mot de passe mis à jour.", es: "Contraseña actualizada correctamente." })
-                : tx({ it: "Scegli una nuova password per il tuo account Wayra.", en: "Choose a new password for your Wayra account.", fr: "Choisissez un nouveau mot de passe pour votre compte Wayra.", es: "Elige una nueva contraseña para tu cuenta Wayra." })}
+                : tx({ it: "Scegli una nuova password per il tuo account Urveya.", en: "Choose a new password for your Urveya account.", fr: "Choisissez un nouveau mot de passe pour votre compte Urveya.", es: "Elige una nueva contraseña para tu cuenta Urveya." })}
             </Text>
           </View>
 

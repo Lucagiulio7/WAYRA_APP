@@ -37,7 +37,6 @@ class ErrorBoundaryInner extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // In produzione qui andrà Sentry.captureException(error, { extra: info })
     if (__DEV__) {
       console.error("[ErrorBoundary] caught:", error, info.componentStack);
     }

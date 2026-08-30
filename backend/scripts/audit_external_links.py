@@ -1,4 +1,4 @@
-"""Check the external links bundled with Wayra city packages.
+"""Check the external links bundled with Urveya city packages.
 
 The audit is intentionally separate from the deterministic content audit. It
 uses a persistent cache, follows redirects and treats anti-bot responses as
@@ -99,7 +99,7 @@ def merge_links(target: dict[str, list[Reference]], source: dict[str, list[Refer
 
 def request_once(url: str, method: str, timeout: float) -> tuple[int, str]:
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; WayraLinkAudit/2.0; +https://wayra-api.onrender.com/)",
+        "User-Agent": "Mozilla/5.0 (compatible; UrveyaLinkAudit/2.0; +https://wayra-api.onrender.com/)",
         "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.8",
     }
@@ -217,7 +217,7 @@ def write_reports(
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     lines = [
-        "# Wayra external-link validation",
+        "# Urveya external-link validation",
         "",
         f"Generated: {generated_at}",
         f"Unique links: {len(links)} | References: {payload['references']} | From cache: {cached_count}",
@@ -296,7 +296,7 @@ def main() -> int:
     save_cache(args.cache, merged_cache)
     json_path, markdown_path = write_reports(args.report_dir, links, results, len(results) - len(pending))
     counts = Counter(result.status for result in results.values())
-    print(f"Wayra external-link audit: {len(links)} unique links, {sum(len(items) for items in links.values())} references")
+    print(f"Urveya external-link audit: {len(links)} unique links, {sum(len(items) for items in links.values())} references")
     print(" | ".join(f"{status}: {count}" for status, count in sorted(counts.items())))
     print(f"JSON: {json_path}")
     print(f"Report: {markdown_path}")

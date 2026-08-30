@@ -1270,7 +1270,7 @@ export function DayMap({
             )}
           </Animated.View>
           {contextHelp.active && (
-            <TouchableOpacity activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.map)} style={[StyleSheet.absoluteFill, { zIndex: 20 }]} />
+            <TouchableOpacity activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.map, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} style={[StyleSheet.absoluteFill, { zIndex: 20 }]} />
           )}
 
           {status === "loading" && (

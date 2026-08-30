@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.release-bundle-check/
 .expo/
 
 # Credenziali sensibili — non committare mai

@@ -1,5 +1,30 @@
 services:
   - type: web
+    name: urveya-legal
+    runtime: static
+    rootDir: mobile
+    plan: free
+    buildCommand: echo "Urveya legal pages ready"
+    staticPublishPath: public
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /privacy
+        destination: /privacy.html
+      - type: rewrite
+        source: /terms
+        destination: /terms.html
+      - type: rewrite
+        source: /delete-account
+        destination: /delete-account.html
+      - type: rewrite
+        source: /support
+        destination: /support.html
+      - type: redirect
+        source: /
+        destination: /support
+
+  - type: web
     name: wayra-api
     runtime: python
     rootDir: backend

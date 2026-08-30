@@ -6,6 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { cityLabel } from "@/utils/cityLabels";
 import { ActivityKind, cityActivities, localizedActivitySubject } from "@/data/cityActivities";
 import { openExternalLink } from "@/utils/externalLinks";
+import { contextHelpOutline, type ContextHelpAnchor, type ContextHelpContent } from "@/components/ContextHelp";
 
 type Category = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -123,7 +124,7 @@ function getYourGuideSearchUrl(city: string, lang: string, query?: string): stri
   return "https://www.getyourguide.com/" + locale + "/s/?q=" + encodeURIComponent(search);
 }
 
-export function ActivitiesTab({ city }: { city: string }) {
+export function ActivitiesTab({ city, helpActive = false, onHelpRequest }: { city: string; helpActive?: boolean; onHelpRequest?: (content: ContextHelpContent, anchor?: ContextHelpAnchor) => void }) {
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
 
@@ -141,6 +142,19 @@ export function ActivitiesTab({ city }: { city: string }) {
       : lang === "en"
         ? "Recommended searches"
         : "Ricerche consigliate";
+  const activityHelp: ContextHelpContent = {
+    icon: "open-outline",
+    title: lang === "es" ? "Abrir una actividad" : lang === "fr" ? "Ouvrir une activité" : lang === "en" ? "Open an activity" : "Apri un'attività",
+    body: lang === "es" ? "Abre una búsqueda externa ya preparada con la actividad y la ciudad seleccionadas. Comprueba horarios, condiciones y precio antes de reservar." : lang === "fr" ? "Ouvre une recherche externe préparée avec l'activité et la ville choisies. Vérifiez horaires, conditions et prix avant de réserver." : lang === "en" ? "Opens a prepared external search for the selected activity and city. Check times, conditions and price before booking." : "Apre una ricerca esterna già compilata con attività e città. Controlla orari, condizioni e prezzo prima di prenotare.",
+  };
+
+  const activityPress = (action: () => void) => (event: any) => {
+    if (helpActive) {
+      onHelpRequest?.(activityHelp, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY });
+      return;
+    }
+    action();
+  };
 
   const openSearch = async (query?: string) => {
     const url = getYourGuideSearchUrl(city, lang, query);
@@ -157,8 +171,8 @@ export function ActivitiesTab({ city }: { city: string }) {
       </View>
 
       <TouchableOpacity
-        style={[styles.primaryButton, { backgroundColor: colors.accentGold }]}
-        onPress={() => openSearch()}
+        style={[styles.primaryButton, { backgroundColor: colors.accentGold }, contextHelpOutline(helpActive, colors.text)]}
+        onPress={activityPress(() => openSearch())}
         activeOpacity={0.84}
         accessibilityRole="link"
       >
@@ -177,8 +191,8 @@ export function ActivitiesTab({ city }: { city: string }) {
               return (
                 <TouchableOpacity
                   key={activity.kind + "-" + subject}
-                  style={[styles.categoryCard, styles.curatedCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-                  onPress={() => openSearch(title)}
+                  style={[styles.categoryCard, styles.curatedCard, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(helpActive, colors.accentGold)]}
+                  onPress={activityPress(() => openSearch(title))}
                   activeOpacity={0.82}
                   accessibilityRole="link"
                   accessibilityLabel={title + ", GetYourGuide"}
@@ -197,8 +211,8 @@ export function ActivitiesTab({ city }: { city: string }) {
           : CATEGORIES.map((category) => (
               <TouchableOpacity
                 key={category.icon}
-                style={[styles.categoryCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => openSearch(textFor(category.query, lang))}
+                style={[styles.categoryCard, { backgroundColor: colors.card, borderColor: colors.border }, contextHelpOutline(helpActive, colors.accentGold)]}
+                onPress={activityPress(() => openSearch(textFor(category.query, lang)))}
                 activeOpacity={0.82}
                 accessibilityRole="link"
               >

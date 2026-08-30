@@ -1,40 +1,30 @@
-# Pubblicazione Android Wayra
+# Pubblicazione Android Urveya
 
 ## Stato tecnico richiesto
 
 Prima di creare la build Play Store:
 
 - `npm run typecheck` deve passare dentro `mobile`;
-- `npm exec expo-doctor` deve passare 18/18;
-- il backend FastAPI deve essere pubblico su HTTPS;
-- `mobile/.env.production` deve avere `EXPO_PUBLIC_API_BASE_URL` impostato all'URL pubblico del backend;
-- il backend pubblico deve rispondere su `/api/health`;
-- la generazione itinerario deve funzionare dalla build Android, non solo da Expo Go.
+- `npm run release:check` deve completarsi senza errori;
+- `npm exec expo-doctor` deve passare tutti i controlli;
+- catalogo, contenuti e generazione devono funzionare dalla build Android anche offline;
+- le credenziali Supabase pubbliche devono essere configurate solo se si mantiene la sincronizzazione facoltativa degli itinerari salvati;
+- privacy, supporto, termini e cancellazione account devono essere pubblicati su URL HTTPS definitivi.
 
-## Deploy backend
+## Architettura di produzione
 
-Il backend consigliato e FastAPI pubblico con Supabase come database.
+Urveya non richiede FastAPI o Render per catalogo e generazione: i pacchetti delle
+citta e gli itinerari sono inclusi nell'app. Render non deve quindi essere
+considerato un requisito della release.
 
-Passaggi consigliati su Render:
+Supabase resta opzionale per autenticazione e sincronizzazione tra dispositivi.
+Prima della release:
 
-1. Collega il repository GitHub `Lucagiulio7/WAYRA_APP`.
-2. Crea un servizio usando il file `render.yaml`.
-3. Imposta le variabili:
-   - `DATABASE_URL`: connection string PostgreSQL Supabase;
-   - `ANTHROPIC_API_KEY`: chiave AI, se usata;
-   - `SENTRY_DSN`: opzionale;
-   - `CORS_ORIGINS`: `*` in test, poi dominio reale in produzione.
-4. Verifica:
-
-   ```text
-   https://<backend-url>/api/health
-   ```
-
-5. Aggiorna `mobile/.env.production`:
-
-   ```text
-   EXPO_PUBLIC_API_BASE_URL=https://<backend-url>
-   ```
+1. applica `backend/database/supabase_runtime_security.sql`;
+2. verifica che la RLS sia attiva su `saved_itineraries`;
+3. configura i redirect `urveya://auth-callback` e `urveya://reset-password`;
+4. verifica login, sincronizzazione e cancellazione account da una build installata;
+5. non inserire mai service-role key o password database nell'app.
 
 ## Test Android senza telefono fisico
 
@@ -69,4 +59,3 @@ npx eas-cli build --platform android --profile production
 ```
 
 Risultato atteso: file `.aab` da caricare su Google Play Console.
-

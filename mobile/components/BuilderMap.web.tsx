@@ -612,7 +612,7 @@ export function BuilderMap({
             </View>
           )}
           {contextHelp.active && (
-            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.map)} />
+            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.map, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} />
           )}
         </View>
 
@@ -838,7 +838,7 @@ export function BuilderMap({
 
           </Animated.View>
           {contextHelp.active && (
-            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={() => contextHelp.explain(mapHelp.panel)} />
+            <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.panel, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} />
           )}
         </View>
         <ContextHelpUI controller={contextHelp} lang={lang} />
