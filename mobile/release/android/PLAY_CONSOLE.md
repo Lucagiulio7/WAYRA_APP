@@ -14,9 +14,9 @@ Documenti da usare durante la compilazione:
 - Nome app: `Urveya`
 - ID applicazione: `com.urveya.app`
 - Categoria proposta: `Viaggi e informazioni locali`
-- Email di contatto da confermare: `privacy@wayra.app`
-- Privacy policy da pubblicare: `https://wayra.app/privacy`
-- Eliminazione account da pubblicare: `https://wayra.app/delete-account`
+- Email di contatto: `wayrapp01@gmail.com`
+- Privacy policy: `https://urveya-legal.onrender.com/privacy`
+- Eliminazione account: `https://urveya-legal.onrender.com/delete-account`
 
 Il nome definitivo e `Urveya`. La ricerca preliminare non ha rilevato marchi
 identici nel settore travel/software; prima del deposito resta consigliata una

@@ -27,11 +27,11 @@ npm run preflight
 - [x] Add dedicated OAuth callback and password-recovery deep-link routes.
 - [x] Verify the static web export includes all four legal pages and authentication routes.
 - [x] Link the repository to Expo project `35fadf8a-85b3-430d-86b7-01f6adf9f8c5`.
-- [ ] Deploy the legal pages and verify the final public URLs for `/privacy`, `/terms`, `/delete-account`, and `/support`.
-- [ ] Confirm that `privacy@wayra.app` is a working monitored mailbox, or replace it everywhere with the real support address.
+- [x] Deploy the legal pages on `https://urveya-legal.onrender.com` with public routes for privacy, terms, account deletion, and support.
+- [x] Configure the monitored support and privacy mailbox `wayrapp01@gmail.com`.
 - [x] Final product name selected: `Urveya`; preliminary exact-name trademark screening completed.
 - [ ] Complete a professional similarity search before filing the `Urveya` trademark.
-- [ ] Purchase and configure a developer-controlled Urveya domain and support mailbox; legacy `wayra.app` references are temporary and must not be published.
+- [x] Configure a monitored support mailbox. A custom Urveya domain is recommended later but is not required for the first release.
 - [ ] Generate and install the `preview` APK on the Android emulator.
 - [ ] Install `expo-store-review` and connect the prepared review eligibility rule to the native prompt (the current terminal could not reach npm).
 - [x] Remove inactive Sentry runtime and align privacy declarations with zero crash/diagnostic collection.

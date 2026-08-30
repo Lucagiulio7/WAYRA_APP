@@ -9,7 +9,7 @@ risposte sul bundle definitivo prima dell'invio.
 - I dati sono cifrati durante il trasferimento: `Si` (HTTPS/TLS).
 - L'utente puo richiedere la cancellazione: `Si`.
 - Cancellazione dentro l'app: `Impostazioni > Elimina account`.
-- URL cancellazione esterna: `https://wayra.app/delete-account`.
+- URL cancellazione esterna: `https://urveya-legal.onrender.com/delete-account`.
 - Condivisione di dati per pubblicita o vendita: `No`.
 - Pubblicita presenti nella release: `No`.
 
@@ -71,7 +71,7 @@ mostrata dalla Play Console al momento della compilazione.
 
 ## Controlli prima dell'invio
 
-- Verificare che `privacy@wayra.app` sia monitorata.
+- Email privacy e supporto monitorata: `wayrapp01@gmail.com`.
 - Verificare che l'URL di cancellazione sia pubblico e funzionante.
 - Verificare RLS su `saved_itineraries`.
 - Verificare che il bundle definitivo non includa SDK diagnostici aggiunti successivamente.

@@ -17,17 +17,16 @@ Non eseguire nuovamente `eas init`. Se EAS richiede l'accesso, usare soltanto
 
 ### Pagine legali pubbliche
 
-Il Blueprint `render.yaml` include il sito statico gratuito `urveya-legal`.
-Dopo il push e il sync su Render, aprire e verificare i quattro URL assegnati:
+Il Blueprint `render.yaml` include il sito statico gratuito `urveya-legal`,
+pubblicato su:
 
-- `https://<host-render>/privacy`
-- `https://<host-render>/terms`
-- `https://<host-render>/delete-account`
-- `https://<host-render>/support`
+- `https://urveya-legal.onrender.com/privacy`
+- `https://urveya-legal.onrender.com/terms`
+- `https://urveya-legal.onrender.com/delete-account`
+- `https://urveya-legal.onrender.com/support`
 
-Solo dopo aver confermato l'host sostituire i riferimenti temporanei
-`wayra.app` nell'app e nei documenti Play Console. Il preflight strict blocca
-intenzionalmente la pubblicazione finche quei riferimenti restano presenti.
+L'host Render e definitivo per la prima release. Il dominio personalizzato puo
+essere aggiunto in seguito senza modificare il contenuto delle pagine.
 
 ### Supabase
 

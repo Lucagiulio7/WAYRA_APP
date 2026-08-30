@@ -8,6 +8,7 @@ import { LANGUAGE_OPTIONS, languageOption, localText } from "@/i18n";
 import { AccountDeletionButton } from "@/components/AccountDeletionButton";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
 import { openExternalLink } from "@/utils/externalLinks";
+import { PRIVACY_URL, TERMS_URL } from "@/constants/legal";
 
 type SettingsModalProps = {
   visible: boolean;
@@ -107,13 +108,13 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
           </View>
 
           <View style={styles.legalLinks}>
-            <TouchableOpacity onPress={contextHelp.guard(settingsHelp.privacy, () => openExternalLink("https://wayra.app/privacy", lang))}>
+            <TouchableOpacity onPress={contextHelp.guard(settingsHelp.privacy, () => openExternalLink(PRIVACY_URL, lang))}>
               <Text style={styles.legalLink}>
                 {tx({ it: "Privacy", en: "Privacy", fr: "Confidentialité", es: "Privacidad" })}
               </Text>
             </TouchableOpacity>
             <Text style={styles.legalSeparator}>·</Text>
-            <TouchableOpacity onPress={contextHelp.guard(settingsHelp.terms, () => openExternalLink("https://wayra.app/terms", lang))}>
+            <TouchableOpacity onPress={contextHelp.guard(settingsHelp.terms, () => openExternalLink(TERMS_URL, lang))}>
               <Text style={styles.legalLink}>
                 {tx({ it: "Termini", en: "Terms", fr: "Conditions", es: "Términos" })}
               </Text>

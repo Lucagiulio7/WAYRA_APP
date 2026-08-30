@@ -35,7 +35,7 @@ export function AccountDeletionButton({ onDeleted }: Props) {
     if (error) {
       Alert.alert(
         tx({ it: "Cancellazione non riuscita", en: "Deletion failed", fr: "Échec de la suppression", es: "No se pudo eliminar" }),
-        tx({ it: "Riprova tra poco. Se il problema continua, contatta privacy@wayra.app.", en: "Try again shortly. If the issue continues, contact privacy@wayra.app.", fr: "Réessayez dans un instant. Si le problème persiste, contactez privacy@wayra.app.", es: "Inténtalo de nuevo en unos instantes. Si el problema continúa, escribe a privacy@wayra.app." }),
+        tx({ it: "Riprova tra poco. Se il problema continua, contatta wayrapp01@gmail.com.", en: "Try again shortly. If the issue continues, contact wayrapp01@gmail.com.", fr: "Réessayez dans un instant. Si le problème persiste, contactez wayrapp01@gmail.com.", es: "Inténtalo de nuevo en unos instantes. Si el problema continúa, escribe a wayrapp01@gmail.com." }),
       );
       return;
     }

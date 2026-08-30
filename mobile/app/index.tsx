@@ -51,6 +51,7 @@ import {
 } from "@/services/generationRequestStorage";
 import { withStorageLock } from "@/services/resilientStorage";
 import { openExternalLink } from "@/utils/externalLinks";
+import { PRIVACY_URL, TERMS_URL } from "@/constants/legal";
 
 const DAYS_GAP = 7;
 const WALK_MODES = [
@@ -924,13 +925,13 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.privacyLinksRow}>
-              <TouchableOpacity onPress={() => openExternalLink("https://wayra.app/privacy", lang)} activeOpacity={0.75}>
+              <TouchableOpacity onPress={() => openExternalLink(PRIVACY_URL, lang)} activeOpacity={0.75}>
                 <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
                   {tx({it:"Privacy Policy",en:"Privacy Policy",fr:"Politique de confidentialite",es:"Politica de privacidad"})}
                 </Text>
               </TouchableOpacity>
               <Text style={[styles.privacyDot, { color: colors.textMuted }]}>-</Text>
-              <TouchableOpacity onPress={() => openExternalLink("https://wayra.app/terms", lang)} activeOpacity={0.75}>
+              <TouchableOpacity onPress={() => openExternalLink(TERMS_URL, lang)} activeOpacity={0.75}>
                 <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
                   {tx({it:"Termini",en:"Terms",fr:"Conditions",es:"Terminos"})}
                 </Text>

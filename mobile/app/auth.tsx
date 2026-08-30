@@ -12,9 +12,6 @@ import {
   Keyboard,
 } from "react-native";
 
-// ── URL legali — aggiorna prima della pubblicazione ────────────────────────────
-const PRIVACY_URL = "https://wayra.app/privacy";
-const TERMS_URL   = "https://wayra.app/terms";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { openExternalLink } from "@/utils/externalLinks";
+import { PRIVACY_URL, TERMS_URL } from "@/constants/legal";
 
 export default function AuthScreen() {
   const router = useRouter();
