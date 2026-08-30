@@ -3,7 +3,6 @@ services:
     name: urveya-legal
     runtime: static
     rootDir: mobile
-    plan: free
     buildCommand: echo "Urveya legal pages ready"
     staticPublishPath: public
     autoDeploy: true
