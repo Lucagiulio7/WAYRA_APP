@@ -1,0 +1,21 @@
+# Dipendenze e output locali
+node_modules/
+dist/
+.expo/
+.release-bundle-check/
+
+# File di sviluppo non necessari nella build nativa
+__tests__/
+coverage/
+
+# Credenziali locali: EAS usa le proprie variabili e credenziali protette
+google-service-account.json
+*.p8
+*.p12
+*.mobileprovision
+.env
+.env.local
+
+# File del sistema operativo
+.DS_Store
+Thumbs.db
