@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { localText } from "@/i18n";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 
 const CITY_EMOJIS: Record<string, string> = {
   roma: "🏛️",
@@ -78,7 +79,7 @@ export default function SavedScreen() {
   const router = useRouter();
   const { lang } = useLanguage();
   const { user, signOut } = useAuth();
-  const { saved, loading, remove } = useSavedItineraries();
+  const { saved, loading, syncError, remove } = useSavedItineraries();
   const { colors } = useTheme();
   const contextHelp = useContextHelpController();
   const tx = (values: Record<string, string>) => localText(lang, values);
@@ -90,6 +91,16 @@ export default function SavedScreen() {
     trip: help("map-outline", { it: "Apri viaggio", en: "Open trip", fr: "Ouvrir le voyage", es: "Abrir viaje" }, { it: "Apre l'itinerario salvato con giornate, mappe e informazioni della città.", en: "Opens the saved itinerary with days, maps and city information.", fr: "Ouvre l'itinéraire enregistré avec les journées, cartes et informations de la ville.", es: "Abre el itinerario guardado con días, mapas e información de la ciudad." }),
     remove: help("trash-outline", { it: "Elimina viaggio", en: "Delete trip", fr: "Supprimer le voyage", es: "Eliminar viaje" }, { it: "Rimuove questo itinerario dopo una richiesta di conferma.", en: "Removes this itinerary after confirmation.", fr: "Supprime cet itinéraire après confirmation.", es: "Elimina este itinerario después de confirmar." }),
   };
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "saved-v1",
+    controller: contextHelp,
+    enabled: !loading,
+    steps: [
+      { content: savedHelp.account },
+      ...(!user && saved.length > 0 ? [{ content: savedHelp.sync }] : []),
+      ...(saved.length > 0 ? [{ content: savedHelp.trip }, { content: savedHelp.remove }] : []),
+    ],
+  });
 
   const handleOpen = async (entry: SavedItinerary) => {
     await AsyncStorage.setItem("wayra_pending_itinerary", JSON.stringify(entry.itinerary));
@@ -177,7 +188,7 @@ export default function SavedScreen() {
         </View>
 
         <TouchableOpacity
-          onPress={contextHelp.toggle}
+          onPress={firstVisitGuide.onHelpPress}
           style={[styles.backBtn, { backgroundColor: colors.card, borderColor: colors.accentGold + "70" }]}
           accessibilityLabel={tx({ it: "Guida contestuale", en: "Context help", fr: "Aide contextuelle", es: "Ayuda contextual" })}
         >
@@ -220,7 +231,7 @@ export default function SavedScreen() {
           <Ionicons name="cloud-upload-outline" size={16} color={colors.accentBlue} />
           <Text style={[styles.syncText, { color: colors.accentBlue }]}>
             {lang === "es"
-              ? "Inicia sesion para sincronizar tus viajes en todos tus dispositivos"
+              ? "Inicia sesión para sincronizar tus viajes en todos tus dispositivos"
               : lang === "fr"
               ? "Connectez-vous pour synchroniser vos voyages sur tous vos appareils"
               : lang === "it"
@@ -229,6 +240,20 @@ export default function SavedScreen() {
           </Text>
           <Ionicons name="chevron-forward" size={14} color={colors.accentBlue} />
         </TouchableOpacity>
+      )}
+
+      {user && syncError && (
+        <View style={[styles.syncIssue, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+          <Ionicons name="cloud-offline-outline" size={16} color={colors.textMuted} />
+          <Text style={[styles.syncIssueText, { color: colors.textSub }]}>
+            {tx({
+              it: "I viaggi restano salvati sul dispositivo. La sincronizzazione riprenderà quando la connessione sarà disponibile.",
+              en: "Trips remain saved on this device. Sync will resume when a connection is available.",
+              fr: "Les voyages restent enregistrés sur cet appareil. La synchronisation reprendra dès qu'une connexion sera disponible.",
+              es: "Los viajes permanecen guardados en este dispositivo. La sincronización se reanudará cuando haya conexión.",
+            })}
+          </Text>
+        </View>
       )}
 
       {loading ? (
@@ -241,12 +266,12 @@ export default function SavedScreen() {
           </Text>
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
             {lang === "es"
-              ? "Genera o crea un itinerario y toca el marcador para guardarlo"
+              ? "Genera un itinerario y toca el marcador para guardarlo"
               : lang === "fr"
-              ? "Générez ou créez un itinéraire puis appuyez sur le signet pour l'enregistrer"
+              ? "Générez un itinéraire puis appuyez sur le signet pour l'enregistrer"
               : lang === "it"
-                ? "Genera o crea un itinerario e premi 🔖 per salvarlo"
-                : "Generate or build an itinerary and tap 🔖 to save it"}
+                ? "Genera un itinerario e premi 🔖 per salvarlo"
+                : "Generate an itinerary and tap 🔖 to save it"}
           </Text>
           {!user && (
             <TouchableOpacity
@@ -319,7 +344,7 @@ export default function SavedScreen() {
           })}
         </ScrollView>
       )}
-      <ContextHelpUI controller={contextHelp} lang={lang} />
+      <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
     </SafeAreaView>
   );
 }
@@ -356,6 +381,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 11,
   },
   syncText: { flex: 1, fontSize: 12, lineHeight: 17 },
+  syncIssue: { flexDirection: "row", alignItems: "center", gap: 9, borderBottomWidth: 1, paddingHorizontal: 16, paddingVertical: 10 },
+  syncIssueText: { flex: 1, fontSize: 11.5, lineHeight: 16 },
   empty: {
     flex: 1, alignItems: "center", justifyContent: "center",
     paddingHorizontal: 40, gap: 12,

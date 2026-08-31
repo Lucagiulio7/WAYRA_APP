@@ -33,6 +33,7 @@ import { FoodCard } from "@/components/FoodCard";
 import { PracticalInfoTab } from "@/components/PracticalInfoTab";
 import { ActivitiesTab } from "@/components/ActivitiesTab";
 import { SettingsModal } from "@/components/SettingsModal";
+import { AccommodationCard } from "@/components/AccommodationCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSavedItineraries } from "@/hooks/useSavedItineraries";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -66,8 +67,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loadItineraryDraft, saveItineraryDraft } from "@/services/itineraryDraftStorage";
 import { normalizeItineraryStructure } from "@/utils/itineraryStructure";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 import { getTransitNetwork, supportsTransit } from "@/data/transitNetworks";
 import { requestOptionalUserLocation, type UserLocationStatus } from "@/services/userLocation";
+import {
+  loadTripAccommodation,
+  removeTripAccommodation,
+  saveTripAccommodation,
+  type TripAccommodation,
+} from "@/services/accommodationStorage";
 
 type Tab = "itinerary" | "neighborhoods" | "food" | "culture" | "activities" | "practical";
 type GuideStep = { icon: keyof typeof Ionicons.glyphMap; title: string; body: string; target: string };
@@ -85,7 +93,7 @@ const ITINERARY_GUIDE_IT: GuideStep[] = [
   { icon: "help-circle-outline", target: "guide", title: "Guida contestuale", body: "Il punto interrogativo attiva la modalità guida: scorri liberamente e tocca un controllo per sapere cosa fa senza eseguire l'azione." },
   { icon: "settings-outline", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema, privacy e account. Il cambio lingua aggiorna anche contenuti e PDF." },
   { icon: "map-outline", target: "tab-itinerary", title: "Itinerario", body: "Questa tab contiene le giornate, le tappe, le metriche a piedi e gli strumenti per controllare o modificare il percorso." },
-  { icon: "bed-outline", target: "tab-neighborhoods", title: "Alloggi", body: "Mostra le zone consigliate con caratteristiche, pro e contro. La mappa colora i quartieri e usa stelle dorate per le attrazioni iconiche di riferimento." },
+  { icon: "bed-outline", target: "tab-neighborhoods", title: "Alloggi", body: "Mostra le zone consigliate con caratteristiche, pro e contro. In alto puoi salvare l'alloggio prenotato: comparirà sulle mappe e potrà diventare partenza e arrivo dei percorsi giornalieri." },
   { icon: "restaurant-outline", target: "tab-food", title: "Cucina", body: "Raccoglie piatti tipici, ingredienti, descrizioni e ristoranti consigliati specificamente per assaggiarli." },
   { icon: "book-outline", target: "tab-culture", title: "Cultura", body: "Raccoglie curiosità e contesto culturale della destinazione per capire meglio ciò che visiterai." },
   { icon: "sparkles-outline", target: "tab-activities", title: "Attività", body: "Propone esperienze aggiuntive della città e apre la ricerca dell'attività scelta sul servizio esterno indicato." },
@@ -101,7 +109,7 @@ const ITINERARY_GUIDE_EN: GuideStep[] = [
   { icon: "help-circle-outline", target: "guide", title: "Contextual help", body: "The question mark enables help mode: scroll freely and tap a control to learn what it does without running the action." },
   { icon: "settings-outline", target: "settings", title: "Settings", body: "The gear opens language, theme, privacy and account. Changing language also updates content and the PDF." },
   { icon: "map-outline", target: "tab-itinerary", title: "Itinerary", body: "This tab contains days, stops, walking metrics and all tools used to review or change the route." },
-  { icon: "bed-outline", target: "tab-neighborhoods", title: "Lodging", body: "See recommended areas with features, pros and cons. The map colors neighborhoods and marks iconic reference attractions with gold stars." },
+  { icon: "bed-outline", target: "tab-neighborhoods", title: "Lodging", body: "See recommended areas with features, pros and cons. At the top you can save your booked accommodation: it will appear on maps and can become the start and end of daily routes." },
   { icon: "restaurant-outline", target: "tab-food", title: "Cuisine", body: "Explore typical dishes, ingredients, descriptions and restaurants specifically recommended for each dish." },
   { icon: "book-outline", target: "tab-culture", title: "Culture", body: "Read cultural facts and local context that help you understand the destination." },
   { icon: "sparkles-outline", target: "tab-activities", title: "Activities", body: "Discover additional city experiences and open the selected activity search on the indicated external service." },
@@ -117,7 +125,7 @@ const ITINERARY_GUIDE_FR: GuideStep[] = [
   { icon: "help-circle-outline", target: "guide", title: "Aide contextuelle", body: "Le point d'interrogation active le mode d'aide : faites défiler librement et touchez un contrôle pour connaître sa fonction sans lancer l'action." },
   { icon: "settings-outline", target: "settings", title: "Paramètres", body: "L'engrenage ouvre langue, thème, confidentialité et compte. La langue s'applique aussi au PDF." },
   { icon: "map-outline", target: "tab-itinerary", title: "Itinéraire", body: "Cet onglet contient les journées, les étapes, les métriques de marche et les outils de modification du parcours." },
-  { icon: "bed-outline", target: "tab-neighborhoods", title: "Logements", body: "Consultez les zones, leurs avantages et inconvénients. La carte colore les quartiers et marque les attractions emblématiques avec des étoiles dorées." },
+  { icon: "bed-outline", target: "tab-neighborhoods", title: "Logements", body: "Consultez les zones, leurs avantages et inconvénients. En haut, vous pouvez enregistrer le logement réservé : il apparaîtra sur les cartes et pourra servir de départ et d'arrivée aux parcours quotidiens." },
   { icon: "restaurant-outline", target: "tab-food", title: "Cuisine", body: "Découvrez plats typiques, ingrédients, descriptions et restaurants recommandés pour chaque spécialité." },
   { icon: "book-outline", target: "tab-culture", title: "Culture", body: "Lisez des curiosités et le contexte culturel qui aide à comprendre la destination." },
   { icon: "sparkles-outline", target: "tab-activities", title: "Activités", body: "Découvrez des expériences supplémentaires et ouvrez leur recherche sur le service externe indiqué." },
@@ -133,7 +141,7 @@ const ITINERARY_GUIDE_ES: GuideStep[] = [
   { icon: "help-circle-outline", target: "guide", title: "Ayuda contextual", body: "El signo de interrogación activa el modo de ayuda: desplázate libremente y toca un control para saber qué hace sin ejecutar la acción." },
   { icon: "settings-outline", target: "settings", title: "Configuración", body: "El engranaje abre idioma, tema, privacidad y cuenta. El idioma también se aplica al PDF." },
   { icon: "map-outline", target: "tab-itinerary", title: "Itinerario", body: "Esta pestaña contiene días, paradas, métricas a pie y herramientas para revisar o modificar la ruta." },
-  { icon: "bed-outline", target: "tab-neighborhoods", title: "Alojamiento", body: "Consulta zonas recomendadas con ventajas y desventajas. El mapa colorea barrios y marca atracciones icónicas con estrellas doradas." },
+  { icon: "bed-outline", target: "tab-neighborhoods", title: "Alojamiento", body: "Consulta zonas recomendadas con ventajas y desventajas. Arriba puedes guardar el alojamiento reservado: aparecerá en los mapas y podrá ser el inicio y el final de las rutas diarias." },
   { icon: "restaurant-outline", target: "tab-food", title: "Cocina", body: "Descubre platos típicos, ingredientes, descripciones y restaurantes recomendados para cada especialidad." },
   { icon: "book-outline", target: "tab-culture", title: "Cultura", body: "Lee curiosidades y contexto cultural para comprender mejor el destino." },
   { icon: "sparkles-outline", target: "tab-activities", title: "Actividades", body: "Descubre experiencias adicionales y abre su búsqueda en el servicio externo indicado." },
@@ -645,8 +653,39 @@ export default function ItineraryScreen() {
   const contextHelp = useContextHelpController();
   useFonts({ BebasNeue_400Regular });
 
+  const selectedGuide = lang === "es"
+    ? ITINERARY_GUIDE_ES
+    : lang === "fr"
+      ? ITINERARY_GUIDE_FR
+      : lang === "en"
+        ? ITINERARY_GUIDE_EN
+        : ITINERARY_GUIDE_IT;
+  const itineraryHelp = Object.fromEntries(
+    selectedGuide.map(({ target, icon, title, body }) => [target, { icon, title, body }]),
+  ) as Record<string, ContextHelpContent>;
+  const toolsHelp = itineraryHelp.tools;
+
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [itineraryLoading, setItineraryLoading] = useState(true);
+  const [accommodation, setAccommodation] = useState<TripAccommodation | null>(null);
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "itinerary-v1",
+    controller: contextHelp,
+    enabled: !itineraryLoading && Boolean(itinerary),
+    steps: [
+      { content: itineraryHelp.summary },
+      { content: itineraryHelp["tab-itinerary"], afterAcknowledge: () => setTab("itinerary") },
+      { content: itineraryHelp.tools },
+      { content: itineraryHelp.day },
+      { content: itineraryHelp["tab-neighborhoods"], afterAcknowledge: () => setTab("neighborhoods") },
+      { content: itineraryHelp["tab-food"], afterAcknowledge: () => setTab("food") },
+      { content: itineraryHelp["tab-culture"], afterAcknowledge: () => setTab("culture") },
+      { content: itineraryHelp["tab-activities"], afterAcknowledge: () => setTab("activities") },
+      { content: itineraryHelp["tab-practical"], afterAcknowledge: () => setTab("practical") },
+      { content: itineraryHelp.save },
+      { content: itineraryHelp.settings },
+    ],
+  });
 
   // Legge l'itinerario da AsyncStorage (passato da index/create/saved senza URL params)
   useEffect(() => {
@@ -692,6 +731,29 @@ export default function ItineraryScreen() {
     if (!itinerary) return;
     void saveItineraryDraft(itinerary, lang).catch(() => {});
   }, [itinerary, lang]);
+
+  useEffect(() => {
+    let active = true;
+    if (!itinerary) {
+      setAccommodation(null);
+      return () => { active = false; };
+    }
+    void loadTripAccommodation(itinerary.city, itinerary.start_date).then((savedAccommodation) => {
+      if (active) setAccommodation(savedAccommodation);
+    });
+    return () => { active = false; };
+  }, [itinerary?.city, itinerary?.start_date]);
+
+  const handleSaveAccommodation = useCallback(async (nextAccommodation: TripAccommodation) => {
+    await saveTripAccommodation(nextAccommodation);
+    setAccommodation(nextAccommodation);
+  }, []);
+
+  const handleRemoveAccommodation = useCallback(async () => {
+    if (!itinerary) return;
+    await removeTripAccommodation(itinerary.city, itinerary.start_date);
+    setAccommodation(null);
+  }, [itinerary]);
 
   // Precarica la rete mentre l'utente consulta l'itinerario, cosi la mappa si apre gia completa.
   useEffect(() => {
@@ -1188,18 +1250,6 @@ export default function ItineraryScreen() {
         ? "This combination cannot meet every target without exceeding a limit. The most consistent available option is shown."
         : "Con questa combinazione non è possibile raggiungere tutti gli obiettivi senza superare un limite. Mostriamo l'opzione più coerente disponibile.";
 
-  const selectedGuide = lang === "es"
-    ? ITINERARY_GUIDE_ES
-    : lang === "fr"
-      ? ITINERARY_GUIDE_FR
-      : lang === "en"
-        ? ITINERARY_GUIDE_EN
-        : ITINERARY_GUIDE_IT;
-  const itineraryHelp = Object.fromEntries(
-    selectedGuide.map(({ target, icon, title, body }) => [target, { icon, title, body }]),
-  ) as Record<string, ContextHelpContent>;
-  const toolsHelp = itineraryHelp.tools;
-
   return (
     <SafeAreaView ref={guideRootRef} style={[styles.safe, { backgroundColor: colors.bg }]}>
       {/* Top bar */}
@@ -1245,7 +1295,7 @@ export default function ItineraryScreen() {
         </View>
         <TouchableOpacity
           ref={(ref) => setGuideTarget("guide", ref)}
-          onPress={contextHelp.toggle}
+          onPress={firstVisitGuide.onHelpPress}
           activeOpacity={0.7}
           style={[styles.flagBtn, styles.guideBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }]}
           accessibilityLabel={lang === "es" ? "Abrir la guía" : lang === "fr" ? "Ouvrir le guide" : lang === "en" ? "Open guide" : "Apri guida"}
@@ -1343,7 +1393,7 @@ export default function ItineraryScreen() {
                   onPress={contextHelp.guard({ ...toolsHelp, icon: "information-circle-outline", title: "Info" }, () => setMapInfoVisible(true))}
                   haptic="selection"
                   pressScale={0.9}
-                  accessibilityLabel={lang === "es" ? "Informacion sobre mapa y restaurantes" : lang === "fr" ? "Infos carte et restaurants" : lang === "en" ? "Map and food info" : "Info mappa e cibo"}
+                  accessibilityLabel={lang === "es" ? "Información sobre mapa y restaurantes" : lang === "fr" ? "Informations sur la carte et les restaurants" : lang === "en" ? "Map and food info" : "Info mappa e cibo"}
                 >
                   <Ionicons name="information-circle-outline" size={22} color={colors.accentBlue} />
                 </PressableCard>
@@ -1354,6 +1404,7 @@ export default function ItineraryScreen() {
               <FadeInUp delay={staggerDelay(i, 70, 350)}>
                 <DayCard
                   day={day}
+                  city={itinerary.city}
                   maxWalkKm={itinerary.max_walk_km ?? 5}
                   open={openDay === day.day}
                   onToggleOpen={contextHelp.guard(itineraryHelp.day, () => handleToggleDay(day.day))}
@@ -1362,6 +1413,7 @@ export default function ItineraryScreen() {
                   onNoteChange={(stopIndex, note) => handleNoteChange(i, stopIndex, note)}
                   onDragStateChange={setDayCardDragging}
                   onRemoveRestaurant={(restaurantId) => handleRemoveRestaurant(i, restaurantId)}
+                  accommodation={accommodation}
                   helpActive={contextHelp.active}
                   onHelpRequest={contextHelp.explain}
                 />
@@ -1373,6 +1425,16 @@ export default function ItineraryScreen() {
 
         {tab === "neighborhoods" && (
           <>
+            <AccommodationCard
+              city={itinerary.city}
+              startDate={itinerary.start_date}
+              lang={lang}
+              value={accommodation}
+              onSave={handleSaveAccommodation}
+              onRemove={handleRemoveAccommodation}
+              helpActive={contextHelp.active}
+              onHelpRequest={contextHelp.explain}
+            />
             <Text style={[styles.sectionIntro, { color: colors.textMuted }]}>
               {t.neighborhoodsIntro(itinerary.city)}
             </Text>
@@ -1699,6 +1761,7 @@ export default function ItineraryScreen() {
             foodSelection={mapMode === "food" && foodSelection
               ? { mealType: foodSelection.mealType, origin: foodSelection.origin }
               : null}
+            accommodation={accommodation}
             assignedMap={assignedMap}
             lang={lang}
             accent={DAY_ACCENTS[(mapDay.day - 1) % DAY_ACCENTS.length]}
@@ -1731,6 +1794,7 @@ export default function ItineraryScreen() {
           cityLabel={cityLabel(itinerary.city, lang)}
           attractions={attractions}
           foodSpots={enrichedFoodSpots}
+          accommodation={accommodation}
           lang={lang}
         />
       )}
@@ -1740,7 +1804,7 @@ export default function ItineraryScreen() {
         onClose={() => setShowSettings(false)}
       />
 
-      <ContextHelpUI controller={contextHelp} lang={lang} />
+      <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
 
     </SafeAreaView>
   );

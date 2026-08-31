@@ -35,6 +35,7 @@ npm run preflight
 - [ ] Generate and install the `preview` APK on the Android emulator.
 - [ ] Install `expo-store-review` and connect the prepared review eligibility rule to the native prompt (the current terminal could not reach npm).
 - [x] Remove inactive Sentry runtime and align privacy declarations with zero crash/diagnostic collection.
+- [x] Hide and route-guard the manual builder for version 1.0 while preserving it behind a feature flag.
 
 ## Android
 

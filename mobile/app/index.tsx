@@ -27,14 +27,14 @@ import { ExperienceLevel } from "@/types";
 import CountryFlag from "react-native-country-flag";
 import { WorldMapModal } from "@/components/WorldMap";
 import { SkeletonBox, ItinerarySkeleton } from "@/components/Skeleton";
-import { AccountDeletionButton } from "@/components/AccountDeletionButton";
+import { SettingsModal } from "@/components/SettingsModal";
 import { PressableCard, FadeInUp, staggerDelay, PulseGlow } from "@/components/ui";
 import { shadowLevel } from "@/utils/shadow";
 import { cityLabel } from "@/utils/cityLabels";
 import { CITIES, CITY_EMOJI_MAP, COUNTRIES, registeredCountryLabel } from "@/data/cityRegistry";
 import { cacheCityForOffline } from "@/services/cityOfflineCache";
 import { useCityDownload, type DownloadStatus } from "@/hooks/useCityDownload";
-import { LANGUAGE_OPTIONS, languageOption, localText } from "@/i18n";
+import { localText } from "@/i18n";
 import {
   ContextHelpUI,
   contextHelpOutline,
@@ -50,8 +50,8 @@ import {
   type GenerationRequest,
 } from "@/services/generationRequestStorage";
 import { withStorageLock } from "@/services/resilientStorage";
-import { openExternalLink } from "@/utils/externalLinks";
-import { PRIVACY_URL, TERMS_URL } from "@/constants/legal";
+import { FEATURES } from "@/constants/features";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 
 const DAYS_GAP = 7;
 const WALK_MODES = [
@@ -117,11 +117,11 @@ const ONBOARDING_SLIDES_IT: GuideStep[] = [
   { icon: "contrast-outline", target: "brand", title: "Tema dell'app", body: "Tocca URVEYA per passare dal tema scuro al tema chiaro e viceversa." },
   { icon: "help-circle-outline", target: "guide", title: "Guida", body: "Il punto interrogativo riapre questa spiegazione in qualsiasi momento." },
   { icon: "settings-outline", target: "settings", title: "Impostazioni", body: "L'ingranaggio apre lingua, tema, privacy, account e gestione dei dati offline." },
-  { icon: "location-outline", target: "destination", title: "Destinazione", body: "Scegli la citt\u00e0 dalla lista con ricerca oppure dalla mappa. La destinazione \u00e8 necessaria sia per generare sia per creare manualmente un itinerario." },
+  { icon: "location-outline", target: "destination", title: "Destinazione", body: "Scegli la citt\u00e0 dalla lista con ricerca oppure dalla mappa. La destinazione viene usata per creare automaticamente il tuo itinerario." },
   { icon: "calendar-outline", target: "days", title: "Numero di giorni", body: "Seleziona la durata del viaggio. Iconico arriva fino a 5 giorni; Esploratore pu\u00f2 mostrare anche 6 e 7 giorni quando disponibili." },
   { icon: "sparkles-outline", target: "experience", title: "Tipo di esperienza", body: "Iconico privilegia le attrazioni imperdibili. Esploratore include anche luoghi ricercati e nascosti per costruire giornate pi\u00f9 ricche." },
   { icon: "walk-outline", target: "walk", title: "Ritmo e camminata", body: "Rilassato limita il percorso a 3 km, Bilanciato a 5 km e Intenso a 7 km al giorno. Il ritmo modifica anche quante tappe vengono inserite." },
-  { icon: "git-compare-outline", target: "actions", title: "Genera o crea", body: "Genera itinerario organizza automaticamente giorni, tappe e distanze. Crea itinerario apre l'editor manuale, dove trascini personalmente attrazioni e pasti negli slot." },
+  { icon: "sparkles-outline", target: "actions", title: "Genera itinerario", body: "Urveya organizza automaticamente giorni, tappe e distanze usando le preferenze che hai selezionato." },
   { icon: "hourglass-outline", target: "none", title: "Durante la generazione", body: "Il pannello di caricamento mostra lo stato del calcolo. Urveya controlla durata, musei, distanza e distribuzione delle tappe prima di aprire il riepilogo." },
 ];
 
@@ -130,11 +130,11 @@ const ONBOARDING_SLIDES_EN: GuideStep[] = [
   { icon: "contrast-outline", target: "brand", title: "App theme", body: "Tap URVEYA to switch between dark and light themes." },
   { icon: "help-circle-outline", target: "guide", title: "Guide", body: "The question mark reopens this walkthrough at any time." },
   { icon: "settings-outline", target: "settings", title: "Settings", body: "The gear opens language, theme, privacy, account and offline data controls." },
-  { icon: "location-outline", target: "destination", title: "Destination", body: "Choose a city from the searchable list or the map. A destination is required for both automatic and manual planning." },
+  { icon: "location-outline", target: "destination", title: "Destination", body: "Choose a city from the searchable list or the map. Urveya uses it to build your itinerary automatically." },
   { icon: "calendar-outline", target: "days", title: "Number of days", body: "Choose the trip length. Iconic supports up to 5 days; Explorer can also offer 6 and 7 days when available." },
   { icon: "sparkles-outline", target: "experience", title: "Experience type", body: "Iconic prioritizes unmissable sights. Explorer also includes curated and hidden places for richer days." },
   { icon: "walk-outline", target: "walk", title: "Pace and walking", body: "Relaxed limits walking to 3 km, Balanced to 5 km and Intense to 7 km per day. Pace also changes how many stops are added." },
-  { icon: "git-compare-outline", target: "actions", title: "Generate or create", body: "Generate itinerary organizes days, stops and distances automatically. Create itinerary opens the manual drag-and-drop editor." },
+  { icon: "sparkles-outline", target: "actions", title: "Generate itinerary", body: "Urveya automatically organizes days, stops and distances using your selected preferences." },
   { icon: "hourglass-outline", target: "none", title: "While generating", body: "The loading panel reports progress while Urveya checks duration, museums, distance and the distribution of stops." },
 ];
 
@@ -143,11 +143,11 @@ const ONBOARDING_SLIDES_FR: GuideStep[] = [
   { icon: "contrast-outline", target: "brand", title: "Th\u00e8me de l'app", body: "Touchez URVEYA pour passer du th\u00e8me sombre au th\u00e8me clair." },
   { icon: "help-circle-outline", target: "guide", title: "Guide", body: "Le point d'interrogation rouvre cette visite guid\u00e9e \u00e0 tout moment." },
   { icon: "settings-outline", target: "settings", title: "Param\u00e8tres", body: "L'engrenage ouvre la langue, le th\u00e8me, la confidentialit\u00e9, le compte et les donn\u00e9es hors ligne." },
-  { icon: "location-outline", target: "destination", title: "Destination", body: "Choisissez la ville dans la liste avec recherche ou sur la carte. Elle est n\u00e9cessaire pour les deux modes de cr\u00e9ation." },
+  { icon: "location-outline", target: "destination", title: "Destination", body: "Choisissez une ville dans la liste ou sur la carte. Urveya l'utilise pour construire automatiquement votre itin\u00e9raire." },
   { icon: "calendar-outline", target: "days", title: "Nombre de jours", body: "Choisissez la dur\u00e9e. Iconique va jusqu'\u00e0 5 jours; Explorateur peut aussi proposer 6 et 7 jours." },
   { icon: "sparkles-outline", target: "experience", title: "Type d'exp\u00e9rience", body: "Iconique privil\u00e9gie les incontournables. Explorateur ajoute aussi des lieux recherch\u00e9s et cach\u00e9s." },
   { icon: "walk-outline", target: "walk", title: "Rythme et marche", body: "D\u00e9tendu limite la marche \u00e0 3 km, \u00c9quilibr\u00e9 \u00e0 5 km et Intense \u00e0 7 km par jour." },
-  { icon: "git-compare-outline", target: "actions", title: "G\u00e9n\u00e9rer ou cr\u00e9er", body: "G\u00e9n\u00e9rer organise automatiquement les journ\u00e9es. Cr\u00e9er ouvre l'\u00e9diteur manuel par glisser-d\u00e9poser." },
+  { icon: "sparkles-outline", target: "actions", title: "G\u00e9n\u00e9rer l'itin\u00e9raire", body: "Urveya organise automatiquement les journ\u00e9es, les \u00e9tapes et les distances selon vos pr\u00e9f\u00e9rences." },
   { icon: "hourglass-outline", target: "none", title: "Pendant la g\u00e9n\u00e9ration", body: "Le panneau indique la progression pendant que Urveya contr\u00f4le dur\u00e9e, mus\u00e9es, distance et r\u00e9partition des \u00e9tapes." },
 ];
 
@@ -158,11 +158,11 @@ const ONBOARDING_SLIDES_ES: GuideStep[] = [
   { icon: "contrast-outline", target: "brand", title: "Tema de la app", body: "Toca URVEYA para cambiar entre el tema oscuro y el claro." },
   { icon: "help-circle-outline", target: "guide", title: "Gu\u00eda", body: "El signo de interrogaci\u00f3n vuelve a abrir esta explicaci\u00f3n en cualquier momento." },
   { icon: "settings-outline", target: "settings", title: "Configuraci\u00f3n", body: "El engranaje abre idioma, tema, privacidad, cuenta y datos sin conexi\u00f3n." },
-  { icon: "location-outline", target: "destination", title: "Destino", body: "Elige la ciudad en la lista con buscador o en el mapa. Es necesaria para la planificaci\u00f3n autom\u00e1tica y manual." },
+  { icon: "location-outline", target: "destination", title: "Destino", body: "Elige una ciudad en la lista o en el mapa. Urveya la utiliza para crear automáticamente tu itinerario." },
   { icon: "calendar-outline", target: "days", title: "N\u00famero de d\u00edas", body: "Elige la duraci\u00f3n. Ic\u00f3nico llega hasta 5 d\u00edas; Explorador tambi\u00e9n puede ofrecer 6 y 7 d\u00edas." },
   { icon: "sparkles-outline", target: "experience", title: "Tipo de experiencia", body: "Ic\u00f3nico prioriza los imprescindibles. Explorador a\u00f1ade lugares seleccionados y ocultos." },
   { icon: "walk-outline", target: "walk", title: "Ritmo y caminata", body: "Relajado limita la caminata a 3 km, Equilibrado a 5 km e Intenso a 7 km por d\u00eda." },
-  { icon: "git-compare-outline", target: "actions", title: "Generar o crear", body: "Generar organiza autom\u00e1ticamente d\u00edas y paradas. Crear abre el editor manual de arrastrar y soltar." },
+  { icon: "sparkles-outline", target: "actions", title: "Generar itinerario", body: "Urveya organiza automáticamente los días, las paradas y las distancias según tus preferencias." },
   { icon: "hourglass-outline", target: "none", title: "Durante la generaci\u00f3n", body: "El panel muestra el progreso mientras Urveya comprueba duraci\u00f3n, museos, distancia y distribuci\u00f3n de las paradas." },
 ];
 
@@ -197,7 +197,7 @@ const GENERATING_MESSAGES_ES = ["Buscando atracciones...", "Optimizando la ruta.
 export default function HomeScreen() {
   const router = useRouter();
   const { generate, cancel, loading, error } = useItinerary();
-  const { lang, t, setLang } = useLanguage();
+  const { lang, t } = useLanguage();
   const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
   const { isOnline } = useNetworkStatus();
@@ -225,12 +225,25 @@ export default function HomeScreen() {
   isOnlineRef.current = isOnline;
 
   const genMessages = ({ it: GENERATING_MESSAGES_IT, en: GENERATING_MESSAGES_EN, fr: GENERATING_MESSAGES_FR, es: GENERATING_MESSAGES_ES } as Record<string, string[]>)[lang] ?? GENERATING_MESSAGES_EN;
-  const currentLanguage = languageOption(lang);
   const cityPlaceholder = tx({ it: "Seleziona una città...", en: "Select a city...", fr: "Sélectionnez une ville...", es: "Selecciona una ciudad..." });
-  const maxWalkTitle = tx({ it: "Camminata max", en: "Max walking", fr: "Marche max", es: "Caminata maxima" });
+  const maxWalkTitle = tx({ it: "Camminata max", en: "Max walking", fr: "Marche max", es: "Caminata máxima" });
   const noCityTitle = tx({ it: "Nessuna città selezionata", en: "No city selected", fr: "Aucune ville sélectionnée", es: "Ninguna ciudad seleccionada" });
   const noCityBody = tx({ it: "Seleziona una destinazione prima di continuare.", en: "Select a destination before continuing.", fr: "Sélectionnez une destination avant de continuer.", es: "Selecciona un destino antes de continuar." });
   const homeHelp = homeContextHelp(lang);
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "home-v1",
+    controller: contextHelp,
+    steps: [
+      { content: homeHelp.cityList },
+      { content: homeHelp.days },
+      { content: homeHelp.iconic },
+      { content: homeHelp.relaxed },
+      { content: homeHelp.packing },
+      { content: homeHelp.generate },
+      { content: homeHelp.saved },
+      { content: homeHelp.settings },
+    ],
+  });
   const generationVisible = loading || preparingTrip;
   const displayedGenerationError = generationError || error;
 
@@ -487,7 +500,7 @@ export default function HomeScreen() {
         <View style={styles.headerActions}>
           <TouchableOpacity
             ref={(ref) => setGuideTarget("guide", ref)}
-            onPress={contextHelp.toggle}
+            onPress={firstVisitGuide.onHelpPress}
             activeOpacity={0.7}
             style={[styles.iconBtn, { backgroundColor: colors.accentGold + "14", borderColor: colors.accentGold + "70" }, contextHelp.active && { backgroundColor: colors.accentGold, borderColor: colors.accentGold }]}
             accessibilityLabel={tx({it:"Apri guida",en:"Open guide",fr:"Ouvrir le guide",es:"Abrir la guía"})}
@@ -677,7 +690,7 @@ export default function HomeScreen() {
           <View style={[styles.errorBox, { backgroundColor: colors.textMuted + "22", borderColor: colors.textMuted + "44" }]}>
             <Ionicons name="cloud-offline-outline" size={16} color={colors.textMuted} />
             <Text style={[styles.errorText, { color: colors.textSub }]}>
-              {tx({it:"Sei offline. Itinerari e contenuti restano disponibili; mappe live e sincronizzazione richiedono internet.",en:"You are offline. Itineraries and content remain available; live maps and sync require internet.",fr:"Vous etes hors ligne. Les itineraires restent disponibles; les cartes en direct et la synchronisation demandent internet.",es:"Estas sin conexion. Los itinerarios siguen disponibles; los mapas en directo y la sincronizacion necesitan internet."})}
+              {tx({it:"Sei offline. Itinerari e contenuti restano disponibili; mappe live e sincronizzazione richiedono internet.",en:"You are offline. Itineraries and content remain available; live maps and sync require internet.",fr:"Vous êtes hors ligne. Les itinéraires restent disponibles ; les cartes en direct et la synchronisation nécessitent internet.",es:"Estás sin conexión. Los itinerarios siguen disponibles; los mapas en directo y la sincronización necesitan internet."})}
             </Text>
           </View>
         )}
@@ -720,11 +733,12 @@ export default function HomeScreen() {
             </PressableCard>
           </View>
 
-          <Text style={[styles.orDivider, { color: colors.textMuted }]}>
-            {tx({it:"o",en:"or",fr:"ou",es:"o"})}
-          </Text>
+          {FEATURES.manualBuilder && <>
+            <Text style={[styles.orDivider, { color: colors.textMuted }]}>
+              {tx({it:"o",en:"or",fr:"ou",es:"o"})}
+            </Text>
 
-          <PressableCard
+            <PressableCard
             style={[
                 styles.ctaCreate,
                 { borderColor: colors.accentGreen + "40", backgroundColor: colors.accentGreen + "10" },
@@ -743,7 +757,8 @@ export default function HomeScreen() {
                 {tx({it:"Crea itinerario",en:"Build itinerary",fr:"Creer l itinerario",es:"Crear itinerario"})}
               </Text>
             </View>
-          </PressableCard>
+            </PressableCard>
+          </>}
         </View>
         </FadeInUp>
 
@@ -836,124 +851,9 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      {/* Ã¢â€â‚¬Ã¢â€â‚¬ Onboarding Ã¢â€â‚¬Ã¢â€â‚¬ */}
-      <Modal
-        visible={showSettings}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSettings(false)}
-      >
-        <TouchableOpacity
-          style={styles.privacyBackdrop}
-          activeOpacity={1}
-          onPress={() => setShowSettings(false)}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            style={[styles.privacySheet, { backgroundColor: colors.card, borderColor: colors.border }]}
-          >
-            <View style={styles.privacyHeader}>
-              <View style={[styles.privacyIconBox, { backgroundColor: colors.accentBlue + "18", borderColor: colors.accentBlue + "55" }]}>
-                <Ionicons name="shield-checkmark-outline" size={22} color={colors.accentBlue} />
-              </View>
-              <View style={styles.privacyTitleWrap}>
-                <Text style={[styles.privacyTitle, { color: colors.text }]}>
-                  {tx({it:"Impostazioni",en:"Settings",fr:"Param\u00e8tres",es:"Configuraci\u00f3n"})}
-                </Text>
-                <Text style={[styles.privacySubtitle, { color: colors.textMuted }]}>
-                  {lang === "en"
-                    ? "Language, theme and privacy controls."
-                    : lang === "fr"
-                      ? "Langue, th\u00e8me et contr\u00f4les de confidentialit\u00e9."
-                      : "Lingua, tema e controlli privacy."}
-                </Text>
-              </View>
-            </View>
+      <SettingsModal visible={showSettings} onClose={() => setShowSettings(false)} />
 
-            <View style={styles.settingsGrid}>
-              <View style={[styles.settingsLanguageCard, { backgroundColor: colors.card2, borderColor: colors.border2 }]}>
-                <View style={styles.settingsLanguageHeader}>
-                  <Ionicons name="language-outline" size={18} color={colors.accentGold} />
-                  <View style={styles.settingsActionText}>
-                    <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
-                      {tx({it:"Lingua",en:"Language",fr:"Langue",es:"Idioma"})}
-                    </Text>
-                    <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
-                      {currentLanguage.label}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.languageChoiceRow}>
-                  {LANGUAGE_OPTIONS.map((option) => {
-                    const active = option.code === lang;
-                    return (
-                      <TouchableOpacity
-                        key={option.code}
-                        onPress={() => setLang(option.code)}
-                        activeOpacity={0.82}
-                        style={[
-                          styles.languageChoice,
-                          { backgroundColor: colors.inputBg, borderColor: colors.border },
-                          active && { backgroundColor: colors.accentGold + "1f", borderColor: colors.accentGold },
-                        ]}
-                      >
-                        <CountryFlag isoCode={option.flagIso} size={13} />
-                        <Text style={[styles.languageChoiceText, { color: active ? colors.accentGold : colors.textSub }]}>
-                          {option.shortLabel}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.settingsAction, { backgroundColor: colors.card2, borderColor: colors.border2 }]}
-                onPress={toggleTheme}
-                activeOpacity={0.82}
-              >
-                <Ionicons name="contrast-outline" size={18} color={colors.accentPurple} />
-                <View style={styles.settingsActionText}>
-                  <Text style={[styles.settingsActionTitle, { color: colors.text }]}>
-                    {tx({it:"Tema",en:"Theme",fr:"Theme",es:"Tema"})}
-                  </Text>
-                  <Text style={[styles.settingsActionSub, { color: colors.textMuted }]}>
-                    {tx({it:"Cambia aspetto",en:"Switch app look",fr:"Changer l apparence",es:"Cambiar apariencia"})}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.privacyLinksRow}>
-              <TouchableOpacity onPress={() => openExternalLink(PRIVACY_URL, lang)} activeOpacity={0.75}>
-                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
-                  {tx({it:"Privacy Policy",en:"Privacy Policy",fr:"Politique de confidentialite",es:"Politica de privacidad"})}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.privacyDot, { color: colors.textMuted }]}>-</Text>
-              <TouchableOpacity onPress={() => openExternalLink(TERMS_URL, lang)} activeOpacity={0.75}>
-                <Text style={[styles.privacyLink, { color: colors.accentBlue }]}>
-                  {tx({it:"Termini",en:"Terms",fr:"Conditions",es:"Terminos"})}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <AccountDeletionButton onDeleted={() => setShowSettings(false)} />
-
-            <TouchableOpacity
-              style={[styles.privacyDoneBtn, { backgroundColor: colors.accentBlue }]}
-              onPress={() => setShowSettings(false)}
-              activeOpacity={0.85}
-            >
-              <Text style={[styles.privacyDoneText, { color: colors.bg }]}>
-                {localText(lang, { it: "Fatto", en: "Done", fr: "Terminé", es: "Listo" })}
-              </Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
-
-      <ContextHelpUI controller={contextHelp} lang={lang} />
+      <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
     </SafeAreaView>
   );
 }
@@ -1169,7 +1069,7 @@ function CityPickerModal({
                           onPress={() => onDownload(c.id)}
                           style={[styles.cityDownloadBtn, { borderColor: colors.border }]}
                           accessibilityRole="button"
-                          accessibilityLabel={tx({ it: `Scarica dati offline di ${label}`, en: `Download ${label} for offline use`, fr: `Télécharger ${label} pour une utilisation hors ligne`, es: `Descargar ${label} para usar sin conexión` })}
+                          accessibilityLabel={tx({ it: `Prepara i dati offline di ${label}`, en: `Prepare ${label} for offline use`, fr: `Préparer les données hors ligne de ${label}`, es: `Preparar los datos sin conexión de ${label}` })}
                         >
                           {getDownloadStatus(c.id) === "downloading" ? (
                             <ActivityIndicator size="small" color={colors.accentBlue} />

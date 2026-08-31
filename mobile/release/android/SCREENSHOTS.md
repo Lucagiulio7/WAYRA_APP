@@ -41,8 +41,8 @@ adb shell wm density reset
    - Mappa alloggi con poligoni dei quartieri e attrazioni iconiche.
 5. `05-cucina.png`
    - Piatti tipici con icone diverse e un ristorante consigliato aperto.
-6. `06-creazione-manuale.png`
-   - Editor manuale con giorni a sinistra e attrazioni trascinabili a destra.
+6. `06-valigia-smart.png`
+   - Checklist valigia adattata a durata, clima e tipo di viaggio.
 
 ## Screenshot aggiuntivi
 

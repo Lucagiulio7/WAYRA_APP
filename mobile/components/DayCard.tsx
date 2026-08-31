@@ -6,6 +6,8 @@ import {
   StyleSheet,
   LayoutAnimation,
   Animated,
+  Modal,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ItineraryDay, Restaurant, Stop } from "@/types";
@@ -19,7 +21,9 @@ import { PressableCard } from "@/components/ui";
 import { localText } from "@/i18n";
 import { contextHelpOutline, type ContextHelpContent } from "@/components/ContextHelp";
 import { openExternalLink } from "@/utils/externalLinks";
-import { analyzeRouteMobility, type MobilityPoint, type RouteTransfer } from "@/utils/routeMetrics";
+import { analyzeRouteMobility, haversineKm, type MobilityPoint, type RouteTransfer } from "@/utils/routeMetrics";
+import type { TripAccommodation } from "@/services/accommodationStorage";
+import { requestOptionalUserLocation } from "@/services/userLocation";
 
 const DAY_ACCENTS = ["#e8c06a", "#7eb8f7", "#a78bfa", "#6ee7b7", "#f97316"];
 
@@ -66,10 +70,40 @@ function buildRouteMapsLink(stops: MobilityPoint[], lang: string): string {
     "?travelmode=walking";
 }
 
-function buildFirstStopMapsLink(stop: Stop | undefined, lang: string): string {
+function buildFirstStopMapsLink(stop: Stop | undefined, lang: string, fallbackCity = ""): string {
   if (!stop) return "";
-  const destination = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? "", lang)}`.trim();
+  const destination = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? fallbackCity, lang)}`.trim();
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=transit`;
+}
+
+function buildCurrentLocationToStopMapsLink(
+  stop: Stop | undefined,
+  coordinates: { latitude: number; longitude: number } | undefined,
+  lang: string,
+  fallbackCity = "",
+): string {
+  if (!stop) return "";
+  const destination = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? fallbackCity, lang)}`.trim();
+  const origin = coordinates
+    ? `&origin=${encodeURIComponent(`${coordinates.latitude},${coordinates.longitude}`)}`
+    : "";
+  return `https://www.google.com/maps/dir/?api=1${origin}&destination=${encodeURIComponent(destination)}&travelmode=transit`;
+}
+
+function accommodationWaypoint(accommodation: TripAccommodation, lang: string): string {
+  return encodeURIComponent([accommodation.name, accommodation.address, cityLabel(accommodation.city, lang)].filter(Boolean).join(", "));
+}
+
+function buildAccommodationToStopMapsLink(accommodation: TripAccommodation, stop: Stop | undefined, lang: string): string {
+  if (!stop) return "";
+  const destination = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? accommodation.city, lang)}`.trim();
+  return `https://www.google.com/maps/dir/?api=1&origin=${accommodationWaypoint(accommodation, lang)}&destination=${encodeURIComponent(destination)}&travelmode=transit`;
+}
+
+function buildReturnToAccommodationMapsLink(accommodation: TripAccommodation, stop: Stop | undefined, lang: string): string {
+  if (!stop) return "";
+  const origin = `${localizedName(stop, lang)} ${cityLabel(stop.city ?? accommodation.city, lang)}`.trim();
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${accommodationWaypoint(accommodation, lang)}&travelmode=transit`;
 }
 
 function buildInternalTransferMapsLink(transfer: RouteTransfer, lang: string): string {
@@ -84,6 +118,7 @@ function buildInternalTransferMapsLink(transfer: RouteTransfer, lang: string): s
 
 interface Props {
   day: ItineraryDay;
+  city?: string;
   maxWalkKm?: number;
   open?: boolean;
   onToggleOpen?: () => void;
@@ -92,13 +127,15 @@ interface Props {
   onNoteChange?: (stopIndex: number, note: string) => void;
   onDragStateChange?: (dragging: boolean) => void;
   onRemoveRestaurant?: (restaurantId: number) => void;
+  accommodation?: TripAccommodation | null;
   helpActive?: boolean;
   onHelpRequest?: (content: ContextHelpContent) => void;
 }
 
-export function DayCard({ day, maxWalkKm = 5, open: controlledOpen, onToggleOpen, onOptimizeDay, onReorder, onNoteChange, onDragStateChange, onRemoveRestaurant, helpActive = false, onHelpRequest }: Props) {
+export function DayCard({ day, city = "", maxWalkKm = 5, open: controlledOpen, onToggleOpen, onOptimizeDay, onReorder, onNoteChange, onDragStateChange, onRemoveRestaurant, accommodation, helpActive = false, onHelpRequest }: Props) {
   const [internalOpen, setInternalOpen] = useState(day.day === 1);
   const [foodOpen, setFoodOpen] = useState(false);
+  const [startChoiceVisible, setStartChoiceVisible] = useState(false);
   const accent = DAY_ACCENTS[(day.day - 1) % DAY_ACCENTS.length];
   const { lang, t } = useLanguage();
   const { colors } = useTheme();
@@ -146,10 +183,46 @@ export function DayCard({ day, maxWalkKm = 5, open: controlledOpen, onToggleOpen
       .map((group) => buildRouteMapsLink(group, lang)),
     [mobilityPlan.walkingGroups, lang],
   );
-  const firstStopMapsLink = useMemo(
-    () => day.transfer_required ? buildFirstStopMapsLink(attractionStops[0], lang) : "",
-    [attractionStops, day.transfer_required, lang],
+  const firstStopMapsLink = useMemo(() => buildFirstStopMapsLink(attractionStops[0], lang, city), [attractionStops, lang, city]);
+  const accommodationToFirstStopLink = useMemo(
+    () => accommodation ? buildAccommodationToStopMapsLink(accommodation, attractionStops[0], lang) : "",
+    [accommodation, attractionStops, lang],
   );
+  const returnToAccommodationLink = useMemo(
+    () => accommodation ? buildReturnToAccommodationMapsLink(accommodation, attractionStops[attractionStops.length - 1], lang) : "",
+    [accommodation, attractionStops, lang],
+  );
+
+  const openFromCurrentLocation = async () => {
+    setStartChoiceVisible(false);
+    const result = await requestOptionalUserLocation();
+    const firstStop = attractionStops[0];
+    const link = buildCurrentLocationToStopMapsLink(firstStop, result.coordinates, lang, city);
+    if (!link) return;
+
+    if (result.status === "available" && result.coordinates && firstStop) {
+      const distanceFromCity = haversineKm(result.coordinates, firstStop);
+      if (distanceFromCity > 80) {
+        Alert.alert(
+          tx({ it: "Sei lontano dalla destinazione", en: "You are far from the destination", fr: "Vous êtes loin de la destination", es: "Estás lejos del destino" }),
+          tx({
+            it: accommodation ? "La posizione attuale sembra fuori dalla città del viaggio. Puoi partire dal tuo alloggio oppure aprire comunque il percorso." : "La posizione attuale sembra fuori dalla città del viaggio. Aprire comunque il percorso?",
+            en: accommodation ? "Your current location appears to be outside the trip city. You can start from your accommodation or open the route anyway." : "Your current location appears to be outside the trip city. Open the route anyway?",
+            fr: accommodation ? "Votre position actuelle semble être hors de la ville du voyage. Vous pouvez partir de votre logement ou ouvrir quand même l'itinéraire." : "Votre position actuelle semble être hors de la ville du voyage. Ouvrir quand même l'itinéraire ?",
+            es: accommodation ? "Tu ubicación actual parece estar fuera de la ciudad del viaje. Puedes salir desde tu alojamiento o abrir la ruta de todos modos." : "Tu ubicación actual parece estar fuera de la ciudad del viaje. ¿Abrir la ruta de todos modos?",
+          }),
+          [
+            { text: tx({ it: "Annulla", en: "Cancel", fr: "Annuler", es: "Cancelar" }), style: "cancel" },
+            ...(accommodationToFirstStopLink ? [{ text: tx({ it: "Dall'alloggio", en: "From accommodation", fr: "Depuis le logement", es: "Desde el alojamiento" }), onPress: () => openMaps(accommodationToFirstStopLink) }] : []),
+            { text: tx({ it: "Apri comunque", en: "Open anyway", fr: "Ouvrir quand même", es: "Abrir de todos modos" }), onPress: () => openMaps(link) },
+          ],
+        );
+        return;
+      }
+    }
+
+    openMaps(link);
+  };
 
   const allRestaurants = useMemo(
     () => (day.restaurants ?? []).slice().sort(
@@ -303,7 +376,11 @@ export function DayCard({ day, maxWalkKm = 5, open: controlledOpen, onToggleOpen
           {!!firstStopMapsLink && (
             <TouchableOpacity
               style={[styles.mapsBtn, { borderColor: colors.accentBlue, backgroundColor: colors.accentBlue + "0D" }]}
-              onPress={() => helpActive ? onHelpRequest?.(dayHelp.transfer) : openMaps(firstStopMapsLink)}
+              onPress={() => {
+                if (helpActive) { onHelpRequest?.(dayHelp.transfer); return; }
+                if (accommodationToFirstStopLink) setStartChoiceVisible(true);
+                else void openFromCurrentLocation();
+              }}
               activeOpacity={0.8}
               accessibilityRole="link"
               accessibilityLabel={tx({ it: "Raggiungi la prima tappa", en: "Reach the first stop", fr: "Rejoindre la première étape", es: "Llegar a la primera parada" })}
@@ -313,6 +390,22 @@ export function DayCard({ day, maxWalkKm = 5, open: controlledOpen, onToggleOpen
                 {tx({ it: "Raggiungi la prima tappa", en: "Reach the first stop", fr: "Rejoindre la première étape", es: "Llegar a la primera parada" })}
               </Text>
               <Ionicons name="open-outline" size={14} color={colors.accentBlue} />
+            </TouchableOpacity>
+          )}
+
+          {!!returnToAccommodationLink && (
+            <TouchableOpacity
+              style={[styles.mapsBtn, { borderColor: colors.accentPurple, backgroundColor: colors.accentPurple + "0D" }]}
+              onPress={() => helpActive ? onHelpRequest?.(dayHelp.transfer) : openMaps(returnToAccommodationLink)}
+              activeOpacity={0.8}
+              accessibilityRole="link"
+              accessibilityLabel={tx({ it: "Torna all'alloggio", en: "Return to accommodation", fr: "Retourner au logement", es: "Volver al alojamiento" })}
+            >
+              <Ionicons name="home-outline" size={17} color={colors.accentPurple} />
+              <Text style={[styles.mapsBtnText, { color: colors.accentPurple }]}>
+                {tx({ it: "Torna all'alloggio", en: "Return to accommodation", fr: "Retourner au logement", es: "Volver al alojamiento" })}
+              </Text>
+              <Ionicons name="open-outline" size={14} color={colors.accentPurple} />
             </TouchableOpacity>
           )}
 
@@ -389,6 +482,32 @@ export function DayCard({ day, maxWalkKm = 5, open: controlledOpen, onToggleOpen
         </View>
       )}
 
+      <Modal visible={startChoiceVisible} transparent animationType="fade" onRequestClose={() => setStartChoiceVisible(false)}>
+        <TouchableOpacity style={[styles.routeChoiceBackdrop, { backgroundColor: colors.overlay }]} activeOpacity={1} onPress={() => setStartChoiceVisible(false)}>
+          <TouchableOpacity activeOpacity={1} style={[styles.routeChoiceSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.routeChoiceTitle, { color: colors.text }]}>{tx({ it: "Da dove vuoi partire?", en: "Where do you want to start?", fr: "D'où voulez-vous partir ?", es: "¿Desde dónde quieres salir?" })}</Text>
+            <Text style={[styles.routeChoiceSubtitle, { color: colors.textMuted }]}>{tx({ it: "Il trasferimento verso la prima tappa resta separato dai chilometri a piedi della giornata.", en: "The transfer to the first stop remains separate from the day's walking distance.", fr: "Le trajet jusqu'à la première étape reste séparé de la distance à pied de la journée.", es: "El traslado hasta la primera parada queda separado de la distancia a pie del día." })}</Text>
+            <TouchableOpacity style={[styles.routeChoiceButton, { borderColor: colors.accentBlue + "66", backgroundColor: colors.accentBlue + "12" }]} onPress={() => void openFromCurrentLocation()}>
+              <Ionicons name="navigate-outline" size={20} color={colors.accentBlue} />
+              <View style={styles.routeChoiceText}>
+                <Text style={[styles.routeChoiceButtonTitle, { color: colors.text }]}>{tx({ it: "La mia posizione", en: "My current location", fr: "Ma position actuelle", es: "Mi ubicación actual" })}</Text>
+                <Text style={[styles.routeChoiceButtonSub, { color: colors.textMuted }]}>{tx({ it: "Maps userà la posizione disponibile al momento dell'apertura.", en: "Maps will use your available location when it opens.", fr: "Maps utilisera votre position disponible à l'ouverture.", es: "Maps usará tu ubicación disponible al abrirse." })}</Text>
+              </View>
+              <Ionicons name="open-outline" size={15} color={colors.accentBlue} />
+            </TouchableOpacity>
+            {!!accommodationToFirstStopLink && (
+              <TouchableOpacity style={[styles.routeChoiceButton, { borderColor: colors.accentPurple + "66", backgroundColor: colors.accentPurple + "12" }]} onPress={() => { setStartChoiceVisible(false); openMaps(accommodationToFirstStopLink); }}>
+                <Ionicons name="home-outline" size={20} color={colors.accentPurple} />
+                <View style={styles.routeChoiceText}>
+                  <Text style={[styles.routeChoiceButtonTitle, { color: colors.text }]}>{accommodation?.name || tx({ it: "Il mio alloggio", en: "My accommodation", fr: "Mon logement", es: "Mi alojamiento" })}</Text>
+                  <Text style={[styles.routeChoiceButtonSub, { color: colors.textMuted }]} numberOfLines={2}>{accommodation?.address}</Text>
+                </View>
+                <Ionicons name="open-outline" size={15} color={colors.accentPurple} />
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -551,6 +670,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   mapsBtnText: { fontWeight: "700", fontSize: 14 },
+  routeChoiceBackdrop: { flex: 1, justifyContent: "flex-end", padding: 14 },
+  routeChoiceSheet: { width: "100%", maxWidth: 520, alignSelf: "center", borderWidth: 1, borderRadius: 12, padding: 16, gap: 10 },
+  routeChoiceTitle: { fontSize: 18, fontWeight: "900" },
+  routeChoiceSubtitle: { fontSize: 12, lineHeight: 18, marginBottom: 2 },
+  routeChoiceButton: { minHeight: 64, flexDirection: "row", alignItems: "center", gap: 11, borderWidth: 1, borderRadius: 8, padding: 12 },
+  routeChoiceText: { flex: 1, minWidth: 0 },
+  routeChoiceButtonTitle: { fontSize: 14, fontWeight: "900" },
+  routeChoiceButtonSub: { fontSize: 11, lineHeight: 16, marginTop: 2 },
   // â”€â”€ Food section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   foodSection: {
     marginTop: 10,

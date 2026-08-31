@@ -64,11 +64,13 @@ export default function RootLayout() {
       >
         <ThemeProvider>
           <LanguageProvider>
-            <AuthProvider>
-              <SafeAreaProvider>
-                <AppStack />
-              </SafeAreaProvider>
-            </AuthProvider>
+            <ErrorBoundary>
+              <AuthProvider>
+                <SafeAreaProvider>
+                  <AppStack />
+                </SafeAreaProvider>
+              </AuthProvider>
+            </ErrorBoundary>
           </LanguageProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>

@@ -36,6 +36,15 @@ mostrata dalla Play Console al momento della compilazione.
 - Finalita: `Funzionalita dell'app` e `Gestione account`.
 - Eliminazione: insieme all'account.
 
+### Informazioni personali - Indirizzo fisico
+
+- Dato: indirizzo dell'alloggio inserito facoltativamente dall'utente.
+- Raccolta: `Si`, dichiarazione prudenziale perché la verifica invia temporaneamente l'indirizzo al servizio cartografico o di geocodifica.
+- Condivisione: `No`, se il fornitore opera come prestatore di servizio secondo le condizioni applicabili.
+- Obbligatoria: `No`.
+- Elaborazione temporanea: `Si` per verifica e apertura delle indicazioni; Urveya lo conserva soltanto sul dispositivo e non nel proprio database.
+- Finalita: `Funzionalita dell'app`.
+
 ### Identificativi utente
 
 - Raccolta: `Si`, solo per utenti autenticati.
@@ -60,7 +69,7 @@ mostrata dalla Play Console al momento della compilazione.
 
 ## Tipi non raccolti
 
-- Nome, indirizzo fisico e numero di telefono.
+- Nome e numero di telefono.
 - Informazioni finanziarie.
 - Contatti.
 - Foto, video, audio e file personali.

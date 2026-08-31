@@ -19,6 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { localText } from "@/i18n";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 import {
   generatePackingItems,
   getPackingProfile,
@@ -283,6 +284,20 @@ export default function PackingScreen() {
     reset: help("refresh-outline", { it: "Azzera spunte", en: "Clear checks", fr: "Effacer les coches", es: "Borrar marcas" }, { it: "Deseleziona tutti gli elementi, mantenendo intatta la lista.", en: "Unchecks every item while keeping the list unchanged.", fr: "Décoche tous les objets sans modifier la liste.", es: "Desmarca todos los objetos sin cambiar la lista." }),
     add: help("add-circle-outline", { it: "Elemento personale", en: "Custom item", fr: "Objet personnel", es: "Objeto personal" }, { it: "Scegli una categoria, scrivi ciò che vuoi aggiungere e premi Aggiungi.", en: "Choose a category, type the item and press Add.", fr: "Choisissez une catégorie, saisissez l'objet puis appuyez sur Ajouter.", es: "Elige una categoría, escribe el objeto y pulsa Añadir." }),
   };
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "packing-v1",
+    controller: contextHelp,
+    enabled: hydrated,
+    steps: [
+      { content: packingHelp.duration },
+      { content: packingHelp.climate },
+      { content: packingHelp.trip },
+      { content: packingHelp.update },
+      { content: packingHelp.checklist },
+      { content: packingHelp.add },
+      { content: packingHelp.progress },
+    ],
+  });
 
   const categoryLabel = (category: PackingCategory) => localText(lang, {
     documents: { it: "Documenti", en: "Documents", fr: "Documents", es: "Documentos" },
@@ -370,7 +385,7 @@ export default function PackingScreen() {
           </View>
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.accentGold + "70" }]}
-            onPress={contextHelp.toggle}
+            onPress={firstVisitGuide.onHelpPress}
             accessibilityLabel={tx({ it: "Guida contestuale", en: "Context help", fr: "Aide contextuelle", es: "Ayuda contextual" })}
           >
             <Ionicons name={contextHelp.active ? "close" : "help-circle-outline"} size={22} color={colors.accentGold} />
@@ -504,7 +519,7 @@ export default function PackingScreen() {
             <Text style={[styles.offlineText, { color: colors.textMuted }]}>{labels.offline}</Text>
           </View>
         </ScrollView>
-        <ContextHelpUI controller={contextHelp} lang={lang} />
+        <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

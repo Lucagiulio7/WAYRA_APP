@@ -42,18 +42,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
+    let active = true;
+    void supabase.auth.getSession()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          setSession(null);
+          setUser(null);
+          return;
+        }
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSession(null);
+        setUser(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   // ── Email / Password ──────────────────────────────────────────────────────
@@ -137,9 +155,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) await supabase.auth.signOut({ scope: "local" });
     } catch {
-      // Forza il reset locale anche se l'API fallisce
+      await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+    } finally {
       setUser(null);
       setSession(null);
     }

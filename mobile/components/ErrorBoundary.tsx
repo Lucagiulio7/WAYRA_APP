@@ -77,7 +77,7 @@ class ErrorBoundaryInner extends Component<Props, State> {
 export function ErrorBoundary(props: Props) {
   const { lang } = useLanguage();
   const labels = lang === "es"
-    ? { title: "Algo salio mal", message: "Se produjo un error inesperado. Intentalo de nuevo o reinicia la aplicacion.", retry: "Intentar de nuevo" }
+    ? { title: "Algo salió mal", message: "Se produjo un error inesperado. Inténtalo de nuevo o reinicia la aplicación.", retry: "Intentar de nuevo" }
     : lang === "fr"
     ? { title: "Un probl\u00e8me est survenu", message: "Une erreur inattendue s\u2019est produite. R\u00e9essayez ou red\u00e9marrez l\u2019application.", retry: "R\u00e9essayer" }
     : lang === "en"

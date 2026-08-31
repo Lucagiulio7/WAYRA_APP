@@ -23,7 +23,7 @@ dell'app alla recensione.
 ## Accesso app
 
 L'account non e necessario per utilizzare le funzioni principali. Il revisore
-puo selezionare una citta, generare o creare manualmente un itinerario,
+puo selezionare una citta, generare e modificare un itinerario,
 consultare contenuti, mappe e valigia senza effettuare l'accesso.
 
 Testo suggerito per il revisore:

@@ -334,7 +334,7 @@ function AttractionStop({
             >
               <Ionicons name="ticket-outline" size={14} color={colors.accentPurple} />
               <Text style={[styles.ticketFullText, { color: colors.accentPurple }]}>
-                {lang === "es" ? "Comprar entradas en linea" : lang === "fr" ? "Acheter les billets en ligne" : lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
+                {lang === "es" ? "Comprar entradas en línea" : lang === "fr" ? "Acheter les billets en ligne" : lang === "en" ? "Buy tickets online" : "Acquista biglietti online"}
               </Text>
               <Ionicons name="open-outline" size={13} color={colors.accentPurple} />
             </TouchableOpacity>

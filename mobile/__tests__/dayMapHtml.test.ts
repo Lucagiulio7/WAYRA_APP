@@ -73,6 +73,62 @@ describe("DayMap embedded document", () => {
   it.each([
     ["Expo Go", buildHtml],
     ["web", buildWebHtml],
+  ])("mostra l'alloggio come livello filtrabile nella mappa itinerario su %s", (_platform, createHtml) => {
+    const accommodation = {
+      city: "lisbona",
+      name: "Casa Alfama",
+      address: "Rua da Saudade 1",
+      latitude: 38.711,
+      longitude: -9.13,
+      updatedAt: "2026-08-31T10:00:00.000Z",
+    };
+    const html = createHtml(
+      { day: 1, stops: [], restaurants: [], maps_link: "" } as any,
+      "lisbona",
+      [],
+      [],
+      null,
+      new Map(),
+      "it",
+      "#e8c06a",
+      true,
+      null,
+      accommodation,
+    );
+
+    expect(html).toContain('"Casa Alfama"');
+    expect(html).toContain("var accommodationLayer = null");
+    expect(html).toContain("level:5");
+    expect(() => new Function(html.match(/<script>([\s\S]*?)<\/script>/)?.[1] ?? "")).not.toThrow();
+  });
+
+  it("mostra e permette di nascondere l'alloggio nella mappa delle zone", () => {
+    const html = buildNeighborhoodHtml(
+      [],
+      [],
+      "lisbona",
+      "it",
+      true,
+      null,
+      "lodging-test",
+      {
+        city: "lisbona",
+        address: "Rua da Saudade 1",
+        latitude: 38.711,
+        longitude: -9.13,
+        updatedAt: "2026-08-31T10:00:00.000Z",
+      },
+    );
+
+    expect(html).toContain("const ACCOMMODATION=");
+    expect(html).toContain("accommodation-toggle");
+    expect(html).toContain("Rua da Saudade 1");
+    expect(() => new Function(html.match(/<script>([\s\S]*?)<\/script>/)?.[1] ?? "")).not.toThrow();
+  });
+
+  it.each([
+    ["Expo Go", buildHtml],
+    ["web", buildWebHtml],
   ])("permette di salvare e rimuovere ristoranti anche dalla mappa itinerario su %s", (_platform, createHtml) => {
     const html = createHtml(
       {

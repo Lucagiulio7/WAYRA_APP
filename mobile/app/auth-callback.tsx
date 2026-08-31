@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
@@ -56,6 +56,16 @@ export default function AuthCallbackScreen() {
               {tx({ it: "Accesso non riuscito", en: "Sign-in failed", fr: "Échec de la connexion", es: "Error de acceso" })}
             </Text>
             <Text style={[styles.body, { color: colors.textSub }]}>{error}</Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={() => router.replace("/auth")}
+              style={[styles.backButton, { backgroundColor: colors.accentGold }]}
+              activeOpacity={0.82}
+            >
+              <Text style={[styles.backButtonText, { color: colors.bg }]}>
+                {tx({ it: "Torna all'accesso", en: "Back to sign in", fr: "Retour à la connexion", es: "Volver al acceso" })}
+              </Text>
+            </TouchableOpacity>
           </>
         ) : (
           <>
@@ -75,4 +85,6 @@ const styles = StyleSheet.create({
   content: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 14 },
   title: { fontSize: 20, fontWeight: "800", textAlign: "center" },
   body: { fontSize: 14, lineHeight: 20, textAlign: "center" },
+  backButton: { minHeight: 44, paddingHorizontal: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", marginTop: 4 },
+  backButtonText: { fontSize: 14, fontWeight: "800" },
 });

@@ -104,6 +104,28 @@ describe("hooks — queryKey", () => {
   });
 });
 
+describe("guide obbligatorie al primo accesso", () => {
+  const guidedFiles: Array<[string, string]> = [
+    ["app/index.tsx", "home-v1"],
+    ["app/itinerary.tsx", "itinerary-v1"],
+    ["app/packing.tsx", "packing-v1"],
+    ["app/saved.tsx", "saved-v1"],
+    ["components/SettingsModal.tsx", "settings-v1"],
+    ["components/DayMap.tsx", "day-map-v1"],
+    ["components/DayMap.tsx", "food-map-v1"],
+    ["components/DayMap.web.tsx", "day-map-v1"],
+    ["components/DayMap.web.tsx", "food-map-v1"],
+    ["components/NeighborhoodMap.tsx", "neighborhood-map-v1"],
+  ];
+
+  it.each(guidedFiles)("%s collega la guida %s", (fileName, guideId) => {
+    const file = src(fileName);
+    expect(file).toContain("useFirstVisitGuide");
+    expect(file).toContain(`"${guideId}"`);
+    expect(file).toContain("guided={firstVisitGuide.guided}");
+  });
+});
+
 // ─── hooks — enabled flag ─────────────────────────────────────────────────────
 
 describe("hooks — enabled: !!city", () => {
@@ -180,6 +202,22 @@ describe("create-itinerary.tsx", () => {
   it("usa initBuilder in un useEffect", () => {
     expect(file).toContain("initBuilder");
     expect(file).toContain("useEffect");
+  });
+});
+
+describe("release feature flags", () => {
+  const features = src("constants/features.ts");
+  const home = src("app/index.tsx");
+  const builder = src("app/create-itinerary.tsx");
+
+  it("keeps the manual builder disabled for the first public release", () => {
+    expect(features).toMatch(/manualBuilder:\s*false/);
+    expect(home).toContain("FEATURES.manualBuilder &&");
+  });
+
+  it("redirects direct manual-builder links to the home screen", () => {
+    expect(builder).toContain("DisabledManualBuilderRedirect");
+    expect(builder).toContain('router.replace("/")');
   });
 });
 

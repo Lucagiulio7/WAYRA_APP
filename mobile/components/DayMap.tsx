@@ -22,10 +22,12 @@ import { localizedDescription, localizedField, localizedName } from "@/utils/loc
 import { translateAttractionType } from "@/utils/attractionType";
 import { localText } from "@/i18n";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "./ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 import { useTransitNetwork } from "@/hooks/useTransitNetwork";
 import { transitBadgeForCity, transitModeForCity, transitPresentation, type TransitNetwork } from "@/data/transitNetworks";
 import { MapStatusOverlay } from "./MapStatusOverlay";
 import { openExternalLink } from "@/utils/externalLinks";
+import type { TripAccommodation } from "@/services/accommodationStorage";
 
 // â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -37,6 +39,7 @@ interface Props {
   allAttractions: BuilderAttraction[];
   allFoodSpots?: BuilderAttraction[];
   foodSelection?: { mealType?: string | null; origin?: { latitude: number; longitude: number; name?: string } } | null;
+  accommodation?: TripAccommodation | null;
   /** attractionId â†’ dayNumber (per classificare layer 2 vs layer 3) */
   assignedMap: Map<number, number>;
   lang: string;
@@ -91,11 +94,12 @@ export function buildHtml(
   accent: string,
   isDark: boolean,
   transitNetwork: TransitNetwork | null,
+  accommodation?: TripAccommodation | null,
 ): string {
   const isEn = lang === "en";
   const isFr = lang === "fr";
   const isEs = lang === "es";
-  const labelsEs: Record<string, string> = {"La tua posizione":"Tu posición","Giorno":"Día","Già in programma":"Ya planificado","Non nell'itinerario":"Fuera del itinerario","Apri in Maps":"Abrir en Maps","Tutti":"Todos","Iconico":"Icónico","Ricercato":"Seleccionado","Nascosto":"Oculto","Cucina":"Cocina","Linee":"Líneas","A piedi ~":"A pie ~","dalle tappe di oggi":"desde las paradas de hoy","Misura distanza":"Medir distancia","Posto cibo":"Restaurante","Posto scelto":"Lugar elegido","Piatto tipico":"Plato típico","Scegli questo posto":"Elegir este lugar","Rimuovi questo posto":"Eliminar este lugar","Come arrivare con i mezzi":"Cómo llegar en transporte público","Fermata vicina":"Parada cercana","Trasporto pubblico":"Transporte público"};
+  const labelsEs: Record<string, string> = {"La tua posizione":"Tu posición","Il mio alloggio":"Mi alojamiento","Alloggio":"Alojamiento","Giorno":"Día","Già in programma":"Ya planificado","Non nell'itinerario":"Fuera del itinerario","Apri in Maps":"Abrir en Maps","Tutti":"Todos","Iconico":"Icónico","Ricercato":"Seleccionado","Nascosto":"Oculto","Cucina":"Cocina","Linee":"Líneas","A piedi ~":"A pie ~","dalle tappe di oggi":"desde las paradas de hoy","Misura distanza":"Medir distancia","Posto cibo":"Restaurante","Posto scelto":"Lugar elegido","Piatto tipico":"Plato típico","Scegli questo posto":"Elegir este lugar","Rimuovi questo posto":"Eliminar este lugar","Come arrivare con i mezzi":"Cómo llegar en transporte público","Fermata vicina":"Parada cercana","Trasporto pubblico":"Transporte público"};
   const label = (it: string, en: string, fr: string) => isEs ? (labelsEs[it] ?? en) : isFr ? fr : isEn ? en : it;
 
   // Colori tema per l'HTML interno
@@ -124,6 +128,14 @@ export function buildHtml(
         lat: foodSelection.origin.latitude,
         lon: foodSelection.origin.longitude,
         name: esc(foodSelection.origin.name ?? label("La tua posizione", "Your position", "Votre position")),
+      }
+    : null;
+  const accommodationPoint = accommodation && validCoords(accommodation.latitude, accommodation.longitude)
+    ? {
+        lat: accommodation.latitude,
+        lon: accommodation.longitude,
+        name: esc(accommodation.name ?? label("Il mio alloggio", "My accommodation", "Mon logement")),
+        address: esc(accommodation.address),
       }
     : null;
   const contextStops = day.stops;
@@ -237,6 +249,7 @@ export function buildHtml(
     filterCurated: label("Ricercato", "Curated", "Sélectionné"),
     filterHidden: label("Nascosto", "Hidden", "Caché"),
     filterFood: label("Cucina", "Food", "Cuisine"),
+    filterAccommodation: label("Alloggio", "Lodging", "Logement"),
     transitLabel: transitCopy.label,
     stationLabel: transitCopy.station,
     linesLabel: label("Linee", "Lines", "Lignes"),
@@ -265,6 +278,7 @@ export function buildHtml(
   const selectedFoodJson = JSON.stringify(selectedFoodSpots);
   const foodJson       = JSON.stringify(foodSpots);
   const originJson     = JSON.stringify(foodOrigin);
+  const accommodationJson = JSON.stringify(accommodationPoint);
   const transitJson    = JSON.stringify(transitNetwork).replace(/</g, "\\u003c");
 
   return `<!DOCTYPE html>
@@ -294,6 +308,7 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 .pop-badge-day{color:${accent};background:${accent}22;border:1px solid ${accent}55}
 .pop-badge-planned{color:#7eb8f7;background:#7eb8f722;border:1px solid #7eb8f766}
 .pop-badge-expl{color:#6ee7b7;background:#6ee7b722;border:1px solid #6ee7b755}
+.accommodation-marker{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#a78bfa;color:#11111f;border:2px solid #fff;font-size:18px;box-shadow:0 4px 14px rgba(0,0,0,.38)}
 .pop-name{font-size:13px;font-weight:700;color:${popupText};margin-bottom:3px;line-height:1.3}
 .pop-name,.pop-type,.pop-desc,.pop-meta,.transit-access{max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:normal}
 .pop-type{font-size:10px;color:${popupSub};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
@@ -416,7 +431,7 @@ html,body{width:100%;height:100%;background:${mapBg};font-family:-apple-system,B
 /* Filter bar â€” overlay sulla mappa */
 #filter-bar{
   position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-  z-index:1000;display:flex;gap:4px;
+  z-index:1000;display:flex;gap:4px;max-width:calc(100% - 24px);overflow-x:auto;
   background:${filterBg};
   border:1px solid ${filterBdr};border-radius:999px;
   padding:5px 8px;backdrop-filter:blur(6px);
@@ -462,6 +477,7 @@ const UNASSIGNED   = ${unassignedJson};
 const SELECTED_FOOD = ${selectedFoodJson};
 const FOOD_SPOTS   = ${foodJson};
 const FOOD_ORIGIN  = ${originJson};
+const ACCOMMODATION = ${accommodationJson};
 const FOOD_MODE    = ${JSON.stringify(foodMode)};
 const TRANSIT      = ${transitJson};
 const ACCENT       = ${JSON.stringify(accent)};
@@ -479,6 +495,7 @@ const FILTER_ICONIC    = ${JSON.stringify(L.filterIconic)};
 const FILTER_CURATED   = ${JSON.stringify(L.filterCurated)};
 const FILTER_HIDDEN    = ${JSON.stringify(L.filterHidden)};
 const FILTER_FOOD      = ${JSON.stringify(L.filterFood)};
+const FILTER_ACCOMMODATION = ${JSON.stringify(L.filterAccommodation)};
 const TRANSIT_LABEL    = ${JSON.stringify(L.transitLabel)};
 const TRANSIT_BADGE    = ${JSON.stringify(transitNetwork?.badge ?? transitBadgeForCity(city))};
 const STATION_LABEL    = ${JSON.stringify(L.stationLabel)};
@@ -496,7 +513,7 @@ const SELECTED_FOOD_LABEL = ${JSON.stringify(L.selectedFoodLabel)};
 const TYPICAL_DISH_LABEL = ${JSON.stringify(L.typicalDishLabel)};
 const SELECT_FOOD_LABEL = ${JSON.stringify(L.selectFood)};
 const REMOVE_FOOD_LABEL = ${JSON.stringify(L.removeFood)};
-const LEVEL_COLORS     = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa', 4:'#f97316'};
+const LEVEL_COLORS     = {1:'#e8c06a', 2:'#7eb8f7', 3:'#a78bfa', 4:'#f97316', 5:'#a78bfa'};
 
 function typeEmoji(t){
   t=(t||'').toLowerCase();
@@ -592,6 +609,7 @@ document.addEventListener('click', function(e){
 // â”€â”€ Filter bar: mostra/nasconde layer 3 per livello â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var unassLayers = {};
 var foodLayer = null;
+var accommodationLayer = null;
 var currentFilter = 0;
 var transitLayer = null;
 var transitVisible = true;
@@ -635,6 +653,13 @@ function setFilter(level) {
       if (!map.hasLayer(foodLayer)) foodLayer.addTo(map);
     } else if (!FOOD_MODE && map.hasLayer(foodLayer)) {
       map.removeLayer(foodLayer);
+    }
+  }
+  if (accommodationLayer) {
+    if (level === 0 || level === 5) {
+      if (!map.hasLayer(accommodationLayer)) accommodationLayer.addTo(map);
+    } else if (map.hasLayer(accommodationLayer)) {
+      map.removeLayer(accommodationLayer);
     }
   }
   document.querySelectorAll('.filter-btn').forEach(function(b){
@@ -769,6 +794,7 @@ var map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:3,maxZo
 L.tileLayer('${tileUrl}',{subdomains:'abcd',maxZoom:20,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
 measureLayer = L.layerGroup().addTo(map);
 foodLayer = L.layerGroup();
+accommodationLayer = L.layerGroup();
 
 // â”€â”€ Layer 3: non in itinerario â€” gruppi per livello (filtrabili) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 [1,2,3].forEach(function(lv){ unassLayers[lv] = L.layerGroup(); });
@@ -829,6 +855,13 @@ FOOD_SPOTS.forEach(function(f){
   foodLayer.addLayer(attachMarker(L.marker([f.lat,f.lon],{icon:icon,zIndexOffset:900}), popup));
 });
 if (FOOD_MODE && foodLayer) foodLayer.addTo(map);
+
+if(ACCOMMODATION){
+  var accommodationIcon=L.divIcon({className:'',html:'<div class="accommodation-marker">&#8962;</div>',iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18]});
+  var accommodationPopup='<div class="pop-badge" style="color:#a78bfa;background:#a78bfa22;border:1px solid #a78bfa66">'+FILTER_ACCOMMODATION+'</div><div class="pop-name">'+ACCOMMODATION.name+'</div><div class="pop-desc">'+ACCOMMODATION.address+'</div>'+transitAccess(ACCOMMODATION.lat,ACCOMMODATION.lon)+mapsButton(mapsUrl(ACCOMMODATION.lat,ACCOMMODATION.lon,ACCOMMODATION.name));
+  accommodationLayer.addLayer(attachMarker(L.marker([ACCOMMODATION.lat,ACCOMMODATION.lon],{icon:accommodationIcon,zIndexOffset:1200}),accommodationPopup));
+  accommodationLayer.addTo(map);
+}
 
 SELECTED_FOOD.forEach(function(f){
   var icon=L.divIcon({
@@ -931,6 +964,7 @@ if (TRANSIT && TRANSIT.lines && TRANSIT.lines.length) {
     {level:2, label:FILTER_CURATED, color:LEVEL_COLORS[2]},
     {level:3, label:FILTER_HIDDEN,  color:LEVEL_COLORS[3]},
     {level:4, label:FILTER_FOOD,    color:LEVEL_COLORS[4]},
+    {level:5, label:FILTER_ACCOMMODATION, color:LEVEL_COLORS[5]},
   ];
   filters.forEach(function(f){
     var btn = document.createElement('button');
@@ -1043,9 +1077,10 @@ setTimeout(function() {
     if(FOOD_MODE) FOOD_SPOTS.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
     SELECTED_FOOD.forEach(function(f){ bounds.extend([f.lat,f.lon]); });
     if(FOOD_ORIGIN) bounds.extend([FOOD_ORIGIN.lat,FOOD_ORIGIN.lon]);
+    if(ACCOMMODATION) bounds.extend([ACCOMMODATION.lat,ACCOMMODATION.lon]);
     map.fitBounds(bounds,{padding:[55,55],maxZoom:16});
   } else {
-    var all=[].concat(FOOD_MODE ? FOOD_SPOTS : []).concat(OTHER_DAY).concat(UNASSIGNED).filter(function(a){return a.lat&&a.lon;});
+    var all=[].concat(FOOD_MODE ? FOOD_SPOTS : []).concat(OTHER_DAY).concat(UNASSIGNED).concat(ACCOMMODATION ? [ACCOMMODATION] : []).filter(function(a){return a.lat&&a.lon;});
     if(all.length>0) map.fitBounds(L.latLngBounds(all.map(function(a){return[a.lat,a.lon];})),{padding:[40,40]});
     else map.setView([48,13],4);
   }
@@ -1063,7 +1098,7 @@ setTimeout(function() {
 // â”€â”€ Componente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function DayMap({
-  visible, onClose, city, day, allAttractions, allFoodSpots = [], foodSelection,
+  visible, onClose, city, day, allAttractions, allFoodSpots = [], foodSelection, accommodation,
   assignedMap, lang, accent, onAddAttraction, onMoveAttraction, onRemoveAttraction, onReorderStops, onSelectFood, onRemoveFood,
   allDays, onDayChange,
 }: Props) {
@@ -1078,6 +1113,15 @@ export function DayMap({
   const isEs = lang === "es";
   const contextHelp = useContextHelpController();
   const mapHelp = dayMapHelp(lang);
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: foodSelection ? "food-map-v1" : "day-map-v1",
+    controller: contextHelp,
+    enabled: visible,
+    steps: [
+      { content: mapHelp.legend },
+      { content: mapHelp.map },
+    ],
+  });
   const { network: transitNetwork, loading: transitLoading, supported: transitSupported } = useTransitNetwork(city, visible);
   const cityTransitMode = transitNetwork?.mode ?? transitModeForCity(city);
 
@@ -1107,9 +1151,9 @@ export function DayMap({
   );
 
   const html = useMemo(
-    () => buildHtml(day, city, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark, transitNetwork),
+    () => buildHtml(day, city, allAttractions, allFoodSpots, foodSelection, assignedMap, lang, accent, isDark, transitNetwork, accommodation),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [day.day, city, stopOrderSignature, restaurantSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, lang, accent, isDark, transitNetwork],
+    [day.day, city, stopOrderSignature, restaurantSignature, assignedMap.size, allAttractions.length, allFoodSpots.length, foodSelection?.origin?.latitude, foodSelection?.origin?.longitude, foodSelection?.mealType, accommodation?.latitude, accommodation?.longitude, accommodation?.address, accommodation?.name, lang, accent, isDark, transitNetwork],
   );
 
   useEffect(() => {
@@ -1173,7 +1217,7 @@ export function DayMap({
     : null;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={firstVisitGuide.mandatory ? () => {} : onClose}>
       <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: colors.bg }]}>
 
         {/* Header */}
@@ -1223,7 +1267,7 @@ export function DayMap({
             </Text>
           )}
           <TouchableOpacity
-            onPress={contextHelp.toggle}
+            onPress={firstVisitGuide.onHelpPress}
             style={[styles.closeBtn, { backgroundColor: colors.accentGold + "18", borderColor: colors.accentGold + "70", borderWidth: 1 }]}
             accessibilityRole="button"
             accessibilityLabel={isEs ? "Ayuda del mapa" : isFr ? "Aide de la carte" : isEn ? "Map help" : "Guida della mappa"}
@@ -1270,7 +1314,7 @@ export function DayMap({
             )}
           </Animated.View>
           {contextHelp.active && (
-            <TouchableOpacity activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.map, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} style={[StyleSheet.absoluteFill, { zIndex: 20 }]} />
+            <TouchableOpacity activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.map, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} style={[StyleSheet.absoluteFill, { zIndex: 30 }]} />
           )}
 
           {status === "loading" && (
@@ -1313,7 +1357,7 @@ export function DayMap({
               <Ionicons name="reorder-three-outline" size={22} color={accent} />
             </TouchableOpacity>
           )}
-        <ContextHelpUI controller={contextHelp} lang={lang} />
+        <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
        </View>
 
         {/* â”€â”€ Bottom sheet riordino tappe â€” drag-to-dismiss + rubber-band â”€â”€ */}

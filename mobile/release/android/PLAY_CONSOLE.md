@@ -35,7 +35,7 @@ Itinerari personalizzati, mappe e consigli di viaggio anche offline.
 
 Urveya ti aiuta a organizzare un viaggio coerente con il tuo ritmo.
 
-Scegli la citta, la durata e l'intensita del viaggio: Urveya distribuisce le attrazioni nei diversi giorni, limita gli spostamenti a piedi e crea un percorso ordinato. Puoi anche costruire l'itinerario manualmente, consultare la mappa e modificare l'ordine delle tappe.
+Scegli la citta, la durata e l'intensita del viaggio: Urveya distribuisce le attrazioni nei diversi giorni, limita gli spostamenti a piedi e crea un percorso ordinato. Dalla mappa puoi consultare e modificare l'ordine delle tappe.
 
 Per ogni destinazione trovi inoltre:
 
@@ -59,9 +59,9 @@ Sequenza screenshot proposta:
 1. Scelta della citta e impostazioni del viaggio.
 2. Itinerario giornaliero generato.
 3. Mappa delle tappe.
-4. Creazione manuale dell'itinerario.
-5. Alloggi e mappa dei quartieri.
-6. Cucina e ristoranti consigliati.
+4. Alloggi e mappa dei quartieri.
+5. Cucina e ristoranti consigliati.
+6. Valigia smart.
 
 ## Dichiarazioni Play Console
 

@@ -19,7 +19,7 @@
       "buildNumber": "1",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Urveya usa la tua posizione solo se la richiedi per trovare ristoranti vicini alle tappe del tuo itinerario.",
+        "NSLocationWhenInUseUsageDescription": "Urveya usa la tua posizione solo su richiesta per mostrare ristoranti vicini e creare indicazioni verso le tappe del viaggio.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -67,6 +67,22 @@
             "NSPrivacyCollectedDataTypePurposes": [
               "NSPrivacyCollectedDataTypePurposeAppFunctionality"
             ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePreciseLocation",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePhysicalAddress",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
           }
         ]
       }
@@ -96,7 +112,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Urveya usa la tua posizione solo se la richiedi per trovare ristoranti vicini alle tappe del tuo itinerario."
+          "locationWhenInUsePermission": "Urveya usa la tua posizione solo su richiesta per mostrare ristoranti vicini, creare indicazioni verso le tappe e verificare la posizione dell'alloggio."
         }
       ]
     ],

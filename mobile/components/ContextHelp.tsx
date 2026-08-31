@@ -31,6 +31,7 @@ export interface ContextHelpController {
   active: boolean;
   selected: ContextHelpContent | null;
   anchor: ContextHelpAnchor | null;
+  enter: () => void;
   toggle: () => void;
   exit: () => void;
   close: () => void;
@@ -42,6 +43,12 @@ export function useContextHelpController(): ContextHelpController {
   const [active, setActive] = useState(false);
   const [selected, setSelected] = useState<ContextHelpContent | null>(null);
   const [anchor, setAnchor] = useState<ContextHelpAnchor | null>(null);
+
+  const enter = useCallback(() => {
+    setSelected(null);
+    setAnchor(null);
+    setActive(true);
+  }, []);
 
   const exit = useCallback(() => {
     setSelected(null);
@@ -81,7 +88,14 @@ export function useContextHelpController(): ContextHelpController {
     [active],
   );
 
-  return { active, selected, anchor, toggle, exit, close, explain, guard };
+  return { active, selected, anchor, enter, toggle, exit, close, explain, guard };
+}
+
+export interface GuidedContextHelp {
+  index: number;
+  total: number;
+  expected: ContextHelpContent;
+  onAcknowledge: (selected: ContextHelpContent | null) => void;
 }
 
 export function contextHelpOutline(active: boolean, color: string) {
@@ -99,9 +113,11 @@ export function contextHelpOutline(active: boolean, color: string) {
 export function ContextHelpUI({
   controller,
   lang,
+  guided,
 }: {
   controller: ContextHelpController;
   lang: string;
+  guided?: GuidedContextHelp;
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -120,6 +136,15 @@ export function ContextHelpUI({
     safeTop: insets.top,
     safeBottom: insets.bottom,
   });
+  const selectedIsExpected = Boolean(
+    guided
+    && controller.selected
+    && controller.selected.title === guided.expected.title
+    && controller.selected.body === guided.expected.body,
+  );
+  const acknowledge = () => guided
+    ? guided.onAcknowledge(controller.selected)
+    : controller.close();
 
   useEffect(() => {
     if (!controller.active || controller.selected) return;
@@ -162,20 +187,22 @@ export function ContextHelpUI({
           <View pointerEvents="box-none" style={[styles.banner, { backgroundColor: colors.card, borderColor: colors.accentGold }]}>
             <Ionicons pointerEvents="none" name="help-circle" size={18} color={colors.accentGold} />
             <Text pointerEvents="none" style={[styles.bannerText, { color: colors.text }]}>
-              {tx({
+              {guided
+                ? `${tx({ it: "Passo", en: "Step", fr: "Étape", es: "Paso" })} ${guided.index + 1}/${guided.total} · ${tx({ it: "Tocca", en: "Tap", fr: "Touchez", es: "Toca" })}: ${guided.expected.title}`
+                : tx({
                 it: "Scorri liberamente e tocca un elemento evidenziato per sapere cosa fa.",
                 en: "Scroll freely and tap a highlighted element to learn what it does.",
                 fr: "Faites défiler librement et touchez un élément surligné pour découvrir sa fonction.",
                 es: "Desplázate libremente y toca un elemento resaltado para saber qué hace.",
               })}
             </Text>
-            <TouchableOpacity
+            {!guided && <TouchableOpacity
               onPress={controller.exit}
               style={styles.bannerClose}
               accessibilityLabel={tx({ it: "Esci dalla guida", en: "Exit help", fr: "Quitter l'aide", es: "Salir de la ayuda" })}
             >
               <Ionicons name="close" size={19} color={colors.textMuted} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </Animated.View>
       )}
@@ -185,9 +212,9 @@ export function ContextHelpUI({
         transparent
         animationType="fade"
         statusBarTranslucent
-        onRequestClose={controller.close}
+        onRequestClose={guided ? () => {} : controller.close}
       >
-        <Pressable style={styles.backdrop} onPress={controller.close}>
+        <Pressable style={styles.backdrop} onPress={guided ? undefined : controller.close}>
           <Pressable
             accessibilityViewIsModal
             accessibilityLiveRegion="polite"
@@ -210,13 +237,13 @@ export function ContextHelpUI({
                 <Ionicons name={controller.selected?.icon ?? "help-circle-outline"} size={23} color={colors.accentGold} />
               </View>
               <Text ref={titleRef} accessible accessibilityRole="header" style={[styles.title, { color: colors.text }]}>{controller.selected?.title}</Text>
-              <TouchableOpacity
+              {!guided && <TouchableOpacity
                 onPress={controller.close}
                 style={[styles.closeButton, { backgroundColor: colors.card2 }]}
                 accessibilityLabel={tx({ it: "Chiudi", en: "Close", fr: "Fermer", es: "Cerrar" })}
               >
                 <Ionicons name="close" size={19} color={colors.textMuted} />
-              </TouchableOpacity>
+              </TouchableOpacity>}
             </View>
 
             <ScrollView
@@ -235,9 +262,15 @@ export function ContextHelpUI({
               ) : null}
             </ScrollView>
 
-            <TouchableOpacity style={[styles.confirm, { backgroundColor: colors.accentGold }]} onPress={controller.close}>
+            <TouchableOpacity style={[styles.confirm, { backgroundColor: colors.accentGold }]} onPress={acknowledge}>
               <Text style={[styles.confirmText, { color: colors.bg }]}>
-                {tx({ it: "Ho capito", en: "Got it", fr: "J'ai compris", es: "Entendido" })}
+                {guided
+                  ? selectedIsExpected
+                    ? (guided.index + 1 === guided.total
+                      ? tx({ it: "Completa guida", en: "Complete guide", fr: "Terminer le guide", es: "Completar guía" })
+                      : tx({ it: "Avanti", en: "Next", fr: "Suivant", es: "Siguiente" }))
+                    : tx({ it: "Torna al passo richiesto", en: "Return to the required step", fr: "Revenir à l'étape demandée", es: "Volver al paso requerido" })
+                  : tx({ it: "Ho capito", en: "Got it", fr: "J'ai compris", es: "Entendido" })}
               </Text>
             </TouchableOpacity>
           </Pressable>

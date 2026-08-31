@@ -20,9 +20,11 @@ import { localizedDescription, localizedName } from "@/utils/localization";
 import { localText } from "@/i18n";
 import { neighborhoodVibe } from "@/utils/neighborhoods";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "./ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
 import { useTransitNetwork } from "@/hooks/useTransitNetwork";
 import { MapStatusOverlay } from "./MapStatusOverlay";
 import { transitBadgeForCity, transitModeForCity, transitPresentation, type TransitNetwork } from "@/data/transitNetworks";
+import type { TripAccommodation } from "@/services/accommodationStorage";
 
 interface Props {
   visible: boolean;
@@ -32,6 +34,7 @@ interface Props {
   cityLabel: string;
   attractions: BuilderAttraction[];
   foodSpots?: BuilderAttraction[];
+  accommodation?: TripAccommodation | null;
   lang: string;
 }
 
@@ -240,6 +243,7 @@ export function buildHtml(
   isDark: boolean,
   transitNetwork: TransitNetwork | null,
   documentId = "lodging-map",
+  accommodation?: TripAccommodation | null,
 ): string {
   const tileUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const bg = "#dfe8ec";
@@ -249,6 +253,11 @@ export function buildHtml(
   const muted = isDark ? "#aaa" : "#5d574f";
   const areasJson = JSON.stringify(areas);
   const landmarksJson = JSON.stringify(landmarks);
+  const accommodationJson = JSON.stringify(
+    accommodation && Number.isFinite(accommodation.latitude) && Number.isFinite(accommodation.longitude)
+      ? { name: esc(accommodation.name ?? (lang === "fr" ? "Mon logement" : lang === "es" ? "Mi alojamiento" : lang === "en" ? "My accommodation" : "Il mio alloggio")), address: esc(accommodation.address), lat: accommodation.latitude, lon: accommodation.longitude }
+      : null,
+  );
   const transitJson = JSON.stringify(transitNetwork).replace(/</g, "\\u003c");
   const t = translations[lang as keyof typeof translations] ?? translations.it;
   const landmarkLabel = lang === "fr"
@@ -292,6 +301,8 @@ html,body,#map{width:100%;height:100%;margin:0;background:${bg};font-family:-app
 .tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px}
 .tag-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;color:inherit}
 .landmark-marker{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e8c06a;color:#11111f;border:2px solid #fff;font-size:13px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+.accommodation-marker{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#a78bfa;color:#11111f;border:2px solid #fff;font-size:19px;box-shadow:0 4px 14px rgba(0,0,0,.42)}
+.accommodation-toggle{position:absolute;top:12px;right:12px;z-index:1000;width:40px;height:38px;border-radius:10px;background:${isDark ? "rgba(12,12,26,.92)" : "rgba(255,255,255,.95)"};border:1px solid #a78bfa;display:flex;align-items:center;justify-content:center;color:#a78bfa;font-size:19px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.16)}.accommodation-toggle.off{opacity:.55;border-color:${popupBorder};color:${muted}}
 .landmark-kicker{color:#b58b2d;font-size:10px;font-weight:900;text-transform:uppercase;margin-bottom:4px}
 .transit-toggle{position:absolute;top:12px;left:12px;z-index:1000;min-width:42px;height:38px;border-radius:10px;padding:0 11px;background:${isDark ? "rgba(12,12,26,.92)" : "rgba(255,255,255,.95)"};border:1px solid ${popupBorder};display:flex;align-items:center;justify-content:center;gap:6px;color:${muted};font:800 11px -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.16)}
 .transit-toggle.active{color:${text};border-color:#0891b2;background:${isDark ? "rgba(8,145,178,.22)" : "rgba(207,250,254,.96)"}}
@@ -309,6 +320,7 @@ html,body,#map{width:100%;height:100%;margin:0;background:${bg};font-family:-app
 const DOCUMENT_ID=${JSON.stringify(documentId)};
 const AREAS=${areasJson};
 const LANDMARKS=${landmarksJson};
+const ACCOMMODATION=${accommodationJson};
 const TRANSIT=${transitJson};
 const TRANSIT_LABEL=${JSON.stringify(transitLabel)};
 const TRANSIT_BADGE=${JSON.stringify(transitNetwork?.badge ?? transitBadgeForCity(city))};
@@ -318,7 +330,7 @@ const TRANSIT_MODE_LABELS=${JSON.stringify(transitModeLabels)};
 function sendMessage(payload){try{payload.documentId=DOCUMENT_ID;if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify(payload));}else if(window.parent){window.parent.postMessage(JSON.stringify(payload),'*');}}catch(e){}}
 function htmlText(value){return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function hKm(lat1,lon1,lat2,lon2){var R=6371,f1=lat1*Math.PI/180,f2=lat2*Math.PI/180;var df=(lat2-lat1)*Math.PI/180,dl=(lon2-lon1)*Math.PI/180;var a=Math.sin(df/2)*Math.sin(df/2)+Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)*Math.sin(dl/2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-function lodgingTransitFocus(){return LANDMARKS.length?LANDMARKS:AREAS;}
+function lodgingTransitFocus(){return ACCOMMODATION?[ACCOMMODATION]:(LANDMARKS.length?LANDMARKS:AREAS);}
 function isLodgingTransitPointRelevant(point,maxKm){var focus=lodgingTransitFocus();if(!focus.length)return true;for(var i=0;i<focus.length;i++){if(hKm(point[0],point[1],focus[i].lat,focus[i].lon)<=maxKm)return true;}return false;}
 function isLodgingTransitEdgeRelevant(a,b){var ar=isLodgingTransitPointRelevant(a,4),br=isLodgingTransitPointRelevant(b,4);return ar&&br;}
 window.onerror=function(msg){sendMessage({type:'error',message:String(msg)});return true;};
@@ -353,6 +365,15 @@ try{
   // Mantieni disponibili le altre attrazioni anche con un dato corrotto.
 }
 });
+if(ACCOMMODATION){
+  const accommodationLayer=L.layerGroup().addTo(map);
+  const icon=L.divIcon({className:'',html:'<div class="accommodation-marker">&#8962;</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-19]});
+  const marker=L.marker([ACCOMMODATION.lat,ACCOMMODATION.lon],{icon:icon,zIndexOffset:1200}).addTo(accommodationLayer);
+  marker.bindPopup('<div class="landmark-kicker" style="color:#a78bfa">'+ACCOMMODATION.name+'</div><div class="area-desc">'+ACCOMMODATION.address+'</div>');
+  const pointBounds=L.latLngBounds([ACCOMMODATION.lat,ACCOMMODATION.lon],[ACCOMMODATION.lat,ACCOMMODATION.lon]);
+  bounds=bounds ? bounds.extend(pointBounds) : pointBounds;
+  const button=document.createElement('button');button.className='accommodation-toggle';button.innerHTML='&#8962;';button.setAttribute('aria-label',ACCOMMODATION.name);button.addEventListener('click',function(){const visible=map.hasLayer(accommodationLayer);if(visible)map.removeLayer(accommodationLayer);else accommodationLayer.addTo(map);button.classList.toggle('off',visible);});document.getElementById('map').appendChild(button);
+}
 var transitLayer=null;
 var transitItems=[];
 var selectedTransitMode='recommended';
@@ -413,7 +434,7 @@ function neighborhoodMapHelp(lang: string) {
   };
 }
 
-export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLabel, attractions, foodSpots = [], lang }: Props) {
+export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLabel, attractions, foodSpots = [], accommodation, lang }: Props) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [transitFallback, setTransitFallback] = useState(false);
   const [mapReloadKey, setMapReloadKey] = useState(0);
@@ -421,6 +442,12 @@ export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLab
   const { colors, isDark } = useTheme();
   const contextHelp = useContextHelpController();
   const mapHelp = neighborhoodMapHelp(lang);
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "neighborhood-map-v1",
+    controller: contextHelp,
+    enabled: visible,
+    steps: [{ content: mapHelp.map }],
+  });
   const { network: transitNetwork, resolved: transitResolved } = useTransitNetwork(city, visible);
   const t = translations[lang as keyof typeof translations] ?? translations.it;
   const landmarkLabel = lang === "fr"
@@ -437,12 +464,12 @@ export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLab
   const landmarks = useMemo(() => buildLandmarks(attractions, lang), [attractions, lang]);
   const effectiveTransit = transitFallback ? null : transitNetwork;
   const documentId = useMemo(
-    () => [city, lang, isDark ? "dark" : "light", transitFallback ? "fallback" : (effectiveTransit?.fetchedAt ?? "base"), areas.length, landmarks.length, mapReloadKey].join(":"),
-    [city, lang, isDark, transitFallback, effectiveTransit?.fetchedAt, areas.length, landmarks.length, mapReloadKey],
+    () => [city, lang, isDark ? "dark" : "light", transitFallback ? "fallback" : (effectiveTransit?.fetchedAt ?? "base"), areas.length, landmarks.length, accommodation?.updatedAt, mapReloadKey].join(":"),
+    [city, lang, isDark, transitFallback, effectiveTransit?.fetchedAt, areas.length, landmarks.length, accommodation?.updatedAt, mapReloadKey],
   );
   const html = useMemo(
-    () => buildHtml(areas, landmarks, city, lang, isDark, effectiveTransit, documentId),
-    [areas, landmarks, city, lang, isDark, effectiveTransit, documentId],
+    () => buildHtml(areas, landmarks, city, lang, isDark, effectiveTransit, documentId, accommodation),
+    [areas, landmarks, city, lang, isDark, effectiveTransit, accommodation, documentId],
   );
   const currentDocumentId = useRef(documentId);
   currentDocumentId.current = documentId;
@@ -512,7 +539,7 @@ export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLab
     : null;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={firstVisitGuide.mandatory ? () => {} : onClose}>
       <View style={[styles.safe, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: colors.bg }]}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity
@@ -530,7 +557,7 @@ export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLab
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>{cityLabel}</Text>
           </View>
           <TouchableOpacity
-            onPress={contextHelp.toggle}
+            onPress={firstVisitGuide.onHelpPress}
             style={[styles.closeBtn, { backgroundColor: contextHelp.active ? colors.accentGold : colors.card2 }, contextHelpOutline(contextHelp.active, colors.accentGold)]}
             activeOpacity={0.75}
             accessibilityRole="button"
@@ -574,7 +601,7 @@ export function NeighborhoodMap({ visible, onClose, neighborhoods, city, cityLab
             <TouchableOpacity style={styles.guideOverlay} activeOpacity={1} onPress={(event) => contextHelp.explain(mapHelp.map, { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY })} />
           )}
         </View>
-        <ContextHelpUI controller={contextHelp} lang={lang} />
+        <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
       </View>
     </Modal>
   );

@@ -7,6 +7,8 @@ import { ColorPalette, useTheme } from "@/contexts/ThemeContext";
 import { LANGUAGE_OPTIONS, languageOption, localText } from "@/i18n";
 import { AccountDeletionButton } from "@/components/AccountDeletionButton";
 import { ContextHelpUI, contextHelpOutline, useContextHelpController, type ContextHelpContent } from "@/components/ContextHelp";
+import { useFirstVisitGuide } from "@/hooks/useFirstVisitGuide";
+import { useAuth } from "@/contexts/AuthContext";
 import { openExternalLink } from "@/utils/externalLinks";
 import { PRIVACY_URL, TERMS_URL } from "@/constants/legal";
 
@@ -17,6 +19,7 @@ type SettingsModalProps = {
 
 export function SettingsModal({ visible, onClose }: SettingsModalProps) {
   const { lang, setLang } = useLanguage();
+  const { user } = useAuth();
   const { colors, toggleTheme } = useTheme();
   const currentLanguage = languageOption(lang);
   const contextHelp = useContextHelpController();
@@ -35,10 +38,22 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
     account: help("person-remove-outline", { it: "Account e cancellazione", en: "Account and deletion", fr: "Compte et suppression", es: "Cuenta y eliminación" }, { it: "L'account è facoltativo e serve alla sincronizzazione. Da qui puoi eliminare definitivamente account e itinerari sincronizzati.", en: "The account is optional and enables sync. Here you can permanently delete the account and synced itineraries.", fr: "Le compte est facultatif et permet la synchronisation. Vous pouvez supprimer définitivement le compte et les itinéraires synchronisés.", es: "La cuenta es opcional y permite sincronizar. Aquí puedes eliminar definitivamente la cuenta y los itinerarios sincronizados." }),
     close: help("checkmark-outline", { it: "Chiudi impostazioni", en: "Close settings", fr: "Fermer les paramètres", es: "Cerrar configuración" }, { it: "Torna alla schermata precedente. Le modifiche a lingua e tema sono già salvate.", en: "Returns to the previous screen. Language and theme changes are already saved.", fr: "Revient à l'écran précédent. Les changements de langue et de thème sont déjà enregistrés.", es: "Vuelve a la pantalla anterior. Los cambios de idioma y tema ya están guardados." }),
   };
+  const firstVisitGuide = useFirstVisitGuide({
+    guideId: "settings-v1",
+    controller: contextHelp,
+    enabled: visible,
+    steps: [
+      { content: settingsHelp.language },
+      { content: settingsHelp.theme },
+      { content: settingsHelp.privacy },
+      { content: settingsHelp.terms },
+      ...(user ? [{ content: settingsHelp.account }] : []),
+    ],
+  });
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={firstVisitGuide.mandatory ? () => {} : onClose}>
+      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={firstVisitGuide.mandatory ? undefined : onClose}>
         <TouchableOpacity activeOpacity={1} style={styles.sheet}>
           <View style={styles.header}>
             <View style={styles.iconBox}>
@@ -53,7 +68,7 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
               </Text>
             </View>
             <TouchableOpacity
-              onPress={contextHelp.toggle}
+              onPress={firstVisitGuide.onHelpPress}
               style={[styles.helpButton, contextHelp.active && { backgroundColor: colors.accentGold }]}
               accessibilityRole="button"
               accessibilityLabel={tx({ it: "Guida impostazioni", en: "Settings help", fr: "Aide des paramètres", es: "Ayuda de configuración" })}
@@ -121,19 +136,21 @@ export function SettingsModal({ visible, onClose }: SettingsModalProps) {
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.accountArea, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
-            <AccountDeletionButton onDeleted={onClose} />
-            {contextHelp.active ? (
-              <TouchableOpacity style={StyleSheet.absoluteFill} onPress={contextHelp.guard(settingsHelp.account, () => {})} accessibilityLabel={settingsHelp.account.title} />
-            ) : null}
-          </View>
+          {user ? (
+            <View style={[styles.accountArea, contextHelpOutline(contextHelp.active, colors.accentGold)]}>
+              <AccountDeletionButton onDeleted={onClose} />
+              {contextHelp.active ? (
+                <TouchableOpacity style={StyleSheet.absoluteFill} onPress={contextHelp.guard(settingsHelp.account, () => {})} accessibilityLabel={settingsHelp.account.title} />
+              ) : null}
+            </View>
+          ) : null}
 
           <TouchableOpacity onPress={contextHelp.guard(settingsHelp.close, onClose)} style={[styles.closeBtn, contextHelpOutline(contextHelp.active, colors.text)]} activeOpacity={0.85}>
             <Text style={styles.closeText}>
               {tx({ it: "Fatto", en: "Done", fr: "Termin\u00e9", es: "Listo" })}
             </Text>
           </TouchableOpacity>
-          <ContextHelpUI controller={contextHelp} lang={lang} />
+          <ContextHelpUI controller={contextHelp} lang={lang} guided={firstVisitGuide.guided} />
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>

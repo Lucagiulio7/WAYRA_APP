@@ -123,6 +123,10 @@ for (const file of runtimeFiles) {
 const productionEnv = fs.readFileSync(path.join(root, ".env.production"), "utf8");
 check(!forbidden.test(productionEnv), ".env.production still references the legacy backend.");
 check(!pkg.dependencies?.["@sentry/react-native"], "Sentry must not be bundled while crash collection is declared disabled.");
+const releaseFeatures = fs.readFileSync(path.join(root, "constants/features.ts"), "utf8");
+check(/manualBuilder:\s*false/.test(releaseFeatures), "The manual builder must remain disabled for the first public release.");
+const storeListing = fs.readFileSync(path.join(root, "release/android/STORE_LISTING.md"), "utf8");
+check(!/manualmente|manually|manuellement/i.test(storeListing), "Store listing still advertises the disabled manual builder.");
 
 const publicationFiles = [
   ...runtimeFiles,

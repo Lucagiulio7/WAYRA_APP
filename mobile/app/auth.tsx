@@ -200,7 +200,7 @@ export default function AuthScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={s.toggleText}>
-                    {lang === "es" ? "Volver al inicio de sesion" : lang === "fr" ? "Retour a la connexion" : lang === "it" ? "Torna al login" : "Back to sign in"}
+                    {lang === "es" ? "Volver al inicio de sesión" : lang === "fr" ? "Retour à la connexion" : lang === "it" ? "Torna al login" : "Back to sign in"}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -403,7 +403,7 @@ function translateError(msg: string, lang: string): string {
     return lang === "es" ? "Contrasena demasiado corta (minimo 6 caracteres)" : lang === "fr" ? "Mot de passe trop court (min. 6 caracteres)" : lang === "it" ? "Password troppo corta (min 6 caratteri)" : "Password too short (min 6 chars)";
   if (m.includes("email"))
     return lang === "es" ? "Dirección de correo no válida" : lang === "fr" ? "Adresse e-mail non valide" : lang === "it" ? "Indirizzo email non valido" : "Invalid email address";
-  return lang === "es" ? "Error. Intentalo de nuevo." : lang === "fr" ? "Erreur. Reessayez." : lang === "it" ? "Errore. Riprova." : "Error. Please try again.";
+  return lang === "es" ? "Error. Inténtalo de nuevo." : lang === "fr" ? "Erreur. Réessayez." : lang === "it" ? "Errore. Riprova." : "Error. Please try again.";
 }
 
 function makeStyles(colors: any) {
